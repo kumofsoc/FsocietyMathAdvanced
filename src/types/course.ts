@@ -13,12 +13,19 @@ export type BlockKind =
   | "geometry"
   | "summary";
 
+export interface PropertyProof {
+  label: string;
+  body: string;
+  formula?: string;
+}
+
 export interface ContentBlock {
   kind: BlockKind;
   title: string;
   body: string;
   formula?: string;
   items?: string[];
+  proofs?: PropertyProof[];
   dependsOn?: string[];
 }
 
@@ -57,7 +64,9 @@ export interface GraphNodeData {
   chapter: string;
   summary: string;
   rotation: number;
+  scale?: number;
   progress?: number;
   onOpen: (id: string) => void;
   onRotate: (id: string, delta: number) => void;
+  onScale?: (id: string, scale: number) => void;
 }
