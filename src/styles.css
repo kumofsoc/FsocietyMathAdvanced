@@ -2667,3 +2667,171 @@ html[data-motion-profile="off"] .home-scrollytelling [data-reveal] {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ===== v0.6: interactive matrix type anatomy ===== */
+.matrix-type-grid > .matrix-type-card {
+  min-height: 150px;
+  padding: 13px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--elevated);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+.matrix-type-grid > .matrix-type-card:hover,
+.matrix-type-grid > .matrix-type-card.active {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb,var(--definition) 58%,var(--border));
+  background: color-mix(in srgb,var(--definition) 5%,var(--elevated));
+}
+.matrix-type-grid > .matrix-type-card.active {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb,var(--definition) 38%,transparent),
+              0 16px 40px rgba(0,0,0,.12);
+}
+.matrix-cell {
+  min-width: 20px;
+  min-height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  transition: background .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+.cell-diagonal {
+  color: var(--formula) !important;
+  background: color-mix(in srgb,var(--formula) 11%,transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb,var(--formula) 18%,transparent);
+}
+.cell-identity {
+  color: var(--accent2) !important;
+  background: color-mix(in srgb,var(--accent2) 15%,transparent);
+  box-shadow: 0 0 12px color-mix(in srgb,var(--accent2) 18%,transparent),
+              inset 0 0 0 1px color-mix(in srgb,var(--accent2) 26%,transparent);
+  font-weight: 750 !important;
+  transform: scale(1.08);
+}
+.cell-structure {
+  color: var(--definition) !important;
+  background: color-mix(in srgb,var(--definition) 9%,transparent);
+}
+.cell-muted,
+.cell-zero {
+  color: color-mix(in srgb,var(--muted) 55%,transparent) !important;
+}
+.cell-row {
+  color: var(--accent) !important;
+  background: color-mix(in srgb,var(--accent) 8%,transparent);
+}
+.cell-column {
+  color: var(--accent2) !important;
+  background: color-mix(in srgb,var(--accent2) 8%,transparent);
+}
+.cell-pair-a {
+  color: var(--definition) !important;
+  background: color-mix(in srgb,var(--definition) 8%,transparent);
+}
+.cell-pair-b {
+  color: var(--theorem) !important;
+  background: color-mix(in srgb,var(--theorem) 8%,transparent);
+}
+.cell-soft {
+  color: var(--formula) !important;
+}
+
+.matrix-type-detail {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: minmax(220px,.9fr) minmax(180px,.55fr) minmax(320px,1.3fr);
+  gap: 10px;
+  align-items: stretch;
+}
+.matrix-type-detail > div {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--elevated);
+}
+.matrix-type-detail-copy {
+  padding: 18px;
+}
+.matrix-type-detail-copy h3 {
+  margin: 7px 0 0;
+  font-size: 26px;
+  letter-spacing: -.035em;
+}
+.matrix-type-detail-copy p {
+  margin: 11px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.7;
+}
+.matrix-type-detail-copy code {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--definition);
+  font-size: 9px;
+}
+.matrix-type-detail-main {
+  display: grid;
+  place-items: center;
+  min-height: 210px;
+}
+.mini-matrix.large {
+  min-width: 138px;
+  min-height: 122px;
+}
+.mini-matrix.large .mini-matrix-grid {
+  gap: 9px 15px;
+}
+.mini-matrix.large .matrix-cell {
+  min-width: 28px;
+  min-height: 28px;
+  font-size: 13px;
+}
+.matrix-type-examples {
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 7px;
+}
+.matrix-type-examples article {
+  min-height: 185px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.matrix-type-examples article > span {
+  color: var(--muted);
+  font-size: 7px;
+  letter-spacing: .12em;
+}
+.matrix-type-examples .mini-matrix {
+  margin-block: 12px;
+}
+
+@media (max-width: 1100px) {
+  .matrix-type-detail {
+    grid-template-columns: 1fr 1fr;
+  }
+  .matrix-type-examples {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 700px) {
+  .matrix-type-detail {
+    grid-template-columns: 1fr;
+  }
+  .matrix-type-examples {
+    grid-column: auto;
+    grid-template-columns: 1fr;
+  }
+  .matrix-type-examples article {
+    min-height: 135px;
+  }
+}
