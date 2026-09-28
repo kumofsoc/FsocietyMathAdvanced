@@ -6,11 +6,13 @@ import { practiceByTopic } from "./data/practice";
 import { CourseMap } from "./components/CourseMap";
 import { CustomCursor } from "./components/CustomCursor";
 import { HomePage } from "./components/HomePage";
+import { HistoryDock } from "./components/HistoryDock";
 import { MathBackdrop } from "./components/MathBackdrop";
 import { ScrollProgress } from "./components/ScrollProgress";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { TopicPage } from "./components/TopicPage";
 import { LEARNING_EVENT, loadSet, SOLVED_KEY, THEORY_KEY } from "./lib/learning";
+import type { Chapter } from "./types/course";
 
 function routeFromHash() {
   const raw = window.location.hash.replace(/^#/, "");
@@ -24,6 +26,75 @@ function topicProgress(id: string) {
   const solved = loadSet(SOLVED_KEY);
   const practice = tasks.filter((task) => solved.has(task.id)).length / tasks.length;
   return Math.round(theory + practice * 50);
+}
+
+function ChapterAccordion({
+  chapter,
+  route,
+}: {
+  chapter: Chapter;
+  route: string;
+}) {
+  const containsRoute = chapter.topicIds.includes(route);
+  const [open, setOpen] = useState(chapter.id === "linear" || containsRoute);
+
+  useEffect(() => {
+    if (containsRoute) setOpen(true);
+  }, [containsRoute]);
+
+  return (
+    <section className={"chapter-accordion " + (open ? "open" : "")}>
+      <button className="chapter-summary" onClick={() => setOpen((value) => !value)}>
+        <span>{chapter.number}</span>
+        <strong>{chapter.title}</strong>
+        <i>{open ? "−" : "+"}</i>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            className="chapter-topics-clip"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <motion.div
+              className="chapter-topics"
+              initial="closed"
+              animate="open"
+              variants={{
+                closed: {},
+                open: { transition: { staggerChildren: 0.025 } },
+              }}
+            >
+              {chapter.topicIds.map((id) => {
+                const item = topics[id];
+                if (!item) return null;
+                const progress = item.chapterId === "linear" ? topicProgress(id) : 0;
+                return (
+                  <motion.button
+                    key={id}
+                    className={route === id ? "active" : ""}
+                    onClick={() => (window.location.hash = id)}
+                    title={item.chapterId === "linear" ? "Освоение: " + progress + "%" : undefined}
+                    variants={{
+                      closed: { opacity: 0, x: -8 },
+                      open: { opacity: 1, x: 0 },
+                    }}
+                  >
+                    <span>{item.chapterId === "linear" ? (progress >= 100 ? "●" : progress > 0 ? "◐" : "○") : "·"}</span>
+                    <em>§ {item.number}</em>
+                    {item.title}
+                  </motion.button>
+                );
+              })}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
+  );
 }
 
 export default function App() {
@@ -88,6 +159,7 @@ export default function App() {
       <ScrollProgress />
       <MathBackdrop />
       <CustomCursor />
+      <HistoryDock />
 
       <aside className={"sidebar " + (sidebarOpen ? "open" : "")}>
         <button className="brand" onClick={() => (window.location.hash = "home")}>
@@ -115,31 +187,7 @@ export default function App() {
 
         <div className="chapter-list">
           {chapters.map((chapter) => (
-            <details key={chapter.id} open={chapter.id === "linear"}>
-              <summary>
-                <span>{chapter.number}</span>
-                <strong>{chapter.title}</strong>
-              </summary>
-              <div className="chapter-topics">
-                {chapter.topicIds.map((id) => {
-                  const item = topics[id];
-                  if (!item) return null;
-                  const progress = item.chapterId === "linear" ? topicProgress(id) : 0;
-                  return (
-                    <button
-                      key={id}
-                      className={route === id ? "active" : ""}
-                      onClick={() => (window.location.hash = id)}
-                      title={item.chapterId === "linear" ? "Освоение: " + progress + "%" : undefined}
-                    >
-                      <span>{item.chapterId === "linear" ? (progress >= 100 ? "●" : progress > 0 ? "◐" : "○") : "·"}</span>
-                      <em>§ {item.number}</em>
-                      {item.title}
-                    </button>
-                  );
-                })}
-              </div>
-            </details>
+            <ChapterAccordion key={chapter.id} chapter={chapter} route={route} />
           ))}
         </div>
       </aside>
