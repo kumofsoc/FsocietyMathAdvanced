@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { BlockMath } from "react-katex";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { chapters, topics } from "../data/course";
+import { chapters, topicList, topics } from "../data/course";
 import { practiceByTopic } from "../data/practice";
 import {
   LEARNING_EVENT,
@@ -15,6 +15,7 @@ import {
 import type { BlockKind, ContentBlock, Topic } from "../types/course";
 import { MatrixLab } from "./MatrixLab";
 import { MatrixTypesGallery } from "./MatrixTypesGallery";
+import { DeterminantVisual } from "./DeterminantVisual";
 import { PracticePanel } from "./PracticePanel";
 
 const labels: Record<BlockKind, string> = {
@@ -32,6 +33,41 @@ const labels: Record<BlockKind, string> = {
   geometry: "ГЕОМЕТРИЧЕСКИЙ СМЫСЛ",
   summary: "ИТОГ",
 };
+
+const BLOCK_TARGET_KEY = "fsociety-block-target-v1";
+
+function dependencyTarget(dependency: string) {
+  const marker = dependency.toLowerCase().match(/(теорема|свойство)\s*(\d+(?:\.\d+)?)/);
+  const clean = dependency
+    .toLowerCase()
+    .replace(/определителей/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  for (const candidate of topicList) {
+    for (let index = 0; index < candidate.blocks.length; index += 1) {
+      const title = candidate.blocks[index].title.toLowerCase();
+      if (title.includes(clean) || clean.includes(title)) {
+        return { topicId: candidate.id, index, title: candidate.blocks[index].title };
+      }
+      if (marker && title.includes(marker[1]) && title.includes(marker[2])) {
+        return { topicId: candidate.id, index, title: candidate.blocks[index].title };
+      }
+    }
+  }
+
+  return null;
+}
+
+function openBlock(topicId: string, index: number) {
+  const id = "block-" + topicId + "-" + index;
+  if (window.location.hash.replace(/^#/, "") === topicId) {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  sessionStorage.setItem(BLOCK_TARGET_KEY, topicId + "::" + index);
+  window.location.hash = topicId;
+}
 
 function ContentCard({
   topic,
@@ -110,7 +146,21 @@ function ContentCard({
         {block.dependsOn && (
           <div className="depends-row">
             <span>Использует:</span>
-            {block.dependsOn.map((dependency) => <b key={dependency}>{dependency}</b>)}
+            {block.dependsOn.map((dependency) => {
+              const target = dependencyTarget(dependency);
+              return target ? (
+                <button
+                  key={dependency}
+                  className="dependency-link"
+                  onClick={() => openBlock(target.topicId, target.index)}
+                  title={"Перейти: " + target.title}
+                >
+                  {dependency} ↗
+                </button>
+              ) : (
+                <b key={dependency}>{dependency}</b>
+              );
+            })}
           </div>
         )}
       </div>
@@ -119,12 +169,16 @@ function ContentCard({
 }
 
 function NeighborNav({ topic }: { topic: Topic }) {
-  const chapter = chapters.find((item) => item.id === topic.chapterId);
-  const index = chapter?.topicIds.indexOf(topic.id) ?? -1;
-  const previous = index > 0 ? topics[chapter!.topicIds[index - 1]] : undefined;
-  const next = chapter && index >= 0 && index < chapter.topicIds.length - 1
-    ? topics[chapter.topicIds[index + 1]]
-    : undefined;
+  const sequence = chapters.flatMap((chapter) =>
+    chapter.topicIds
+      .filter((id) => Boolean(topics[id]))
+      .map((id) => ({ id, chapter })),
+  );
+  const index = sequence.findIndex((entry) => entry.id === topic.id);
+  const previousEntry = index > 0 ? sequence[index - 1] : undefined;
+  const nextEntry = index >= 0 && index < sequence.length - 1 ? sequence[index + 1] : undefined;
+  const previous = previousEntry ? topics[previousEntry.id] : undefined;
+  const next = nextEntry ? topics[nextEntry.id] : undefined;
 
   return (
     <nav className="neighbor-nav">
@@ -132,15 +186,25 @@ function NeighborNav({ topic }: { topic: Topic }) {
         disabled={!previous}
         onClick={() => previous && (window.location.hash = previous.id)}
       >
-        <span>Предыдущая тема</span>
-        <strong>{previous?.title ?? "Начало главы"}</strong>
+        <span>
+          {previousEntry && previousEntry.chapter.id !== topic.chapterId
+            ? "← Предыдущая глава"
+            : "← Предыдущая тема"}
+        </span>
+        <strong>{previous?.title ?? "Начало курса"}</strong>
+        {previousEntry && <small>Глава {previousEntry.chapter.number} · {previousEntry.chapter.title}</small>}
       </button>
       <button
         disabled={!next}
         onClick={() => next && (window.location.hash = next.id)}
       >
-        <span>Следующая тема</span>
-        <strong>{next?.title ?? "Конец главы"}</strong>
+        <span>
+          {nextEntry && nextEntry.chapter.id !== topic.chapterId
+            ? "Следующая глава →"
+            : "Следующая тема →"}
+        </span>
+        <strong>{next?.title ?? "Конец курса"}</strong>
+        {nextEntry && <small>Глава {nextEntry.chapter.number} · {nextEntry.chapter.title}</small>}
       </button>
     </nav>
   );
@@ -152,6 +216,20 @@ export function TopicPage({ topic }: { topic: Topic }) {
   const theorySentinel = useRef<HTMLDivElement>(null);
   const [theoryRead, setTheoryRead] = useState(() => loadSet(THEORY_KEY).has(topic.id));
   const [solved, setSolved] = useState(() => loadSet(SOLVED_KEY));
+
+  useEffect(() => {
+    const target = sessionStorage.getItem(BLOCK_TARGET_KEY);
+    if (!target) return;
+    const [targetTopic, rawIndex] = target.split("::");
+    if (targetTopic !== topic.id) return;
+    sessionStorage.removeItem(BLOCK_TARGET_KEY);
+    const timer = window.setTimeout(() => {
+      document
+        .getElementById("block-" + topic.id + "-" + rawIndex)
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 140);
+    return () => window.clearTimeout(timer);
+  }, [topic.id]);
 
   useEffect(() => {
     setTheoryRead(loadSet(THEORY_KEY).has(topic.id));
@@ -240,7 +318,7 @@ export function TopicPage({ topic }: { topic: Topic }) {
           <button
             type="button"
             key={block.title + "-outline"}
-            onClick={() => document.getElementById("block-" + index)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            onClick={() => document.getElementById("block-" + topic.id + "-" + index)?.scrollIntoView({ behavior: "smooth", block: "start" })}
           >
             {String(index + 1).padStart(2, "0")} · {block.title}
           </button>
@@ -249,9 +327,10 @@ export function TopicPage({ topic }: { topic: Topic }) {
 
       <section className="lesson-content">
         {topic.blocks.map((block, index) => (
-          <div id={"block-" + index} key={topic.id + "-" + block.title}>
+          <div id={"block-" + topic.id + "-" + index} key={topic.id + "-" + block.title}>
             <ContentCard topic={topic} block={block} index={index} />
             {topic.id === "matrices" && index === 0 && <MatrixTypesGallery />}
+            {topic.id === "determinants" && block.title.includes("Определитель 3-го порядка") && <DeterminantVisual />}
           </div>
         ))}
       </section>
@@ -261,11 +340,11 @@ export function TopicPage({ topic }: { topic: Topic }) {
       {isLinear && <div className="theory-finish" ref={theorySentinel}>
         <span>{theoryRead ? "✓" : "↓"}</span>
         <div>
-          <strong>{theoryRead ? "Теория отмечена как прочитанная" : "Конец теории"}</strong>
+          <strong>{theoryRead ? "Теоретический маршрут пройден" : "Финиш теоретической части"}</strong>
           <p>
             {theoryRead
-              ? "Это даёт только половину прогресса темы. Остальное — через задачи."
-              : "Когда этот блок появляется на экране, теория автоматически засчитывается как прочитанная."}
+              ? "Система зафиксировала, что ты дошёл до конца материала. Теперь практика проверит, можешь ли ты самостоятельно использовать определения, свойства и методы этой темы."
+              : "Когда этот блок попадёт в область просмотра, система отметит теоретический материал как пройденный и откроет следующий этап — проверку на задачах."}
           </p>
         </div>
       </div>}
