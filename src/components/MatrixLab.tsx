@@ -8,7 +8,35 @@ type Matrix3 = [
   [number, number, number],
 ];
 
-type Mode = "scale" | "shear" | "rotate" | "projection" | "reflection";
+type ControlTab = "scale" | "shear" | "rotate" | "projection" | "reflection";
+
+interface TransformState {
+  sx: number;
+  sy: number;
+  sz: number;
+  shearXY: number;
+  shearXZ: number;
+  shearYZ: number;
+  angleDeg: number;
+  projectionZ: number;
+  reflectX: boolean;
+  reflectY: boolean;
+  reflectZ: boolean;
+}
+
+const DEFAULTS: TransformState = {
+  sx: 1,
+  sy: 1,
+  sz: 1,
+  shearXY: 0.55,
+  shearXZ: 0,
+  shearYZ: 0.2,
+  angleDeg: 0,
+  projectionZ: 1,
+  reflectX: false,
+  reflectY: false,
+  reflectZ: false,
+};
 
 const vertices: [number, number, number][] = [
   [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
@@ -21,45 +49,52 @@ const edges = [
   [0, 4], [1, 5], [2, 6], [3, 7],
 ] as const;
 
-function matrixFor(mode: Mode, strength: number): Matrix3 {
-  if (mode === "scale") {
-    return [
-      [1 + strength * 0.9, 0, 0],
-      [0, 1 - strength * 0.35, 0],
-      [0, 0, 1 + strength * 0.45],
-    ];
-  }
+const identity = (): Matrix3 => [[1,0,0],[0,1,0],[0,0,1]];
 
-  if (mode === "shear") {
-    return [
-      [1, strength * 1.15, 0],
-      [0, 1, strength * 0.45],
-      [0, 0, 1],
-    ];
+function multiply(a: Matrix3, b: Matrix3): Matrix3 {
+  const result = identity();
+  for (let i = 0; i < 3; i += 1) {
+    for (let j = 0; j < 3; j += 1) {
+      result[i][j] = a[i][0] * b[0][j] + a[i][1] * b[1][j] + a[i][2] * b[2][j];
+    }
   }
+  return result;
+}
 
-  if (mode === "rotate") {
-    const angle = strength * Math.PI * 1.4;
-    return [
-      [Math.cos(angle), -Math.sin(angle), 0],
-      [Math.sin(angle), Math.cos(angle), 0],
-      [0, 0, 1],
-    ];
-  }
+function matrixFromState(state: TransformState): Matrix3 {
+  const angle = state.angleDeg * Math.PI / 180;
 
-  if (mode === "reflection") {
-    return [
-      [-1, 0, 0],
-      [0, 1, 0],
-      [0, 0, 1],
-    ];
-  }
+  const scale: Matrix3 = [
+    [state.sx, 0, 0],
+    [0, state.sy, 0],
+    [0, 0, state.sz],
+  ];
 
-  return [
+  const shear: Matrix3 = [
+    [1, state.shearXY, state.shearXZ],
+    [0, 1, state.shearYZ],
+    [0, 0, 1],
+  ];
+
+  const rotate: Matrix3 = [
+    [Math.cos(angle), -Math.sin(angle), 0],
+    [Math.sin(angle), Math.cos(angle), 0],
+    [0, 0, 1],
+  ];
+
+  const projection: Matrix3 = [
     [1, 0, 0],
     [0, 1, 0],
-    [0, 0, Math.max(0, 1 - strength)],
+    [0, 0, state.projectionZ],
   ];
+
+  const reflection: Matrix3 = [
+    [state.reflectX ? -1 : 1, 0, 0],
+    [0, state.reflectY ? -1 : 1, 0],
+    [0, 0, state.reflectZ ? -1 : 1],
+  ];
+
+  return multiply(scale, multiply(rotate, multiply(shear, multiply(projection, reflection))));
 }
 
 function transform(matrix: Matrix3, point: [number, number, number]): [number, number, number] {
@@ -114,7 +149,7 @@ function CubeLines({ matrix }: { matrix?: Matrix3 }) {
           color={matrix ? "#9b8cff" : "#777786"}
           lineWidth={matrix ? 2.2 : 1}
           transparent
-          opacity={matrix ? 0.95 : 0.36}
+          opacity={matrix ? 0.95 : 0.34}
         />
       ))}
     </>
@@ -123,15 +158,11 @@ function CubeLines({ matrix }: { matrix?: Matrix3 }) {
 
 function Basis({ matrix }: { matrix: Matrix3 }) {
   const origin: [number, number, number] = [0, 0, 0];
-  const e1 = transform(matrix, [1.8, 0, 0]);
-  const e2 = transform(matrix, [0, 1.8, 0]);
-  const e3 = transform(matrix, [0, 0, 1.8]);
-
   return (
     <>
-      <Line points={[origin, e1]} color="#ff7b86" lineWidth={3} />
-      <Line points={[origin, e2]} color="#63df9b" lineWidth={3} />
-      <Line points={[origin, e3]} color="#65a8ff" lineWidth={3} />
+      <Line points={[origin, transform(matrix, [1.8, 0, 0])]} color="#ff7b86" lineWidth={3} />
+      <Line points={[origin, transform(matrix, [0, 1.8, 0])]} color="#63df9b" lineWidth={3} />
+      <Line points={[origin, transform(matrix, [0, 0, 1.8])]} color="#65a8ff" lineWidth={3} />
     </>
   );
 }
@@ -150,31 +181,73 @@ function Scene({ matrix }: { matrix: Matrix3 }) {
 }
 
 function geometryCopy(det: number, matrixRank: number) {
-  if (matrixRank < 3) {
+  if (matrixRank === 0) {
     return {
-      title: "Размерность образа уменьшилась",
-      body: "rank(A)=" + matrixRank + ": после преобразования все векторы попадают в подпространство меньшей размерности. При rank=2 объём схлопывается в плоскость, при rank=1 — в прямую.",
+      title: "Всё пространство схлопнулось в точку",
+      body: "rank(A)=0: любой входной вектор превращается в нулевой.",
     };
   }
-
+  if (matrixRank === 1) {
+    return {
+      title: "Образ стал прямой",
+      body: "rank(A)=1: после преобразования остаётся только одно независимое направление.",
+    };
+  }
+  if (matrixRank === 2) {
+    return {
+      title: "Образ стал плоскостью",
+      body: "rank(A)=2: объём исчез, но два независимых направления сохранились.",
+    };
+  }
   if (det < 0) {
     return {
-      title: "Пространство зеркально перевёрнуто",
-      body: "det(A)<0: преобразование сохраняет трёхмерность, но меняет ориентацию базиса — это можно понимать как отражение вместе с возможным растяжением.",
+      title: "Трёхмерность сохранена, но ориентация перевёрнута",
+      body: "rank(A)=3, поэтому пространство не схлопнулось. det(A)<0 означает зеркальное изменение ориентации базиса.",
     };
   }
-
   return {
     title: "Трёхмерность сохранена",
-    body: "rank(A)=3: три независимых направления не схлопнулись. det(A)>0 означает, что ориентация базиса не была зеркально перевёрнута; |det(A)| показывает коэффициент изменения объёма.",
+    body: "rank(A)=3: три независимых направления остались независимыми. |det(A)| показывает, во сколько раз изменился объём.",
   };
 }
 
+function RangeControl({
+  label,
+  value,
+  min,
+  max,
+  step,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <label className="transform-control">
+      <span>{label}</span>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+      />
+      <b>{value.toFixed(step < 0.1 ? 2 : 1)}</b>
+    </label>
+  );
+}
+
 export function MatrixLab() {
-  const [mode, setMode] = useState<Mode>("shear");
-  const [strength, setStrength] = useState(0.55);
+  const [tab, setTab] = useState<ControlTab>("shear");
+  const [state, setState] = useState<TransformState>(DEFAULTS);
   const [fullscreen, setFullscreen] = useState(false);
-  const matrix = useMemo(() => matrixFor(mode, strength), [mode, strength]);
+
+  const matrix = useMemo(() => matrixFromState(state), [state]);
   const det = determinant(matrix);
   const matrixRank = rank(matrix);
   const geometry = geometryCopy(det, matrixRank);
@@ -191,12 +264,28 @@ export function MatrixLab() {
     };
   }, [fullscreen]);
 
+  const patch = <K extends keyof TransformState>(key: K, value: TransformState[K]) => {
+    setState((current) => ({ ...current, [key]: value }));
+  };
+
+  const preset = (name: "identity" | "rotation" | "projection" | "reflection" | "chaos") => {
+    if (name === "identity") setState(DEFAULTS);
+    if (name === "rotation") setState({ ...DEFAULTS, shearXY: 0, shearYZ: 0, angleDeg: 38 });
+    if (name === "projection") setState({ ...DEFAULTS, shearXY: 0, shearYZ: 0, projectionZ: 0 });
+    if (name === "reflection") setState({ ...DEFAULTS, shearXY: 0, shearYZ: 0, reflectX: true });
+    if (name === "chaos") setState({
+      sx: 1.3, sy: 0.75, sz: 1.15,
+      shearXY: 0.6, shearXZ: -0.25, shearYZ: 0.35,
+      angleDeg: 28, projectionZ: 0.82,
+      reflectX: false, reflectY: true, reflectZ: false,
+    });
+  };
+
   return (
     <section className={"matrix-lab " + (fullscreen ? "is-fullscreen" : "")}>
       <button
         className="lab-fullscreen-button"
         onClick={() => setFullscreen((value) => !value)}
-        aria-label={fullscreen ? "Закрыть полноэкранный режим" : "Открыть лабораторию на весь экран"}
       >
         {fullscreen ? "× Закрыть" : "⛶ Full screen"}
       </button>
@@ -208,28 +297,28 @@ export function MatrixLab() {
         <div className="lab-explainer">
           <strong>Что означает ℝ³ → ℝ³?</strong>
           <p>
-            ℝ³ — обычное трёхмерное пространство всех векторов (x, y, z). Запись
-            A: ℝ³ → ℝ³ означает: на вход матрица получает любой трёхмерный вектор,
-            а на выходе снова даёт трёхмерный вектор Ax.
+            ℝ³ — множество всех векторов (x,y,z). Запись A:ℝ³→ℝ³ означает, что
+            матрица 3×3 получает трёхмерный вектор x и возвращает другой трёхмерный
+            вектор Ax.
           </p>
           <p>
-            Матрица 3×3 полностью определяется тем, куда она отправляет базисные
-            e₁=(1,0,0), e₂=(0,1,0), e₃=(0,0,1). Эти три образа — столбцы матрицы.
+            Красный, зелёный и синий векторы — Ae₁, Ae₂, Ae₃. Их координаты — три
+            столбца матрицы A, поэтому по ним можно восстановить действие A на любой x.
           </p>
         </div>
 
-        <p>
-          Серый куб — исходный набор точек. Цветной — те же точки после применения A.
-          Красная, зелёная и синяя линии показывают Ae₁, Ae₂ и Ae₃.
-        </p>
+        <div className="lab-presets">
+          <span>Presets</span>
+          <button onClick={() => preset("identity")}>Base</button>
+          <button onClick={() => preset("rotation")}>Rotate</button>
+          <button onClick={() => preset("projection")}>Rank 2</button>
+          <button onClick={() => preset("reflection")}>Reflect</button>
+          <button onClick={() => preset("chaos")}>Mixed</button>
+        </div>
 
         <div className="lab-modes">
-          {(["scale", "shear", "rotate", "projection", "reflection"] as Mode[]).map((item) => (
-            <button
-              key={item}
-              className={mode === item ? "active" : ""}
-              onClick={() => setMode(item)}
-            >
+          {(["scale", "shear", "rotate", "projection", "reflection"] as ControlTab[]).map((item) => (
+            <button key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>
               {item === "scale" && "Масштаб"}
               {item === "shear" && "Shear"}
               {item === "rotate" && "Поворот"}
@@ -239,19 +328,51 @@ export function MatrixLab() {
           ))}
         </div>
 
-        <label className="lab-slider">
-          <span>Параметр преобразования</span>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={strength}
-            onChange={(event) => setStrength(Number(event.target.value))}
-            disabled={mode === "reflection"}
-          />
-          <b>{mode === "reflection" ? "fixed" : strength.toFixed(2)}</b>
-        </label>
+        <div className="transform-controls">
+          {tab === "scale" && (
+            <>
+              <RangeControl label="scale X" value={state.sx} min={0} max={2} step={0.05} onChange={(value) => patch("sx", value)} />
+              <RangeControl label="scale Y" value={state.sy} min={0} max={2} step={0.05} onChange={(value) => patch("sy", value)} />
+              <RangeControl label="scale Z" value={state.sz} min={0} max={2} step={0.05} onChange={(value) => patch("sz", value)} />
+            </>
+          )}
+          {tab === "shear" && (
+            <>
+              <RangeControl label="X от Y" value={state.shearXY} min={-1.5} max={1.5} step={0.05} onChange={(value) => patch("shearXY", value)} />
+              <RangeControl label="X от Z" value={state.shearXZ} min={-1.5} max={1.5} step={0.05} onChange={(value) => patch("shearXZ", value)} />
+              <RangeControl label="Y от Z" value={state.shearYZ} min={-1.5} max={1.5} step={0.05} onChange={(value) => patch("shearYZ", value)} />
+            </>
+          )}
+          {tab === "rotate" && (
+            <RangeControl label="угол вокруг Z" value={state.angleDeg} min={-180} max={180} step={1} onChange={(value) => patch("angleDeg", value)} />
+          )}
+          {tab === "projection" && (
+            <RangeControl label="коэффициент Z" value={state.projectionZ} min={0} max={1} step={0.01} onChange={(value) => patch("projectionZ", value)} />
+          )}
+          {tab === "reflection" && (
+            <div className="reflection-controls">
+              {[
+                ["reflectX", "Отразить X"],
+                ["reflectY", "Отразить Y"],
+                ["reflectZ", "Отразить Z"],
+              ].map(([key, label]) => (
+                <button
+                  key={key}
+                  className={state[key as keyof TransformState] ? "active" : ""}
+                  onClick={() => patch(key as "reflectX" | "reflectY" | "reflectZ", !state[key as "reflectX" | "reflectY" | "reflectZ"])}
+                >
+                  <span>{state[key as "reflectX" | "reflectY" | "reflectZ"] ? "−1" : "+1"}</span>
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="lab-pipeline">
+          <span>Все параметры работают одновременно и не сбрасываются при переключении вкладок.</span>
+          <code>S · R · H · P · F</code>
+        </div>
 
         <div className="matrix-readout">
           {matrix.map((row, index) => (
@@ -266,28 +387,24 @@ export function MatrixLab() {
             <small>Во сколько раз меняется ориентированный объём.</small>
           </div>
 
-          <button
-            className="stat-tooltip stat-link"
-            onClick={() => (window.location.hash = "inverse-rank")}
-          >
+          <button className="stat-tooltip stat-link" onClick={() => (window.location.hash = "inverse-rank")}>
             <span>rank(A) ↗</span>
             <strong>{matrixRank}</strong>
-            <small>Число независимых направлений после преобразования. Открыть тему ранга.</small>
+            <small>Число независимых направлений в образе. Нажми, чтобы открыть тему ранга.</small>
           </button>
 
           <div className="stat-tooltip geometry-stat">
-            <span>что произошло с пространством?</span>
+            <span>геометрический результат</span>
             <strong>{geometry.title}</strong>
             <small>{geometry.body}</small>
           </div>
         </div>
 
         <div className="lab-note">
-          <strong>Почему здесь нет обычного переноса?</strong>
+          <strong>Порядок преобразований имеет значение.</strong>
           <p>
-            Перенос x ↦ x+b обычно не оставляет ноль на месте, поэтому не является линейным
-            преобразованием ℝ³ в стандартных координатах. Для него используют аффинные или
-            однородные координаты.
+            Матрицы в композиции обычно не коммутируют. Поэтому сначала отразить, потом
+            сдвинуть слои и повернуть — не то же самое, что выполнить эти операции в другом порядке.
           </p>
         </div>
       </div>
