@@ -75,7 +75,11 @@ export function DeterminantVisual() {
 
       <div className="det-plain-example">
         <span>ОБЫЧНЫЙ ПРИМЕР</span>
-        <strong>det [[3, 2], [8, 5]] = 3·5 − 2·8 = −1</strong>
+        <div className="det-plain-line">
+          <strong>det</strong>
+          <DetMatrix values={[["3","2"],["8","5"]]} />
+          <b>= 3·5 − 2·8 = −1</b>
+        </div>
         <p>Это тот же алгоритм без графической подсветки: два произведения, затем разность.</p>
       </div>
     </section>
