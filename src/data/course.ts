@@ -1732,7 +1732,7 @@ export const topics: Record<string, Topic> = {
     title: "Отображения и преобразования",
     chapterId: "plane-transformations",
     summary: "Образ и прообраз точки, взаимная однозначность, композиция, тождественное и обратное преобразования, координатная запись.",
-    prerequisites: ["plane-lines"],
+    prerequisites: ["quadrics", "plane-lines"],
     blocks: [
       {
         kind: "definition",
