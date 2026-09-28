@@ -98,6 +98,8 @@ export function SettingsPanel() {
       return { ...themes.Black };
     }
   });
+  const [customDirty, setCustomDirty] = useState(false);
+  const [customSaved, setCustomSaved] = useState(false);
   const [cursor, setCursor] = useState<CursorMode>(() => (localStorage.getItem(CURSOR_KEY) as CursorMode) || "halo");
   const [motion, setMotion] = useState<MotionProfile>(() => (localStorage.getItem(MOTION_KEY) as MotionProfile) || "balanced");
   const [saved, setSaved] = useState(loadSavedTheorems);
@@ -110,8 +112,7 @@ export function SettingsPanel() {
   useEffect(() => {
     applyTheme(activeTheme);
     localStorage.setItem(THEME_NAME_KEY, themeName);
-    if (themeName === "Custom") localStorage.setItem(THEME_CUSTOM_KEY, JSON.stringify(custom));
-  }, [activeTheme, themeName, custom]);
+  }, [activeTheme, themeName]);
 
   useEffect(() => {
     applyMotion(motion);
@@ -122,6 +123,31 @@ export function SettingsPanel() {
     window.addEventListener(LEARNING_EVENT, refresh);
     return () => window.removeEventListener(LEARNING_EVENT, refresh);
   }, []);
+
+  const updateCustom = (token: string, value: string) => {
+    setCustom((state) => ({ ...state, [token]: value }));
+    setCustomDirty(true);
+    setCustomSaved(false);
+  };
+
+  const saveCustomTheme = () => {
+    localStorage.setItem(THEME_CUSTOM_KEY, JSON.stringify(custom));
+    localStorage.setItem(THEME_NAME_KEY, "Custom");
+    setThemeName("Custom");
+    setCustomDirty(false);
+    setCustomSaved(true);
+  };
+
+  const restoreCustomTheme = () => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(THEME_CUSTOM_KEY) || "null");
+      setCustom(stored || { ...themes.Black });
+    } catch {
+      setCustom({ ...themes.Black });
+    }
+    setCustomDirty(false);
+    setCustomSaved(false);
+  };
 
   const chooseCursor = (next: CursorMode) => {
     localStorage.setItem(CURSOR_KEY, next);
@@ -185,8 +211,8 @@ export function SettingsPanel() {
                           key={name}
                           className={themeName === name ? "active" : ""}
                           onClick={() => {
-                            if (name !== "Custom") setCustom({ ...themes[name] });
                             setThemeName(name);
+                            setCustomSaved(false);
                           }}
                         >
                           <span className="theme-preview">
@@ -209,14 +235,25 @@ export function SettingsPanel() {
                           <input
                             type="color"
                             value={custom[token]}
-                            onChange={(event) => setCustom((state) => ({ ...state, [token]: event.target.value }))}
+                            onChange={(event) => updateCustom(token, event.target.value)}
                           />
                           <input
                             value={custom[token]}
-                            onChange={(event) => setCustom((state) => ({ ...state, [token]: event.target.value }))}
+                            onChange={(event) => updateCustom(token, event.target.value)}
                           />
                         </label>
                       ))}
+                      <div className="custom-theme-actions">
+                        <button className="custom-save-button" onClick={saveCustomTheme}>
+                          {customSaved ? "✓ Custom сохранена" : customDirty ? "Сохранить изменения" : "Сохранить Custom"}
+                        </button>
+                        <button className="custom-restore-button" onClick={restoreCustomTheme}>
+                          Вернуть сохранённую
+                        </button>
+                      </div>
+                      <p className="custom-save-note">
+                        Изменения сразу видны в интерфейсе, но сохраняются между запусками только после нажатия «Сохранить».
+                      </p>
                     </div>
                   )}
                 </section>
