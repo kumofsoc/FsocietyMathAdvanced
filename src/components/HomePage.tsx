@@ -1,79 +1,87 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { chapters, topicList } from "../data/course";
+import { useLayoutEffect, useRef } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export function HomePage({ progress }: { progress: number }) {
+  void progress;
   const root = useRef<HTMLDivElement>(null);
-  const liveMetrics = useMemo(
-    () => [
-      { value: progress + "%", label: "текущий прогресс" },
-      { value: "8", label: "свойств определителя" },
-      { value: "3D", label: "интерактивная лаборатория" },
-      { value: "∞", label: "маршрутов по карте" },
-    ],
-    [progress],
-  );
-  const [metricIndex, setMetricIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setMetricIndex((current) => (current + 1) % liveMetrics.length);
-    }, 2300);
-    return () => window.clearInterval(timer);
-  }, [liveMetrics.length]);
-
-  const liveMetric = liveMetrics[metricIndex];
+  const pulseRef = useRef<HTMLSpanElement>(null);
 
   useLayoutEffect(() => {
     const element = root.current;
     if (!element) return;
 
-    const ctx = gsap.context(() => {
-      const panels = gsap.utils.toArray<HTMLElement>(".home-panel", element);
-      if (!panels.length) return;
+    let pulseFrame = 0;
+    const pulseStart = performance.now();
 
-      const motionProfile = document.documentElement.dataset.motionProfile || "balanced";
-      if (motionProfile === "off") return;
+    const updatePulse = (now: number) => {
+      const profile = document.documentElement.dataset.motionProfile || "balanced";
+      if (pulseRef.current) {
+        if (profile === "off") {
+          pulseRef.current.textContent = "50%";
+        } else {
+          const duration = 6200;
+          const phase = ((now - pulseStart) % duration) / duration;
+          const value = phase < 0.5
+            ? 1 + Math.round(99 * (phase * 2))
+            : 100 - Math.round(100 * ((phase - 0.5) * 2));
+          pulseRef.current.textContent = Math.max(0, Math.min(100, value)) + "%";
+        }
+      }
+      pulseFrame = requestAnimationFrame(updatePulse);
+    };
+    pulseFrame = requestAnimationFrame(updatePulse);
+
+    const ctx = gsap.context(() => {
+      const profile = document.documentElement.dataset.motionProfile || "balanced";
+      if (profile === "off") return;
+
+      const panels = gsap.utils.toArray<HTMLElement>(".home-panel", element);
+      const mobile = window.matchMedia("(max-width: 820px)").matches;
+      const eco = profile === "eco";
+
       const mm = gsap.matchMedia();
 
-      mm.add("(min-width: 821px)", () => {
+      if (!mobile) {
         panels.forEach((panel, index) => {
-          const content = panel.querySelectorAll<HTMLElement>("[data-reveal]");
-          if (content.length) {
+          const reveal = panel.querySelectorAll<HTMLElement>("[data-reveal]");
+          if (reveal.length) {
             gsap.fromTo(
-              content,
-              { y: motionProfile === "eco" ? 24 : 70, opacity: 0, filter: "blur(12px)" },
+              reveal,
+              {
+                y: eco ? 24 : 64,
+                opacity: 0,
+                filter: eco ? "blur(0px)" : "blur(10px)",
+              },
               {
                 y: 0,
                 opacity: 1,
                 filter: "blur(0px)",
-                stagger: motionProfile === "full" ? 0.08 : 0.045,
+                stagger: profile === "full" ? 0.075 : 0.045,
                 ease: "power3.out",
                 scrollTrigger: {
                   trigger: panel,
-                  start: "top 68%",
-                  end: "center 46%",
-                  scrub: motionProfile === "full" ? 0.65 : 0.35,
+                  start: "top 72%",
+                  end: "center 48%",
+                  scrub: profile === "full" ? 0.58 : 0.34,
                 },
               },
             );
           }
 
-          const floaters = panel.querySelectorAll<HTMLElement>("[data-float]");
-          if (floaters.length) {
-            gsap.to(floaters, {
-              yPercent: index % 2 ? -18 : 18,
-              rotate: index % 2 ? 12 : -12,
+          const parallax = panel.querySelectorAll<HTMLElement>("[data-parallax]");
+          if (parallax.length) {
+            gsap.to(parallax, {
+              yPercent: index % 2 ? -14 : 14,
+              rotate: index % 2 ? 5 : -5,
               ease: "none",
               scrollTrigger: {
                 trigger: panel,
                 start: "top bottom",
                 end: "bottom top",
-                scrub: 0.8,
+                scrub: 0.75,
               },
             });
           }
@@ -85,301 +93,279 @@ export function HomePage({ progress }: { progress: number }) {
           end: "bottom bottom",
           snap: {
             snapTo: 1 / Math.max(1, panels.length - 1),
-            duration: { min: 0.22, max: 0.7 },
-            delay: 0.07,
+            duration: { min: 0.22, max: 0.68 },
+            delay: 0.08,
             ease: "power2.inOut",
           },
         });
-      });
-
-      mm.add("(max-width: 820px)", () => {
+      } else {
         panels.forEach((panel) => {
-          const content = panel.querySelectorAll<HTMLElement>("[data-reveal]");
-          if (!content.length) return;
+          const reveal = panel.querySelectorAll<HTMLElement>("[data-reveal]");
+          if (!reveal.length) return;
           gsap.fromTo(
-            content,
-            { y: 30, opacity: 0 },
+            reveal,
+            { y: 24, opacity: 0 },
             {
               y: 0,
               opacity: 1,
-              stagger: 0.035,
-              duration: 0.6,
+              stagger: 0.03,
+              duration: 0.5,
               ease: "power2.out",
               scrollTrigger: {
                 trigger: panel,
-                start: "top 84%",
+                start: "top 86%",
                 once: true,
               },
             },
           );
         });
-      });
+      }
+
+      if (!eco) {
+        gsap.utils.toArray<HTMLElement>("[data-loop='float']", element).forEach((node, index) => {
+          gsap.to(node, {
+            y: index % 2 ? -10 : 10,
+            x: index % 3 === 0 ? 5 : -4,
+            rotate: index % 2 ? 1.2 : -1.2,
+            duration: 2.8 + (index % 4) * 0.55,
+            ease: "sine.inOut",
+            repeat: -1,
+            yoyo: true,
+          });
+        });
+
+        gsap.utils.toArray<HTMLElement>("[data-loop='pulse']", element).forEach((node, index) => {
+          gsap.to(node, {
+            scale: 1.035,
+            opacity: 0.82,
+            duration: 2.2 + index * 0.2,
+            ease: "sine.inOut",
+            repeat: -1,
+            yoyo: true,
+          });
+        });
+
+        gsap.utils.toArray<HTMLElement>("[data-loop='drift']", element).forEach((node, index) => {
+          gsap.to(node, {
+            rotate: index % 2 ? 360 : -360,
+            duration: 26 + index * 5,
+            ease: "none",
+            repeat: -1,
+          });
+        });
+      }
 
       return () => mm.revert();
     }, element);
 
     requestAnimationFrame(() => ScrollTrigger.refresh());
-    return () => ctx.revert();
+
+    return () => {
+      cancelAnimationFrame(pulseFrame);
+      ctx.revert();
+    };
   }, []);
 
   return (
-    <div className="home-page home-scrollytelling" ref={root}>
-      <section className="home-panel home-panel-hero">
-        <div className="hero-grid-lines" aria-hidden="true" />
-        <div className="hero-floating-equations" aria-hidden="true">
-          <span data-float>det A</span>
-          <span data-float>Ax=b</span>
-          <span data-float>rank A</span>
-          <span data-float>ℝ³</span>
-        </div>
+    <div className="home-page home-scrollytelling home-project-showcase" ref={root}>
+      <section className="home-panel project-hero">
+        <div className="project-grid" aria-hidden="true" />
+        <div className="project-ambient ambient-a" data-loop="drift" aria-hidden="true" />
+        <div className="project-ambient ambient-b" data-loop="drift" aria-hidden="true" />
+        <div className="project-ambient ambient-c" data-loop="pulse" aria-hidden="true" />
 
-        <div className="home-panel-inner">
-          <div className="home-hero-copy">
-            <div className="eyebrow" data-reveal>FSOCIETYMATH / ADVANCED KNOWLEDGE SYSTEM</div>
+        <div className="home-panel-inner project-hero-inner">
+          <div className="project-hero-copy">
+            <div className="eyebrow" data-reveal>FSOCIETYMATH / INTERACTIVE LEARNING ENVIRONMENT</div>
             <h1 data-reveal>
-              Математика,
+              Не страница.
               <br />
-              <span>которая связана.</span>
+              <span>Целая среда.</span>
             </h1>
             <p data-reveal>
-              Не бесконечный список параграфов. Определения ведут к свойствам, свойства —
-              к доказательствам, доказательства — к теоремам, а практика проверяет, понял ли
-              ты это на самом деле.
+              FsocietyMath соединяет контент, навигацию, интерактив, персонализацию,
+              историю действий и визуальные инструменты в один живой интерфейс.
+              Здесь хочется не просто открыть тему — хочется исследовать сам проект.
             </p>
+
             <div className="home-actions" data-reveal>
               <button className="home-primary" onClick={() => (window.location.hash = "matrices")}>
-                Начать изучение
+                Начать
               </button>
               <button className="home-secondary" onClick={() => (window.location.hash = "map")}>
-                Открыть карту
+                Исследовать интерфейс
               </button>
             </div>
           </div>
 
-          <div className="hero-object" data-float aria-hidden="true">
-            <div className="hero-matrix-shell">
-              <span>[</span>
-              <div>
-                <b>1</b><b>0</b><b>0</b>
-                <b>0</b><b>1</b><b>0</b>
-                <b>0</b><b>0</b><b>1</b>
-              </div>
-              <span>]</span>
+          <div className="project-core" data-parallax data-loop="float" aria-hidden="true">
+            <div className="project-core-ring ring-1" />
+            <div className="project-core-ring ring-2" />
+            <div className="project-core-ring ring-3" />
+            <div className="project-core-grid">
+              <i /><i /><i /><i /><i /><i /><i /><i /><i />
             </div>
-            <div className="hero-axis axis-x" />
-            <div className="hero-axis axis-y" />
-            <div className="hero-axis axis-z" />
+            <span>FS</span>
           </div>
 
-          <div className="home-stats" data-reveal>
-            <div><strong>{chapters.length}</strong><span>глав в архитектуре</span></div>
-            <div><strong>{topicList.length}</strong><span>узлов знаний</span></div>
-            <div className="home-live-stat">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.span
-                  key={liveMetric.value + liveMetric.label}
-                  className="home-live-stat-inner"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.28 }}
-                >
-                  <strong>{liveMetric.value}</strong>
-                  <span>{liveMetric.label}</span>
-                </motion.span>
-              </AnimatePresence>
-            </div>
+          <div className="project-pulse" data-reveal>
+            <span ref={pulseRef}>1%</span>
+            <small>LIVE SYSTEM PULSE</small>
+            <i><b /></i>
           </div>
         </div>
 
         <div className="home-snap-cue">
           <span>SCROLL</span>
           <i />
-          <small>страница притягивается к следующей сцене</small>
+          <small>каждый экран — отдельная сцена</small>
         </div>
       </section>
 
-      <section className="home-panel home-panel-graph">
-        <div className="home-panel-inner split-layout">
-          <div className="home-scene-number" data-float>01</div>
-          <div className="home-story-copy">
-            <div className="eyebrow" data-reveal>KNOWLEDGE GRAPH</div>
-            <h2 data-reveal>Тема знает, от каких тем она зависит.</h2>
+      <section className="home-panel project-feature-panel">
+        <div className="home-panel-inner project-split">
+          <div className="project-feature-copy">
+            <div className="eyebrow" data-reveal>DESIGNED AS A SYSTEM</div>
+            <h2 data-reveal>Интерфейс не разваливается на отдельные страницы.</h2>
             <p data-reveal>
-              Матрицы ведут к определителям. Определители — к обратимости. Ранг — к структуре
-              решений систем. Карта сохраняет эти связи даже когда ты двигаешь и вращаешь узлы.
-            </p>
-            <button data-reveal className="home-text-link" onClick={() => (window.location.hash = "map")}>
-              Исследовать граф →
-            </button>
-          </div>
-
-          <div className="home-fake-graph" data-float aria-hidden="true">
-            <div className="fake-node n1">Матрицы</div>
-            <div className="fake-node n2">det</div>
-            <div className="fake-node n3">rank</div>
-            <div className="fake-node n4">Ax=b</div>
-            <svg viewBox="0 0 600 440">
-              <path d="M118 116 C210 116 232 198 305 198" />
-              <path d="M305 198 C380 198 392 114 490 114" />
-              <path d="M305 198 C360 250 395 330 490 330" />
-            </svg>
-          </div>
-        </div>
-      </section>
-
-      <section className="home-panel home-panel-proof">
-        <div className="home-panel-inner proof-layout">
-          <div className="proof-stack" data-float>
-            <article>
-              <span>СВОЙСТВО 2</span>
-              <strong>Rᵢ ↔ Rⱼ ⇒ det A меняет знак</strong>
-            </article>
-            <article>
-              <span>СВОЙСТВО 3</span>
-              <strong>Два одинаковых ряда ⇒ det A = 0</strong>
-              <small>следует из свойства 2</small>
-            </article>
-            <article>
-              <span>ТЕОРЕМА 3.1</span>
-              <strong>A⁻¹ = adj(A) / det A</strong>
-              <small>использует свойства 7 и 8</small>
-            </article>
-          </div>
-
-          <div className="home-story-copy">
-            <div className="eyebrow" data-reveal>PROOFS, NOT FLASHCARDS</div>
-            <h2 data-reveal>Не запоминай утверждение отдельно от причины.</h2>
-            <p data-reveal>
-              У каждого доказательства есть контекст. На странице видно, какие определения,
-              свойства и предыдущие теоремы реально используются дальше.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="home-panel home-panel-visual">
-        <div className="home-panel-inner visual-layout">
-          <div className="home-story-copy">
-            <div className="eyebrow" data-reveal>SEE THE TRANSFORMATION</div>
-            <h2 data-reveal>Если объект геометрический — его надо увидеть.</h2>
-            <p data-reveal>
-              Матрица 3×3 действует на всё ℝ³. Меняй масштаб, shear, поворот, отражение и
-              схлопывание одновременно; следи за det(A), rank(A) и образами базисных векторов.
-            </p>
-            <button data-reveal className="home-text-link" onClick={() => (window.location.hash = "matrices")}>
-              Открыть 3D-лабораторию →
-            </button>
-          </div>
-
-          <div className="visual-cube" data-float aria-hidden="true">
-            <i className="cube-face face-a" />
-            <i className="cube-face face-b" />
-            <i className="cube-face face-c" />
-            <span className="cube-label">A : ℝ³ → ℝ³</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="home-panel home-panel-progress">
-        <div className="home-panel-inner progress-layout">
-          <div className="home-progress-orbit" data-float>
-            <div>
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={"orbit-" + liveMetric.value + liveMetric.label}
-                  className="orbit-live-metric"
-                  initial={{ opacity: 0, scale: 0.88, y: 8 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 1.08, y: -8 }}
-                  transition={{ duration: 0.34 }}
-                >
-                  <strong>{liveMetric.value}</strong>
-                  <span>{liveMetric.label.toUpperCase()}</span>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
-
-          <div className="home-story-copy">
-            <div className="eyebrow" data-reveal>LEARNING TRAIL</div>
-            <h2 data-reveal>Маршрут показывает, где ты уже был и куда двигаться дальше.</h2>
-            <p data-reveal>
-              Прогресс здесь — не декоративный счётчик. Он связывает пройденную теорию,
-              решённые задачи и карту зависимостей, чтобы в любой момент было понятно,
-              какие темы уже опираются на твои знания, а какие ещё требуют внимания.
-            </p>
-            <div className="home-progress-legend" data-reveal>
-              <span><i /> теория · пройдена</span>
-              <span><i /> практика · проверена</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="home-panel home-panel-guide">
-        <div className="home-panel-inner guide-layout">
-          <div className="home-story-copy">
-            <div className="eyebrow" data-reveal>HOW TO USE THE SYSTEM</div>
-            <h2 data-reveal>Где что находится — без необходимости разбираться в интерфейсе наугад.</h2>
-            <p data-reveal>
-              Сайт устроен как рабочая среда: навигация, карта зависимостей, теория,
-              доказательства, интерактивы и практика разделены по ролям, но связаны между собой.
+              Карта, история переходов, сохранённые элементы, настройки, прогресс,
+              интерактивные лаборатории и контент работают как части одного продукта.
+              Любое действие ощущается связанным с предыдущим.
             </p>
           </div>
 
-          <div className="home-guide-grid">
-            <article data-reveal>
+          <div className="project-window-stack" data-parallax>
+            <article className="project-window window-a" data-loop="float">
               <span>01</span>
-              <strong>Левая панель</strong>
-              <p>Главы и темы. Раскрывай разделы, переходи между темами и следи за прогрессом.</p>
+              <strong>Контекст сохраняется</strong>
+              <p>Можно уйти глубже, вернуться назад и продолжить с того же места.</p>
             </article>
-            <article data-reveal>
+            <article className="project-window window-b" data-loop="float">
               <span>02</span>
-              <strong>Карта курса</strong>
-              <p>Показывает prerequisites. Узлы можно двигать, вращать и менять размер, связи остаются привязаны.</p>
+              <strong>Интерфейс отвечает</strong>
+              <p>Наведение, переходы, прокрутка и трансформации имеют собственный визуальный отклик.</p>
             </article>
-            <article data-reveal>
+            <article className="project-window window-c" data-loop="float">
               <span>03</span>
-              <strong>Карточка свойства</strong>
-              <p>Формула, термин, затем отдельные кнопки «Доказательство» и «Следствие».</p>
-            </article>
-            <article data-reveal>
-              <span>04</span>
-              <strong>3D-лаборатория</strong>
-              <p>Не иллюстрация ради красоты: меняй преобразование и наблюдай det(A), rank(A) и образы базиса.</p>
-            </article>
-            <article data-reveal>
-              <span>05</span>
-              <strong>Назад / вперёд</strong>
-              <p>История сохраняет переходы и позицию чтения, поэтому можно уйти по ссылке и вернуться точно назад.</p>
-            </article>
-            <article data-reveal>
-              <span>06</span>
-              <strong>Настройки</strong>
-              <p>Темы, кастомные цвета, курсоры, профиль анимаций и сохранённые теоремы находятся в одном месте.</p>
+              <strong>Всё персонализируется</strong>
+              <p>Тема, курсор и интенсивность движения настраиваются под пользователя.</p>
             </article>
           </div>
         </div>
       </section>
 
-      <section className="home-panel home-panel-final">
-        <div className="home-panel-inner final-inner">
-          <div className="eyebrow" data-reveal>START WITH THE FIRST STRUCTURE</div>
+      <section className="home-panel project-motion-panel">
+        <div className="home-panel-inner project-motion-layout">
+          <div className="project-motion-object" data-parallax aria-hidden="true">
+            <div className="motion-orbit orbit-a" data-loop="drift" />
+            <div className="motion-orbit orbit-b" data-loop="drift" />
+            <div className="motion-orbit orbit-c" data-loop="drift" />
+            <div className="motion-chip chip-a" data-loop="float">GSAP</div>
+            <div className="motion-chip chip-b" data-loop="float">MOTION</div>
+            <div className="motion-chip chip-c" data-loop="float">THREE</div>
+            <div className="motion-center" data-loop="pulse">LIVE</div>
+          </div>
+
+          <div className="project-feature-copy">
+            <div className="eyebrow" data-reveal>MOTION WITH A PURPOSE</div>
+            <h2 data-reveal>Движение встроено в характер проекта.</h2>
+            <p data-reveal>
+              Большая часть сцены живёт постоянно: панели слегка плавают, слои вращаются,
+              акценты пульсируют, а прокрутка захватывается в последовательность сцен.
+              На телефоне тяжёлые эффекты упрощаются, но визуальный язык сохраняется.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="home-panel project-guide-panel">
+        <div className="home-panel-inner project-guide-layout">
+          <header className="project-guide-head">
+            <div className="eyebrow" data-reveal>WHERE EVERYTHING LIVES</div>
+            <h2 data-reveal>Один экран — одна роль. Никакой охоты за функциями.</h2>
+            <p data-reveal>
+              Основные возможности разнесены по понятным зонам, поэтому даже насыщенный
+              интерфейс остаётся предсказуемым.
+            </p>
+          </header>
+
+          <div className="project-guide-grid">
+            <article data-reveal data-loop="float">
+              <span>01</span>
+              <strong>Навигация</strong>
+              <p>Разделы и темы находятся в боковой панели и раскрываются плавно.</p>
+            </article>
+            <article data-reveal data-loop="float">
+              <span>02</span>
+              <strong>Карта</strong>
+              <p>Отдельная рабочая сцена с группами, связями, перемещением, вращением и масштабом.</p>
+            </article>
+            <article data-reveal data-loop="float">
+              <span>03</span>
+              <strong>История</strong>
+              <p>Назад и вперёд работают как полноценная навигационная история с восстановлением позиции.</p>
+            </article>
+            <article data-reveal data-loop="float">
+              <span>04</span>
+              <strong>Настройки</strong>
+              <p>Темы, курсоры, движение и сохранённые элементы собраны в одном месте.</p>
+            </article>
+            <article data-reveal data-loop="float">
+              <span>05</span>
+              <strong>Интерактив</strong>
+              <p>Сложные вещи можно не только читать — ими можно управлять прямо в интерфейсе.</p>
+            </article>
+            <article data-reveal data-loop="float">
+              <span>06</span>
+              <strong>Адаптив</strong>
+              <p>Desktop получает максимум пространства и движения, mobile — тот же характер без развала layout.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section className="home-panel project-personal-panel">
+        <div className="home-panel-inner project-personal-layout">
+          <div className="project-feature-copy">
+            <div className="eyebrow" data-reveal>YOUR VERSION OF THE PROJECT</div>
+            <h2 data-reveal>Один продукт может выглядеть совершенно по-разному.</h2>
+            <p data-reveal>
+              Система тем меняет весь визуальный язык. Система курсоров меняет само ощущение
+              управления. Профили движения позволяют оставить максимум эффектов или получить
+              полностью статичный интерфейс.
+            </p>
+          </div>
+
+          <div className="project-theme-showcase" data-parallax>
+            <div className="theme-orb orb-black" data-loop="float"><span>BLACK</span></div>
+            <div className="theme-orb orb-latte" data-loop="float"><span>LATTE</span></div>
+            <div className="theme-orb orb-night" data-loop="float"><span>NIGHT</span></div>
+            <div className="theme-orb orb-custom" data-loop="float"><span>CUSTOM</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="home-panel project-final-panel">
+        <div className="home-panel-inner project-final-inner">
+          <div className="project-final-halo" data-loop="pulse" aria-hidden="true" />
+          <div className="eyebrow" data-reveal>OPEN THE SYSTEM</div>
           <h2 data-reveal>
-            Начни с таблицы чисел.
+            Смотри.
             <br />
-            Дойди до пространства.
+            Крути.
+            <br />
+            Исследуй.
           </h2>
           <p data-reveal>
-            Матрицы → определители → обратимость → ранг → системы линейных уравнений.
+            FsocietyMath задуман как продукт, который хочется открыть ещё до того,
+            как ты решил, что именно собираешься изучать.
           </p>
           <div className="home-actions" data-reveal>
             <button className="home-primary" onClick={() => (window.location.hash = "matrices")}>
-              § 1 · Матрицы
+              Начать
             </button>
             <button className="home-secondary" onClick={() => (window.location.hash = "map")}>
-              Карта курса
+              Открыть карту
             </button>
           </div>
         </div>
