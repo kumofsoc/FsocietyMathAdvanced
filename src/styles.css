@@ -338,7 +338,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .map-topic-meta { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 8px; text-transform: uppercase; letter-spacing: .08em; }
 .map-topic-card > strong { display: block; margin-top: 9px; font-size: 14px; }
 .map-topic-card p { margin: 7px 0 0; color: var(--muted); font-size: 9px; line-height: 1.5; }
-.map-topic-card button { margin-top: 10px; padding: 0; border: 0; background: transparent; color: var(--accent); font-size: 9px; cursor: pointer; }
+.map-card-actions { margin-top: 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.map-card-actions > button { padding: 0; border: 0; background: transparent; color: var(--accent); font-size: 9px; cursor: pointer; }
+.map-card-actions span { display: flex; gap: 4px; }
+.map-card-actions span button { width: 24px; height: 24px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); border-radius: 7px; cursor: pointer; transition: .16s ease; }
+.map-card-actions span button:hover { color: var(--text); border-color: var(--accent); transform: rotate(8deg); }
 .map-node-hint { margin-top: 8px; padding-top: 7px; border-top: 1px solid var(--border); color: color-mix(in srgb, var(--muted) 65%, transparent); font-size: 7px; font-family: ui-monospace, monospace; }
 .react-flow__edge.edge-hot path { stroke: var(--accent); stroke-width: 1.8; opacity: .75; }
 .react-flow__edge.edge-normal path { stroke: var(--border); stroke-width: 1.2; opacity: .5; }
