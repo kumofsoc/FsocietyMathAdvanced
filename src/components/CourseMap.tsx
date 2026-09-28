@@ -178,7 +178,6 @@ function chapterForTopic(topicId: string) {
 }
 
 function InnerCourseMap() {
-  const stored = useMemo(() => readLayout(), []);
   const [fullscreen, setFullscreen] = useState(false);
   const [activeChapterId, setActiveChapterId] = useState<string | null>("linear");
   const [progressVersion, setProgressVersion] = useState(0);
@@ -231,6 +230,8 @@ function InnerCourseMap() {
   }, []);
 
   const buildNodes = useCallback((): Node[] => {
+    const stored = readLayout();
+
     if (activeChapterId === null) {
       return chapters.map((chapter, index) => {
         const id = "group:" + chapter.id;
@@ -281,7 +282,7 @@ function InnerCourseMap() {
           } satisfies GraphNodeData,
         };
       });
-  }, [activeChapterId, openChapter, openTopic, stored, progressVersion]);
+  }, [activeChapterId, openChapter, openTopic, progressVersion]);
 
   const buildEdges = useCallback((): Edge[] => {
     if (activeChapterId === null) return groupEdges;
