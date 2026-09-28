@@ -19,6 +19,10 @@ function routeFromHash() {
   return raw || "home";
 }
 
+function isTrackedChapter(id: string) {
+  return id === "linear" || id === "vectors";
+}
+
 function topicProgress(id: string) {
   const theory = loadSet(THEORY_KEY).has(id) ? 50 : 0;
   const tasks = practiceByTopic[id] ?? [];
@@ -71,19 +75,20 @@ function ChapterAccordion({
               {chapter.topicIds.map((id) => {
                 const item = topics[id];
                 if (!item) return null;
-                const progress = item.chapterId === "linear" ? topicProgress(id) : 0;
+                const tracked = isTrackedChapter(item.chapterId);
+                const progress = tracked ? topicProgress(id) : 0;
                 return (
                   <motion.button
                     key={id}
                     className={route === id ? "active" : ""}
                     onClick={() => (window.location.hash = id)}
-                    title={item.chapterId === "linear" ? "Освоение: " + progress + "%" : undefined}
+                    title={tracked ? "Освоение: " + progress + "%" : undefined}
                     variants={{
                       closed: { opacity: 0, x: -8 },
                       open: { opacity: 1, x: 0 },
                     }}
                   >
-                    <span>{item.chapterId === "linear" ? (progress >= 100 ? "●" : progress > 0 ? "◐" : "○") : "·"}</span>
+                    <span>{tracked ? (progress >= 100 ? "●" : progress > 0 ? "◐" : "○") : "·"}</span>
                     <em>§ {item.number}</em>
                     {item.title}
                   </motion.button>
@@ -173,6 +178,16 @@ export default function App() {
     return Math.round(linearIds.reduce((sum, id) => sum + topicProgress(id), 0) / linearIds.length);
   }, [linearIds, learningVersion]);
 
+  const vectorIds = useMemo(
+    () => chapters.find((chapter) => chapter.id === "vectors")?.topicIds ?? [],
+    [],
+  );
+
+  const vectorProgress = useMemo(() => {
+    if (!vectorIds.length) return 0;
+    return Math.round(vectorIds.reduce((sum, id) => sum + topicProgress(id), 0) / vectorIds.length);
+  }, [vectorIds, learningVersion]);
+
   const topic = topics[route];
 
   return (
@@ -204,6 +219,15 @@ export default function App() {
           </div>
           <div className="progress-track"><i style={{ width: linearProgress + "%" }} /></div>
           <small>50% теория + 50% практика по каждой теме</small>
+        </div>
+
+        <div className="sidebar-progress sidebar-progress-secondary">
+          <div>
+            <span>Векторная алгебра</span>
+            <strong>{vectorProgress}%</strong>
+          </div>
+          <div className="progress-track"><i style={{ width: vectorProgress + "%" }} /></div>
+          <small>Визуальная теория + задачи + интерактивы</small>
         </div>
 
         <div className="chapter-list">
