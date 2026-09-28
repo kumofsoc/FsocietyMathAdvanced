@@ -1,18 +1,29 @@
 import {
   Background,
+  BaseEdge,
   Controls,
+  EdgeLabelRenderer,
   Handle,
   MarkerType,
   MiniMap,
   Position,
   ReactFlow,
   ReactFlowProvider,
+  getSmoothStepPath,
   useNodesState,
   type Edge,
+  type EdgeProps,
   type Node,
   type NodeProps,
 } from "@xyflow/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { chapters, topicList, topics } from "../data/course";
 import { practiceByTopic } from "../data/practice";
 import { LEARNING_EVENT, loadSet, SOLVED_KEY, THEORY_KEY } from "../lib/learning";
@@ -33,6 +44,15 @@ type GroupNodeData = {
   onOpen: (id: string) => void;
   onRotate: (id: string, delta: number) => void;
   onScale: (id: string, scale: number) => void;
+};
+
+type DependencyEdgeData = {
+  sourceLabel: string;
+  targetLabel: string;
+  sourceNumber?: string;
+  targetNumber?: string;
+  relationLabel: string;
+  onOpenTarget?: () => void;
 };
 
 function readLayout(): StoredLayout {
@@ -58,21 +78,143 @@ function progressForChapter(chapterId: string) {
   const chapter = chapters.find((item) => item.id === chapterId);
   if (!chapter || chapter.id !== "linear") return 0;
   const values = chapter.topicIds.map(progressForTopic);
-  return values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length) : 0;
+  return values.length
+    ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length)
+    : 0;
 }
 
-function RotationGizmo({
+function DependencyEdge(props: EdgeProps) {
+  const {
+    id,
+    sourceX,
+    sourceY,
+    targetX,
+    targetY,
+    sourcePosition,
+    targetPosition,
+    markerEnd,
+    style,
+    data,
+  } = props;
+
+  const [edgePath, labelX, labelY] = getSmoothStepPath({
+    sourceX,
+    sourceY,
+    targetX,
+    targetY,
+    sourcePosition,
+    targetPosition,
+    borderRadius: 18,
+    offset: 34,
+  });
+
+  const meta = (data ?? {}) as DependencyEdgeData;
+
+  return (
+    <>
+      <BaseEdge
+        id={id}
+        path={edgePath}
+        markerEnd={markerEnd}
+        style={style}
+        interactionWidth={34}
+      />
+
+      <EdgeLabelRenderer>
+        <button
+          className="map-edge-label nodrag nopan"
+          style={{
+            transform:
+              "translate(-50%, -50%) translate(" + labelX + "px, " + labelY + "px)",
+          }}
+          onClick={(event) => {
+            event.stopPropagation();
+            meta.onOpenTarget?.();
+          }}
+          title={
+            meta.sourceLabel && meta.targetLabel
+              ? meta.sourceLabel + " → " + meta.targetLabel
+              : undefined
+          }
+        >
+          <span className="map-edge-route">
+            {meta.sourceNumber && <b>{meta.sourceNumber}</b>}
+            <i>→</i>
+            {meta.targetNumber && <b>{meta.targetNumber}</b>}
+          </span>
+          <span className="map-edge-names">
+            <strong>{meta.sourceLabel}</strong>
+            <i>→</i>
+            <strong>{meta.targetLabel}</strong>
+          </span>
+          <small>{meta.relationLabel}</small>
+        </button>
+      </EdgeLabelRenderer>
+    </>
+  );
+}
+
+function TransformGizmos({
   selector,
+  rotation,
+  scale,
   onRotate,
+  onScale,
 }: {
   selector: string;
+  rotation: number;
+  scale: number;
   onRotate: (delta: number) => void;
+  onScale: (scale: number) => void;
 }) {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const [anchors, setAnchors] = useState({
+    rotateLeft: 0,
+    rotateTop: 0,
+    scaleLeft: 0,
+    scaleTop: 0,
+    ready: false,
+  });
+
+  const measure = useCallback(() => {
+    const host = hostRef.current;
+    const root = host?.parentElement;
+    const card = root?.querySelector<HTMLElement>(selector);
+    if (!host || !root || !card) return;
+
+    const rootRect = root.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    const gap = 13;
+
+    setAnchors({
+      rotateLeft: cardRect.right - rootRect.left + gap,
+      rotateTop: cardRect.bottom - rootRect.top + gap,
+      scaleLeft: cardRect.left - rootRect.left - gap,
+      scaleTop: cardRect.bottom - rootRect.top + gap,
+      ready: true,
+    });
+  }, [selector]);
+
+  useLayoutEffect(() => {
+    const frame = requestAnimationFrame(measure);
+    const root = hostRef.current?.parentElement;
+    const card = root?.querySelector<HTMLElement>(selector);
+    const observer = new ResizeObserver(measure);
+    if (card) observer.observe(card);
+    window.addEventListener("resize", measure);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [measure, rotation, scale]);
+
   const startRotate = (event: React.PointerEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
 
-    const root = event.currentTarget.parentElement;
+    const root = hostRef.current?.parentElement;
     const card = root?.querySelector<HTMLElement>(selector);
     if (!card) return;
 
@@ -83,7 +225,7 @@ function RotationGizmo({
 
     const move = (pointer: PointerEvent) => {
       const nextAngle = Math.atan2(pointer.clientY - centerY, pointer.clientX - centerX);
-      let delta = (nextAngle - lastAngle) * 180 / Math.PI;
+      let delta = ((nextAngle - lastAngle) * 180) / Math.PI;
       if (delta > 180) delta -= 360;
       if (delta < -180) delta += 360;
       lastAngle = nextAngle;
@@ -99,45 +241,32 @@ function RotationGizmo({
     window.addEventListener("pointerup", stop, { once: true });
   };
 
-  return (
-    <button
-      className="map-rotate-gizmo nodrag nopan"
-      onPointerDown={startRotate}
-      title="Потяни по окружности, чтобы повернуть карточку"
-      aria-label="Повернуть карточку"
-    >
-      <span>↻</span>
-      <i />
-    </button>
-  );
-}
-
-function ResizeGizmo({
-  selector,
-  scale,
-  onScale,
-}: {
-  selector: string;
-  scale: number;
-  onScale: (scale: number) => void;
-}) {
   const startResize = (event: React.PointerEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
 
-    const root = event.currentTarget.parentElement;
+    const root = hostRef.current?.parentElement;
     const card = root?.querySelector<HTMLElement>(selector);
     if (!card) return;
 
     const rect = card.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    const startDistance = Math.max(24, Math.hypot(event.clientX - centerX, event.clientY - centerY));
+    const startDistance = Math.max(
+      24,
+      Math.hypot(event.clientX - centerX, event.clientY - centerY),
+    );
     const startScale = scale;
 
     const move = (pointer: PointerEvent) => {
-      const distance = Math.max(24, Math.hypot(pointer.clientX - centerX, pointer.clientY - centerY));
-      const next = Math.min(1.55, Math.max(0.72, startScale * (distance / startDistance)));
+      const distance = Math.max(
+        24,
+        Math.hypot(pointer.clientX - centerX, pointer.clientY - centerY),
+      );
+      const next = Math.min(
+        1.55,
+        Math.max(0.72, startScale * (distance / startDistance)),
+      );
       onScale(Number(next.toFixed(3)));
     };
 
@@ -151,14 +280,28 @@ function ResizeGizmo({
   };
 
   return (
-    <button
-      className="map-resize-gizmo nodrag nopan"
-      onPointerDown={startResize}
-      title="Потяни наружу или внутрь, чтобы изменить размер"
-      aria-label="Изменить размер карточки"
-    >
-      <span>↘</span>
-    </button>
+    <div ref={hostRef} className={"map-transform-gizmos " + (anchors.ready ? "ready" : "")}>
+      <button
+        className="map-rotate-gizmo nodrag nopan"
+        style={{ left: anchors.rotateLeft, top: anchors.rotateTop }}
+        onPointerDown={startRotate}
+        title="Потяни по окружности, чтобы повернуть карточку"
+        aria-label="Повернуть карточку"
+      >
+        <span>↻</span>
+        <i />
+      </button>
+
+      <button
+        className="map-resize-gizmo nodrag nopan"
+        style={{ left: anchors.scaleLeft, top: anchors.scaleTop }}
+        onPointerDown={startResize}
+        title="Потяни наружу или внутрь, чтобы изменить размер"
+        aria-label="Изменить размер карточки"
+      >
+        <span>↘</span>
+      </button>
+    </div>
   );
 }
 
@@ -167,10 +310,21 @@ function TopicNodeCard({ id, data }: NodeProps) {
 
   return (
     <>
-      <Handle type="target" position={Position.Left} className="map-handle map-handle-target" isConnectable={false} />
+      <Handle
+        id="in"
+        type="target"
+        position={Position.Left}
+        className="map-handle map-handle-target"
+        isConnectable={false}
+      />
+      <span className="map-port-caption map-port-caption-in">НУЖНО ДО</span>
+
       <div
         className="map-topic-card"
-        style={{ transform: "rotate(" + (value.rotation ?? 0) + "deg) scale(" + (value.scale ?? 1) + ")" }}
+        style={{
+          transform:
+            "rotate(" + (value.rotation ?? 0) + "deg) scale(" + (value.scale ?? 1) + ")",
+        }}
         data-cursor="active"
       >
         <div className="map-topic-meta">
@@ -191,9 +345,22 @@ function TopicNodeCard({ id, data }: NodeProps) {
         <div className="map-node-hint">drag = move · ↻ rotate · ↘ resize</div>
       </div>
 
-      <RotationGizmo selector=".map-topic-card" onRotate={(delta) => value.onRotate(id, delta)} />
-      <ResizeGizmo selector=".map-topic-card" scale={value.scale ?? 1} onScale={(scale) => value.onScale?.(id, scale)} />
-      <Handle type="source" position={Position.Right} className="map-handle map-handle-source" isConnectable={false} />
+      <TransformGizmos
+        selector=".map-topic-card"
+        rotation={value.rotation ?? 0}
+        scale={value.scale ?? 1}
+        onRotate={(delta) => value.onRotate(id, delta)}
+        onScale={(nextScale) => value.onScale?.(id, nextScale)}
+      />
+
+      <span className="map-port-caption map-port-caption-out">ВЕДЁТ К</span>
+      <Handle
+        id="out"
+        type="source"
+        position={Position.Right}
+        className="map-handle map-handle-source"
+        isConnectable={false}
+      />
     </>
   );
 }
@@ -203,10 +370,21 @@ function ChapterGroupCard({ id, data }: NodeProps) {
 
   return (
     <>
-      <Handle type="target" position={Position.Left} className="map-handle group-handle" isConnectable={false} />
+      <Handle
+        id="in"
+        type="target"
+        position={Position.Left}
+        className="map-handle group-handle"
+        isConnectable={false}
+      />
+      <span className="map-port-caption map-port-caption-in">ЗАВИСИТ ОТ</span>
+
       <div
         className="map-group-card"
-        style={{ transform: "rotate(" + (value.rotation ?? 0) + "deg) scale(" + (value.scale ?? 1) + ")" }}
+        style={{
+          transform:
+            "rotate(" + (value.rotation ?? 0) + "deg) scale(" + (value.scale ?? 1) + ")",
+        }}
         data-cursor="active"
       >
         <div className="map-group-number">{value.number}</div>
@@ -220,14 +398,29 @@ function ChapterGroupCard({ id, data }: NodeProps) {
           <button onClick={() => value.onOpen(value.chapterId)}>Войти в группу →</button>
         </div>
       </div>
-      <RotationGizmo selector=".map-group-card" onRotate={(delta) => value.onRotate(id, delta)} />
-      <ResizeGizmo selector=".map-group-card" scale={value.scale ?? 1} onScale={(scale) => value.onScale(id, scale)} />
-      <Handle type="source" position={Position.Right} className="map-handle group-handle" isConnectable={false} />
+
+      <TransformGizmos
+        selector=".map-group-card"
+        rotation={value.rotation ?? 0}
+        scale={value.scale ?? 1}
+        onRotate={(delta) => value.onRotate(id, delta)}
+        onScale={(nextScale) => value.onScale(id, nextScale)}
+      />
+
+      <span className="map-port-caption map-port-caption-out">ВЕДЁТ К</span>
+      <Handle
+        id="out"
+        type="source"
+        position={Position.Right}
+        className="map-handle group-handle"
+        isConnectable={false}
+      />
     </>
   );
 }
 
 const nodeTypes = { topic: TopicNodeCard, group: ChapterGroupCard };
+const edgeTypes = { dependency: DependencyEdge };
 
 function chapterForTopic(topicId: string) {
   return topics[topicId]?.chapterId;
@@ -263,27 +456,46 @@ function InnerCourseMap() {
 
     for (const topic of topicList) {
       for (const dependency of topic.prerequisites) {
-        const sourceChapter = chapterForTopic(dependency);
-        const targetChapter = topic.chapterId;
-        if (!sourceChapter || sourceChapter === targetChapter) continue;
+        const sourceChapterId = chapterForTopic(dependency);
+        const targetChapterId = topic.chapterId;
+        if (!sourceChapterId || sourceChapterId === targetChapterId) continue;
 
-        const key = sourceChapter + "->" + targetChapter;
+        const key = sourceChapterId + "->" + targetChapterId;
         if (seen.has(key)) continue;
         seen.add(key);
 
+        const sourceChapter = chapters.find((chapter) => chapter.id === sourceChapterId);
+        const targetChapter = chapters.find((chapter) => chapter.id === targetChapterId);
+        if (!sourceChapter || !targetChapter) continue;
+
         result.push({
           id: "group:" + key,
-          source: "group:" + sourceChapter,
-          target: "group:" + targetChapter,
-          type: "smoothstep",
+          source: "group:" + sourceChapterId,
+          target: "group:" + targetChapterId,
+          sourceHandle: "out",
+          targetHandle: "in",
+          type: "dependency",
+          animated: true,
           className: "edge-group",
-          markerEnd: { type: MarkerType.ArrowClosed, width: 14, height: 14 },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            width: 20,
+            height: 20,
+          },
+          data: {
+            sourceLabel: sourceChapter.title,
+            targetLabel: targetChapter.title,
+            sourceNumber: sourceChapter.number,
+            targetNumber: targetChapter.number,
+            relationLabel: "эта группа нужна перед следующей",
+            onOpenTarget: () => openChapter(targetChapterId),
+          } satisfies DependencyEdgeData,
         });
       }
     }
 
     return result;
-  }, []);
+  }, [openChapter]);
 
   const buildNodes = useCallback((): Node[] => {
     const stored = readLayout();
@@ -327,7 +539,7 @@ function InnerCourseMap() {
           type: "topic",
           position: saved
             ? { x: saved.x, y: saved.y }
-            : { x: (index % 2) * 410, y: Math.floor(index / 2) * 220 },
+            : { x: (index % 2) * 430, y: Math.floor(index / 2) * 235 },
           data: {
             label: topic.title,
             number: topic.number,
@@ -354,19 +566,40 @@ function InnerCourseMap() {
     return chapter.topicIds.flatMap((id) => {
       const topic = topics[id];
       if (!topic) return [];
+
       return topic.prerequisites
         .filter((dependency) => visible.has(dependency))
-        .map((dependency) => ({
-          id: dependency + "->" + topic.id,
-          source: dependency,
-          target: topic.id,
-          type: "smoothstep",
-          animated: chapter.id === "linear",
-          className: chapter.id === "linear" ? "edge-hot" : "edge-normal",
-          markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16 },
-        }));
+        .map((dependency) => {
+          const sourceTopic = topics[dependency];
+          if (!sourceTopic) return null;
+
+          return {
+            id: dependency + "->" + topic.id,
+            source: dependency,
+            target: topic.id,
+            sourceHandle: "out",
+            targetHandle: "in",
+            type: "dependency",
+            animated: chapter.id === "linear",
+            className: chapter.id === "linear" ? "edge-hot" : "edge-normal",
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+              width: 20,
+              height: 20,
+            },
+            data: {
+              sourceLabel: sourceTopic.title,
+              targetLabel: topic.title,
+              sourceNumber: "§ " + sourceTopic.number,
+              targetNumber: "§ " + topic.number,
+              relationLabel: "нужно знать перед этой темой",
+              onOpenTarget: () => openTopic(topic.id),
+            } satisfies DependencyEdgeData,
+          } satisfies Edge;
+        })
+        .filter((edge): edge is Edge => edge !== null);
     });
-  }, [activeChapterId, groupEdges]);
+  }, [activeChapterId, groupEdges, openTopic]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(buildNodes());
 
@@ -388,28 +621,38 @@ function InnerCourseMap() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
   }, []);
 
-  const handleRotate = useCallback((id: string, delta: number) => {
-    setNodes((current) => {
-      const next = current.map((node) => {
-        if (node.id !== id) return node;
-        const rotation = Number((Number((node.data as { rotation?: number }).rotation ?? 0) + delta).toFixed(2));
-        return { ...node, data: { ...node.data, rotation } };
+  const handleRotate = useCallback(
+    (id: string, delta: number) => {
+      setNodes((current) => {
+        const next = current.map((node) => {
+          if (node.id !== id) return node;
+          const rotation = Number(
+            (
+              Number((node.data as { rotation?: number }).rotation ?? 0) + delta
+            ).toFixed(2),
+          );
+          return { ...node, data: { ...node.data, rotation } };
+        });
+        persist(next);
+        return next;
       });
-      persist(next);
-      return next;
-    });
-  }, [persist, setNodes]);
+    },
+    [persist, setNodes],
+  );
 
-  const handleScale = useCallback((id: string, scale: number) => {
-    setNodes((current) => {
-      const next = current.map((node) => {
-        if (node.id !== id) return node;
-        return { ...node, data: { ...node.data, scale } };
+  const handleScale = useCallback(
+    (id: string, scale: number) => {
+      setNodes((current) => {
+        const next = current.map((node) => {
+          if (node.id !== id) return node;
+          return { ...node, data: { ...node.data, scale } };
+        });
+        persist(next);
+        return next;
       });
-      persist(next);
-      return next;
-    });
-  }, [persist, setNodes]);
+    },
+    [persist, setNodes],
+  );
 
   const hydratedNodes = useMemo(
     () =>
@@ -431,35 +674,55 @@ function InnerCourseMap() {
     window.location.reload();
   };
 
-  const activeChapter = activeChapterId ? chapters.find((item) => item.id === activeChapterId) : null;
+  const activeChapter = activeChapterId
+    ? chapters.find((item) => item.id === activeChapterId)
+    : null;
 
   return (
     <section className={"course-map-page " + (fullscreen ? "map-fullscreen" : "")}>
       <header className="map-header">
         <div>
           <div className="eyebrow">
-            {activeChapter ? "GROUP / " + activeChapter.number : "KNOWLEDGE GROUPS"} · {edges.length} LINKS
+            {activeChapter
+              ? "GROUP / " + activeChapter.number
+              : "KNOWLEDGE GROUPS"}{" "}
+            · {edges.length} LINKS
           </div>
           <h1>{activeChapter?.title ?? "Карта курса"}</h1>
           <p>
             {activeChapter
-              ? "Сейчас показана одна математическая группа, поэтому граф не превращается в облако из десятков карточек. Связи внутри группы остаются прикреплёнными при перемещении узлов."
-              : "На обзорном уровне каждая глава — отдельная группа. Стрелки между группами показывают междисциплинарные prerequisites; войди в группу, чтобы увидеть её темы."}
+              ? "Каждая стрелка читается слева направо: от prerequisite к теме, которая на него опирается. На самой связи теперь прямо написано, какие две темы она соединяет; по подписи можно перейти в конечную тему."
+              : "На обзорном уровне связи тоже читаются слева направо: от группы-предпосылки к группе, которая использует её материал. Подпись на линии показывает оба конца связи."}
           </p>
         </div>
         <div className="map-header-actions">
           <button className="ghost-button" onClick={() => setActiveChapterId(null)}>
             ◫ Обзор групп
           </button>
-          <button className="ghost-button" onClick={() => setFullscreen((value) => !value)}>
+          <button
+            className="ghost-button"
+            onClick={() => setFullscreen((value) => !value)}
+          >
             {fullscreen ? "× Закрыть full screen" : "⛶ Full screen"}
           </button>
-          <button className="ghost-button" onClick={resetLayout}>Сбросить расположение</button>
+          <button className="ghost-button" onClick={resetLayout}>
+            Сбросить расположение
+          </button>
         </div>
       </header>
 
+      <div className="map-legend">
+        <span><i className="legend-source" /> источник / prerequisite</span>
+        <b>→</b>
+        <span><i className="legend-target" /> тема, которая использует его</span>
+        <small>нажми на подпись связи, чтобы открыть конечную тему</small>
+      </div>
+
       <div className="map-group-tabs" aria-label="Группы карты">
-        <button className={activeChapterId === null ? "active" : ""} onClick={() => setActiveChapterId(null)}>
+        <button
+          className={activeChapterId === null ? "active" : ""}
+          onClick={() => setActiveChapterId(null)}
+        >
           Все группы
         </button>
         {chapters.map((chapter) => (
@@ -480,10 +743,11 @@ function InnerCourseMap() {
           nodes={hydratedNodes}
           edges={edges}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           onNodesChange={onNodesChange}
           onNodeDragStop={(_event, _node, nextNodes) => persist(nextNodes)}
           fitView
-          fitViewOptions={{ padding: activeChapterId ? 0.3 : 0.12 }}
+          fitViewOptions={{ padding: activeChapterId ? 0.32 : 0.14 }}
           minZoom={0.08}
           maxZoom={2.1}
           nodesDraggable
@@ -491,7 +755,7 @@ function InnerCourseMap() {
           zoomOnScroll
           zoomOnPinch
           selectionOnDrag
-          edgesFocusable={false}
+          edgesFocusable
         >
           <Background gap={26} size={1} />
           <MiniMap pannable zoomable nodeStrokeWidth={2} />
