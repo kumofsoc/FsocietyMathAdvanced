@@ -147,6 +147,7 @@ function NeighborNav({ topic }: { topic: Topic }) {
 
 export function TopicPage({ topic }: { topic: Topic }) {
   const chapter = chapters.find((item) => item.id === topic.chapterId);
+  const isLinear = topic.chapterId === "linear";
   const theorySentinel = useRef<HTMLDivElement>(null);
   const [theoryRead, setTheoryRead] = useState(() => loadSet(THEORY_KEY).has(topic.id));
   const [solved, setSolved] = useState(() => loadSet(SOLVED_KEY));
@@ -165,7 +166,7 @@ export function TopicPage({ topic }: { topic: Topic }) {
 
   useEffect(() => {
     const target = theorySentinel.current;
-    if (!target || theoryRead) return;
+    if (!isLinear || !target || theoryRead) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -181,7 +182,7 @@ export function TopicPage({ topic }: { topic: Topic }) {
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [topic.id, theoryRead]);
+  }, [topic.id, theoryRead, isLinear]);
 
   const tasks = practiceByTopic[topic.id] ?? [];
   const solvedCount = useMemo(
@@ -255,7 +256,7 @@ export function TopicPage({ topic }: { topic: Topic }) {
 
       {topic.hasLab && <MatrixLab />}
 
-      <div className="theory-finish" ref={theorySentinel}>
+      {isLinear && <div className="theory-finish" ref={theorySentinel}>
         <span>{theoryRead ? "✓" : "↓"}</span>
         <div>
           <strong>{theoryRead ? "Теория отмечена как прочитанная" : "Конец теории"}</strong>
@@ -265,9 +266,9 @@ export function TopicPage({ topic }: { topic: Topic }) {
               : "Когда этот блок появляется на экране, теория автоматически засчитывается как прочитанная."}
           </p>
         </div>
-      </div>
+      </div>}
 
-      <PracticePanel topicId={topic.id} />
+      {isLinear && <PracticePanel topicId={topic.id} />}
 
       <NeighborNav topic={topic} />
     </div>
