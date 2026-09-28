@@ -1,7 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { Line, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Mode =
   | "ellipsoid"
@@ -276,6 +276,63 @@ function sectionData(mode: Mode, a: number, b: number, c: number, h: number) {
   return { label: "парабола — одинаковая на любой высоте", lines: [parabola] };
 }
 
+function generatorLines(mode: Mode, a: number, b: number, c: number) {
+  const result: Array<{ points: Point3[]; color: string }> = [];
+
+  if (mode === "one-sheet") {
+    const angles = Array.from({ length: 7 }, (_, i) => (i / 7) * Math.PI * 2);
+    for (const u of angles) {
+      const first: Point3[] = [];
+      const second: Point3[] = [];
+      for (let i = 0; i <= 40; i += 1) {
+        const t = -1.65 + (i / 40) * 3.3;
+        first.push([
+          a * (Math.cos(u) - t * Math.sin(u)),
+          b * (Math.sin(u) + t * Math.cos(u)),
+          c * t,
+        ]);
+        second.push([
+          a * (Math.cos(u) + t * Math.sin(u)),
+          b * (Math.sin(u) - t * Math.cos(u)),
+          c * t,
+        ]);
+      }
+      result.push({ points: first, color: "#58dca2" });
+      result.push({ points: second, color: "#ff7585" });
+    }
+  }
+
+  if (mode === "hyperbolic-paraboloid") {
+    const constants = [-2.2, -1.4, -0.75, 0.75, 1.4, 2.2];
+
+    for (const lambda of constants) {
+      const familyA: Point3[] = [];
+      const familyB: Point3[] = [];
+
+      for (let i = 0; i <= 36; i += 1) {
+        const z = -2 + (i / 36) * 4;
+
+        familyA.push([
+          (a / 2) * (lambda + (2 * z) / lambda),
+          (b / 2) * (lambda - (2 * z) / lambda),
+          z,
+        ]);
+
+        familyB.push([
+          (a / 2) * ((2 * z) / lambda + lambda),
+          (b / 2) * ((2 * z) / lambda - lambda),
+          z,
+        ]);
+      }
+
+      result.push({ points: familyA, color: "#58dca2" });
+      result.push({ points: familyB, color: "#ff7585" });
+    }
+  }
+
+  return result;
+}
+
 function Scene({
   mode,
   a,
@@ -283,6 +340,7 @@ function Scene({
   c,
   h,
   showSection,
+  showGenerators,
   wireframe,
 }: {
   mode: Mode;
@@ -291,10 +349,12 @@ function Scene({
   c: number;
   h: number;
   showSection: boolean;
+  showGenerators: boolean;
   wireframe: boolean;
 }) {
   const geometries = useMemo(() => surfaceGeometries(mode, a, b, c), [mode, a, b, c]);
   const section = useMemo(() => sectionData(mode, a, b, c, h), [mode, a, b, c, h]);
+  const generators = useMemo(() => generatorLines(mode, a, b, c), [mode, a, b, c]);
 
   return (
     <>
@@ -343,6 +403,18 @@ function Scene({
         </>
       )}
 
+      {showGenerators &&
+        generators.map((generator, index) => (
+          <Line
+            key={"generator-" + index}
+            points={generator.points}
+            color={generator.color}
+            lineWidth={1.35}
+            transparent
+            opacity={0.74}
+          />
+        ))}
+
       <OrbitControls makeDefault enableDamping dampingFactor={0.08} />
     </>
   );
@@ -378,13 +450,29 @@ export function QuadricSurfaceLab() {
   const [c, setC] = useState(1.55);
   const [h, setH] = useState(0.6);
   const [showSection, setShowSection] = useState(true);
+  const [showGenerators, setShowGenerators] = useState(true);
   const [wireframe, setWireframe] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
+
+  useEffect(() => {
+    document.body.classList.toggle("quadric-fullscreen-open", fullscreen);
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setFullscreen(false);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.classList.remove("quadric-fullscreen-open");
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [fullscreen]);
 
   const section = useMemo(() => sectionData(mode, a, b, c, h), [mode, a, b, c, h]);
   const current = MODES.find((item) => item.id === mode)!;
 
   return (
-    <section className="quadric-lab">
+    <section className={"quadric-lab " + (fullscreen ? "quadric-fullscreen" : "")}>
       <header className="quadric-head">
         <div>
           <div className="eyebrow">3D LAB / ПОВЕРХНОСТИ ВТОРОГО ПОРЯДКА</div>
@@ -427,6 +515,7 @@ export function QuadricSurfaceLab() {
               c={c}
               h={h}
               showSection={showSection}
+              showGenerators={showGenerators}
               wireframe={wireframe}
             />
           </Canvas>
@@ -436,9 +525,22 @@ export function QuadricSurfaceLab() {
             <strong>{showSection ? section.label : "сечение скрыто"}</strong>
           </div>
 
+          <button
+            className="quadric-fullscreen-button"
+            onClick={() => setFullscreen((value) => !value)}
+          >
+            {fullscreen ? "× Закрыть" : "⛶ Full screen"}
+          </button>
+
           <div className="quadric-legend">
             <span><i className="surface-dot" /> поверхность</span>
             <span><i className="section-dot" /> сечение z=h</span>
+            {(mode === "one-sheet" || mode === "hyperbolic-paraboloid") && (
+              <>
+                <span><i className="generator-a-dot" /> образующие I</span>
+                <span><i className="generator-b-dot" /> образующие II</span>
+              </>
+            )}
             <span>drag = rotate</span>
             <span>wheel = zoom</span>
           </div>
@@ -489,6 +591,11 @@ export function QuadricSurfaceLab() {
             <button className={wireframe ? "active" : ""} onClick={() => setWireframe((value) => !value)}>
               {wireframe ? "✓" : "○"} Каркас
             </button>
+            {(mode === "one-sheet" || mode === "hyperbolic-paraboloid") && (
+              <button className={showGenerators ? "active" : ""} onClick={() => setShowGenerators((value) => !value)}>
+                {showGenerators ? "✓" : "○"} Образующие
+              </button>
+            )}
           </div>
 
           <div className="quadric-equation">
