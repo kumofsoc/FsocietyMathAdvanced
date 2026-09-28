@@ -54,7 +54,7 @@ function ExpandedSarrus() {
       <div className="expanded-sarrus-legend">
         <span><i className="plus-dot" /> первые два столбца скопированы справа</span>
         <span><i className="plus-line-dot" /> диагонали ↘ складываются</span>
-        <span><i className="minus-line-dot" /> диагонали ↙ вычитаются</span>
+        <span><i className="minus-line-dot" /> диагонали ↗ вычитаются</span>
       </div>
     </div>
   );
@@ -147,7 +147,7 @@ export function DeterminantVisual() {
             <code>(1·5·0) + (2·6·7) + (3·4·8) = 0 + 84 + 96 = 180</code>
           </div>
           <div>
-            <span className="minus">Сумма ↙</span>
+            <span className="minus">Сумма ↗</span>
             <code>(3·5·7) + (1·6·8) + (2·4·0) = 105 + 48 + 0 = 153</code>
           </div>
           <div className="det-final-result">
