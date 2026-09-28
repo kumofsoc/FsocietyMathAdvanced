@@ -2,34 +2,37 @@ import { AnimatePresence, motion } from "framer-motion";
 import { gsap } from "gsap";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { chapters, topicList, topics } from "./data/course";
+import { practiceByTopic } from "./data/practice";
 import { CourseMap } from "./components/CourseMap";
+import { CursorStudio } from "./components/CursorStudio";
 import { CustomCursor } from "./components/CustomCursor";
+import { HomePage } from "./components/HomePage";
 import { MathBackdrop } from "./components/MathBackdrop";
+import { SavedTheorems } from "./components/SavedTheorems";
+import { ScrollProgress } from "./components/ScrollProgress";
 import { ThemeStudio } from "./components/ThemeStudio";
 import { TopicPage } from "./components/TopicPage";
-
-const MASTERY_KEY = "fsociety-math-mastery-v1";
-
-function readMastery(): Set<string> {
-  try {
-    return new Set(JSON.parse(localStorage.getItem(MASTERY_KEY) || "[]"));
-  } catch {
-    return new Set();
-  }
-}
+import { LEARNING_EVENT, loadSet, SOLVED_KEY, THEORY_KEY } from "./lib/learning";
 
 function routeFromHash() {
   const raw = window.location.hash.replace(/^#/, "");
-  if (!raw) return "matrices";
-  if (raw.startsWith("block-")) return "matrices";
-  return raw;
+  return raw || "home";
+}
+
+function topicProgress(id: string) {
+  const theory = loadSet(THEORY_KEY).has(id) ? 50 : 0;
+  const tasks = practiceByTopic[id] ?? [];
+  if (!tasks.length) return theory;
+  const solved = loadSet(SOLVED_KEY);
+  const practice = tasks.filter((task) => solved.has(task.id)).length / tasks.length;
+  return Math.round(theory + practice * 50);
 }
 
 export default function App() {
   const [route, setRoute] = useState(routeFromHash);
   const [query, setQuery] = useState("");
-  const [mastered, setMastered] = useState<Set<string>>(readMastery);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [learningVersion, setLearningVersion] = useState(0);
   const mainRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -41,6 +44,16 @@ export default function App() {
     };
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+
+  useEffect(() => {
+    const refresh = () => setLearningVersion((value) => value + 1);
+    window.addEventListener(LEARNING_EVENT, refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener(LEARNING_EVENT, refresh);
+      window.removeEventListener("storage", refresh);
+    };
   }, []);
 
   useEffect(() => {
@@ -66,26 +79,26 @@ export default function App() {
       .slice(0, 8);
   }, [query]);
 
-  const toggleMastered = (id: string) => {
-    setMastered((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      localStorage.setItem(MASTERY_KEY, JSON.stringify([...next]));
-      return next;
-    });
-  };
+  const linearIds = useMemo(
+    () => chapters.find((chapter) => chapter.id === "linear")?.topicIds ?? [],
+    [],
+  );
 
-  const progress = Math.round((mastered.size / topicList.length) * 100);
+  const linearProgress = useMemo(() => {
+    if (!linearIds.length) return 0;
+    return Math.round(linearIds.reduce((sum, id) => sum + topicProgress(id), 0) / linearIds.length);
+  }, [linearIds, learningVersion]);
+
   const topic = topics[route];
 
   return (
     <div className="app-shell">
+      <ScrollProgress />
       <MathBackdrop />
       <CustomCursor />
 
-      <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
-        <button className="brand" onClick={() => (window.location.hash = "matrices")}>
+      <aside className={"sidebar " + (sidebarOpen ? "open" : "")}>
+        <button className="brand" onClick={() => (window.location.hash = "home")}>
           <span className="brand-mark">∑</span>
           <span>
             <strong>FsocietyMath</strong>
@@ -101,10 +114,11 @@ export default function App() {
 
         <div className="sidebar-progress">
           <div>
-            <span>Освоено</span>
-            <strong>{mastered.size} / {topicList.length}</strong>
+            <span>Линейная алгебра</span>
+            <strong>{linearProgress}%</strong>
           </div>
-          <div className="progress-track"><i style={{ width: `${progress}%` }} /></div>
+          <div className="progress-track"><i style={{ width: linearProgress + "%" }} /></div>
+          <small>50% теория + 50% практика по каждой теме</small>
         </div>
 
         <div className="chapter-list">
@@ -118,13 +132,15 @@ export default function App() {
                 {chapter.topicIds.map((id) => {
                   const item = topics[id];
                   if (!item) return null;
+                  const progress = topicProgress(id);
                   return (
                     <button
                       key={id}
                       className={route === id ? "active" : ""}
                       onClick={() => (window.location.hash = id)}
+                      title={"Освоение: " + progress + "%"}
                     >
-                      <span>{mastered.has(id) ? "●" : "○"}</span>
+                      <span>{progress >= 100 ? "●" : progress > 0 ? "◐" : "○"}</span>
                       <em>§ {item.number}</em>
                       {item.title}
                     </button>
@@ -168,7 +184,9 @@ export default function App() {
           </div>
 
           <div className="topbar-actions">
-            <span className="progress-label">{progress}% курса</span>
+            <span className="progress-label">{linearProgress}% линала</span>
+            <SavedTheorems />
+            <CursorStudio />
             <ThemeStudio />
           </div>
         </header>
@@ -182,14 +200,12 @@ export default function App() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              {route === "map" ? (
+              {route === "home" ? (
+                <HomePage progress={linearProgress} />
+              ) : route === "map" ? (
                 <CourseMap />
               ) : topic ? (
-                <TopicPage
-                  topic={topic}
-                  mastered={mastered.has(topic.id)}
-                  onToggleMastered={toggleMastered}
-                />
+                <TopicPage topic={topic} />
               ) : (
                 <section className="not-found">
                   <div className="eyebrow">404 / UNKNOWN TOPIC</div>
