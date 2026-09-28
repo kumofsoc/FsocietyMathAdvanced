@@ -18,6 +18,7 @@ export function HomePage({ progress }: { progress: number }) {
       if (!panels.length) return;
 
       const motionProfile = document.documentElement.dataset.motionProfile || "balanced";
+      if (motionProfile === "off") return;
       const mm = gsap.matchMedia();
 
       mm.add("(min-width: 821px)", () => {
@@ -128,7 +129,7 @@ export function HomePage({ progress }: { progress: number }) {
             </p>
             <div className="home-actions" data-reveal>
               <button className="home-primary" onClick={() => (window.location.hash = "matrices")}>
-                Войти в линейную алгебру
+                Начать изучение
               </button>
               <button className="home-secondary" onClick={() => (window.location.hash = "map")}>
                 Открыть карту
@@ -252,20 +253,21 @@ export function HomePage({ progress }: { progress: number }) {
           <div className="home-progress-orbit" data-float>
             <div>
               <strong>{progress}%</strong>
-              <span>LINEAR ALGEBRA</span>
+              <span>ПРОГРЕСС КУРСА</span>
             </div>
           </div>
 
           <div className="home-story-copy">
-            <div className="eyebrow" data-reveal>READ ≠ MASTERED</div>
-            <h2 data-reveal>Теория даёт 50%. Практика закрывает тему.</h2>
+            <div className="eyebrow" data-reveal>LEARNING TRAIL</div>
+            <h2 data-reveal>Маршрут показывает, где ты уже был и куда двигаться дальше.</h2>
             <p data-reveal>
-              Дочитал теорию — система это видит. Но 100% появляется только после решения
-              задач. Никакой кнопки «я всё понял» больше нет.
+              Прогресс здесь — не декоративный счётчик. Он связывает пройденную теорию,
+              решённые задачи и карту зависимостей, чтобы в любой момент было понятно,
+              какие темы уже опираются на твои знания, а какие ещё требуют внимания.
             </p>
             <div className="home-progress-legend" data-reveal>
-              <span><i /> теория · 50%</span>
-              <span><i /> практика · 50%</span>
+              <span><i /> теория · пройдена</span>
+              <span><i /> практика · проверена</span>
             </div>
           </div>
         </div>
