@@ -19,6 +19,12 @@ export interface PropertyProof {
   formula?: string;
 }
 
+export interface PropertyCorollary {
+  label: string;
+  body: string;
+  formula?: string;
+}
+
 export interface ContentBlock {
   kind: BlockKind;
   title: string;
@@ -26,6 +32,7 @@ export interface ContentBlock {
   formula?: string;
   items?: string[];
   proofs?: PropertyProof[];
+  corollaries?: PropertyCorollary[];
   dependsOn?: string[];
 }
 
