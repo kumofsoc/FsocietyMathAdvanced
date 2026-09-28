@@ -231,8 +231,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .prerequisites button:hover { color: var(--text); border-color: var(--accent); }
 
 .topic-outline { display: flex; gap: 7px; overflow-x: auto; padding: 16px 0 6px; position: sticky; top: 68px; z-index: 10; background: linear-gradient(var(--bg) 70%, transparent); }
-.topic-outline a { color: var(--muted); text-decoration: none; border: 1px solid var(--border); background: var(--surface); border-radius: 999px; padding: 7px 10px; white-space: nowrap; font-size: 9px; }
-.topic-outline a:hover { color: var(--text); border-color: var(--accent); }
+.topic-outline button { color: var(--muted); text-decoration: none; border: 1px solid var(--border); background: var(--surface); border-radius: 999px; padding: 7px 10px; white-space: nowrap; font-size: 9px; cursor: pointer; }
+.topic-outline button:hover { color: var(--text); border-color: var(--accent); }
 
 .lesson-content { margin-top: 34px; display: grid; gap: 12px; }
 .lesson-content > div { scroll-margin-top: 128px; }
