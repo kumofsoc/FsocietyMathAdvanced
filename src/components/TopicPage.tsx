@@ -133,9 +133,13 @@ export function TopicPage({
 
       <div className="topic-outline">
         {topic.blocks.map((block, index) => (
-          <a href={`#block-${index}`} key={`${block.title}-outline`}>
+          <button
+            type="button"
+            key={`${block.title}-outline`}
+            onClick={() => document.getElementById(`block-${index}`)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+          >
             {String(index + 1).padStart(2, "0")} · {block.title}
-          </a>
+          </button>
         ))}
       </div>
 
