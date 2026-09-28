@@ -102,14 +102,35 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [learningVersion, setLearningVersion] = useState(0);
   const mainRef = useRef<HTMLElement>(null);
+  const routeRef = useRef(route);
 
   useEffect(() => {
+    const key = "fsociety-route-scroll-v1";
+
+    const readPositions = (): Record<string, number> => {
+      try {
+        return JSON.parse(sessionStorage.getItem(key) || "{}");
+      } catch {
+        return {};
+      }
+    };
+
     const onHash = () => {
+      const positions = readPositions();
+      positions[routeRef.current] = window.scrollY;
+      sessionStorage.setItem(key, JSON.stringify(positions));
+
       const next = routeFromHash();
       setRoute(next);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      routeRef.current = next;
       setSidebarOpen(false);
+
+      window.requestAnimationFrame(() => {
+        const y = positions[next] ?? 0;
+        window.scrollTo({ top: y, behavior: y > 0 ? "auto" : "smooth" });
+      });
     };
+
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
