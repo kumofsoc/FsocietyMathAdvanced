@@ -14,6 +14,7 @@ import {
 } from "../lib/learning";
 import type { BlockKind, ContentBlock, Topic } from "../types/course";
 import { MatrixLab } from "./MatrixLab";
+import { MatrixTypesGallery } from "./MatrixTypesGallery";
 import { PracticePanel } from "./PracticePanel";
 
 const labels: Record<BlockKind, string> = {
@@ -250,6 +251,7 @@ export function TopicPage({ topic }: { topic: Topic }) {
         {topic.blocks.map((block, index) => (
           <div id={"block-" + index} key={topic.id + "-" + block.title}>
             <ContentCard topic={topic} block={block} index={index} />
+            {topic.id === "matrices" && index === 0 && <MatrixTypesGallery />}
           </div>
         ))}
       </section>
