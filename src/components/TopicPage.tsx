@@ -18,6 +18,7 @@ import { MatrixTypesGallery } from "./MatrixTypesGallery";
 import { DeterminantVisual } from "./DeterminantVisual";
 import { RichMatrixText } from "./MatrixNotation";
 import { VectorVisualInsert } from "./VectorVisuals";
+import { GeometryVisualInsert } from "./GeometryVisuals";
 import { PracticePanel } from "./PracticePanel";
 
 const labels: Record<BlockKind, string> = {
@@ -297,7 +298,7 @@ function NeighborNav({ topic }: { topic: Topic }) {
 
 export function TopicPage({ topic }: { topic: Topic }) {
   const chapter = chapters.find((item) => item.id === topic.chapterId);
-  const tracksLearning = topic.chapterId === "linear" || topic.chapterId === "vectors";
+  const tracksLearning = ["linear", "vectors", "plane-geometry", "space-geometry"].includes(topic.chapterId);
   const theorySentinel = useRef<HTMLDivElement>(null);
   const [theoryRead, setTheoryRead] = useState(() => loadSet(THEORY_KEY).has(topic.id));
   const [solved, setSolved] = useState(() => loadSet(SOLVED_KEY));
@@ -417,6 +418,7 @@ export function TopicPage({ topic }: { topic: Topic }) {
             {topic.id === "matrices" && index === 0 && <MatrixTypesGallery />}
             {topic.id === "determinants" && block.title.includes("Определитель 3-го порядка") && <DeterminantVisual />}
             <VectorVisualInsert topicId={topic.id} index={index} />
+            <GeometryVisualInsert topicId={topic.id} index={index} />
           </div>
         ))}
       </section>
