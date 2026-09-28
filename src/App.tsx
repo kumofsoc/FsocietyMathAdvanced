@@ -20,7 +20,7 @@ function routeFromHash() {
 }
 
 function isTrackedChapter(id: string) {
-  return id === "linear" || id === "vectors" || id === "plane-geometry" || id === "space-geometry";
+  return id === "linear" || id === "vectors" || id === "plane-geometry" || id === "space-geometry" || id === "plane-transformations";
 }
 
 function topicProgress(id: string) {
