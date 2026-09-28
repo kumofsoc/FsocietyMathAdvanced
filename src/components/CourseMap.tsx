@@ -58,8 +58,14 @@ function TopicNodeCard({ id, data }: NodeProps) {
       </div>
       <strong>{value.label}</strong>
       <p>{value.summary}</p>
-      <button onClick={() => value.onOpen(id)}>Открыть тему →</button>
-      <div className="map-node-hint">drag · alt + wheel = rotate</div>
+      <div className="map-card-actions">
+        <button onClick={() => value.onOpen(id)}>Открыть тему →</button>
+        <span>
+          <button aria-label="Повернуть влево" onClick={() => value.onRotate(id, -6)}>↺</button>
+          <button aria-label="Повернуть вправо" onClick={() => value.onRotate(id, 6)}>↻</button>
+        </span>
+      </div>
+      <div className="map-node-hint">drag = move · alt + wheel / ↺↻ = rotate</div>
     </div>
   );
 }
