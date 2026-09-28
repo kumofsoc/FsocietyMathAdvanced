@@ -20,7 +20,7 @@ import type { GraphNodeData } from "../types/course";
 
 const STORAGE_KEY = "fsociety-course-map-layout-v2";
 
-type StoredLayout = Record<string, { x: number; y: number; rotation: number }>;
+type StoredLayout = Record<string, { x: number; y: number; rotation: number; scale?: number }>;
 
 type GroupNodeData = {
   chapterId: string;
@@ -29,8 +29,10 @@ type GroupNodeData = {
   topicCount: number;
   progress: number;
   rotation: number;
+  scale: number;
   onOpen: (id: string) => void;
   onRotate: (id: string, delta: number) => void;
+  onScale: (id: string, scale: number) => void;
 };
 
 function readLayout(): StoredLayout {
@@ -110,6 +112,56 @@ function RotationGizmo({
   );
 }
 
+function ResizeGizmo({
+  selector,
+  scale,
+  onScale,
+}: {
+  selector: string;
+  scale: number;
+  onScale: (scale: number) => void;
+}) {
+  const startResize = (event: React.PointerEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const root = event.currentTarget.parentElement;
+    const card = root?.querySelector<HTMLElement>(selector);
+    if (!card) return;
+
+    const rect = card.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const startDistance = Math.max(24, Math.hypot(event.clientX - centerX, event.clientY - centerY));
+    const startScale = scale;
+
+    const move = (pointer: PointerEvent) => {
+      const distance = Math.max(24, Math.hypot(pointer.clientX - centerX, pointer.clientY - centerY));
+      const next = Math.min(1.55, Math.max(0.72, startScale * (distance / startDistance)));
+      onScale(Number(next.toFixed(3)));
+    };
+
+    const stop = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", stop);
+    };
+
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", stop, { once: true });
+  };
+
+  return (
+    <button
+      className="map-resize-gizmo nodrag nopan"
+      onPointerDown={startResize}
+      title="Потяни наружу или внутрь, чтобы изменить размер"
+      aria-label="Изменить размер карточки"
+    >
+      <span>↘</span>
+    </button>
+  );
+}
+
 function TopicNodeCard({ id, data }: NodeProps) {
   const value = data as unknown as GraphNodeData;
 
@@ -118,7 +170,7 @@ function TopicNodeCard({ id, data }: NodeProps) {
       <Handle type="target" position={Position.Left} className="map-handle map-handle-target" isConnectable={false} />
       <div
         className="map-topic-card"
-        style={{ transform: "rotate(" + (value.rotation ?? 0) + "deg)" }}
+        style={{ transform: "rotate(" + (value.rotation ?? 0) + "deg) scale(" + (value.scale ?? 1) + ")" }}
         data-cursor="active"
       >
         <div className="map-topic-meta">
@@ -136,10 +188,11 @@ function TopicNodeCard({ id, data }: NodeProps) {
         <div className="map-card-actions">
           <button onClick={() => value.onOpen(id)}>Открыть тему →</button>
         </div>
-        <div className="map-node-hint">drag = move · corner gizmo = rotate</div>
+        <div className="map-node-hint">drag = move · ↻ rotate · ↘ resize</div>
       </div>
 
       <RotationGizmo selector=".map-topic-card" onRotate={(delta) => value.onRotate(id, delta)} />
+      <ResizeGizmo selector=".map-topic-card" scale={value.scale ?? 1} onScale={(scale) => value.onScale?.(id, scale)} />
       <Handle type="source" position={Position.Right} className="map-handle map-handle-source" isConnectable={false} />
     </>
   );
@@ -153,7 +206,7 @@ function ChapterGroupCard({ id, data }: NodeProps) {
       <Handle type="target" position={Position.Left} className="map-handle group-handle" isConnectable={false} />
       <div
         className="map-group-card"
-        style={{ transform: "rotate(" + (value.rotation ?? 0) + "deg)" }}
+        style={{ transform: "rotate(" + (value.rotation ?? 0) + "deg) scale(" + (value.scale ?? 1) + ")" }}
         data-cursor="active"
       >
         <div className="map-group-number">{value.number}</div>
@@ -168,6 +221,7 @@ function ChapterGroupCard({ id, data }: NodeProps) {
         </div>
       </div>
       <RotationGizmo selector=".map-group-card" onRotate={(delta) => value.onRotate(id, delta)} />
+      <ResizeGizmo selector=".map-group-card" scale={value.scale ?? 1} onScale={(scale) => value.onScale(id, scale)} />
       <Handle type="source" position={Position.Right} className="map-handle group-handle" isConnectable={false} />
     </>
   );
@@ -251,8 +305,10 @@ function InnerCourseMap() {
             topicCount: chapter.topicIds.length,
             progress: progressForChapter(chapter.id),
             rotation: saved?.rotation ?? 0,
+            scale: saved?.scale ?? 1,
             onOpen: openChapter,
             onRotate: () => undefined,
+            onScale: () => undefined,
           } satisfies GroupNodeData,
         };
       });
@@ -278,9 +334,11 @@ function InnerCourseMap() {
             chapter: chapter.title,
             summary: topic.summary,
             rotation: saved?.rotation ?? 0,
+            scale: saved?.scale ?? 1,
             progress: progressForTopic(topic.id),
             onOpen: openTopic,
             onRotate: () => undefined,
+            onScale: () => undefined,
           } satisfies GraphNodeData,
         };
       });
@@ -319,11 +377,12 @@ function InnerCourseMap() {
   const persist = useCallback((nextNodes: Node[]) => {
     const existing = readLayout();
     nextNodes.forEach((node) => {
-      const data = node.data as { rotation?: number };
+      const data = node.data as { rotation?: number; scale?: number };
       existing[node.id] = {
         x: node.position.x,
         y: node.position.y,
         rotation: data.rotation ?? 0,
+        scale: data.scale ?? 1,
       };
     });
     localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
@@ -341,6 +400,17 @@ function InnerCourseMap() {
     });
   }, [persist, setNodes]);
 
+  const handleScale = useCallback((id: string, scale: number) => {
+    setNodes((current) => {
+      const next = current.map((node) => {
+        if (node.id !== id) return node;
+        return { ...node, data: { ...node.data, scale } };
+      });
+      persist(next);
+      return next;
+    });
+  }, [persist, setNodes]);
+
   const hydratedNodes = useMemo(
     () =>
       nodes.map((node) => ({
@@ -348,9 +418,10 @@ function InnerCourseMap() {
         data: {
           ...node.data,
           onRotate: (id: string, delta: number) => handleRotate(id, delta),
+          onScale: (id: string, scale: number) => handleScale(id, scale),
         },
       })),
-    [nodes, handleRotate],
+    [nodes, handleRotate, handleScale],
   );
 
   const edges = useMemo(() => buildEdges(), [buildEdges, progressVersion]);
