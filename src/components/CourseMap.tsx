@@ -18,9 +18,20 @@ import { practiceByTopic } from "../data/practice";
 import { LEARNING_EVENT, loadSet, SOLVED_KEY, THEORY_KEY } from "../lib/learning";
 import type { GraphNodeData } from "../types/course";
 
-const STORAGE_KEY = "fsociety-course-map-layout-v1";
+const STORAGE_KEY = "fsociety-course-map-layout-v2";
 
 type StoredLayout = Record<string, { x: number; y: number; rotation: number }>;
+
+type GroupNodeData = {
+  chapterId: string;
+  number: string;
+  title: string;
+  topicCount: number;
+  progress: number;
+  rotation: number;
+  onOpen: (id: string) => void;
+  onRotate: (id: string, delta: number) => void;
+};
 
 function readLayout(): StoredLayout {
   try {
@@ -41,26 +52,72 @@ function progressForTopic(id: string) {
   return Math.round(theory + (solvedCount / tasks.length) * 50);
 }
 
-function TopicNodeCard({ id, data }: NodeProps) {
-  const value = data as unknown as GraphNodeData;
+function progressForChapter(chapterId: string) {
+  const chapter = chapters.find((item) => item.id === chapterId);
+  if (!chapter || chapter.id !== "linear") return 0;
+  const values = chapter.topicIds.map(progressForTopic);
+  return values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length) : 0;
+}
 
-  const rotate = (event: React.WheelEvent<HTMLDivElement>) => {
-    if (!event.altKey) return;
+function RotationGizmo({
+  selector,
+  onRotate,
+}: {
+  selector: string;
+  onRotate: (delta: number) => void;
+}) {
+  const startRotate = (event: React.PointerEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    value.onRotate(id, Math.sign(event.deltaY) * 3);
+    event.stopPropagation();
+
+    const root = event.currentTarget.parentElement;
+    const card = root?.querySelector<HTMLElement>(selector);
+    if (!card) return;
+
+    const rect = card.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    let lastAngle = Math.atan2(event.clientY - centerY, event.clientX - centerX);
+
+    const move = (pointer: PointerEvent) => {
+      const nextAngle = Math.atan2(pointer.clientY - centerY, pointer.clientX - centerX);
+      let delta = (nextAngle - lastAngle) * 180 / Math.PI;
+      if (delta > 180) delta -= 360;
+      if (delta < -180) delta += 360;
+      lastAngle = nextAngle;
+      onRotate(delta);
+    };
+
+    const stop = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", stop);
+    };
+
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", stop, { once: true });
   };
 
   return (
+    <button
+      className="map-rotate-gizmo nodrag nopan"
+      onPointerDown={startRotate}
+      title="Потяни по окружности, чтобы повернуть карточку"
+      aria-label="Повернуть карточку"
+    >
+      <span>↻</span>
+      <i />
+    </button>
+  );
+}
+
+function TopicNodeCard({ id, data }: NodeProps) {
+  const value = data as unknown as GraphNodeData;
+
+  return (
     <>
-      <Handle
-        type="target"
-        position={Position.Left}
-        className="map-handle map-handle-target"
-        isConnectable={false}
-      />
+      <Handle type="target" position={Position.Left} className="map-handle map-handle-target" isConnectable={false} />
       <div
         className="map-topic-card"
-        onWheel={rotate}
         style={{ transform: "rotate(" + (value.rotation ?? 0) + "deg)" }}
         data-cursor="active"
       >
@@ -78,26 +135,52 @@ function TopicNodeCard({ id, data }: NodeProps) {
 
         <div className="map-card-actions">
           <button onClick={() => value.onOpen(id)}>Открыть тему →</button>
-          <span>
-            <button aria-label="Повернуть влево" onClick={() => value.onRotate(id, -6)}>↺</button>
-            <button aria-label="Повернуть вправо" onClick={() => value.onRotate(id, 6)}>↻</button>
-          </span>
         </div>
-        <div className="map-node-hint">drag = move · alt + wheel / ↺↻ = rotate</div>
+        <div className="map-node-hint">drag = move · corner gizmo = rotate</div>
       </div>
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="map-handle map-handle-source"
-        isConnectable={false}
-      />
+
+      <RotationGizmo selector=".map-topic-card" onRotate={(delta) => value.onRotate(id, delta)} />
+      <Handle type="source" position={Position.Right} className="map-handle map-handle-source" isConnectable={false} />
     </>
   );
+}
+
+function ChapterGroupCard({ id, data }: NodeProps) {
+  const value = data as unknown as GroupNodeData;
+
+  return (
+    <>
+      <Handle type="target" position={Position.Left} className="map-handle group-handle" isConnectable={false} />
+      <div
+        className="map-group-card"
+        style={{ transform: "rotate(" + (value.rotation ?? 0) + "deg)" }}
+        data-cursor="active"
+      >
+        <div className="map-group-number">{value.number}</div>
+        <div className="map-group-copy">
+          <span>ГРУППА / {value.topicCount} ТЕМ</span>
+          <strong>{value.title}</strong>
+          <div className="map-progress-mini">
+            <i style={{ width: value.progress + "%" }} />
+            <span>{value.progress}%</span>
+          </div>
+          <button onClick={() => value.onOpen(value.chapterId)}>Войти в группу →</button>
+        </div>
+      </div>
+      <RotationGizmo selector=".map-group-card" onRotate={(delta) => value.onRotate(id, delta)} />
+      <Handle type="source" position={Position.Right} className="map-handle group-handle" isConnectable={false} />
+    </>
+  );
+}
+
+function chapterForTopic(topicId: string) {
+  return topics[topicId]?.chapterId;
 }
 
 function InnerCourseMap() {
   const stored = useMemo(() => readLayout(), []);
   const [fullscreen, setFullscreen] = useState(false);
+  const [activeChapterId, setActiveChapterId] = useState<string | null>("linear");
   const [progressVersion, setProgressVersion] = useState(0);
 
   useEffect(() => {
@@ -111,137 +194,189 @@ function InnerCourseMap() {
     return () => document.body.classList.remove("map-overlay-open");
   }, [fullscreen]);
 
-  const rotateNode = useCallback((_id: string, _delta: number) => undefined, []);
   const openTopic = useCallback((id: string) => {
     window.location.hash = id;
   }, []);
 
-  const initialNodes = useMemo<Node[]>(() => {
-    return topicList.map((topic) => {
-      const chapterIndex = chapters.findIndex((chapter) => chapter.id === topic.chapterId);
-      const chapter = chapters[chapterIndex];
-      const localIndex = Math.max(0, chapter?.topicIds.indexOf(topic.id) ?? 0);
-      const saved = stored[topic.id];
+  const openChapter = useCallback((id: string) => {
+    setActiveChapterId(id);
+  }, []);
 
-      return {
-        id: topic.id,
-        type: "topic",
-        position: saved
-          ? { x: saved.x, y: saved.y }
-          : {
-              x: chapterIndex * 360 + (localIndex % 2) * 70,
-              y: localIndex * 190 + (chapterIndex % 4) * 48,
-            },
-        data: {
-          label: topic.title,
-          number: topic.number,
-          chapter: chapter?.title ?? "",
-          summary: topic.summary,
-          rotation: saved?.rotation ?? 0,
-          progress: progressForTopic(topic.id),
-          onOpen: openTopic,
-          onRotate: rotateNode,
-        } satisfies GraphNodeData,
-      };
-    });
-  }, [stored, openTopic, rotateNode]);
+  const groupEdges = useMemo<Edge[]>(() => {
+    const seen = new Set<string>();
+    const result: Edge[] = [];
 
-  const edges = useMemo<Edge[]>(
-    () =>
-      topicList.flatMap((topic) =>
-        topic.prerequisites
-          .filter((dependency) => Boolean(topics[dependency]))
-          .map((dependency) => ({
-            id: dependency + "->" + topic.id,
-            source: dependency,
-            target: topic.id,
-            type: "smoothstep",
-            animated: topic.chapterId === "linear",
-            className: topic.chapterId === "linear" ? "edge-hot" : "edge-normal",
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-              width: 16,
-              height: 16,
-            },
-          })),
-      ),
-    [],
-  );
+    for (const topic of topicList) {
+      for (const dependency of topic.prerequisites) {
+        const sourceChapter = chapterForTopic(dependency);
+        const targetChapter = topic.chapterId;
+        if (!sourceChapter || sourceChapter === targetChapter) continue;
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+        const key = sourceChapter + "->" + targetChapter;
+        if (seen.has(key)) continue;
+        seen.add(key);
 
-  useEffect(() => {
-    setNodes((current) =>
-      current.map((node) => ({
-        ...node,
-        data: {
-          ...node.data,
-          progress: progressForTopic(node.id),
-        },
-      })),
-    );
-  }, [progressVersion, setNodes]);
+        result.push({
+          id: "group:" + key,
+          source: "group:" + sourceChapter,
+          target: "group:" + targetChapter,
+          type: "smoothstep",
+          className: "edge-group",
+          markerEnd: { type: MarkerType.ArrowClosed, width: 14, height: 14 },
+        });
+      }
+    }
 
-  const persist = useCallback(
-    (nextNodes: Node[]) => {
-      const layout: StoredLayout = {};
-      nextNodes.forEach((node) => {
-        const data = node.data as unknown as GraphNodeData;
-        layout[node.id] = {
-          x: node.position.x,
-          y: node.position.y,
-          rotation: data.rotation ?? 0,
+    return result;
+  }, []);
+
+  const buildNodes = useCallback((): Node[] => {
+    if (activeChapterId === null) {
+      return chapters.map((chapter, index) => {
+        const id = "group:" + chapter.id;
+        const saved = stored[id];
+        return {
+          id,
+          type: "group",
+          position: saved
+            ? { x: saved.x, y: saved.y }
+            : { x: (index % 3) * 390, y: Math.floor(index / 3) * 240 },
+          data: {
+            chapterId: chapter.id,
+            number: chapter.number,
+            title: chapter.title,
+            topicCount: chapter.topicIds.length,
+            progress: progressForChapter(chapter.id),
+            rotation: saved?.rotation ?? 0,
+            onOpen: openChapter,
+            onRotate: () => undefined,
+          } satisfies GroupNodeData,
         };
       });
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
-    },
-    [],
-  );
+    }
 
-  const handleRotate = useCallback(
-    (id: string, delta: number) => {
-      setNodes((current) => {
-        const next = current.map((node) => {
-          if (node.id !== id) return node;
-          const data = node.data as unknown as GraphNodeData;
-          return {
-            ...node,
-            data: { ...data, rotation: (data.rotation ?? 0) + delta },
-          };
-        });
-        persist(next);
-        return next;
+    const chapter = chapters.find((item) => item.id === activeChapterId);
+    if (!chapter) return [];
+
+    return chapter.topicIds
+      .map((id) => topics[id])
+      .filter(Boolean)
+      .map((topic, index) => {
+        const saved = stored[topic.id];
+        return {
+          id: topic.id,
+          type: "topic",
+          position: saved
+            ? { x: saved.x, y: saved.y }
+            : { x: (index % 2) * 410, y: Math.floor(index / 2) * 220 },
+          data: {
+            label: topic.title,
+            number: topic.number,
+            chapter: chapter.title,
+            summary: topic.summary,
+            rotation: saved?.rotation ?? 0,
+            progress: progressForTopic(topic.id),
+            onOpen: openTopic,
+            onRotate: () => undefined,
+          } satisfies GraphNodeData,
+        };
       });
-    },
-    [persist, setNodes],
-  );
+  }, [activeChapterId, openChapter, openTopic, stored, progressVersion]);
+
+  const buildEdges = useCallback((): Edge[] => {
+    if (activeChapterId === null) return groupEdges;
+
+    const chapter = chapters.find((item) => item.id === activeChapterId);
+    if (!chapter) return [];
+    const visible = new Set(chapter.topicIds);
+
+    return chapter.topicIds.flatMap((id) => {
+      const topic = topics[id];
+      if (!topic) return [];
+      return topic.prerequisites
+        .filter((dependency) => visible.has(dependency))
+        .map((dependency) => ({
+          id: dependency + "->" + topic.id,
+          source: dependency,
+          target: topic.id,
+          type: "smoothstep",
+          animated: chapter.id === "linear",
+          className: chapter.id === "linear" ? "edge-hot" : "edge-normal",
+          markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16 },
+        }));
+    });
+  }, [activeChapterId, groupEdges]);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(buildNodes());
+
+  useEffect(() => {
+    setNodes(buildNodes());
+  }, [activeChapterId, progressVersion, buildNodes, setNodes]);
+
+  const persist = useCallback((nextNodes: Node[]) => {
+    const existing = readLayout();
+    nextNodes.forEach((node) => {
+      const data = node.data as { rotation?: number };
+      existing[node.id] = {
+        x: node.position.x,
+        y: node.position.y,
+        rotation: data.rotation ?? 0,
+      };
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+  }, []);
+
+  const handleRotate = useCallback((id: string, delta: number) => {
+    setNodes((current) => {
+      const next = current.map((node) => {
+        if (node.id !== id) return node;
+        const rotation = Number((Number((node.data as { rotation?: number }).rotation ?? 0) + delta).toFixed(2));
+        return { ...node, data: { ...node.data, rotation } };
+      });
+      persist(next);
+      return next;
+    });
+  }, [persist, setNodes]);
 
   const hydratedNodes = useMemo(
     () =>
-      nodes.map((node) => {
-        const data = node.data as unknown as GraphNodeData;
-        return { ...node, data: { ...data, onRotate: handleRotate } };
-      }),
+      nodes.map((node) => ({
+        ...node,
+        data: {
+          ...node.data,
+          onRotate: (id: string, delta: number) => handleRotate(id, delta),
+        },
+      })),
     [nodes, handleRotate],
   );
+
+  const edges = useMemo(() => buildEdges(), [buildEdges, progressVersion]);
 
   const resetLayout = () => {
     localStorage.removeItem(STORAGE_KEY);
     window.location.reload();
   };
 
+  const activeChapter = activeChapterId ? chapters.find((item) => item.id === activeChapterId) : null;
+
   return (
     <section className={"course-map-page " + (fullscreen ? "map-fullscreen" : "")}>
       <header className="map-header">
         <div>
-          <div className="eyebrow">KNOWLEDGE GRAPH / {edges.length} DEPENDENCY LINKS</div>
-          <h1>Карта курса</h1>
+          <div className="eyebrow">
+            {activeChapter ? "GROUP / " + activeChapter.number : "KNOWLEDGE GROUPS"} · {edges.length} LINKS
+          </div>
+          <h1>{activeChapter?.title ?? "Карта курса"}</h1>
           <p>
-            Карточки можно свободно перемещать и вращать, но математические зависимости остаются
-            привязанными к ним. Стрелка A → B означает: тему A полезно знать до B.
+            {activeChapter
+              ? "Сейчас показана одна математическая группа, поэтому граф не превращается в облако из десятков карточек. Связи внутри группы остаются прикреплёнными при перемещении узлов."
+              : "На обзорном уровне каждая глава — отдельная группа. Стрелки между группами показывают междисциплинарные prerequisites; войди в группу, чтобы увидеть её темы."}
           </p>
         </div>
         <div className="map-header-actions">
+          <button className="ghost-button" onClick={() => setActiveChapterId(null)}>
+            ◫ Обзор групп
+          </button>
           <button className="ghost-button" onClick={() => setFullscreen((value) => !value)}>
             {fullscreen ? "× Закрыть full screen" : "⛶ Full screen"}
           </button>
@@ -249,15 +384,32 @@ function InnerCourseMap() {
         </div>
       </header>
 
+      <div className="map-group-tabs" aria-label="Группы карты">
+        <button className={activeChapterId === null ? "active" : ""} onClick={() => setActiveChapterId(null)}>
+          Все группы
+        </button>
+        {chapters.map((chapter) => (
+          <button
+            key={chapter.id}
+            className={activeChapterId === chapter.id ? "active" : ""}
+            onClick={() => setActiveChapterId(chapter.id)}
+          >
+            <span>{chapter.number}</span>
+            {chapter.title}
+          </button>
+        ))}
+      </div>
+
       <div className="map-stage">
         <ReactFlow
+          key={activeChapterId ?? "overview"}
           nodes={hydratedNodes}
           edges={edges}
-          nodeTypes={{ topic: TopicNodeCard }}
+          nodeTypes={{ topic: TopicNodeCard, group: ChapterGroupCard }}
           onNodesChange={onNodesChange}
           onNodeDragStop={(_event, _node, nextNodes) => persist(nextNodes)}
           fitView
-          fitViewOptions={{ padding: 0.18 }}
+          fitViewOptions={{ padding: activeChapterId ? 0.3 : 0.12 }}
           minZoom={0.08}
           maxZoom={2.1}
           nodesDraggable
