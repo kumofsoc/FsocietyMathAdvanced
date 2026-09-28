@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { practiceByTopic } from "../data/practice";
 import { loadSet, saveSet, SOLVED_KEY } from "../lib/learning";
 import type { PracticeTask } from "../types/course";
+import { RichMatrixText } from "./MatrixNotation";
 
 function normalize(value: string) {
   return value
@@ -41,7 +42,7 @@ function TaskCard({
         <b>{solved || status === "right" ? "✓" : "○"}</b>
       </div>
 
-      <p>{task.prompt}</p>
+      <p><RichMatrixText text={task.prompt} /></p>
 
       {task.type === "choice" && task.options ? (
         <div className="practice-options">
@@ -51,7 +52,7 @@ function TaskCard({
               className={value === option ? "selected" : ""}
               onClick={() => setValue(option)}
             >
-              {option}
+              <RichMatrixText text={option} />
             </button>
           ))}
         </div>
@@ -116,10 +117,11 @@ export function PracticePanel({ topicId }: { topicId: string }) {
       <header className="practice-header">
         <div>
           <div className="eyebrow">ПРАКТИКА / ПРОВЕРКА ОСВОЕНИЯ</div>
-          <h2>Теория без задач — только половина темы.</h2>
+          <h2>Проверь, превратились ли формулы в рабочий инструмент.</h2>
           <p>
-            Дочитать страницу достаточно, чтобы отметить теорию прочитанной. Полное освоение
-            появляется только после решения практики.
+            Теоретический проход фиксирует знакомство с материалом. Практический прогресс
+            растёт только после правильных решений — он показывает, можешь ли ты применить
+            определения, свойства и методы без готового хода решения перед глазами.
           </p>
         </div>
         <div className="practice-score">
