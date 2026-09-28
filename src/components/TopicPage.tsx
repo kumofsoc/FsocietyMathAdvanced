@@ -81,6 +81,7 @@ function ContentCard({
 }) {
   const theoremId = topic.id + "::" + index;
   const [saved, setSaved] = useState(() => loadSavedTheorems().some((item) => item.id === theoremId));
+  const [propertyPanel, setPropertyPanel] = useState<"proof" | "corollary" | null>(null);
 
   const toggleSaved = () => {
     const current = loadSavedTheorems();
@@ -140,8 +141,90 @@ function ContentCard({
 
         {block.items && (
           <ul className="property-list">
-            {block.items.map((item) => <li key={item}><RichMatrixText text={item} /></li>)}
+            {block.items.map((item, itemIndex) => (
+              <li key={item}>
+                <span className="property-list-index">{String(itemIndex + 1).padStart(2, "0")}</span>
+                <span><RichMatrixText text={item} /></span>
+              </li>
+            ))}
           </ul>
+        )}
+
+        {block.kind === "property" && (block.proofs?.length || block.corollaries?.length) && (
+          <div className="property-disclosures">
+            <div className="property-disclosure-actions">
+              {block.proofs?.length ? (
+                <button
+                  className={propertyPanel === "proof" ? "active" : ""}
+                  onClick={() => setPropertyPanel((current) => current === "proof" ? null : "proof")}
+                >
+                  <span>∵</span>
+                  Доказательство
+                  <b>{propertyPanel === "proof" ? "−" : "+"}</b>
+                </button>
+              ) : null}
+              {block.corollaries?.length ? (
+                <button
+                  className={propertyPanel === "corollary" ? "active" : ""}
+                  onClick={() => setPropertyPanel((current) => current === "corollary" ? null : "corollary")}
+                >
+                  <span>⇒</span>
+                  Следствие
+                  <b>{propertyPanel === "corollary" ? "−" : "+"}</b>
+                </button>
+              ) : null}
+            </div>
+
+            <AnimatePresence initial={false} mode="wait">
+              {propertyPanel === "proof" && block.proofs?.length ? (
+                <motion.div
+                  key="proof"
+                  className="property-proof-panel"
+                  initial={{ height: 0, opacity: 0, y: -4 }}
+                  animate={{ height: "auto", opacity: 1, y: 0 }}
+                  exit={{ height: 0, opacity: 0, y: -4 }}
+                  transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  {block.proofs.map((proof, proofIndex) => (
+                    <article key={proof.label + proofIndex}>
+                      <div className="property-panel-label">ДОКАЗАТЕЛЬСТВО {proofIndex + 1}</div>
+                      <h4>{proof.label}</h4>
+                      <p><RichMatrixText text={proof.body} /></p>
+                      {proof.formula && (
+                        <div className="property-panel-formula">
+                          <BlockMath math={proof.formula} />
+                        </div>
+                      )}
+                    </article>
+                  ))}
+                </motion.div>
+              ) : null}
+
+              {propertyPanel === "corollary" && block.corollaries?.length ? (
+                <motion.div
+                  key="corollary"
+                  className="property-corollary-panel"
+                  initial={{ height: 0, opacity: 0, y: -4 }}
+                  animate={{ height: "auto", opacity: 1, y: 0 }}
+                  exit={{ height: 0, opacity: 0, y: -4 }}
+                  transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  {block.corollaries.map((corollary, corollaryIndex) => (
+                    <article key={corollary.label + corollaryIndex}>
+                      <div className="property-panel-label">СЛЕДСТВИЕ {corollaryIndex + 1}</div>
+                      <h4>{corollary.label}</h4>
+                      <p><RichMatrixText text={corollary.body} /></p>
+                      {corollary.formula && (
+                        <div className="property-panel-formula">
+                          <BlockMath math={corollary.formula} />
+                        </div>
+                      )}
+                    </article>
+                  ))}
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+          </div>
         )}
 
         {block.dependsOn && (
