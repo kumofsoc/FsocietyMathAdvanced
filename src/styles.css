@@ -4533,3 +4533,285 @@ html[data-motion-profile="off"] [data-reveal] {
     justify-content: flex-start;
   }
 }
+
+
+/* ===== v0.12: analytic geometry visual system ===== */
+
+.geometry-visual {
+  margin: 14px 0 24px;
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 82% 12%, color-mix(in srgb,var(--definition) 7%,transparent), transparent 30%),
+    color-mix(in srgb,var(--surface) 94%,transparent);
+  box-shadow: 0 18px 64px rgba(0,0,0,.08);
+}
+.geometry-visual > header {
+  max-width: 900px;
+  margin-bottom: 20px;
+}
+.geometry-visual > header h2 {
+  margin: 8px 0 0;
+  font-size: clamp(28px,4.2vw,50px);
+  line-height: 1;
+  letter-spacing: -.052em;
+}
+.geometry-visual > header p {
+  max-width: 760px;
+  margin: 13px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.72;
+}
+.geometry-visual-grid {
+  display: grid;
+  grid-template-columns: minmax(0,1.25fr) minmax(270px,.75fr);
+  gap: 12px;
+}
+.geometry-stage {
+  min-height: 390px;
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 50%, color-mix(in srgb,var(--definition) 5%,transparent), transparent 48%),
+    var(--elevated);
+}
+.geometry-stage-svg {
+  display: grid;
+  place-items: center;
+  padding: 12px;
+}
+.geometry-stage-svg svg {
+  width: 100%;
+  max-width: 650px;
+  height: auto;
+  overflow: visible;
+}
+.geo-axis {
+  stroke: color-mix(in srgb,var(--muted) 34%,transparent);
+  stroke-width: 1;
+}
+.geo-set-fill {
+  fill: color-mix(in srgb,var(--accent) 7%,transparent);
+}
+.geo-set-boundary {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+.geo-probe {
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+.geo-probe.inside {
+  fill: var(--accent2);
+  filter: drop-shadow(0 0 6px color-mix(in srgb,var(--accent2) 45%,transparent));
+}
+.geo-probe.outside {
+  fill: #ff7585;
+  filter: drop-shadow(0 0 6px rgba(255,117,133,.36));
+}
+.geometry-stage text {
+  fill: var(--text);
+  font: 9px ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.geo-membership,
+.geo-distance-badge,
+.conic-badge {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  min-width: 138px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: color-mix(in srgb,var(--surface) 88%,transparent);
+  backdrop-filter: blur(12px);
+}
+.geo-membership strong,
+.geo-distance-badge strong,
+.conic-badge strong {
+  display: block;
+  font-size: 16px;
+  letter-spacing: -.02em;
+}
+.geo-membership small,
+.geo-distance-badge span,
+.conic-badge small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 7px;
+}
+.geo-membership.inside { border-color: color-mix(in srgb,var(--accent2) 48%,var(--border)); }
+.geo-membership.outside { border-color: color-mix(in srgb,#ff7585 48%,var(--border)); }
+
+.geometry-controls {
+  padding: 15px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--elevated);
+  display: grid;
+  align-content: start;
+  gap: 9px;
+}
+.geometry-controls > label {
+  display: grid;
+  grid-template-columns: 86px minmax(80px,1fr) 48px;
+  gap: 9px;
+  align-items: center;
+  min-height: 35px;
+}
+.geometry-controls label > span {
+  color: var(--muted);
+  font-size: 8px;
+}
+.geometry-controls input[type="range"] {
+  width: 100%;
+  accent-color: var(--definition);
+}
+.geometry-controls label > b {
+  color: var(--text);
+  font: 8px ui-monospace,SFMono-Regular,Menlo,monospace;
+  text-align: right;
+}
+.geometry-formula-stack {
+  margin-top: 7px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 5px;
+}
+.geometry-formula-stack code {
+  padding: 8px 9px;
+  border: 1px solid color-mix(in srgb,var(--formula) 32%,var(--border));
+  border-radius: 9px;
+  background: color-mix(in srgb,var(--formula) 5%,var(--surface));
+  color: var(--formula);
+  font: 9px ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.geometry-formula-stack span {
+  margin: -1px 0 4px 3px;
+  color: var(--muted);
+  font-size: 7px;
+}
+
+.geo-main-line {
+  stroke: var(--definition);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.geo-normal {
+  stroke: var(--formula);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.geo-distance {
+  stroke: #ff7585;
+  stroke-width: 1.6;
+  stroke-dasharray: 5 4;
+}
+.geo-foot {
+  fill: #ff7585;
+}
+.geo-distance-badge {
+  left: auto;
+  right: 12px;
+}
+.geo-distance-badge span {
+  margin-top: 0;
+}
+
+.conic-stage {
+  background:
+    radial-gradient(circle at 50% 50%, color-mix(in srgb,var(--accent) 5%,transparent), transparent 48%),
+    var(--elevated);
+}
+.conic-main {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+}
+.conic-focus {
+  fill: var(--formula);
+  filter: drop-shadow(0 0 6px color-mix(in srgb,var(--formula) 52%,transparent));
+}
+.conic-asymptote,
+.conic-directrix {
+  stroke: color-mix(in srgb,var(--accent2) 72%,transparent);
+  stroke-width: 1.2;
+  stroke-dasharray: 6 5;
+}
+.conic-badge {
+  left: 12px;
+  top: 12px;
+}
+.conic-badge strong {
+  font-size: 13px;
+}
+.conic-badge small {
+  margin-top: 6px;
+}
+
+.geometry-stage-3d {
+  min-height: 460px;
+}
+.geometry-stage-3d canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.sidebar-progress-secondary {
+  margin-top: 7px;
+}
+.sidebar-progress-secondary .progress-track i {
+  background: linear-gradient(90deg,var(--accent2),var(--definition));
+}
+
+@media (max-width:980px) {
+  .geometry-visual-grid {
+    grid-template-columns: 1fr;
+  }
+  .geometry-stage-3d {
+    min-height: 430px;
+  }
+}
+
+@media (max-width:760px) {
+  .geometry-visual {
+    padding: 17px;
+    border-radius: 15px;
+  }
+  .geometry-visual > header h2 {
+    font-size: 34px;
+  }
+  .geometry-controls > label {
+    grid-template-columns: 68px minmax(70px,1fr) 42px;
+  }
+  .geometry-stage {
+    min-height: 310px;
+  }
+  .geometry-stage-3d {
+    min-height: 390px;
+  }
+}
+
+@media (max-width:520px) {
+  .geometry-visual {
+    padding: 13px;
+  }
+  .geometry-stage-svg {
+    padding: 4px;
+  }
+  .geometry-stage {
+    min-height: 280px;
+  }
+  .geometry-stage-3d {
+    min-height: 350px;
+  }
+}
