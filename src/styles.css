@@ -4815,3 +4815,364 @@ html[data-motion-profile="off"] [data-reveal] {
     min-height: 350px;
   }
 }
+
+
+/* ===== v0.13: quadric 3d laboratory ===== */
+
+.quadric-lab {
+  margin: 18px 0 28px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 78% 12%, color-mix(in srgb,var(--accent) 8%,transparent), transparent 30%),
+    radial-gradient(circle at 15% 88%, color-mix(in srgb,var(--accent2) 6%,transparent), transparent 26%),
+    color-mix(in srgb,var(--surface) 95%,transparent);
+  box-shadow: 0 24px 80px rgba(0,0,0,.1);
+}
+.quadric-head {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(240px,.42fr);
+  gap: 26px;
+  align-items: end;
+}
+.quadric-head h2 {
+  max-width: 860px;
+  margin: 8px 0 0;
+  font-size: clamp(30px,4.6vw,58px);
+  line-height: .96;
+  letter-spacing: -.057em;
+}
+.quadric-head p {
+  max-width: 720px;
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.72;
+}
+.quadric-live {
+  min-height: 118px;
+  padding: 15px;
+  border: 1px solid color-mix(in srgb,var(--accent) 30%,var(--border));
+  border-radius: 16px;
+  background: color-mix(in srgb,var(--elevated) 90%,transparent);
+  display: grid;
+  align-content: center;
+}
+.quadric-live > span {
+  color: var(--accent);
+  font: 9px ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing: .14em;
+}
+.quadric-live > strong {
+  margin-top: 6px;
+  font-size: 18px;
+  letter-spacing: -.025em;
+}
+.quadric-live > code {
+  margin-top: 8px;
+  color: var(--formula);
+  font: 8px ui-monospace,SFMono-Regular,Menlo,monospace;
+  white-space: normal;
+}
+
+.quadric-mode-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 7px;
+}
+.quadric-mode-grid button {
+  min-height: 64px;
+  padding: 10px 11px;
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 8px;
+  align-items: center;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--elevated);
+  color: var(--muted);
+  transition: border-color .16s ease, background .16s ease, transform .16s ease;
+}
+.quadric-mode-grid button:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb,var(--accent) 42%,var(--border));
+}
+.quadric-mode-grid button.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb,var(--accent) 7%,var(--elevated));
+  color: var(--text);
+}
+.quadric-mode-grid button > span {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb,var(--accent) 28%,var(--border));
+  border-radius: 9px;
+  color: var(--accent);
+  font: 8px ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.quadric-mode-grid button > strong {
+  font-size: 9px;
+  line-height: 1.3;
+}
+
+.quadric-layout {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: minmax(0,1.35fr) minmax(280px,.65fr);
+  gap: 12px;
+}
+.quadric-stage {
+  min-height: 610px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% 42%, color-mix(in srgb,var(--accent) 7%,transparent), transparent 36%),
+    #0c0d12;
+}
+.quadric-stage canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+.quadric-section-badge {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  min-width: 170px;
+  padding: 10px 11px;
+  border: 1px solid color-mix(in srgb,var(--formula) 45%,var(--border));
+  border-radius: 11px;
+  background: rgba(10,10,15,.72);
+  backdrop-filter: blur(12px);
+}
+.quadric-section-badge span {
+  display: block;
+  color: #ffcb6b;
+  font: 8px ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.quadric-section-badge strong {
+  display: block;
+  margin-top: 4px;
+  color: #f5f5f7;
+  font-size: 12px;
+  letter-spacing: -.01em;
+}
+.quadric-legend {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 10px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.quadric-legend > span {
+  min-height: 25px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 999px;
+  background: rgba(10,10,15,.68);
+  color: rgba(245,245,247,.72);
+  font-size: 7px;
+  backdrop-filter: blur(10px);
+}
+.quadric-legend i {
+  width: 7px;
+  height: 7px;
+  display: inline-block;
+  border-radius: 50%;
+}
+.surface-dot { background:#7f8cff; box-shadow:0 0 8px rgba(127,140,255,.45); }
+.section-dot { background:#ffcb6b; box-shadow:0 0 8px rgba(255,203,107,.45); }
+
+.quadric-controls {
+  padding: 15px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--elevated);
+  display: grid;
+  align-content: start;
+  gap: 9px;
+}
+.quadric-control-title {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.quadric-control-title span,
+.quadric-equation > span,
+.quadric-explain > span,
+.quadric-section-info > span {
+  display: block;
+  color: var(--muted);
+  font: 7px ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing: .13em;
+}
+.quadric-control-title strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 16px;
+}
+.quadric-controls > label {
+  display: grid;
+  grid-template-columns: 32px minmax(80px,1fr) 48px;
+  gap: 8px;
+  align-items: center;
+  min-height: 34px;
+}
+.quadric-controls > label span {
+  color: var(--muted);
+  font: 8px ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.quadric-controls input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+.quadric-controls > label b {
+  text-align: right;
+  color: var(--text);
+  font: 8px ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.quadric-controls .section-slider {
+  margin-top: 4px;
+  padding-top: 9px;
+  border-top: 1px solid var(--border);
+}
+.quadric-controls .section-slider input {
+  accent-color: var(--formula);
+}
+
+.quadric-toggle-row {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 7px;
+}
+.quadric-toggle-row button {
+  min-height: 35px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 8px;
+}
+.quadric-toggle-row button.active {
+  color: var(--text);
+  border-color: color-mix(in srgb,var(--accent) 50%,var(--border));
+  background: color-mix(in srgb,var(--accent) 6%,var(--surface));
+}
+
+.quadric-equation,
+.quadric-explain,
+.quadric-section-info {
+  margin-top: 2px;
+  padding: 11px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface);
+}
+.quadric-equation code {
+  display: block;
+  margin-top: 7px;
+  color: var(--formula);
+  font: 9px ui-monospace,SFMono-Regular,Menlo,monospace;
+  white-space: normal;
+  line-height: 1.55;
+}
+.quadric-explain p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 8px;
+  line-height: 1.62;
+}
+.quadric-section-info {
+  border-color: color-mix(in srgb,var(--formula) 28%,var(--border));
+}
+.quadric-section-info strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--formula);
+  font-size: 13px;
+}
+.quadric-section-info small {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 7px;
+  line-height: 1.55;
+}
+
+@media (max-width:1100px) {
+  .quadric-layout {
+    grid-template-columns: 1fr;
+  }
+  .quadric-controls {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+  .quadric-control-title,
+  .quadric-equation,
+  .quadric-explain,
+  .quadric-section-info {
+    grid-column: 1 / -1;
+  }
+  .quadric-toggle-row {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width:820px) {
+  .quadric-lab {
+    padding: 16px;
+    border-radius: 16px;
+  }
+  .quadric-head {
+    grid-template-columns: 1fr;
+  }
+  .quadric-live {
+    min-height: 92px;
+  }
+  .quadric-mode-grid {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+  .quadric-stage {
+    min-height: 470px;
+  }
+}
+
+@media (max-width:560px) {
+  .quadric-lab {
+    padding: 12px;
+  }
+  .quadric-head h2 {
+    font-size: 34px;
+  }
+  .quadric-mode-grid {
+    grid-template-columns: 1fr;
+  }
+  .quadric-mode-grid button {
+    min-height: 54px;
+  }
+  .quadric-stage {
+    min-height: 390px;
+  }
+  .quadric-controls {
+    grid-template-columns: 1fr;
+  }
+  .quadric-controls > label,
+  .quadric-toggle-row,
+  .quadric-control-title,
+  .quadric-equation,
+  .quadric-explain,
+  .quadric-section-info {
+    grid-column: 1;
+  }
+}
