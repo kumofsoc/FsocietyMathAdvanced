@@ -16,6 +16,7 @@ import type { BlockKind, ContentBlock, Topic } from "../types/course";
 import { MatrixLab } from "./MatrixLab";
 import { MatrixTypesGallery } from "./MatrixTypesGallery";
 import { DeterminantVisual } from "./DeterminantVisual";
+import { RichMatrixText } from "./MatrixNotation";
 import { PracticePanel } from "./PracticePanel";
 
 const labels: Record<BlockKind, string> = {
@@ -129,7 +130,7 @@ function ContentCard({
             </button>
           )}
         </div>
-        <p>{block.body}</p>
+        <p><RichMatrixText text={block.body} /></p>
 
         {block.formula && (
           <div className="formula-box">
@@ -139,7 +140,7 @@ function ContentCard({
 
         {block.items && (
           <ul className="property-list">
-            {block.items.map((item) => <li key={item}>{item}</li>)}
+            {block.items.map((item) => <li key={item}><RichMatrixText text={item} /></li>)}
           </ul>
         )}
 
