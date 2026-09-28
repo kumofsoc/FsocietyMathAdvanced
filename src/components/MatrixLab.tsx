@@ -8,7 +8,7 @@ type Matrix3 = [
   [number, number, number],
 ];
 
-type Mode = "scale" | "shear" | "rotate" | "projection";
+type Mode = "scale" | "shear" | "rotate" | "projection" | "reflection";
 
 const vertices: [number, number, number][] = [
   [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
@@ -43,6 +43,14 @@ function matrixFor(mode: Mode, strength: number): Matrix3 {
     return [
       [Math.cos(angle), -Math.sin(angle), 0],
       [Math.sin(angle), Math.cos(angle), 0],
+      [0, 0, 1],
+    ];
+  }
+
+  if (mode === "reflection") {
+    return [
+      [-1, 0, 0],
+      [0, 1, 0],
       [0, 0, 1],
     ];
   }
@@ -141,46 +149,86 @@ function Scene({ matrix }: { matrix: Matrix3 }) {
   );
 }
 
+function geometryCopy(det: number, matrixRank: number) {
+  if (matrixRank < 3) {
+    return {
+      title: "Размерность образа уменьшилась",
+      body: "rank(A)=" + matrixRank + ": после преобразования все векторы попадают в подпространство меньшей размерности. При rank=2 объём схлопывается в плоскость, при rank=1 — в прямую.",
+    };
+  }
+
+  if (det < 0) {
+    return {
+      title: "Пространство зеркально перевёрнуто",
+      body: "det(A)<0: преобразование сохраняет трёхмерность, но меняет ориентацию базиса — это можно понимать как отражение вместе с возможным растяжением.",
+    };
+  }
+
+  return {
+    title: "Трёхмерность сохранена",
+    body: "rank(A)=3: три независимых направления не схлопнулись. det(A)>0 означает, что ориентация базиса не была зеркально перевёрнута; |det(A)| показывает коэффициент изменения объёма.",
+  };
+}
+
 export function MatrixLab() {
   const [mode, setMode] = useState<Mode>("shear");
   const [strength, setStrength] = useState(0.55);
+  const [fullscreen, setFullscreen] = useState(false);
   const matrix = useMemo(() => matrixFor(mode, strength), [mode, strength]);
   const det = determinant(matrix);
   const matrixRank = rank(matrix);
-
-  const label =
-    det > 1e-7 ? "ориентация сохранена" :
-    det < -1e-7 ? "ориентация перевёрнута" :
-    "объём схлопнулся";
+  const geometry = geometryCopy(det, matrixRank);
 
   return (
-    <section className="matrix-lab">
+    <section className={"matrix-lab " + (fullscreen ? "is-fullscreen" : "")}>
+      <button
+        className="lab-fullscreen-button"
+        onClick={() => setFullscreen((value) => !value)}
+        aria-label={fullscreen ? "Закрыть полноэкранный режим" : "Открыть лабораторию на весь экран"}
+      >
+        {fullscreen ? "× Закрыть" : "⛶ Full screen"}
+      </button>
+
       <div className="lab-copy">
         <div className="eyebrow">ЛАБОРАТОРИЯ / THREE.JS</div>
         <h2>Матрица как преобразование ℝ³ → ℝ³</h2>
+
+        <div className="lab-explainer">
+          <strong>Что означает ℝ³ → ℝ³?</strong>
+          <p>
+            ℝ³ — обычное трёхмерное пространство всех векторов (x, y, z). Запись
+            A: ℝ³ → ℝ³ означает: на вход матрица получает любой трёхмерный вектор,
+            а на выходе снова даёт трёхмерный вектор Ax.
+          </p>
+          <p>
+            Матрица 3×3 полностью определяется тем, куда она отправляет базисные
+            e₁=(1,0,0), e₂=(0,1,0), e₃=(0,0,1). Эти три образа — столбцы матрицы.
+          </p>
+        </div>
+
         <p>
-          Серый куб — исходное пространство. Цветной — результат применения одной и той же
-          линейной функции ко всем вершинам. Красная, зелёная и синяя линии — образы базисных
-          векторов e₁, e₂, e₃; именно они являются столбцами матрицы.
+          Серый куб — исходный набор точек. Цветной — те же точки после применения A.
+          Красная, зелёная и синяя линии показывают Ae₁, Ae₂ и Ae₃.
         </p>
 
         <div className="lab-modes">
-          {(["scale", "shear", "rotate", "projection"] as Mode[]).map((item) => (
+          {(["scale", "shear", "rotate", "projection", "reflection"] as Mode[]).map((item) => (
             <button
               key={item}
               className={mode === item ? "active" : ""}
               onClick={() => setMode(item)}
             >
               {item === "scale" && "Масштаб"}
-              {item === "shear" && "Сдвиг слоёв / shear"}
+              {item === "shear" && "Shear"}
               {item === "rotate" && "Поворот"}
-              {item === "projection" && "Проекция"}
+              {item === "projection" && "Схлопывание"}
+              {item === "reflection" && "Отражение"}
             </button>
           ))}
         </div>
 
         <label className="lab-slider">
-          <span>Сила преобразования</span>
+          <span>Параметр преобразования</span>
           <input
             type="range"
             min="0"
@@ -188,8 +236,9 @@ export function MatrixLab() {
             step="0.01"
             value={strength}
             onChange={(event) => setStrength(Number(event.target.value))}
+            disabled={mode === "reflection"}
           />
-          <b>{strength.toFixed(2)}</b>
+          <b>{mode === "reflection" ? "fixed" : strength.toFixed(2)}</b>
         </label>
 
         <div className="matrix-readout">
@@ -199,17 +248,34 @@ export function MatrixLab() {
         </div>
 
         <div className="lab-stats">
-          <div><span>det(A)</span><strong>{det.toFixed(3)}</strong></div>
-          <div><span>rank(A)</span><strong>{matrixRank}</strong></div>
-          <div><span>геометрия</span><strong>{label}</strong></div>
+          <div className="stat-tooltip">
+            <span>det(A)</span>
+            <strong>{det.toFixed(3)}</strong>
+            <small>Во сколько раз меняется ориентированный объём.</small>
+          </div>
+
+          <button
+            className="stat-tooltip stat-link"
+            onClick={() => (window.location.hash = "inverse-rank")}
+          >
+            <span>rank(A) ↗</span>
+            <strong>{matrixRank}</strong>
+            <small>Число независимых направлений после преобразования. Открыть тему ранга.</small>
+          </button>
+
+          <div className="stat-tooltip geometry-stat">
+            <span>что произошло с пространством?</span>
+            <strong>{geometry.title}</strong>
+            <small>{geometry.body}</small>
+          </div>
         </div>
 
         <div className="lab-note">
           <strong>Почему здесь нет обычного переноса?</strong>
           <p>
-            Перенос x ↦ x+b не является линейным преобразованием, потому что обычно не оставляет
-            начало координат на месте. Для него нужны аффинные/однородные координаты. Поэтому
-            лаборатория не смешивает translation с 3×3 линейными операторами.
+            Перенос x ↦ x+b обычно не оставляет ноль на месте, поэтому не является линейным
+            преобразованием ℝ³ в стандартных координатах. Для него используют аффинные или
+            однородные координаты.
           </p>
         </div>
       </div>
