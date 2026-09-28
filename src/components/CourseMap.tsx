@@ -64,7 +64,8 @@ function readLayout(): StoredLayout {
 }
 
 function progressForTopic(id: string) {
-  if (topics[id]?.chapterId !== "linear") return 0;
+  const chapterId = topics[id]?.chapterId;
+  if (chapterId !== "linear" && chapterId !== "vectors") return 0;
   const theory = loadSet(THEORY_KEY).has(id) ? 50 : 0;
   const tasks = practiceByTopic[id] ?? [];
   if (!tasks.length) return theory;
@@ -76,7 +77,7 @@ function progressForTopic(id: string) {
 
 function progressForChapter(chapterId: string) {
   const chapter = chapters.find((item) => item.id === chapterId);
-  if (!chapter || chapter.id !== "linear") return 0;
+  if (!chapter || (chapter.id !== "linear" && chapter.id !== "vectors")) return 0;
   const values = chapter.topicIds.map(progressForTopic);
   return values.length
     ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length)
