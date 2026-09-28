@@ -4,13 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { chapters, topicList, topics } from "./data/course";
 import { practiceByTopic } from "./data/practice";
 import { CourseMap } from "./components/CourseMap";
-import { CursorStudio } from "./components/CursorStudio";
 import { CustomCursor } from "./components/CustomCursor";
 import { HomePage } from "./components/HomePage";
 import { MathBackdrop } from "./components/MathBackdrop";
-import { SavedTheorems } from "./components/SavedTheorems";
 import { ScrollProgress } from "./components/ScrollProgress";
-import { ThemeStudio } from "./components/ThemeStudio";
+import { SettingsPanel } from "./components/SettingsPanel";
 import { TopicPage } from "./components/TopicPage";
 import { LEARNING_EVENT, loadSet, SOLVED_KEY, THEORY_KEY } from "./lib/learning";
 
@@ -30,7 +28,6 @@ function topicProgress(id: string) {
 
 export default function App() {
   const [route, setRoute] = useState(routeFromHash);
-  const [query, setQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [learningVersion, setLearningVersion] = useState(0);
   const mainRef = useRef<HTMLElement>(null);
@@ -57,27 +54,22 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!mainRef.current) return;
+    const root = mainRef.current;
+    if (!root) return;
+
+    const targets = root.querySelectorAll<HTMLElement>(".topic-hero, .map-header");
+    if (!targets.length) return;
+
     const ctx = gsap.context(() => {
       gsap.fromTo(
-        ".topic-hero, .map-header",
+        targets,
         { opacity: 0, y: 20, filter: "blur(8px)" },
         { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.68, ease: "power3.out" },
       );
-    }, mainRef);
+    }, root);
+
     return () => ctx.revert();
   }, [route]);
-
-  const results = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    if (!normalized) return [];
-    return topicList
-      .filter((topic) =>
-        topic.title.toLowerCase().includes(normalized) ||
-        topic.summary.toLowerCase().includes(normalized),
-      )
-      .slice(0, 8);
-  }, [query]);
 
   const linearIds = useMemo(
     () => chapters.find((chapter) => chapter.id === "linear")?.topicIds ?? [],
@@ -132,15 +124,15 @@ export default function App() {
                 {chapter.topicIds.map((id) => {
                   const item = topics[id];
                   if (!item) return null;
-                  const progress = topicProgress(id);
+                  const progress = item.chapterId === "linear" ? topicProgress(id) : 0;
                   return (
                     <button
                       key={id}
                       className={route === id ? "active" : ""}
                       onClick={() => (window.location.hash = id)}
-                      title={"Освоение: " + progress + "%"}
+                      title={item.chapterId === "linear" ? "Освоение: " + progress + "%" : undefined}
                     >
-                      <span>{progress >= 100 ? "●" : progress > 0 ? "◐" : "○"}</span>
+                      <span>{item.chapterId === "linear" ? (progress >= 100 ? "●" : progress > 0 ? "◐" : "○") : "·"}</span>
                       <em>§ {item.number}</em>
                       {item.title}
                     </button>
@@ -153,42 +145,12 @@ export default function App() {
       </aside>
 
       <div className="page-column">
-        <header className="topbar">
+        <header className="topbar topbar-minimal">
           <button className="mobile-menu" onClick={() => setSidebarOpen((value) => !value)}>
             ☰
           </button>
-
-          <div className="search-shell">
-            <span>⌕</span>
-            <input
-              placeholder="Поиск по курсу…"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-            {results.length > 0 && (
-              <div className="search-results">
-                {results.map((result) => (
-                  <button
-                    key={result.id}
-                    onClick={() => {
-                      window.location.hash = result.id;
-                      setQuery("");
-                    }}
-                  >
-                    <span>§ {result.number}</span>
-                    <strong>{result.title}</strong>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="topbar-actions">
-            <span className="progress-label">{linearProgress}% линала</span>
-            <SavedTheorems />
-            <CursorStudio />
-            <ThemeStudio />
-          </div>
+          <div className="topbar-spacer" />
+          <SettingsPanel />
         </header>
 
         <main ref={mainRef} className="main-content">
