@@ -1,7 +1,10 @@
 import {
   Background,
   Controls,
+  Handle,
+  MarkerType,
   MiniMap,
+  Position,
   ReactFlow,
   ReactFlowProvider,
   useNodesState,
@@ -9,8 +12,10 @@ import {
   type Node,
   type NodeProps,
 } from "@xyflow/react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { chapters, topicList, topics } from "../data/course";
+import { practiceByTopic } from "../data/practice";
+import { LEARNING_EVENT, loadSet, SOLVED_KEY, THEORY_KEY } from "../lib/learning";
 import type { GraphNodeData } from "../types/course";
 
 const STORAGE_KEY = "fsociety-course-map-layout-v1";
@@ -25,53 +30,85 @@ function readLayout(): StoredLayout {
   }
 }
 
+function progressForTopic(id: string) {
+  const theory = loadSet(THEORY_KEY).has(id) ? 50 : 0;
+  const tasks = practiceByTopic[id] ?? [];
+  if (!tasks.length) return theory;
+
+  const solved = loadSet(SOLVED_KEY);
+  const solvedCount = tasks.filter((task) => solved.has(task.id)).length;
+  return Math.round(theory + (solvedCount / tasks.length) * 50);
+}
+
 function TopicNodeCard({ id, data }: NodeProps) {
   const value = data as unknown as GraphNodeData;
 
   const rotate = (event: React.WheelEvent<HTMLDivElement>) => {
     if (!event.altKey) return;
     event.preventDefault();
-
-    const layout = readLayout();
-    const current = layout[id]?.rotation ?? value.rotation ?? 0;
-    const next = Math.round((current + Math.sign(event.deltaY) * 3) * 10) / 10;
-
-    layout[id] = {
-      x: layout[id]?.x ?? 0,
-      y: layout[id]?.y ?? 0,
-      rotation: next,
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
-    value.onRotate(id, next - current);
+    value.onRotate(id, Math.sign(event.deltaY) * 3);
   };
 
   return (
-    <div
-      className="map-topic-card"
-      onWheel={rotate}
-      style={{ transform: `rotate(${value.rotation ?? 0}deg)` }}
-      data-cursor="active"
-    >
-      <div className="map-topic-meta">
-        <span>§ {value.number}</span>
-        <span>{value.chapter}</span>
+    <>
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="map-handle map-handle-target"
+        isConnectable={false}
+      />
+      <div
+        className="map-topic-card"
+        onWheel={rotate}
+        style={{ transform: "rotate(" + (value.rotation ?? 0) + "deg)" }}
+        data-cursor="active"
+      >
+        <div className="map-topic-meta">
+          <span>§ {value.number}</span>
+          <span>{value.chapter}</span>
+        </div>
+        <strong>{value.label}</strong>
+        <p>{value.summary}</p>
+
+        <div className="map-progress-mini">
+          <i style={{ width: (value.progress ?? 0) + "%" }} />
+          <span>{value.progress ?? 0}%</span>
+        </div>
+
+        <div className="map-card-actions">
+          <button onClick={() => value.onOpen(id)}>Открыть тему →</button>
+          <span>
+            <button aria-label="Повернуть влево" onClick={() => value.onRotate(id, -6)}>↺</button>
+            <button aria-label="Повернуть вправо" onClick={() => value.onRotate(id, 6)}>↻</button>
+          </span>
+        </div>
+        <div className="map-node-hint">drag = move · alt + wheel / ↺↻ = rotate</div>
       </div>
-      <strong>{value.label}</strong>
-      <p>{value.summary}</p>
-      <div className="map-card-actions">
-        <button onClick={() => value.onOpen(id)}>Открыть тему →</button>
-        <span>
-          <button aria-label="Повернуть влево" onClick={() => value.onRotate(id, -6)}>↺</button>
-          <button aria-label="Повернуть вправо" onClick={() => value.onRotate(id, 6)}>↻</button>
-        </span>
-      </div>
-      <div className="map-node-hint">drag = move · alt + wheel / ↺↻ = rotate</div>
-    </div>
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="map-handle map-handle-source"
+        isConnectable={false}
+      />
+    </>
   );
 }
 
 function InnerCourseMap() {
   const stored = useMemo(() => readLayout(), []);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [progressVersion, setProgressVersion] = useState(0);
+
+  useEffect(() => {
+    const refresh = () => setProgressVersion((value) => value + 1);
+    window.addEventListener(LEARNING_EVENT, refresh);
+    return () => window.removeEventListener(LEARNING_EVENT, refresh);
+  }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle("map-overlay-open", fullscreen);
+    return () => document.body.classList.remove("map-overlay-open");
+  }, [fullscreen]);
 
   const rotateNode = useCallback((_id: string, _delta: number) => undefined, []);
   const openTopic = useCallback((id: string) => {
@@ -91,8 +128,8 @@ function InnerCourseMap() {
         position: saved
           ? { x: saved.x, y: saved.y }
           : {
-              x: chapterIndex * 330 + (localIndex % 2) * 55,
-              y: localIndex * 175 + (chapterIndex % 3) * 55,
+              x: chapterIndex * 360 + (localIndex % 2) * 70,
+              y: localIndex * 190 + (chapterIndex % 4) * 48,
             },
         data: {
           label: topic.title,
@@ -100,6 +137,7 @@ function InnerCourseMap() {
           chapter: chapter?.title ?? "",
           summary: topic.summary,
           rotation: saved?.rotation ?? 0,
+          progress: progressForTopic(topic.id),
           onOpen: openTopic,
           onRotate: rotateNode,
         } satisfies GraphNodeData,
@@ -113,17 +151,35 @@ function InnerCourseMap() {
         topic.prerequisites
           .filter((dependency) => Boolean(topics[dependency]))
           .map((dependency) => ({
-            id: `${dependency}->${topic.id}`,
+            id: dependency + "->" + topic.id,
             source: dependency,
             target: topic.id,
+            type: "smoothstep",
             animated: topic.chapterId === "linear",
             className: topic.chapterId === "linear" ? "edge-hot" : "edge-normal",
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+              width: 16,
+              height: 16,
+            },
           })),
       ),
     [],
   );
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+
+  useEffect(() => {
+    setNodes((current) =>
+      current.map((node) => ({
+        ...node,
+        data: {
+          ...node.data,
+          progress: progressForTopic(node.id),
+        },
+      })),
+    );
+  }, [progressVersion, setNodes]);
 
   const persist = useCallback(
     (nextNodes: Node[]) => {
@@ -174,17 +230,22 @@ function InnerCourseMap() {
   };
 
   return (
-    <section className="course-map-page">
+    <section className={"course-map-page " + (fullscreen ? "map-fullscreen" : "")}>
       <header className="map-header">
         <div>
-          <div className="eyebrow">KNOWLEDGE GRAPH / 18 CHAPTERS</div>
+          <div className="eyebrow">KNOWLEDGE GRAPH / {edges.length} DEPENDENCY LINKS</div>
           <h1>Карта курса</h1>
           <p>
-            Связи — это prerequisites. Узлы можно свободно таскать по полотну; рёбра остаются
-            прикреплёнными. Зажми Alt и крути колесо над карточкой, чтобы повернуть её.
+            Карточки можно свободно перемещать и вращать, но математические зависимости остаются
+            привязанными к ним. Стрелка A → B означает: тему A полезно знать до B.
           </p>
         </div>
-        <button className="ghost-button" onClick={resetLayout}>Сбросить расположение</button>
+        <div className="map-header-actions">
+          <button className="ghost-button" onClick={() => setFullscreen((value) => !value)}>
+            {fullscreen ? "× Закрыть full screen" : "⛶ Full screen"}
+          </button>
+          <button className="ghost-button" onClick={resetLayout}>Сбросить расположение</button>
+        </div>
       </header>
 
       <div className="map-stage">
@@ -196,15 +257,17 @@ function InnerCourseMap() {
           onNodeDragStop={(_event, _node, nextNodes) => persist(nextNodes)}
           fitView
           fitViewOptions={{ padding: 0.18 }}
-          minZoom={0.12}
-          maxZoom={1.8}
+          minZoom={0.08}
+          maxZoom={2.1}
           nodesDraggable
           panOnDrag
           zoomOnScroll
+          zoomOnPinch
           selectionOnDrag
+          edgesFocusable={false}
         >
           <Background gap={26} size={1} />
-          <MiniMap pannable zoomable />
+          <MiniMap pannable zoomable nodeStrokeWidth={2} />
           <Controls />
         </ReactFlow>
       </div>
