@@ -22,6 +22,17 @@ export interface ContentBlock {
   dependsOn?: string[];
 }
 
+export interface PracticeTask {
+  id: string;
+  title: string;
+  prompt: string;
+  type: "number" | "choice" | "text";
+  answer: string;
+  options?: string[];
+  hint?: string;
+  difficulty?: "base" | "medium" | "hard";
+}
+
 export interface Topic {
   id: string;
   number: string;
@@ -46,6 +57,7 @@ export interface GraphNodeData {
   chapter: string;
   summary: string;
   rotation: number;
+  progress?: number;
   onOpen: (id: string) => void;
   onRotate: (id: string, delta: number) => void;
 }
