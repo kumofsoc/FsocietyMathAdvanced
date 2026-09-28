@@ -1107,3 +1107,5 @@ body.map-overlay-open { overflow: hidden; }
   .home-actions button { width: 100%; }
   .home-stats strong { font-size: 20px; }
 }
+
+body.lab-overlay-open { overflow: hidden; }
