@@ -3,7 +3,7 @@ import { CURSOR_EVENT, CURSOR_KEY, type CursorMode } from "./CustomCursor";
 import { LEARNING_EVENT, loadSavedTheorems, saveTheorems } from "../lib/learning";
 
 type Theme = Record<string, string>;
-type MotionProfile = "full" | "balanced" | "eco";
+type MotionProfile = "full" | "balanced" | "eco" | "off";
 
 const THEME_NAME_KEY = "math-theme-name";
 const THEME_CUSTOM_KEY = "math-theme-custom";
@@ -287,13 +287,14 @@ export function SettingsPanel() {
                 <section>
                   <div className="settings-section-copy">
                     <h3>Профиль анимаций</h3>
-                    <p>Анимации не отключаются: меняется плотность, частота обновления и тяжесть 3D-эффектов.</p>
+                    <p>Можно выбрать полный визуальный режим, облегчённые профили или полностью статичный интерфейс без анимаций.</p>
                   </div>
                   <div className="motion-profile-grid">
                     {[
                       ["full", "Full", "Максимум GSAP / Three.js. Для мощного desktop."],
                       ["balanced", "Balanced", "Полный визуальный язык, но меньше GPU-нагрузка. По умолчанию."],
                       ["eco", "Eco", "Сохраняет переходы и scroll-story, но снижает частицы и тяжёлые эффекты."],
+                      ["off", "Off", "0 анимаций: без GSAP, motion-переходов, автодвижения Three.js и декоративных трансформаций."],
                     ].map(([id, title, copy]) => (
                       <button
                         key={id}
