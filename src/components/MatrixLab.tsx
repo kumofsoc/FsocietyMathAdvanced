@@ -1,6 +1,6 @@
 import { Canvas } from "@react-three/fiber";
 import { Line, OrbitControls } from "@react-three/drei";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Matrix3 = [
   [number, number, number],
@@ -178,6 +178,18 @@ export function MatrixLab() {
   const det = determinant(matrix);
   const matrixRank = rank(matrix);
   const geometry = geometryCopy(det, matrixRank);
+
+  useEffect(() => {
+    document.body.classList.toggle("lab-overlay-open", fullscreen);
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setFullscreen(false);
+    };
+    window.addEventListener("keydown", close);
+    return () => {
+      document.body.classList.remove("lab-overlay-open");
+      window.removeEventListener("keydown", close);
+    };
+  }, [fullscreen]);
 
   return (
     <section className={"matrix-lab " + (fullscreen ? "is-fullscreen" : "")}>
