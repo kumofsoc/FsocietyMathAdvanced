@@ -19,6 +19,7 @@ import { DeterminantVisual } from "./DeterminantVisual";
 import { RichMatrixText } from "./MatrixNotation";
 import { VectorVisualInsert } from "./VectorVisuals";
 import { GeometryVisualInsert } from "./GeometryVisuals";
+import { QuadricSurfaceLab } from "./QuadricSurfaceLab";
 import { PracticePanel } from "./PracticePanel";
 
 const labels: Record<BlockKind, string> = {
@@ -419,6 +420,7 @@ export function TopicPage({ topic }: { topic: Topic }) {
             {topic.id === "determinants" && block.title.includes("Определитель 3-го порядка") && <DeterminantVisual />}
             <VectorVisualInsert topicId={topic.id} index={index} />
             <GeometryVisualInsert topicId={topic.id} index={index} />
+            {topic.id === "quadrics" && index === 1 && <QuadricSurfaceLab />}
           </div>
         ))}
       </section>
