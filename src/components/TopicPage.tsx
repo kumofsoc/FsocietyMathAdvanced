@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { BlockMath } from "react-katex";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { chapters, topicList, topics } from "../data/course";
