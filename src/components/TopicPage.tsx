@@ -17,6 +17,7 @@ import { MatrixLab } from "./MatrixLab";
 import { MatrixTypesGallery } from "./MatrixTypesGallery";
 import { DeterminantVisual } from "./DeterminantVisual";
 import { RichMatrixText } from "./MatrixNotation";
+import { VectorVisualInsert } from "./VectorVisuals";
 import { PracticePanel } from "./PracticePanel";
 
 const labels: Record<BlockKind, string> = {
@@ -296,7 +297,7 @@ function NeighborNav({ topic }: { topic: Topic }) {
 
 export function TopicPage({ topic }: { topic: Topic }) {
   const chapter = chapters.find((item) => item.id === topic.chapterId);
-  const isLinear = topic.chapterId === "linear";
+  const tracksLearning = topic.chapterId === "linear" || topic.chapterId === "vectors";
   const theorySentinel = useRef<HTMLDivElement>(null);
   const [theoryRead, setTheoryRead] = useState(() => loadSet(THEORY_KEY).has(topic.id));
   const [solved, setSolved] = useState(() => loadSet(SOLVED_KEY));
@@ -329,7 +330,7 @@ export function TopicPage({ topic }: { topic: Topic }) {
 
   useEffect(() => {
     const target = theorySentinel.current;
-    if (!isLinear || !target || theoryRead) return;
+    if (!tracksLearning || !target || theoryRead) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -345,7 +346,7 @@ export function TopicPage({ topic }: { topic: Topic }) {
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [topic.id, theoryRead, isLinear]);
+  }, [topic.id, theoryRead, tracksLearning]);
 
   const tasks = practiceByTopic[topic.id] ?? [];
   const solvedCount = useMemo(
@@ -415,13 +416,14 @@ export function TopicPage({ topic }: { topic: Topic }) {
             <ContentCard topic={topic} block={block} index={index} />
             {topic.id === "matrices" && index === 0 && <MatrixTypesGallery />}
             {topic.id === "determinants" && block.title.includes("Определитель 3-го порядка") && <DeterminantVisual />}
+            <VectorVisualInsert topicId={topic.id} index={index} />
           </div>
         ))}
       </section>
 
       {topic.hasLab && <MatrixLab />}
 
-      {isLinear && <div className="theory-finish" ref={theorySentinel}>
+      {tracksLearning && <div className="theory-finish" ref={theorySentinel}>
         <span>{theoryRead ? "✓" : "↓"}</span>
         <div>
           <strong>{theoryRead ? "Теоретический маршрут пройден" : "Финиш теоретической части"}</strong>
@@ -433,7 +435,7 @@ export function TopicPage({ topic }: { topic: Topic }) {
         </div>
       </div>}
 
-      {isLinear && <PracticePanel topicId={topic.id} />}
+      {tracksLearning && <PracticePanel topicId={topic.id} />}
 
       <NeighborNav topic={topic} />
     </div>
