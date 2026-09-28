@@ -31,6 +31,7 @@ function readLayout(): StoredLayout {
 }
 
 function progressForTopic(id: string) {
+  if (topics[id]?.chapterId !== "linear") return 0;
   const theory = loadSet(THEORY_KEY).has(id) ? 50 : 0;
   const tasks = practiceByTopic[id] ?? [];
   if (!tasks.length) return theory;
