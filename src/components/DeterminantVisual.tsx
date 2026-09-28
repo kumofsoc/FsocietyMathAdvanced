@@ -73,6 +73,35 @@ export function DeterminantVisual() {
         </article>
       </div>
 
+      <div className="det-row-extension">
+        <div className="det-card-title">
+          <span>3×3 / ВАРИАНТ 2</span>
+          <strong>Первые две строки дописываем снизу</strong>
+        </div>
+        <div className="det-row-extension-layout">
+          <div className="det-five-rows">
+            {[
+              ["2","1","3"],
+              ["5","3","2"],
+              ["1","4","3"],
+              ["2","1","3"],
+              ["5","3","2"],
+            ].map((row, rowIndex) => (
+              <div className={rowIndex >= 3 ? "repeated" : ""} key={rowIndex}>
+                {row.map((value, columnIndex) => (
+                  <span key={columnIndex}>{value}</span>
+                ))}
+              </div>
+            ))}
+          </div>
+          <div className="det-row-extension-copy">
+            <p><b>↘ плюс:</b> читаем три нисходящие вправо диагонали.</p>
+            <p><b>↙ минус:</b> читаем три нисходящие влево диагонали.</p>
+            <small>Это тот же Саррюс, только рисунок развёрнут вертикально: вместо двух столбцов справа повторяются две строки снизу.</small>
+          </div>
+        </div>
+      </div>
+
       <div className="det-plain-example">
         <span>ОБЫЧНЫЙ ПРИМЕР</span>
         <div className="det-plain-line">
