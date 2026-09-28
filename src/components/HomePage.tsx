@@ -1,13 +1,32 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { motion } from "framer-motion";
-import { useLayoutEffect, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { chapters, topicList } from "../data/course";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export function HomePage({ progress }: { progress: number }) {
   const root = useRef<HTMLDivElement>(null);
+  const liveMetrics = useMemo(
+    () => [
+      { value: progress + "%", label: "текущий прогресс" },
+      { value: "8", label: "свойств определителя" },
+      { value: "3D", label: "интерактивная лаборатория" },
+      { value: "∞", label: "маршрутов по карте" },
+    ],
+    [progress],
+  );
+  const [metricIndex, setMetricIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setMetricIndex((current) => (current + 1) % liveMetrics.length);
+    }, 2300);
+    return () => window.clearInterval(timer);
+  }, [liveMetrics.length]);
+
+  const liveMetric = liveMetrics[metricIndex];
 
   useLayoutEffect(() => {
     const element = root.current;
@@ -155,7 +174,21 @@ export function HomePage({ progress }: { progress: number }) {
           <div className="home-stats" data-reveal>
             <div><strong>{chapters.length}</strong><span>глав в архитектуре</span></div>
             <div><strong>{topicList.length}</strong><span>узлов знаний</span></div>
-            <div><strong>{progress}%</strong><span>линейной алгебры</span></div>
+            <div className="home-live-stat">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={liveMetric.value + liveMetric.label}
+                  className="home-live-stat-inner"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.28 }}
+                >
+                  <strong>{liveMetric.value}</strong>
+                  <span>{liveMetric.label}</span>
+                </motion.span>
+              </AnimatePresence>
+            </div>
           </div>
         </div>
 
@@ -252,8 +285,19 @@ export function HomePage({ progress }: { progress: number }) {
         <div className="home-panel-inner progress-layout">
           <div className="home-progress-orbit" data-float>
             <div>
-              <strong>{progress}%</strong>
-              <span>ПРОГРЕСС КУРСА</span>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={"orbit-" + liveMetric.value + liveMetric.label}
+                  className="orbit-live-metric"
+                  initial={{ opacity: 0, scale: 0.88, y: 8 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 1.08, y: -8 }}
+                  transition={{ duration: 0.34 }}
+                >
+                  <strong>{liveMetric.value}</strong>
+                  <span>{liveMetric.label.toUpperCase()}</span>
+                </motion.div>
+              </AnimatePresence>
             </div>
           </div>
 
@@ -269,6 +313,52 @@ export function HomePage({ progress }: { progress: number }) {
               <span><i /> теория · пройдена</span>
               <span><i /> практика · проверена</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="home-panel home-panel-guide">
+        <div className="home-panel-inner guide-layout">
+          <div className="home-story-copy">
+            <div className="eyebrow" data-reveal>HOW TO USE THE SYSTEM</div>
+            <h2 data-reveal>Где что находится — без необходимости разбираться в интерфейсе наугад.</h2>
+            <p data-reveal>
+              Сайт устроен как рабочая среда: навигация, карта зависимостей, теория,
+              доказательства, интерактивы и практика разделены по ролям, но связаны между собой.
+            </p>
+          </div>
+
+          <div className="home-guide-grid">
+            <article data-reveal>
+              <span>01</span>
+              <strong>Левая панель</strong>
+              <p>Главы и темы. Раскрывай разделы, переходи между темами и следи за прогрессом.</p>
+            </article>
+            <article data-reveal>
+              <span>02</span>
+              <strong>Карта курса</strong>
+              <p>Показывает prerequisites. Узлы можно двигать, вращать и менять размер, связи остаются привязаны.</p>
+            </article>
+            <article data-reveal>
+              <span>03</span>
+              <strong>Карточка свойства</strong>
+              <p>Формула, термин, затем отдельные кнопки «Доказательство» и «Следствие».</p>
+            </article>
+            <article data-reveal>
+              <span>04</span>
+              <strong>3D-лаборатория</strong>
+              <p>Не иллюстрация ради красоты: меняй преобразование и наблюдай det(A), rank(A) и образы базиса.</p>
+            </article>
+            <article data-reveal>
+              <span>05</span>
+              <strong>Назад / вперёд</strong>
+              <p>История сохраняет переходы и позицию чтения, поэтому можно уйти по ссылке и вернуться точно назад.</p>
+            </article>
+            <article data-reveal>
+              <span>06</span>
+              <strong>Настройки</strong>
+              <p>Темы, кастомные цвета, курсоры, профиль анимаций и сохранённые теоремы находятся в одном месте.</p>
+            </article>
           </div>
         </div>
       </section>
