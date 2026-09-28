@@ -173,6 +173,8 @@ function ChapterGroupCard({ id, data }: NodeProps) {
   );
 }
 
+const nodeTypes = { topic: TopicNodeCard, group: ChapterGroupCard };
+
 function chapterForTopic(topicId: string) {
   return topics[topicId]?.chapterId;
 }
@@ -406,7 +408,7 @@ function InnerCourseMap() {
           key={activeChapterId ?? "overview"}
           nodes={hydratedNodes}
           edges={edges}
-          nodeTypes={{ topic: TopicNodeCard, group: ChapterGroupCard }}
+          nodeTypes={nodeTypes}
           onNodesChange={onNodesChange}
           onNodeDragStop={(_event, _node, nextNodes) => persist(nextNodes)}
           fitView
