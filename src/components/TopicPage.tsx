@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { BlockMath } from "react-katex";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { chapters, topicList, topics } from "../data/course";
+import { topicMeta } from "../data/courseMeta";
 import { practiceByTopic } from "../data/practice";
 import {
   LEARNING_EVENT,
@@ -295,8 +296,10 @@ function NeighborNav({ topic }: { topic: Topic }) {
 
 export function TopicPage({ topicId }: { topicId: string }) {
   const topic = topics[topicId];
+  const meta = topicMeta[topicId];
   const chapter = chapters.find((item) => item.id === topic.chapterId);
   const tracksLearning = isTrackedTopic(topic.id);
+  const isPlanned = Boolean(meta?.isStub);
   const theorySentinel = useRef<HTMLDivElement>(null);
   const [activeBlock, setActiveBlock] = useState(0);
   const [theoryRead, setTheoryRead] = useState(() => loadSet(THEORY_KEY).has(topic.id));
@@ -401,9 +404,10 @@ export function TopicPage({ topicId }: { topicId: string }) {
 
   return (
     <div className="topic-page">
-      <header className="topic-hero">
+      <header className={"topic-hero " + (isPlanned ? "planned-topic-hero" : "")}>
         <div className="eyebrow">
           ГЛАВА {chapter?.number} / § {topic.number} · {chapter?.title}
+          {isPlanned ? " · PLANNED" : ""}
         </div>
         <div className="hero-title-row">
           <div>
@@ -441,7 +445,24 @@ export function TopicPage({ topicId }: { topicId: string }) {
         )}
       </header>
 
-      <div className="topic-outline">
+      {isPlanned && (
+        <section className="planned-topic-banner">
+          <div>
+            <span>ROADMAP / PLANNED MODULE</span>
+            <h2>Структура темы уже включена в курс, но глубокий материал ещё не подключён.</h2>
+            <p>
+              Эта тема сохранена в графе зависимостей и последовательности курса. Когда модуль
+              будет развёрнут, здесь появятся определения, свойства, доказательства,
+              визуализации и полноценный банк задач — без смены URL и структуры навигации.
+            </p>
+          </div>
+          <button onClick={() => (window.location.hash = "map")}>
+            Посмотреть место на карте →
+          </button>
+        </section>
+      )}
+
+      {!isPlanned && <div className="topic-outline">
         {topic.blocks.map((block, index) => (
           <button
             type="button"
@@ -453,7 +474,7 @@ export function TopicPage({ topicId }: { topicId: string }) {
             {String(index + 1).padStart(2, "0")} · {block.title}
           </button>
         ))}
-      </div>
+      </div>}
 
       <section className="lesson-content">
         {topic.blocks.map((block, index) => (
@@ -474,9 +495,9 @@ export function TopicPage({ topicId }: { topicId: string }) {
         ))}
       </section>
 
-      <TopicLabInsert topicId={topic.id} enabled={Boolean(topic.hasLab)} />
+      {!isPlanned && <TopicLabInsert topicId={topic.id} enabled={Boolean(topic.hasLab)} />}
 
-      {tracksLearning && <div className="theory-finish" ref={theorySentinel}>
+      {!isPlanned && tracksLearning && <div className="theory-finish" ref={theorySentinel}>
         <span>{theoryRead ? "✓" : "↓"}</span>
         <div>
           <strong>{theoryRead ? "Теоретический маршрут пройден" : "Финиш теоретической части"}</strong>
@@ -488,7 +509,7 @@ export function TopicPage({ topicId }: { topicId: string }) {
         </div>
       </div>}
 
-      {tracksLearning && <PracticePanel topicId={topic.id} />}
+      {!isPlanned && tracksLearning && <PracticePanel topicId={topic.id} />}
 
       <NeighborNav topic={topic} />
     </div>
