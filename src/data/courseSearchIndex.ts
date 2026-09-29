@@ -6144,4 +6144,424 @@ export const courseSearchIndex: CourseSearchEntry[] = [
     "title": "Итог",
     "kind": "summary"
   },
+  {
+    "topicId": "complex-functions",
+    "index": 0,
+    "title": "74.1 · Комплексная функция",
+    "kind": "definition"
+  },
+  {
+    "topicId": "complex-functions",
+    "index": 1,
+    "title": "74.2 · Комплексная производная",
+    "kind": "definition"
+  },
+  {
+    "topicId": "complex-functions",
+    "index": 2,
+    "title": "Теорема 74.1 · Условия Коши–Римана",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "complex-functions",
+    "index": 3,
+    "title": "Откуда берутся условия Коши–Римана",
+    "kind": "proof"
+  },
+  {
+    "topicId": "complex-functions",
+    "index": 4,
+    "title": "74.3 · Голоморфная функция",
+    "kind": "definition"
+  },
+  {
+    "topicId": "complex-functions",
+    "index": 5,
+    "title": "Теорема 74.2 · Гармоничность компонент",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "complex-functions",
+    "index": 6,
+    "title": "74.4 · Комплексная экспонента",
+    "kind": "formula"
+  },
+  {
+    "topicId": "complex-functions",
+    "index": 7,
+    "title": "74.5 · Периодичность экспоненты",
+    "kind": "property"
+  },
+  {
+    "topicId": "complex-functions",
+    "index": 8,
+    "title": "74.6 · Комплексный логарифм",
+    "kind": "concepts"
+  },
+  {
+    "topicId": "complex-functions",
+    "index": 9,
+    "title": "Итог",
+    "kind": "summary"
+  },
+  {
+    "topicId": "complex-integration",
+    "index": 0,
+    "title": "75.1 · Комплексный контурный интеграл",
+    "kind": "definition"
+  },
+  {
+    "topicId": "complex-integration",
+    "index": 1,
+    "title": "75.2 · Линейность и смена ориентации",
+    "kind": "property"
+  },
+  {
+    "topicId": "complex-integration",
+    "index": 2,
+    "title": "Теорема 75.1 · Оценка ML",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "complex-integration",
+    "index": 3,
+    "title": "Теорема 75.2 · Интегральная теорема Коши",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "complex-integration",
+    "index": 4,
+    "title": "Независимость интеграла от пути",
+    "kind": "corollary"
+  },
+  {
+    "topicId": "complex-integration",
+    "index": 5,
+    "title": "Теорема 75.3 · Интегральная формула Коши",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "complex-integration",
+    "index": 6,
+    "title": "75.4 · Формула Коши для производных",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "complex-integration",
+    "index": 7,
+    "title": "Голоморфность означает бесконечную дифференцируемость",
+    "kind": "corollary"
+  },
+  {
+    "topicId": "complex-integration",
+    "index": 8,
+    "title": "Пример 75.1 · Интеграл Коши",
+    "kind": "example"
+  },
+  {
+    "topicId": "complex-integration",
+    "index": 9,
+    "title": "Итог",
+    "kind": "summary"
+  },
+  {
+    "topicId": "laurent-series",
+    "index": 0,
+    "title": "76.1 · Степенные ряды в ℂ",
+    "kind": "concepts"
+  },
+  {
+    "topicId": "laurent-series",
+    "index": 1,
+    "title": "Теорема 76.1 · Аналитичность голоморфной функции",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "laurent-series",
+    "index": 2,
+    "title": "76.2 · Ряд Лорана",
+    "kind": "definition"
+  },
+  {
+    "topicId": "laurent-series",
+    "index": 3,
+    "title": "76.3 · Кольцо сходимости",
+    "kind": "concepts"
+  },
+  {
+    "topicId": "laurent-series",
+    "index": 4,
+    "title": "76.4 · Главная часть",
+    "kind": "definition"
+  },
+  {
+    "topicId": "laurent-series",
+    "index": 5,
+    "title": "76.5 · Устранимая особая точка",
+    "kind": "definition"
+  },
+  {
+    "topicId": "laurent-series",
+    "index": 6,
+    "title": "76.6 · Полюс",
+    "kind": "definition"
+  },
+  {
+    "topicId": "laurent-series",
+    "index": 7,
+    "title": "76.7 · Существенная особая точка",
+    "kind": "definition"
+  },
+  {
+    "topicId": "laurent-series",
+    "index": 8,
+    "title": "Пример 76.1 · e^{1/z}",
+    "kind": "example"
+  },
+  {
+    "topicId": "laurent-series",
+    "index": 9,
+    "title": "Итог",
+    "kind": "summary"
+  },
+  {
+    "topicId": "residues",
+    "index": 0,
+    "title": "77.1 · Вычет",
+    "kind": "definition"
+  },
+  {
+    "topicId": "residues",
+    "index": 1,
+    "title": "77.2 · Простой полюс",
+    "kind": "formula"
+  },
+  {
+    "topicId": "residues",
+    "index": 2,
+    "title": "77.3 · Полюс порядка m",
+    "kind": "formula"
+  },
+  {
+    "topicId": "residues",
+    "index": 3,
+    "title": "Теорема 77.1 · Теорема о вычетах",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "residues",
+    "index": 4,
+    "title": "Почему остаётся только коэффициент a₋₁",
+    "kind": "proof"
+  },
+  {
+    "topicId": "residues",
+    "index": 5,
+    "title": "Как решать интегралы вычетами",
+    "kind": "algorithm"
+  },
+  {
+    "topicId": "residues",
+    "index": 6,
+    "title": "Пример 77.1 · Рациональная функция",
+    "kind": "example"
+  },
+  {
+    "topicId": "residues",
+    "index": 7,
+    "title": "77.4 · Вещественные несобственные интегралы",
+    "kind": "concepts"
+  },
+  {
+    "topicId": "residues",
+    "index": 8,
+    "title": "Пример 77.2 · Классический интеграл",
+    "kind": "example"
+  },
+  {
+    "topicId": "residues",
+    "index": 9,
+    "title": "Итог",
+    "kind": "summary"
+  },
+  {
+    "topicId": "laplace",
+    "index": 0,
+    "title": "78.1 · Преобразование Лапласа",
+    "kind": "definition"
+  },
+  {
+    "topicId": "laplace",
+    "index": 1,
+    "title": "78.2 · Почему преобразование сходится",
+    "kind": "concepts"
+  },
+  {
+    "topicId": "laplace",
+    "index": 2,
+    "title": "78.3 · Линейность",
+    "kind": "property"
+  },
+  {
+    "topicId": "laplace",
+    "index": 3,
+    "title": "78.4 · Базовые образы",
+    "kind": "formula"
+  },
+  {
+    "topicId": "laplace",
+    "index": 4,
+    "title": "78.5 · Сдвиг по частоте",
+    "kind": "property"
+  },
+  {
+    "topicId": "laplace",
+    "index": 5,
+    "title": "78.6 · Производная",
+    "kind": "property"
+  },
+  {
+    "topicId": "laplace",
+    "index": 6,
+    "title": "78.7 · Производные высших порядков",
+    "kind": "formula"
+  },
+  {
+    "topicId": "laplace",
+    "index": 7,
+    "title": "Теорема 78.1 · Свёртка",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "laplace",
+    "index": 8,
+    "title": "78.8 · Свёртка",
+    "kind": "definition"
+  },
+  {
+    "topicId": "laplace",
+    "index": 9,
+    "title": "Итог",
+    "kind": "summary"
+  },
+  {
+    "topicId": "inverse-laplace",
+    "index": 0,
+    "title": "79.1 · Задача обращения",
+    "kind": "definition"
+  },
+  {
+    "topicId": "inverse-laplace",
+    "index": 1,
+    "title": "79.2 · Единственность оригинала",
+    "kind": "concepts"
+  },
+  {
+    "topicId": "inverse-laplace",
+    "index": 2,
+    "title": "79.3 · Рациональные образы",
+    "kind": "algorithm"
+  },
+  {
+    "topicId": "inverse-laplace",
+    "index": 3,
+    "title": "Пример 79.1 · Простые дроби",
+    "kind": "example"
+  },
+  {
+    "topicId": "inverse-laplace",
+    "index": 4,
+    "title": "79.4 · Первый сдвиг",
+    "kind": "property"
+  },
+  {
+    "topicId": "inverse-laplace",
+    "index": 5,
+    "title": "79.5 · Единичная ступень Хевисайда",
+    "kind": "definition"
+  },
+  {
+    "topicId": "inverse-laplace",
+    "index": 6,
+    "title": "79.6 · Второй сдвиг",
+    "kind": "property"
+  },
+  {
+    "topicId": "inverse-laplace",
+    "index": 7,
+    "title": "79.7 · Интеграл Бромвича",
+    "kind": "concepts"
+  },
+  {
+    "topicId": "inverse-laplace",
+    "index": 8,
+    "title": "Практика против общей теории",
+    "kind": "note"
+  },
+  {
+    "topicId": "inverse-laplace",
+    "index": 9,
+    "title": "Итог",
+    "kind": "summary"
+  },
+  {
+    "topicId": "laplace-ode",
+    "index": 0,
+    "title": "80.1 · Главная идея метода",
+    "kind": "concepts"
+  },
+  {
+    "topicId": "laplace-ode",
+    "index": 1,
+    "title": "Алгоритм решения задачи Коши",
+    "kind": "algorithm"
+  },
+  {
+    "topicId": "laplace-ode",
+    "index": 2,
+    "title": "Пример 80.1 · y'+y=1, y(0)=0",
+    "kind": "example"
+  },
+  {
+    "topicId": "laplace-ode",
+    "index": 3,
+    "title": "80.2 · Второй порядок",
+    "kind": "formula"
+  },
+  {
+    "topicId": "laplace-ode",
+    "index": 4,
+    "title": "80.3 · Передаточная функция",
+    "kind": "concepts"
+  },
+  {
+    "topicId": "laplace-ode",
+    "index": 5,
+    "title": "80.4 · Импульсная характеристика",
+    "kind": "property"
+  },
+  {
+    "topicId": "laplace-ode",
+    "index": 6,
+    "title": "80.5 · Ступенчатое воздействие",
+    "kind": "concepts"
+  },
+  {
+    "topicId": "laplace-ode",
+    "index": 7,
+    "title": "Пример 80.2 · Запаздывающий вход",
+    "kind": "example"
+  },
+  {
+    "topicId": "laplace-ode",
+    "index": 8,
+    "title": "Когда метод особенно хорош",
+    "kind": "note"
+  },
+  {
+    "topicId": "laplace-ode",
+    "index": 9,
+    "title": "Итог",
+    "kind": "summary"
+  },
 ];
