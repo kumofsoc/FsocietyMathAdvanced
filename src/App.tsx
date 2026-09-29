@@ -9,6 +9,7 @@ import { HistoryDock } from "./components/HistoryDock";
 import { MathBackdrop } from "./components/MathBackdrop";
 import { ScrollProgress } from "./components/ScrollProgress";
 import { SettingsPanel } from "./components/SettingsPanel";
+import { StubTopicPage } from "./components/StubTopicPage";
 import { LEARNING_EVENT } from "./lib/learning";
 import {
   getChapterProgress,
@@ -33,6 +34,13 @@ const CourseMap = lazy(() =>
 const TopicPage = lazy(() =>
   import("./components/TopicPage").then((module) => ({ default: module.TopicPage })),
 );
+
+const preloadTopicPage = () => {
+  void import("./components/TopicPage");
+};
+const preloadCourseMap = () => {
+  void import("./components/CourseMap");
+};
 
 function ChapterAccordion({
   chapter,
@@ -85,8 +93,16 @@ function ChapterAccordion({
                   <motion.button
                     key={id}
                     className={route === id ? "active" : ""}
+                    onMouseEnter={() => !item.isStub && preloadTopicPage()}
+                    onFocus={() => !item.isStub && preloadTopicPage()}
                     onClick={() => (window.location.hash = id)}
-                    title={tracked ? "Освоение: " + progress + "%" : undefined}
+                    title={
+                      item.isStub
+                        ? "Раздел запланирован"
+                        : tracked
+                          ? "Освоение: " + progress + "%"
+                          : undefined
+                    }
                     variants={{
                       closed: { opacity: 0, x: -8 },
                       open: { opacity: 1, x: 0 },
@@ -161,17 +177,21 @@ function SidebarProgressItem({
                 return (
                   <button
                     key={id}
-                    className={route === id ? "active" : ""}
+                    className={(route === id ? "active " : "") + (item.isStub ? "planned" : "")}
+                    onMouseEnter={() => !item.isStub && preloadTopicPage()}
+                    onFocus={() => !item.isStub && preloadTopicPage()}
                     onClick={() => (window.location.hash = id)}
                   >
                     <span className="sidebar-topic-state">
-                      {value >= 100 ? "●" : value > 0 ? "◐" : "○"}
+                      {item.isStub ? "◇" : value >= 100 ? "●" : value > 0 ? "◐" : "○"}
                     </span>
                     <span className="sidebar-topic-copy">
                       <em>§ {item.number}</em>
                       <strong>{item.title}</strong>
                     </span>
-                    <span className="sidebar-topic-progress">{value}%</span>
+                    <span className="sidebar-topic-progress">
+                      {item.isStub ? "PLAN" : value + "%"}
+                    </span>
                   </button>
                 );
               })}
@@ -348,7 +368,12 @@ export default function App() {
           </span>
         </button>
 
-        <button className="map-entry" onClick={() => (window.location.hash = "map")}>
+        <button
+          className="map-entry"
+          onMouseEnter={preloadCourseMap}
+          onFocus={preloadCourseMap}
+          onClick={() => (window.location.hash = "map")}
+        >
           <span>◌</span>
           Карта курса
           <b>{topicListMeta.length}</b>
@@ -456,6 +481,8 @@ export default function App() {
                   />
                 ) : route === "map" ? (
                   <CourseMap />
+                ) : topic?.isStub ? (
+                  <StubTopicPage topicId={topic.id} />
                 ) : topic ? (
                   <TopicPage topicId={topic.id} />
                 ) : (
