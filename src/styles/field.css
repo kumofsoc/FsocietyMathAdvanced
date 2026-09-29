@@ -255,3 +255,52 @@
     padding: 0 4px 4px;
   }
 }
+
+
+.field-preset-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.field-preset-row button {
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 7px;
+  cursor: pointer;
+}
+
+.field-preset-row button:hover {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent2) 42%, var(--border));
+  background: color-mix(in srgb, var(--accent2) 7%, var(--surface));
+}
+
+.div-curl-probe-ring {
+  fill: none;
+  stroke: color-mix(in srgb, var(--muted) 25%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 4 5;
+}
+
+.curl-indicator {
+  fill: none;
+  stroke: var(--formula);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.curl-indicator.negative {
+  stroke: var(--accent);
+}
+
+@media (max-width: 520px) {
+  .field-preset-row {
+    grid-template-columns: 1fr;
+  }
+}
