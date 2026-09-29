@@ -12,6 +12,7 @@ import {
   SOLVED_KEY,
   THEORY_KEY,
 } from "../lib/learning";
+import { isTrackedChapter } from "../lib/progress";
 import type { BlockKind, ContentBlock, Topic } from "../types/course";
 import { MatrixLab } from "./MatrixLab";
 import { MatrixTypesGallery } from "./MatrixTypesGallery";
@@ -312,8 +313,9 @@ function NeighborNav({ topic }: { topic: Topic }) {
 
 export function TopicPage({ topic }: { topic: Topic }) {
   const chapter = chapters.find((item) => item.id === topic.chapterId);
-  const tracksLearning = ["linear", "vectors", "plane-geometry", "space-geometry", "plane-transformations", "abstract-linear", "euclidean", "affine-general", "tensor-algebra", "analysis-intro", "indef-integral", "def-integral", "multivariable", "ode"].includes(topic.chapterId);
+  const tracksLearning = isTrackedChapter(topic.chapterId);
   const theorySentinel = useRef<HTMLDivElement>(null);
+  const [activeBlock, setActiveBlock] = useState(0);
   const [theoryRead, setTheoryRead] = useState(() => loadSet(THEORY_KEY).has(topic.id));
   const [solved, setSolved] = useState(() => loadSet(SOLVED_KEY));
 
@@ -330,6 +332,52 @@ export function TopicPage({ topic }: { topic: Topic }) {
     }, 140);
     return () => window.clearTimeout(timer);
   }, [topic.id]);
+
+  useEffect(() => {
+    setActiveBlock(0);
+
+    const frame = requestAnimationFrame(() => {
+      const nodes = Array.from(
+        document.querySelectorAll<HTMLElement>(
+          '[data-topic-block="' + topic.id + '"]',
+        ),
+      );
+      if (!nodes.length) return;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const visible = entries
+            .filter((entry) => entry.isIntersecting)
+            .sort(
+              (a, b) =>
+                Math.abs(a.boundingClientRect.top) -
+                Math.abs(b.boundingClientRect.top),
+            )[0];
+          if (!visible) return;
+
+          const index = Number(
+            (visible.target as HTMLElement).dataset.blockIndex ?? "0",
+          );
+          setActiveBlock(index);
+        },
+        {
+          rootMargin: "-18% 0px -64% 0px",
+          threshold: [0, 0.05, 0.2],
+        },
+      );
+
+      nodes.forEach((node) => observer.observe(node));
+      (window as Window & { __fsTopicObserver?: IntersectionObserver }).__fsTopicObserver?.disconnect();
+      (window as Window & { __fsTopicObserver?: IntersectionObserver }).__fsTopicObserver = observer;
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      const holder = window as Window & { __fsTopicObserver?: IntersectionObserver };
+      holder.__fsTopicObserver?.disconnect();
+      delete holder.__fsTopicObserver;
+    };
+  }, [topic.id, topic.blocks.length]);
 
   useEffect(() => {
     setTheoryRead(loadSet(THEORY_KEY).has(topic.id));
@@ -418,6 +466,8 @@ export function TopicPage({ topic }: { topic: Topic }) {
           <button
             type="button"
             key={block.title + "-outline"}
+            className={activeBlock === index ? "active" : ""}
+            aria-current={activeBlock === index ? "step" : undefined}
             onClick={() => document.getElementById("block-" + topic.id + "-" + index)?.scrollIntoView({ behavior: "smooth", block: "start" })}
           >
             {String(index + 1).padStart(2, "0")} · {block.title}
@@ -427,7 +477,13 @@ export function TopicPage({ topic }: { topic: Topic }) {
 
       <section className="lesson-content">
         {topic.blocks.map((block, index) => (
-          <div id={"block-" + topic.id + "-" + index} key={topic.id + "-" + block.title}>
+          <div
+            id={"block-" + topic.id + "-" + index}
+            key={topic.id + "-" + block.title}
+            className="lesson-block-anchor"
+            data-topic-block={topic.id}
+            data-block-index={index}
+          >
             <ContentCard topic={topic} block={block} index={index} />
             {topic.id === "matrices" && index === 0 && <MatrixTypesGallery />}
             {topic.id === "determinants" && block.title.includes("Определитель 3-го порядка") && <DeterminantVisual />}
