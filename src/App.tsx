@@ -291,11 +291,6 @@ export default function App() {
     [learningVersion],
   );
 
-  const linearProgress = useMemo(
-    () => getChapterProgress("linear", learningSnapshot),
-    [learningSnapshot],
-  );
-
   const trackedProgressRows = useMemo(() => {
     const snapshot = learningSnapshot;
     return chapters
