@@ -398,6 +398,146 @@ function VectorFieldLab() {
   );
 }
 
+
+function linearField(a: number, b: number, omega: number, [x, y]: V2): V2 {
+  return [a * x - omega * y, omega * x + b * y];
+}
+
+function DivCurlLab() {
+  const [a, setA] = useState(0.65);
+  const [b, setB] = useState(0.65);
+  const [omega, setOmega] = useState(0.7);
+
+  const divergence = a + b;
+  const curl = 2 * omega;
+
+  const arrows = useMemo(() => {
+    const result: Array<{ origin: V2; vector: V2; strength: number }> = [];
+    let maxStrength = 0;
+
+    for (let x = -4; x <= 4; x += 1) {
+      for (let y = -3; y <= 3; y += 1) {
+        const raw = linearField(a, b, omega, [x, y]);
+        const strength = norm(raw);
+        maxStrength = Math.max(maxStrength, strength);
+        result.push({ origin: [x, y], vector: raw, strength });
+      }
+    }
+
+    return result.map((item) => ({
+      ...item,
+      vector: normalize(item.vector),
+      strength: maxStrength > 0 ? item.strength / maxStrength : 0,
+    }));
+  }, [a, b, omega]);
+
+  return (
+    <section className="field-lab div-curl-lab">
+      <header>
+        <div className="eyebrow">NABLA LAB / DIV ↔ ROT</div>
+        <h2>Источник и вращение — независимые локальные характеристики поля.</h2>
+        <p>
+          Используем семейство F=(ax−ωy, ωx+by). Параметры a и b управляют
+          растяжением и div, а ω добавляет чистое вращение и меняет rot.
+        </p>
+      </header>
+
+      <div className="field-layout">
+        <div className="field-stage">
+          <svg viewBox={"0 0 " + W + " " + H}>
+            <Axes />
+            <g className="vector-field-arrows">
+              {arrows.map((arrow, index) => (
+                <g key={index} opacity={0.28 + arrow.strength * 0.68}>
+                  <Arrow
+                    origin={arrow.origin}
+                    vector={arrow.vector}
+                    className="field-grid-arrow"
+                    scale={0.48}
+                  />
+                </g>
+              ))}
+            </g>
+
+            <circle className="div-curl-probe-ring" cx={CX} cy={CY} r="58" />
+            {Math.abs(curl) > 0.02 && (
+              <path
+                className={curl > 0 ? "curl-indicator positive" : "curl-indicator negative"}
+                d={
+                  curl > 0
+                    ? "M 252 143 A 58 58 0 0 1 325 180"
+                    : "M 308 143 A 58 58 0 0 0 235 180"
+                }
+              />
+            )}
+          </svg>
+
+          <div className="field-stage-badges">
+            <span>div F = {divergence.toFixed(2)}</span>
+            <span>rot_z F = {curl.toFixed(2)}</span>
+            <span>
+              {Math.abs(divergence) < 0.02
+                ? "solenoidal"
+                : divergence > 0
+                  ? "source-like"
+                  : "sink-like"}
+            </span>
+          </div>
+        </div>
+
+        <aside className="field-controls">
+          <label>
+            <span>a</span>
+            <input type="range" min="-1.4" max="1.4" step="0.05" value={a}
+              onChange={(event) => setA(Number(event.target.value))} />
+            <b>{a.toFixed(2)}</b>
+          </label>
+          <label>
+            <span>b</span>
+            <input type="range" min="-1.4" max="1.4" step="0.05" value={b}
+              onChange={(event) => setB(Number(event.target.value))} />
+            <b>{b.toFixed(2)}</b>
+          </label>
+          <label>
+            <span>ω</span>
+            <input type="range" min="-1.4" max="1.4" step="0.05" value={omega}
+              onChange={(event) => setOmega(Number(event.target.value))} />
+            <b>{omega.toFixed(2)}</b>
+          </label>
+
+          <div className="field-preset-row">
+            <button onClick={() => { setA(0.8); setB(0.8); setOmega(0); }}>
+              Чистый источник
+            </button>
+            <button onClick={() => { setA(-0.8); setB(-0.8); setOmega(0); }}>
+              Чистый сток
+            </button>
+            <button onClick={() => { setA(0); setB(0); setOmega(0.85); }}>
+              Чистый вихрь
+            </button>
+            <button onClick={() => { setA(0.8); setB(-0.8); setOmega(0); }}>
+              div=0 седло
+            </button>
+          </div>
+
+          <div className="field-readout">
+            <div><span>div F</span><strong>a+b = {divergence.toFixed(2)}</strong></div>
+            <div><span>rot_z F</span><strong>2ω = {curl.toFixed(2)}</strong></div>
+            <div>
+              <span>класс</span>
+              <strong>
+                {Math.abs(divergence) < 0.02 ? "соленоидальное" : "с div≠0"}
+                {" · "}
+                {Math.abs(curl) < 0.02 ? "безвихревое" : "вихревое"}
+              </strong>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
 export function FieldVisualInsert({
   topicId,
   index,
@@ -407,5 +547,6 @@ export function FieldVisualInsert({
 }) {
   if (topicId === "scalar-field" && index === 2) return <ScalarFieldLab />;
   if (topicId === "vector-field" && index === 1) return <VectorFieldLab />;
+  if (topicId === "hamilton-operator" && index === 4) return <DivCurlLab />;
   return null;
 }
