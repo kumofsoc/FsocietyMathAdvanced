@@ -117,6 +117,11 @@ const SeriesVisualInsert = lazy(() =>
     default: module.SeriesVisualInsert,
   })),
 );
+const FieldVisualInsert = lazy(() =>
+  import("./FieldVisuals").then((module) => ({
+    default: module.FieldVisualInsert,
+  })),
+);
 
 const VECTOR_INSERTS = new Set([
   "vectors:1",
@@ -215,6 +220,10 @@ const SERIES_INSERTS = new Set([
   "numeric-series:1",
   "positive-series:8",
   "alternating-series:3",
+]);
+const FIELD_INSERTS = new Set([
+  "scalar-field:2",
+  "vector-field:1",
 ]);
 
 class VisualErrorBoundary extends Component<
@@ -388,6 +397,9 @@ export function TopicVisualInsert({
   }
   if (SERIES_INSERTS.has(identity)) {
     return shell(identity, () => <SeriesVisualInsert {...props} />);
+  }
+  if (FIELD_INSERTS.has(identity)) {
+    return shell(identity, () => <FieldVisualInsert {...props} />);
   }
 
   return null;
