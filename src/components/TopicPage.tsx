@@ -28,6 +28,7 @@ import { TensorVisualInsert } from "./TensorVisuals";
 import { AnalysisVisualInsert } from "./AnalysisVisuals";
 import { AnalysisAdvancedVisualInsert } from "./AnalysisAdvancedVisuals";
 import { IntegralVisualInsert } from "./IntegralVisuals";
+import { DefiniteIntegralVisualInsert } from "./DefiniteIntegralVisuals";
 import { PracticePanel } from "./PracticePanel";
 
 const labels: Record<BlockKind, string> = {
@@ -307,7 +308,7 @@ function NeighborNav({ topic }: { topic: Topic }) {
 
 export function TopicPage({ topic }: { topic: Topic }) {
   const chapter = chapters.find((item) => item.id === topic.chapterId);
-  const tracksLearning = ["linear", "vectors", "plane-geometry", "space-geometry", "plane-transformations", "abstract-linear", "euclidean", "affine-general", "tensor-algebra", "analysis-intro", "indef-integral"].includes(topic.chapterId);
+  const tracksLearning = ["linear", "vectors", "plane-geometry", "space-geometry", "plane-transformations", "abstract-linear", "euclidean", "affine-general", "tensor-algebra", "analysis-intro", "indef-integral", "def-integral"].includes(topic.chapterId);
   const theorySentinel = useRef<HTMLDivElement>(null);
   const [theoryRead, setTheoryRead] = useState(() => loadSet(THEORY_KEY).has(topic.id));
   const [solved, setSolved] = useState(() => loadSet(SOLVED_KEY));
@@ -437,6 +438,7 @@ export function TopicPage({ topic }: { topic: Topic }) {
             <AnalysisVisualInsert topicId={topic.id} index={index} />
             <AnalysisAdvancedVisualInsert topicId={topic.id} index={index} />
             <IntegralVisualInsert topicId={topic.id} index={index} />
+            <DefiniteIntegralVisualInsert topicId={topic.id} index={index} />
             {topic.id === "quadric-invariants" && index === 14 && <QuadricSurfaceLab />}
           </div>
         ))}
