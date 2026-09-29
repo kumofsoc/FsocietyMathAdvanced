@@ -20,7 +20,7 @@ function routeFromHash() {
 }
 
 function isTrackedChapter(id: string) {
-  return id === "linear" || id === "vectors" || id === "plane-geometry" || id === "space-geometry" || id === "plane-transformations" || id === "abstract-linear" || id === "euclidean" || id === "affine-general" || id === "tensor-algebra" || id === "analysis-intro" || id === "indef-integral" || id === "def-integral" || id === "multivariable";
+  return id === "linear" || id === "vectors" || id === "plane-geometry" || id === "space-geometry" || id === "plane-transformations" || id === "abstract-linear" || id === "euclidean" || id === "affine-general" || id === "tensor-algebra" || id === "analysis-intro" || id === "indef-integral" || id === "def-integral" || id === "multivariable" || id === "ode";
 }
 
 function topicProgress(id: string) {
