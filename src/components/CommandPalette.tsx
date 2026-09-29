@@ -6,8 +6,27 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
-import { chapters, topicListMeta } from "../data/courseMeta";
+import { chapters, topicListMeta, topicMeta } from "../data/courseMeta";
+import type { CourseSearchEntry } from "../data/courseSearchIndex";
 import { getLearningSnapshot, getTopicProgress } from "../lib/progress";
+
+const BLOCK_TARGET_KEY = "fsociety-block-target-v1";
+
+const kindLabels: Record<string, string> = {
+  definition: "ОПРЕДЕЛЕНИЕ",
+  concepts: "ПОНЯТИЯ",
+  property: "СВОЙСТВО",
+  theorem: "ТЕОРЕМА",
+  proof: "ДОКАЗАТЕЛЬСТВО",
+  corollary: "СЛЕДСТВИЕ",
+  formula: "ФОРМУЛА",
+  example: "ПРИМЕР",
+  solution: "РЕШЕНИЕ",
+  note: "ЗАМЕТКА",
+  algorithm: "АЛГОРИТМ",
+  geometry: "ГЕОМЕТРИЯ",
+  summary: "ИТОГ",
+};
 
 function searchableText(value: string) {
   return value.toLocaleLowerCase("ru-RU").replace(/ё/g, "е");
@@ -17,6 +36,8 @@ export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [deepIndex, setDeepIndex] = useState<CourseSearchEntry[]>([]);
+  const [deepIndexReady, setDeepIndexReady] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -47,16 +68,11 @@ export function CommandPalette() {
     const needle = searchableText(query.trim());
     const snapshot = getLearningSnapshot();
 
-    return topicListMeta
+    const topicResults = topicListMeta
       .map((topic) => {
         const chapter = chapters.find((item) => item.id === topic.chapterId);
         const haystack = searchableText(
-          [
-            topic.title,
-            topic.summary,
-            topic.number,
-            chapter?.title ?? "",
-          ].join(" "),
+          [topic.title, topic.summary, topic.number, chapter?.title ?? ""].join(" "),
         );
 
         let score = 0;
@@ -66,25 +82,66 @@ export function CommandPalette() {
             : getTopicProgress(topic.id, snapshot) > 0
               ? 3
               : 2;
-        }
-        else if (searchableText(topic.title).startsWith(needle)) score = 10;
-        else if (searchableText(topic.title).includes(needle)) score = 8;
-        else if (searchableText(chapter?.title ?? "").includes(needle)) score = 5;
-        else if (haystack.includes(needle)) score = 3;
+        } else if (searchableText(topic.title).startsWith(needle)) score = 12;
+        else if (searchableText(topic.title).includes(needle)) score = 10;
+        else if (searchableText(chapter?.title ?? "").includes(needle)) score = 6;
+        else if (haystack.includes(needle)) score = 4;
 
         return {
+          type: "topic" as const,
           topic,
           chapter,
           progress: getTopicProgress(topic.id, snapshot),
           score,
         };
       })
-      .filter((item) => item.score > 0)
-      .sort((a, b) => b.score - a.score || b.progress - a.progress)
-      .slice(0, 12);
-  }, [query]);
+      .filter((item) => item.score > 0);
 
-  const openTopic = (id: string) => {
+    const blockResults = needle
+      ? deepIndex
+          .map((entry) => {
+            const topic = topicMeta[entry.topicId];
+            const chapter = topic
+              ? chapters.find((item) => item.id === topic.chapterId)
+              : undefined;
+            if (!topic || topic.isStub) return null;
+
+            const title = searchableText(entry.title);
+            const kind = searchableText(kindLabels[entry.kind] ?? entry.kind);
+            let score = 0;
+            if (title.startsWith(needle)) score = 11;
+            else if (title.includes(needle)) score = 9;
+            else if (kind.includes(needle)) score = 5;
+            else if (
+              searchableText(topic.title + " " + (chapter?.title ?? "")).includes(needle)
+            ) {
+              score = 2;
+            }
+
+            if (!score) return null;
+            return {
+              type: "block" as const,
+              topic,
+              chapter,
+              progress: getTopicProgress(topic.id, snapshot),
+              score,
+              blockIndex: entry.index,
+              blockTitle: entry.title,
+              kind: entry.kind,
+            };
+          })
+          .filter((item): item is NonNullable<typeof item> => item !== null)
+      : [];
+
+    return [...topicResults, ...blockResults]
+      .sort((a, b) => b.score - a.score || b.progress - a.progress)
+      .slice(0, 14);
+  }, [query, deepIndex]);
+
+  const openTopic = (id: string, blockIndex?: number) => {
+    if (typeof blockIndex === "number") {
+      sessionStorage.setItem(BLOCK_TARGET_KEY, id + "::" + blockIndex);
+    }
     window.location.hash = id;
     setOpen(false);
   };
@@ -100,7 +157,11 @@ export function CommandPalette() {
       setActiveIndex((index) => (index - 1 + results.length) % results.length);
     } else if (event.key === "Enter") {
       event.preventDefault();
-      openTopic(results[Math.min(activeIndex, results.length - 1)].topic.id);
+      const selected = results[Math.min(activeIndex, results.length - 1)];
+      openTopic(
+        selected.topic.id,
+        selected.type === "block" ? selected.blockIndex : undefined,
+      );
     }
   };
 
@@ -142,7 +203,7 @@ export function CommandPalette() {
                     setActiveIndex(0);
                   }}
                   onKeyDown={onSearchKeyDown}
-                  placeholder="Тема, раздел, определитель, интеграл..."
+                  placeholder="Тема, теорема, свойство, доказательство, интеграл..."
                   aria-label="Поиск по курсу"
                 />
                 <kbd>ESC</kbd>
@@ -150,41 +211,63 @@ export function CommandPalette() {
 
               <div className="command-meta">
                 <span>{query ? "Результаты" : "Быстрый переход"}</span>
-                <small>{results.length} найдено</small>
+                <small>
+                  {results.length} найдено
+                  {open && !deepIndexReady ? " · индексируется…" : ""}
+                </small>
               </div>
 
               <div className="command-results">
-                {results.length ? results.map(({ topic, chapter, progress }, index) => (
-                  <button
-                    key={topic.id}
-                    className={
-                      (activeIndex === index ? "active " : "") +
-                      (topic.isStub ? "planned" : "")
-                    }
-                    onMouseEnter={() => {
-                      setActiveIndex(index);
-                      if (!topic.isStub) void import("./TopicPage");
-                    }}
-                    onFocus={() => {
-                      if (!topic.isStub) void import("./TopicPage");
-                    }}
-                    onClick={() => openTopic(topic.id)}
-                  >
-                    <span className="command-result-number">§ {topic.number}</span>
-                    <span className="command-result-copy">
-                      <strong>{topic.title}</strong>
-                      <small>{chapter?.title} · {topic.summary}</small>
-                    </span>
-                    {topic.isStub ? (
-                      <span className="command-result-plan">PLANNED</span>
-                    ) : (
-                      <span className="command-result-progress">
-                        <i><span style={{ width: progress + "%" }} /></i>
-                        <b>{progress}%</b>
+                {results.length ? results.map((result, index) => {
+                  const { topic, chapter, progress } = result;
+                  const isBlock = result.type === "block";
+                  const resultKey = isBlock
+                    ? topic.id + "::" + result.blockIndex
+                    : topic.id;
+
+                  return (
+                    <button
+                      key={resultKey}
+                      className={
+                        (activeIndex === index ? "active " : "") +
+                        (topic.isStub ? "planned " : "") +
+                        (isBlock ? "block-result" : "")
+                      }
+                      onMouseEnter={() => {
+                        setActiveIndex(index);
+                        if (!topic.isStub) void import("./TopicPage");
+                      }}
+                      onFocus={() => {
+                        if (!topic.isStub) void import("./TopicPage");
+                      }}
+                      onClick={() =>
+                        openTopic(topic.id, isBlock ? result.blockIndex : undefined)
+                      }
+                    >
+                      <span className="command-result-number">
+                        {isBlock
+                          ? kindLabels[result.kind] ?? result.kind.toUpperCase()
+                          : "§ " + topic.number}
                       </span>
-                    )}
-                  </button>
-                )) : (
+                      <span className="command-result-copy">
+                        <strong>{isBlock ? result.blockTitle : topic.title}</strong>
+                        <small>
+                          {isBlock
+                            ? "§ " + topic.number + " · " + topic.title + " · " + (chapter?.title ?? "")
+                            : (chapter?.title ?? "") + " · " + topic.summary}
+                        </small>
+                      </span>
+                      {topic.isStub ? (
+                        <span className="command-result-plan">PLANNED</span>
+                      ) : (
+                        <span className="command-result-progress">
+                          <i><span style={{ width: progress + "%" }} /></i>
+                          <b>{progress}%</b>
+                        </span>
+                      )}
+                    </button>
+                  );
+                }) : (
                   <div className="command-empty">
                     Ничего не найдено. Попробуй название темы или математический термин.
                   </div>
