@@ -1,17 +1,22 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { gsap } from "gsap";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { chapters, topicList, topics } from "./data/course";
-import { practiceByTopic } from "./data/practice";
-import { CourseMap } from "./components/CourseMap";
+import { CommandPalette } from "./components/CommandPalette";
 import { CustomCursor } from "./components/CustomCursor";
 import { HomePage } from "./components/HomePage";
 import { HistoryDock } from "./components/HistoryDock";
 import { MathBackdrop } from "./components/MathBackdrop";
 import { ScrollProgress } from "./components/ScrollProgress";
 import { SettingsPanel } from "./components/SettingsPanel";
-import { TopicPage } from "./components/TopicPage";
-import { LEARNING_EVENT, loadSet, SOLVED_KEY, THEORY_KEY } from "./lib/learning";
+import { LEARNING_EVENT } from "./lib/learning";
+import {
+  getChapterProgress,
+  getCourseProgress,
+  getLearningSnapshot,
+  getTopicProgress,
+  isTrackedChapter,
+} from "./lib/progress";
 import type { Chapter } from "./types/course";
 
 function routeFromHash() {
@@ -19,18 +24,12 @@ function routeFromHash() {
   return raw || "home";
 }
 
-function isTrackedChapter(id: string) {
-  return id === "linear" || id === "vectors" || id === "plane-geometry" || id === "space-geometry" || id === "plane-transformations" || id === "abstract-linear" || id === "euclidean" || id === "affine-general" || id === "tensor-algebra" || id === "analysis-intro" || id === "indef-integral" || id === "def-integral" || id === "multivariable" || id === "ode";
-}
-
-function topicProgress(id: string) {
-  const theory = loadSet(THEORY_KEY).has(id) ? 50 : 0;
-  const tasks = practiceByTopic[id] ?? [];
-  if (!tasks.length) return theory;
-  const solved = loadSet(SOLVED_KEY);
-  const practice = tasks.filter((task) => solved.has(task.id)).length / tasks.length;
-  return Math.round(theory + practice * 50);
-}
+const CourseMap = lazy(() =>
+  import("./components/CourseMap").then((module) => ({ default: module.CourseMap })),
+);
+const TopicPage = lazy(() =>
+  import("./components/TopicPage").then((module) => ({ default: module.TopicPage })),
+);
 
 function ChapterAccordion({
   chapter,
@@ -76,7 +75,7 @@ function ChapterAccordion({
                 const item = topics[id];
                 if (!item) return null;
                 const tracked = isTrackedChapter(item.chapterId);
-                const progress = tracked ? topicProgress(id) : 0;
+                const progress = tracked ? getTopicProgress(id) : 0;
                 return (
                   <motion.button
                     key={id}
@@ -151,7 +150,7 @@ function SidebarProgressItem({
               {chapter.topicIds.map((id) => {
                 const item = topics[id];
                 if (!item) return null;
-                const value = topicProgress(id);
+                const value = getTopicProgress(id);
                 return (
                   <button
                     key={id}
@@ -264,31 +263,25 @@ export default function App() {
     return () => ctx.revert();
   }, [route]);
 
-  const linearIds = useMemo(
-    () => chapters.find((chapter) => chapter.id === "linear")?.topicIds ?? [],
-    [],
-  );
-
-  const linearProgress = useMemo(() => {
-    if (!linearIds.length) return 0;
-    return Math.round(linearIds.reduce((sum, id) => sum + topicProgress(id), 0) / linearIds.length);
-  }, [linearIds, learningVersion]);
-
-  const trackedProgressRows = useMemo(
-    () =>
-      chapters
-        .filter((chapter) => isTrackedChapter(chapter.id))
-        .map((chapter) => ({
-          chapter,
-          progress: chapter.topicIds.length
-            ? Math.round(
-                chapter.topicIds.reduce((sum, id) => sum + topicProgress(id), 0) /
-                  chapter.topicIds.length,
-              )
-            : 0,
-        })),
+  const linearProgress = useMemo(
+    () => getChapterProgress("linear"),
     [learningVersion],
   );
+
+  const trackedProgressRows = useMemo(() => {
+    const snapshot = getLearningSnapshot();
+    return chapters
+      .filter((chapter) => isTrackedChapter(chapter.id))
+      .map((chapter) => ({
+        chapter,
+        progress: getChapterProgress(chapter.id, snapshot),
+      }));
+  }, [learningVersion]);
+
+  const courseProgress = useMemo(() => {
+    const snapshot = getLearningSnapshot();
+    return getCourseProgress(snapshot);
+  }, [learningVersion]);
 
   const topic = topics[route];
 
@@ -366,10 +359,26 @@ export default function App() {
 
       <div className="page-column">
         <header className="topbar topbar-minimal">
-          <button className="mobile-menu" onClick={() => setSidebarOpen((value) => !value)}>
+          <button
+            className="mobile-menu"
+            onClick={() => {
+              if (sidebarCollapsed) {
+                setSidebarCollapsed(false);
+                setSidebarOpen(true);
+              } else {
+                setSidebarOpen((value) => !value);
+              }
+            }}
+          >
             ☰
           </button>
+          <CommandPalette />
           <div className="topbar-spacer" />
+          <div className="topbar-course-progress" title="Общий прогресс по отслеживаемым разделам">
+            <span>COURSE</span>
+            <i><b style={{ width: courseProgress + "%" }} /></i>
+            <strong>{courseProgress}%</strong>
+          </div>
           <SettingsPanel />
         </header>
 
@@ -382,19 +391,28 @@ export default function App() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              {route === "home" ? (
-                <HomePage progress={linearProgress} />
-              ) : route === "map" ? (
-                <CourseMap />
-              ) : topic ? (
-                <TopicPage topic={topic} />
-              ) : (
-                <section className="not-found">
-                  <div className="eyebrow">404 / UNKNOWN TOPIC</div>
-                  <h1>Такой темы пока нет.</h1>
-                  <button onClick={() => (window.location.hash = "map")}>Открыть карту</button>
-                </section>
-              )}
+              <Suspense
+                fallback={
+                  <div className="route-loading" role="status">
+                    <span />
+                    <strong>Загружаю модуль…</strong>
+                  </div>
+                }
+              >
+                {route === "home" ? (
+                  <HomePage progress={linearProgress} />
+                ) : route === "map" ? (
+                  <CourseMap />
+                ) : topic ? (
+                  <TopicPage topic={topic} />
+                ) : (
+                  <section className="not-found">
+                    <div className="eyebrow">404 / UNKNOWN TOPIC</div>
+                    <h1>Такой темы пока нет.</h1>
+                    <button onClick={() => (window.location.hash = "map")}>Открыть карту</button>
+                  </section>
+                )}
+              </Suspense>
             </motion.div>
           </AnimatePresence>
         </main>
