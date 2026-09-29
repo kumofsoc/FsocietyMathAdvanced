@@ -311,7 +311,8 @@ function NeighborNav({ topic }: { topic: Topic }) {
   );
 }
 
-export function TopicPage({ topic }: { topic: Topic }) {
+export function TopicPage({ topicId }: { topicId: string }) {
+  const topic = topics[topicId];
   const chapter = chapters.find((item) => item.id === topic.chapterId);
   const tracksLearning = isTrackedChapter(topic.chapterId);
   const theorySentinel = useRef<HTMLDivElement>(null);
