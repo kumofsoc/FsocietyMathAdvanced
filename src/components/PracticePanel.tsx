@@ -15,6 +15,42 @@ function normalize(value: string) {
     .replace(/\s+/g, " ");
 }
 
+function parseSimpleNumber(value: string) {
+  const normalized = normalize(value).replace(/\s/g, "");
+
+  if (/^[+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:e[+-]?\d+)?$/.test(normalized)) {
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  const fraction = normalized.match(
+    /^([+-]?(?:\d+(?:\.\d+)?|\.\d+))\/([+-]?(?:\d+(?:\.\d+)?|\.\d+))$/,
+  );
+  if (!fraction) return null;
+
+  const numerator = Number(fraction[1]);
+  const denominator = Number(fraction[2]);
+  if (!Number.isFinite(numerator) || !Number.isFinite(denominator) || denominator === 0) {
+    return null;
+  }
+  return numerator / denominator;
+}
+
+function answersMatch(task: PracticeTask, value: string) {
+  if (task.type !== "number") {
+    return normalize(value) === normalize(task.answer);
+  }
+
+  const actual = parseSimpleNumber(value);
+  const expected = parseSimpleNumber(task.answer);
+  if (actual === null || expected === null) {
+    return normalize(value) === normalize(task.answer);
+  }
+
+  const scale = Math.max(1, Math.abs(expected));
+  return Math.abs(actual - expected) <= 1e-9 * scale;
+}
+
 function difficultyLabel(task: PracticeTask) {
   if (task.difficulty === "hard") return "HARD";
   if (task.difficulty === "medium") return "MEDIUM";
@@ -39,7 +75,7 @@ function TaskCard({
 
   const check = () => {
     if (!value.trim()) return;
-    const right = normalize(value) === normalize(task.answer);
+    const right = answersMatch(task, value);
     setAttempts((count) => count + 1);
     setStatus(right ? "right" : "wrong");
     if (right) onSolved(task.id);
