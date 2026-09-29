@@ -183,6 +183,13 @@ function SidebarProgressItem({
 export default function App() {
   const [route, setRoute] = useState(routeFromHash);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem("fsociety-sidebar-collapsed-v1") === "1";
+    } catch {
+      return false;
+    }
+  });
   const [learningVersion, setLearningVersion] = useState(0);
   const mainRef = useRef<HTMLElement>(null);
   const routeRef = useRef(route);
@@ -217,6 +224,17 @@ export default function App() {
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "fsociety-sidebar-collapsed-v1",
+        sidebarCollapsed ? "1" : "0",
+      );
+    } catch {
+      // Storage may be unavailable in strict/private contexts.
+    }
+  }, [sidebarCollapsed]);
 
   useEffect(() => {
     const refresh = () => setLearningVersion((value) => value + 1);
@@ -275,13 +293,24 @@ export default function App() {
   const topic = topics[route];
 
   return (
-    <div className="app-shell">
+    <div className={"app-shell " + (sidebarCollapsed ? "sidebar-collapsed" : "")}>
       <ScrollProgress />
       <MathBackdrop />
       <CustomCursor />
       <HistoryDock />
 
-      <aside className={"sidebar " + (sidebarOpen ? "open" : "")}>
+      <aside className={"sidebar " + (sidebarOpen ? "open " : "") + (sidebarCollapsed ? "collapsed" : "")}>
+        <button
+          className="sidebar-collapse-control"
+          onClick={() => {
+            setSidebarCollapsed(true);
+            setSidebarOpen(false);
+          }}
+          title="Скрыть sidebar"
+          aria-label="Скрыть sidebar"
+        >
+          ←
+        </button>
         <button className="brand" onClick={() => (window.location.hash = "home")}>
           <span className="brand-mark">∑</span>
           <span>
@@ -323,6 +352,17 @@ export default function App() {
           ))}
         </div>
       </aside>
+
+      {sidebarCollapsed && (
+        <button
+          className="sidebar-reopen"
+          onClick={() => setSidebarCollapsed(false)}
+          title="Показать sidebar"
+          aria-label="Показать sidebar"
+        >
+          ☰
+        </button>
+      )}
 
       <div className="page-column">
         <header className="topbar topbar-minimal">
