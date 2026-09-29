@@ -2802,5 +2802,479 @@ export const practiceByTopic: Record<string, PracticeTask[]> = {
       "difficulty": "hard"
     }
   ],
+  "complex-functions": [
+    {
+      "id": "complex-074-1",
+      "title": "Коши–Риман",
+      "prompt": "Для f=u+iv какое равенство входит в условия Коши–Римана?",
+      "type": "choice",
+      "answer": "u_x=v_y",
+      "options": [
+        "u_x=v_y",
+        "u_x=-v_y",
+        "u_y=v_x",
+        "u_x=u_y"
+      ],
+      "difficulty": "base"
+    },
+    {
+      "id": "complex-074-2",
+      "title": "Второе условие",
+      "prompt": "Как выглядит второе условие Коши–Римана?",
+      "type": "choice",
+      "answer": "u_y=-v_x",
+      "options": [
+        "u_y=-v_x",
+        "u_y=v_x",
+        "u_x=-v_y",
+        "u_y=u_x"
+      ],
+      "difficulty": "base"
+    },
+    {
+      "id": "complex-074-3",
+      "title": "Экспонента",
+      "prompt": "Чему равно |e^(x+iy)|?",
+      "type": "choice",
+      "answer": "e^x",
+      "options": [
+        "e^x",
+        "e^y",
+        "1",
+        "x²+y²"
+      ],
+      "difficulty": "base"
+    },
+    {
+      "id": "complex-074-4",
+      "title": "Период",
+      "prompt": "Какой период имеет комплексная экспонента?",
+      "type": "choice",
+      "answer": "2πi",
+      "options": [
+        "2πi",
+        "2π",
+        "i",
+        "πi/2"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "complex-074-5",
+      "title": "Гармоничность",
+      "prompt": "Если u — вещественная часть голоморфной функции, чему равен Δu?",
+      "type": "number",
+      "answer": "0",
+      "difficulty": "medium"
+    }
+  ],
+  "complex-integration": [
+    {
+      "id": "complex-075-1",
+      "title": "Смена ориентации",
+      "prompt": "Что происходит с ∫γ f(z)dz при обращении ориентации γ?",
+      "type": "choice",
+      "answer": "Меняет знак",
+      "options": [
+        "Меняет знак",
+        "Не меняется",
+        "Удваивается",
+        "Обнуляется"
+      ],
+      "difficulty": "base"
+    },
+    {
+      "id": "complex-075-2",
+      "title": "Оценка ML",
+      "prompt": "Если |f|≤3 на контуре длины 4, какая верхняя оценка для модуля интеграла?",
+      "type": "number",
+      "answer": "12",
+      "difficulty": "base"
+    },
+    {
+      "id": "complex-075-3",
+      "title": "Коши",
+      "prompt": "Чему равен интеграл голоморфной функции по замкнутому контуру в односвязной области?",
+      "type": "number",
+      "answer": "0",
+      "difficulty": "base"
+    },
+    {
+      "id": "complex-075-4",
+      "title": "Формула Коши",
+      "prompt": "Чему равно ∮ dz/(z-a), если контур один раз положительно обходит a?",
+      "type": "choice",
+      "answer": "2πi",
+      "options": [
+        "2πi",
+        "πi",
+        "0",
+        "1"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "complex-075-5",
+      "title": "Следствие",
+      "prompt": "Что автоматически существует у голоморфной функции?",
+      "type": "choice",
+      "answer": "Производные всех порядков",
+      "options": [
+        "Производные всех порядков",
+        "Только первая производная",
+        "Только вещественная часть",
+        "Только интеграл по окружности"
+      ],
+      "difficulty": "medium"
+    }
+  ],
+  "laurent-series": [
+    {
+      "id": "complex-076-1",
+      "title": "Ряд Лорана",
+      "prompt": "Что отличает ряд Лорана от обычного степенного ряда?",
+      "type": "choice",
+      "answer": "Допускаются отрицательные степени",
+      "options": [
+        "Допускаются отрицательные степени",
+        "Нет коэффициентов",
+        "Нет центра разложения",
+        "Он всегда конечный"
+      ],
+      "difficulty": "base"
+    },
+    {
+      "id": "complex-076-2",
+      "title": "Главная часть",
+      "prompt": "Какие члены образуют главную часть ряда Лорана?",
+      "type": "choice",
+      "answer": "Члены с отрицательными степенями",
+      "options": [
+        "Члены с отрицательными степенями",
+        "Только постоянный член",
+        "Члены с положительными степенями",
+        "Все чётные члены"
+      ],
+      "difficulty": "base"
+    },
+    {
+      "id": "complex-076-3",
+      "title": "Устранимая особенность",
+      "prompt": "Если главная часть отсутствует, особая точка является:",
+      "type": "choice",
+      "answer": "Устранимой",
+      "options": [
+        "Устранимой",
+        "Полюсом",
+        "Существенной",
+        "Точкой ветвления обязательно"
+      ],
+      "difficulty": "base"
+    },
+    {
+      "id": "complex-076-4",
+      "title": "Полюс",
+      "prompt": "Если главная часть конечна и старшая отрицательная степень равна 3, каков порядок полюса?",
+      "type": "number",
+      "answer": "3",
+      "difficulty": "medium"
+    },
+    {
+      "id": "complex-076-5",
+      "title": "e^(1/z)",
+      "prompt": "Какой тип особенности имеет e^(1/z) в z=0?",
+      "type": "choice",
+      "answer": "Существенная",
+      "options": [
+        "Существенная",
+        "Устранимая",
+        "Простой полюс",
+        "Обычная точка"
+      ],
+      "difficulty": "medium"
+    }
+  ],
+  "residues": [
+    {
+      "id": "complex-077-1",
+      "title": "Коэффициент вычета",
+      "prompt": "Какой коэффициент ряда Лорана является вычетом?",
+      "type": "choice",
+      "answer": "a_{−1}",
+      "options": [
+        "a_{−1}",
+        "a_0",
+        "a_1",
+        "a_{−2}"
+      ],
+      "difficulty": "base"
+    },
+    {
+      "id": "complex-077-2",
+      "title": "Простой полюс",
+      "prompt": "Как найти вычет в простом полюсе z0?",
+      "type": "choice",
+      "answer": "lim (z−z0)f(z)",
+      "options": [
+        "lim (z−z0)f(z)",
+        "lim f(z)/(z−z0)",
+        "f'(z0) всегда",
+        "∫f dz без контура"
+      ],
+      "difficulty": "base"
+    },
+    {
+      "id": "complex-077-3",
+      "title": "Теорема о вычетах",
+      "prompt": "На что умножается сумма вычетов внутри контура?",
+      "type": "choice",
+      "answer": "2πi",
+      "options": [
+        "2πi",
+        "π",
+        "i",
+        "2"
+      ],
+      "difficulty": "base"
+    },
+    {
+      "id": "complex-077-4",
+      "title": "Рациональная функция",
+      "prompt": "Чему равен Res_{z=1} 1/[z(z−1)]?",
+      "type": "number",
+      "answer": "1",
+      "difficulty": "medium"
+    },
+    {
+      "id": "complex-077-5",
+      "title": "Классический интеграл",
+      "prompt": "Чему равен ∫_{−∞}^{∞} dx/(x²+1)?",
+      "type": "choice",
+      "answer": "π",
+      "options": [
+        "π",
+        "2π",
+        "1",
+        "0"
+      ],
+      "difficulty": "medium"
+    }
+  ],
+  "laplace": [
+    {
+      "id": "laplace-078-1",
+      "title": "Определение",
+      "prompt": "Какое ядро используется в преобразовании Лапласа?",
+      "type": "choice",
+      "answer": "e^(−st)",
+      "options": [
+        "e^(−st)",
+        "e^(st)",
+        "sin(st)",
+        "1/t"
+      ],
+      "difficulty": "base"
+    },
+    {
+      "id": "laplace-078-2",
+      "title": "Образ 1",
+      "prompt": "Чему равно L{1}?",
+      "type": "choice",
+      "answer": "1/s",
+      "options": [
+        "1/s",
+        "s",
+        "1",
+        "0"
+      ],
+      "difficulty": "base"
+    },
+    {
+      "id": "laplace-078-3",
+      "title": "Экспонента",
+      "prompt": "Чему равно L{e^(at)}?",
+      "type": "choice",
+      "answer": "1/(s−a)",
+      "options": [
+        "1/(s−a)",
+        "1/(s+a)",
+        "s−a",
+        "e^(as)"
+      ],
+      "difficulty": "base"
+    },
+    {
+      "id": "laplace-078-4",
+      "title": "Производная",
+      "prompt": "Чему равно L{f'}?",
+      "type": "choice",
+      "answer": "sF(s)−f(0)",
+      "options": [
+        "sF(s)−f(0)",
+        "F(s)/s",
+        "sF(s)",
+        "F'(s)"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "laplace-078-5",
+      "title": "Свёртка",
+      "prompt": "Во что превращается свёртка f*g?",
+      "type": "choice",
+      "answer": "F(s)G(s)",
+      "options": [
+        "F(s)G(s)",
+        "F(s)+G(s)",
+        "F(s)/G(s)",
+        "0"
+      ],
+      "difficulty": "medium"
+    }
+  ],
+  "inverse-laplace": [
+    {
+      "id": "laplace-079-1",
+      "title": "Обращение",
+      "prompt": "Чему равно L⁻¹{1/s}?",
+      "type": "choice",
+      "answer": "1",
+      "options": [
+        "1",
+        "t",
+        "e^t",
+        "0"
+      ],
+      "difficulty": "base"
+    },
+    {
+      "id": "laplace-079-2",
+      "title": "Простые дроби",
+      "prompt": "1/[s(s+1)] раскладывается как:",
+      "type": "choice",
+      "answer": "1/s−1/(s+1)",
+      "options": [
+        "1/s−1/(s+1)",
+        "1/s+1/(s+1)",
+        "1/(s−1)",
+        "s/(s+1)"
+      ],
+      "difficulty": "base"
+    },
+    {
+      "id": "laplace-079-3",
+      "title": "Первый сдвиг",
+      "prompt": "F(s−a) соответствует:",
+      "type": "choice",
+      "answer": "e^(at)f(t)",
+      "options": [
+        "e^(at)f(t)",
+        "f(t−a)",
+        "af(t)",
+        "f(at)"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "laplace-079-4",
+      "title": "Хевисайд",
+      "prompt": "Что описывает H(t−a)?",
+      "type": "choice",
+      "answer": "Включение сигнала в момент a",
+      "options": [
+        "Включение сигнала в момент a",
+        "Периодическую функцию",
+        "Производную",
+        "Комплексный контур"
+      ],
+      "difficulty": "base"
+    },
+    {
+      "id": "laplace-079-5",
+      "title": "Второй сдвиг",
+      "prompt": "e^(−as)F(s) соответствует:",
+      "type": "choice",
+      "answer": "H(t−a)f(t−a)",
+      "options": [
+        "H(t−a)f(t−a)",
+        "e^(at)f(t)",
+        "f(t+a)",
+        "F(s+a)"
+      ],
+      "difficulty": "medium"
+    }
+  ],
+  "laplace-ode": [
+    {
+      "id": "laplace-080-1",
+      "title": "Первый шаг",
+      "prompt": "Что делают первым при операционном методе решения ОДУ?",
+      "type": "choice",
+      "answer": "Применяют преобразование Лапласа к обеим частям",
+      "options": [
+        "Применяют преобразование Лапласа к обеим частям",
+        "Сразу интегрируют исходное уравнение",
+        "Заменяют t на x²",
+        "Удаляют начальные условия"
+      ],
+      "difficulty": "base"
+    },
+    {
+      "id": "laplace-080-2",
+      "title": "Начальные данные",
+      "prompt": "Где появляются y(0), y'(0) после преобразования производных?",
+      "type": "choice",
+      "answer": "Прямо в алгебраическом уравнении для Y(s)",
+      "options": [
+        "Прямо в алгебраическом уравнении для Y(s)",
+        "Они исчезают",
+        "Только после обратного преобразования",
+        "В знаменателе всегда"
+      ],
+      "difficulty": "base"
+    },
+    {
+      "id": "laplace-080-3",
+      "title": "Пример",
+      "prompt": "Для y'+y=1, y(0)=0 чему равно решение?",
+      "type": "choice",
+      "answer": "1−e^(−t)",
+      "options": [
+        "1−e^(−t)",
+        "e^t",
+        "t",
+        "0"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "laplace-080-4",
+      "title": "Передаточная функция",
+      "prompt": "При нулевых начальных условиях H(s) определяется как:",
+      "type": "choice",
+      "answer": "Y(s)/G(s)",
+      "options": [
+        "Y(s)/G(s)",
+        "G(s)/Y(s)",
+        "Y(s)+G(s)",
+        "Y'(s)"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "laplace-080-5",
+      "title": "Импульсная характеристика",
+      "prompt": "Как связаны выход y и вход g через h(t)?",
+      "type": "choice",
+      "answer": "y=h*g",
+      "options": [
+        "y=h*g",
+        "y=h+g",
+        "y=h/g",
+        "y=h'"
+      ],
+      "difficulty": "hard"
+    }
+  ],
 
 };
