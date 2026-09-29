@@ -2157,5 +2157,20 @@ export const practiceByTopic: Record<string, PracticeTask[]> = {
     { id:"tri-003", title:"Цилиндрические координаты", prompt:"Как выглядит элемент объёма в цилиндрических координатах?", type:"choice", answer:"r dr dφ dz", options:["r dr dφ dz","dr dφ dz","r² dr dφ dz","ρ² sinθ dρ dθ dφ"], difficulty:"base" },
     { id:"tri-004", title:"Сферические координаты", prompt:"Как выглядит элемент объёма в сферических координатах?", type:"choice", answer:"ρ² sinθ dρ dθ dφ", options:["ρ² sinθ dρ dθ dφ","ρ dρ dθ dφ","sinθ dρ dθ dφ","r dr dφ dz"], difficulty:"base" },
     { id:"tri-005", title:"Выбор координат", prompt:"Для шара x²+y²+z²≤R² какая система координат обычно наиболее естественна?", type:"choice", answer:"Сферическая", options:["Сферическая","Только декартова","Полярная двумерная","Логарифмическая"], difficulty:"base" },
+  ],
+  "line-integrals": [
+    { id:"line-001", title:"I род", prompt:"Что является элементом интегрирования в криволинейном интеграле I рода?", type:"choice", answer:"dl", options:["dl","dxdy","dV","dS"], difficulty:"base" },
+    { id:"line-002", title:"Параметризация", prompt:"Если x=x(t), y=y(t), чему равно dl?", type:"choice", answer:"√(x'²+y'²)dt", options:["√(x'²+y'²)dt","(x'+y')dt","dxdy","x'y'dt"], difficulty:"base" },
+    { id:"line-003", title:"II род и ориентация", prompt:"Что происходит с ∫_L Pdx+Qdy при смене направления пути?", type:"choice", answer:"Меняет знак", options:["Меняет знак","Не меняется","Становится нулём","Удваивается"], difficulty:"base" },
+    { id:"line-004", title:"Работа поля", prompt:"Что физически выражает ∫_L F·dr?", type:"choice", answer:"Работу поля вдоль пути", options:["Работу поля вдоль пути","Площадь области","Поток через поверхность","Объём тела"], difficulty:"base" },
+    { id:"line-005", title:"Формула Грина", prompt:"Что связывает формула Грина?", type:"choice", answer:"Интеграл по границе области и двойной интеграл по области", options:["Интеграл по границе области и двойной интеграл по области","Тройной и поверхностный интегралы","Только два неопределённых интеграла","Два ряда"], difficulty:"medium" },
+  ],
+  "surface-integrals": [
+    { id:"surf-001", title:"I род", prompt:"Что даёт ∬_S 1 dS?", type:"choice", answer:"Площадь поверхности S", options:["Площадь поверхности S","Объём тела","Длину границы","0"], difficulty:"base" },
+    { id:"surf-002", title:"Граф поверхности", prompt:"Для z=z(x,y) чему равен dS?", type:"choice", answer:"√(1+z_x²+z_y²)dxdy", options:["√(1+z_x²+z_y²)dxdy","dxdy","z_x z_y dxdy","dz"], difficulty:"base" },
+    { id:"surf-003", title:"II род", prompt:"Что происходит с поверхностным интегралом II рода при смене стороны поверхности?", type:"choice", answer:"Меняет знак", options:["Меняет знак","Не меняется","Удваивается","Обнуляется"], difficulty:"base" },
+    { id:"surf-004", title:"Поток", prompt:"Что выражает ∬_S F·n dS?", type:"choice", answer:"Поток поля через поверхность", options:["Поток поля через поверхность","Работу вдоль кривой","Площадь проекции","Кривизну"], difficulty:"base" },
+    { id:"surf-005", title:"Гаусс", prompt:"Что связывает формула Остроградского—Гаусса?", type:"choice", answer:"Поток через замкнутую поверхность и интеграл дивергенции по объёму", options:["Поток через замкнутую поверхность и интеграл дивергенции по объёму","Циркуляцию и ротор по поверхности","Длину и площадь","Только двойные интегралы"], difficulty:"medium" },
+    { id:"surf-006", title:"Стокс", prompt:"Что связывает формула Стокса?", type:"choice", answer:"Циркуляцию по границе и поток ротора через поверхность", options:["Циркуляцию по границе и поток ротора через поверхность","Поток и дивергенцию по объёму","Двойной интеграл и площадь","Ряд и предел"], difficulty:"medium" },
   ]
 };
