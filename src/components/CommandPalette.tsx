@@ -6,7 +6,7 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
-import { chapters, topicList } from "../data/course";
+import { chapters, topicListMeta } from "../data/courseMeta";
 import { getLearningSnapshot, getTopicProgress } from "../lib/progress";
 
 function searchableText(value: string) {
@@ -47,7 +47,7 @@ export function CommandPalette() {
     const needle = searchableText(query.trim());
     const snapshot = getLearningSnapshot();
 
-    return topicList
+    return topicListMeta
       .map((topic) => {
         const chapter = chapters.find((item) => item.id === topic.chapterId);
         const haystack = searchableText(
@@ -56,7 +56,6 @@ export function CommandPalette() {
             topic.summary,
             topic.number,
             chapter?.title ?? "",
-            ...topic.blocks.slice(0, 8).map((block) => block.title),
           ].join(" "),
         );
 
@@ -137,7 +136,7 @@ export function CommandPalette() {
                     setActiveIndex(0);
                   }}
                   onKeyDown={onSearchKeyDown}
-                  placeholder="Тема, теорема, определитель, интеграл..."
+                  placeholder="Тема, раздел, определитель, интеграл..."
                   aria-label="Поиск по курсу"
                 />
                 <kbd>ESC</kbd>
