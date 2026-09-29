@@ -2110,5 +2110,38 @@ export const practiceByTopic: Record<string, PracticeTask[]> = {
     { id:"mv-046-4", title:"Седло", prompt:"В стационарной точке Δ<0. Что можно заключить?", type:"choice", answer:"Экстремума нет, точка седловая", options:["Экстремума нет, точка седловая","Есть минимум","Есть максимум","Обязательно глобальный минимум"], difficulty:"base" },
     { id:"mv-046-5", title:"Вырожденный случай", prompt:"Что означает Δ=0?", type:"choice", answer:"Нужно дополнительное исследование", options:["Нужно дополнительное исследование","Всегда минимум","Всегда максимум","Всегда седло"], difficulty:"medium" },
     { id:"mv-046-6", title:"Глобальный экстремум", prompt:"При поиске max/min на замкнутой области что кроме внутренних критических точек обязательно исследовать?", type:"choice", answer:"Границу области", options:["Границу области","Только центр области","Только ось Ox","Ничего"], difficulty:"base" },
+  ],
+  "ode-basics": [
+    { id:"ode-047-1", title:"Порядок ДУ", prompt:"Каков порядок уравнения y''' + y = 0?", type:"number", answer:"3", difficulty:"base" },
+    { id:"ode-047-2", title:"Решение ДУ", prompt:"Что означает, что функция является решением дифференциального уравнения?", type:"choice", answer:"После подстановки она обращает уравнение в тождество", options:["После подстановки она обращает уравнение в тождество","Она обязательно линейна","Она обязательно положительна","Её производная всегда ноль"], difficulty:"base" },
+    { id:"ode-047-3", title:"Общее решение", prompt:"Сколько произвольных постоянных обычно содержит общее решение ДУ n-го порядка?", type:"choice", answer:"n", options:["n","1","2n","0"], difficulty:"base" },
+    { id:"ode-047-4", title:"Экспоненциальная модель", prompt:"Какой вид имеет решение y'=ky?", type:"choice", answer:"y=Ce^(kx)", options:["y=Ce^(kx)","y=C+kx","y=Cx^k","y=k/C"], difficulty:"base" },
+  ],
+  "first-order-ode": [
+    { id:"ode-048-1", title:"Поле направлений", prompt:"Что задаёт значение f(x,y) в уравнении y'=f(x,y)?", type:"choice", answer:"Наклон касательной к интегральной кривой", options:["Наклон касательной к интегральной кривой","Координату x","Только значение y","Площадь под кривой"], difficulty:"base" },
+    { id:"ode-048-2", title:"Разделение переменных", prompt:"Какой первый шаг удобен для y'=xy?", type:"choice", answer:"dy/y = x dx", options:["dy/y = x dx","y=x+y","dx/y = dy/x","y''=x"], difficulty:"base" },
+    { id:"ode-048-3", title:"Однородное ДУ", prompt:"Какая подстановка стандартна для y'=F(y/x)?", type:"choice", answer:"y=ux", options:["y=ux","y=e^u","x=u²","y=u+x²"], difficulty:"base" },
+    { id:"ode-048-4", title:"Бернулли", prompt:"Какая замена сводит y'+p(x)y=q(x)y^n к линейному?", type:"choice", answer:"z=y^(1−n)", options:["z=y^(1−n)","z=xy","z=e^x","z=y'"], difficulty:"medium" },
+    { id:"ode-048-5", title:"Клеро", prompt:"Как выглядит общее решение y=xy'+ψ(y')?", type:"choice", answer:"y=cx+ψ(c)", options:["y=cx+ψ(c)","y=ce^x","y=ψ(x)+c","y=c/x"], difficulty:"medium" },
+  ],
+  "higher-order-ode": [
+    { id:"ode-049-1", title:"Число начальных условий", prompt:"Сколько начальных условий обычно задают для ДУ второго порядка?", type:"number", answer:"2", difficulty:"base" },
+    { id:"ode-049-2", title:"Понижение порядка", prompt:"Для y''=f(x) какую замену вводят?", type:"choice", answer:"p=y'", options:["p=y'","p=y²","p=x'","p=f'"], difficulty:"base" },
+    { id:"ode-049-3", title:"Если нет x", prompt:"Если x явно не входит в F(y,y',y'')=0, какая формула полезна при p=p(y)?", type:"choice", answer:"y''=p·dp/dy", options:["y''=p·dp/dy","y''=p'²","y''=dp/dx только","y''=1/p"], difficulty:"medium" },
+    { id:"ode-049-4", title:"Линейность", prompt:"Что отличает линейное ДУ n-го порядка?", type:"choice", answer:"y и её производные входят только в первой степени", options:["y и её производные входят только в первой степени","Все коэффициенты равны 1","Правая часть всегда ноль","Порядок всегда равен 2"], difficulty:"base" },
+  ],
+  "linear-ode": [
+    { id:"ode-050-1", title:"Характеристическое уравнение", prompt:"Для y''−3y'+2y=0 выбери характеристическое уравнение.", type:"choice", answer:"k²−3k+2=0", options:["k²−3k+2=0","k²+3k+2=0","2k²−3=0","k−3=0"], difficulty:"base" },
+    { id:"ode-050-2", title:"Различные корни", prompt:"Корни k₁=1, k₂=2. Как выглядит общее решение?", type:"choice", answer:"C₁e^x+C₂e^(2x)", options:["C₁e^x+C₂e^(2x)","(C₁+C₂x)e^x","C₁cos x+C₂sin x","C₁x+C₂"], difficulty:"base" },
+    { id:"ode-050-3", title:"Кратный корень", prompt:"Двойной корень k=−1. Как выглядит решение?", type:"choice", answer:"(C₁+C₂x)e^(−x)", options:["(C₁+C₂x)e^(−x)","C₁e^(−x)+C₂e^x","C₁cos x+C₂sin x","C₁+C₂x"], difficulty:"medium" },
+    { id:"ode-050-4", title:"Комплексные корни", prompt:"Для корней α±βi какой общий вещественный вид решения?", type:"choice", answer:"e^(αx)(C₁cosβx+C₂sinβx)", options:["e^(αx)(C₁cosβx+C₂sinβx)","C₁e^(βx)+C₂e^(−βx)","αx+β","C₁x+C₂"], difficulty:"medium" },
+    { id:"ode-051-1", title:"Структура ЛНДУ", prompt:"Как строится общее решение неоднородного линейного ДУ?", type:"choice", answer:"y=y_hom+y_part", options:["y=y_hom+y_part","y=y_hom·y_part","y=y_part только","y=0"], difficulty:"base" },
+    { id:"ode-051-2", title:"Резонанс", prompt:"Что делают с пробным частным решением при совпадении его формы с однородным решением?", type:"choice", answer:"Умножают на подходящую степень x", options:["Умножают на подходящую степень x","Делят на x всегда","Берут производную","Меняют знак"], difficulty:"medium" },
+  ],
+  "ode-systems": [
+    { id:"ode-052-1", title:"Матричная форма", prompt:"Как компактно записывается однородная линейная система с постоянной матрицей A?", type:"choice", answer:"y'=Ay", options:["y'=Ay","y=A+y","Ay=0 всегда","y''=A"], difficulty:"base" },
+    { id:"ode-052-2", title:"Фазовое поле", prompt:"Что соответствует каждой точке фазовой плоскости автономной системы?", type:"choice", answer:"Вектор скорости", options:["Вектор скорости","Площадь","Собственное число обязательно","Только координата времени"], difficulty:"base" },
+    { id:"ode-052-3", title:"Решение через экспоненту", prompt:"Как выглядит решение y'=Ay с y(x₀)=y₀?", type:"choice", answer:"y=e^{A(x−x₀)}y₀", options:["y=e^{A(x−x₀)}y₀","y=A(x−x₀)+y₀","y=det(A)y₀","y=A⁻¹y₀"], difficulty:"medium" },
+    { id:"ode-052-4", title:"Спектр системы", prompt:"Что определяют собственные значения A в системе y'=Ay?", type:"choice", answer:"Характер роста, затухания и фазовых траекторий", options:["Характер роста, затухания и фазовых траекторий","Только размер матрицы","Только начальную точку","Количество переменных x"], difficulty:"medium" },
   ]
 };
