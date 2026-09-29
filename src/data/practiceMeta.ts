@@ -550,4 +550,53 @@ export const practiceTaskIdsByTopic: Record<string, string[]> = {
     "fourier-068-4",
     "fourier-068-5"
   ],
+  "complex-functions": [
+    "complex-074-1",
+    "complex-074-2",
+    "complex-074-3",
+    "complex-074-4",
+    "complex-074-5"
+  ],
+  "complex-integration": [
+    "complex-075-1",
+    "complex-075-2",
+    "complex-075-3",
+    "complex-075-4",
+    "complex-075-5"
+  ],
+  "laurent-series": [
+    "complex-076-1",
+    "complex-076-2",
+    "complex-076-3",
+    "complex-076-4",
+    "complex-076-5"
+  ],
+  "residues": [
+    "complex-077-1",
+    "complex-077-2",
+    "complex-077-3",
+    "complex-077-4",
+    "complex-077-5"
+  ],
+  "laplace": [
+    "laplace-078-1",
+    "laplace-078-2",
+    "laplace-078-3",
+    "laplace-078-4",
+    "laplace-078-5"
+  ],
+  "inverse-laplace": [
+    "laplace-079-1",
+    "laplace-079-2",
+    "laplace-079-3",
+    "laplace-079-4",
+    "laplace-079-5"
+  ],
+  "laplace-ode": [
+    "laplace-080-1",
+    "laplace-080-2",
+    "laplace-080-3",
+    "laplace-080-4",
+    "laplace-080-5"
+  ],
 };
