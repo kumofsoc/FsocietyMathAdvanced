@@ -1,5 +1,5 @@
-import { chapters } from "../data/course";
-import { practiceByTopic } from "../data/practice";
+import { chapters } from "../data/courseMeta";
+import { practiceTaskIdsByTopic } from "../data/practiceMeta";
 import { loadSet, SOLVED_KEY, THEORY_KEY } from "./learning";
 
 export const TRACKED_CHAPTER_IDS = new Set([
@@ -40,15 +40,15 @@ export function getTopicProgress(
   snapshot: LearningSnapshot = getLearningSnapshot(),
 ) {
   const theory = snapshot.theory.has(topicId) ? 50 : 0;
-  const tasks = practiceByTopic[topicId] ?? [];
-  if (!tasks.length) return theory;
+  const taskIds = practiceTaskIdsByTopic[topicId] ?? [];
+  if (!taskIds.length) return theory;
 
-  const solvedCount = tasks.reduce(
-    (count, task) => count + (snapshot.solved.has(task.id) ? 1 : 0),
+  const solvedCount = taskIds.reduce(
+    (count, taskId) => count + (snapshot.solved.has(taskId) ? 1 : 0),
     0,
   );
 
-  return Math.round(theory + (solvedCount / tasks.length) * 50);
+  return Math.round(theory + (solvedCount / taskIds.length) * 50);
 }
 
 export function getChapterProgress(
