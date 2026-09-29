@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactElement } from "react";
 
 type V2=[number,number];
 
@@ -159,7 +159,7 @@ function CharacteristicLab(){
 function PhasePlaneLab(){
   const [kind,setKind]=useState<"node"|"saddle"|"center"|"spiral">("saddle");
   const A=kind==="node"?[[ -1,0],[0,-2]]:kind==="saddle"?[[1,0],[0,-1]]:kind==="center"?[[0,-1],[1,0]]:[[-.25,-1],[1,-.25]];
-  const field:JSX.Element[]=[];
+  const field:ReactElement[]=[];
   for(let x=-4.5;x<=4.5;x+=.65){
     for(let y=-3.3;y<=3.3;y+=.55){
       const vx=A[0][0]*x+A[0][1]*y,vy=A[1][0]*x+A[1][1]*y;
