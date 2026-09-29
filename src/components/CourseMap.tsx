@@ -23,6 +23,7 @@ import {
   useState,
 } from "react";
 import { chapters, topicList, topics } from "../data/course";
+import { topicMeta } from "../data/courseMeta";
 import { LEARNING_EVENT } from "../lib/learning";
 import { getChapterProgress, getTopicProgress } from "../lib/progress";
 import type { GraphNodeData } from "../types/course";
@@ -36,6 +37,8 @@ type GroupNodeData = {
   number: string;
   title: string;
   topicCount: number;
+  readyCount: number;
+  plannedCount: number;
   progress: number;
   rotation: number;
   scale: number;
@@ -190,7 +193,11 @@ function TopicNodeCard({ id, data, selected }: NodeProps) {
 
   return (
     <div
-      className={"map-node-shell map-topic-shell " + (selected ? "is-selected" : "")}
+      className={
+        "map-node-shell map-topic-shell " +
+        (selected ? "is-selected " : "") +
+        (value.planned ? "is-planned" : "")
+      }
       style={{ width: Math.round(260 * scale) }}
     >
       {selected && (
@@ -218,19 +225,26 @@ function TopicNodeCard({ id, data, selected }: NodeProps) {
       >
         <div className="map-topic-meta">
           <span>§ {value.number}</span>
-          <span>{value.chapter}</span>
+          <span>{value.planned ? "PLANNED" : value.chapter}</span>
         </div>
         <strong>{value.label}</strong>
         <p>{value.summary}</p>
 
-        <div className="map-progress-mini">
-          <i style={{ width: (value.progress ?? 0) + "%" }} />
-          <span>{value.progress ?? 0}%</span>
-        </div>
+        {value.planned ? (
+          <div className="map-planned-state">
+            <span>ROADMAP NODE</span>
+            <strong>Контент готовится</strong>
+          </div>
+        ) : (
+          <div className="map-progress-mini">
+            <i style={{ width: (value.progress ?? 0) + "%" }} />
+            <span>{value.progress ?? 0}%</span>
+          </div>
+        )}
 
         <div className="map-card-actions">
           <button className="nodrag nopan" onClick={() => value.onOpen(id)}>
-            Открыть тему →
+            {value.planned ? "Открыть roadmap →" : "Открыть тему →"}
           </button>
         </div>
         <div className="map-node-hint">
@@ -284,7 +298,9 @@ function ChapterGroupCard({ id, data, selected }: NodeProps) {
       >
         <div className="map-group-number">{value.number}</div>
         <div className="map-group-copy">
-          <span>ГРУППА / {value.topicCount} ТЕМ</span>
+          <span>
+            ГРУППА / {value.readyCount} READY · {value.plannedCount} PLAN
+          </span>
           <strong>{value.title}</strong>
           <div className="map-progress-mini">
             <i style={{ width: value.progress + "%" }} />
@@ -413,6 +429,8 @@ function InnerCourseMap() {
             number: chapter.number,
             title: chapter.title,
             topicCount: chapter.topicIds.length,
+            readyCount: chapter.topicIds.filter((topicId) => !topicMeta[topicId]?.isStub).length,
+            plannedCount: chapter.topicIds.filter((topicId) => topicMeta[topicId]?.isStub).length,
             progress: getChapterProgress(chapter.id),
             rotation: saved?.rotation ?? 0,
             scale: saved?.scale ?? 1,
@@ -446,6 +464,7 @@ function InnerCourseMap() {
             rotation: saved?.rotation ?? 0,
             scale: saved?.scale ?? 1,
             progress: getTopicProgress(topic.id),
+            planned: Boolean(topicMeta[topic.id]?.isStub),
             onOpen: openTopic,
             onRotate: () => undefined,
             onScale: () => undefined,
@@ -632,6 +651,7 @@ function InnerCourseMap() {
         <span><i className="legend-source" /> источник / prerequisite</span>
         <b>→</b>
         <span><i className="legend-target" /> тема, которая использует его</span>
+        <span><i className="legend-planned" /> planned / контент ещё строится</span>
         <small>нажми на подпись связи, чтобы открыть конечную тему</small>
       </div>
 
