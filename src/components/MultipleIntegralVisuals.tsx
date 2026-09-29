@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 
 type P2=[number,number];
 const W=520,H=360,CX=260,CY=205,SX=70,SY=70;
@@ -46,7 +46,7 @@ function DoubleRiemannLab(){
     <div className="multi-layout">
       <div className="multi-stage pseudo3d">
         <div className="multi-surface-cap">z = 2.6 − 0.55(x²+y²)</div>
-        <div className="multi-columns" style={{"--n":n} as React.CSSProperties}>
+        <div className="multi-columns" style={{"--n":n} as CSSProperties}>
           {cells.slice(0,220).map((c,i)=>(
             <i key={i} style={{
               left:(50+c.x*17)+"%",
