@@ -224,6 +224,7 @@ const SERIES_INSERTS = new Set([
 const FIELD_INSERTS = new Set([
   "scalar-field:2",
   "vector-field:1",
+  "hamilton-operator:4",
 ]);
 
 class VisualErrorBoundary extends Component<
