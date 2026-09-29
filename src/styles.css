@@ -9816,3 +9816,42 @@ body.quadric-fullscreen-open {
     grid-column: 1 / -1;
   }
 }
+
+
+/* ===== v1.7: deferred practice loading ===== */
+
+.practice-deferred {
+  min-height: 130px;
+  margin: 18px 0 28px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 7px;
+  padding: 20px;
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb,var(--accent) 6%,transparent), transparent 45%),
+    color-mix(in srgb,var(--surface) 84%,transparent);
+  text-align: center;
+}
+.practice-deferred > span {
+  color: var(--accent);
+  font: 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .14em;
+}
+.practice-deferred > strong {
+  max-width: 480px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 520;
+  line-height: 1.6;
+}
+.practice-deferred.loading {
+  border-style: solid;
+  animation: practice-deferred-pulse 1.1s ease-in-out infinite alternate;
+}
+@keyframes practice-deferred-pulse {
+  from { opacity: .62; }
+  to { opacity: 1; }
+}
