@@ -139,9 +139,24 @@ export function CommandPalette() {
   }, [query, deepIndex]);
 
   const openTopic = (id: string, blockIndex?: number) => {
-    if (typeof blockIndex === "number") {
-      sessionStorage.setItem(BLOCK_TARGET_KEY, id + "::" + blockIndex);
+    const current = window.location.hash.replace(/^#/, "");
+
+    if (typeof blockIndex === "number" && current === id) {
+      document
+        .getElementById("block-" + id + "-" + blockIndex)
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setOpen(false);
+      return;
     }
+
+    if (typeof blockIndex === "number") {
+      try {
+        sessionStorage.setItem(BLOCK_TARGET_KEY, id + "::" + blockIndex);
+      } catch {
+        // Deep-linking still works without persisted block state.
+      }
+    }
+
     window.location.hash = id;
     setOpen(false);
   };
