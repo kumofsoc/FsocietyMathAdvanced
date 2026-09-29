@@ -60,7 +60,13 @@ export function CommandPalette() {
         );
 
         let score = 0;
-        if (!needle) score = getTopicProgress(topic.id, snapshot) > 0 ? 2 : 1;
+        if (!needle) {
+          score = topic.isStub
+            ? 0.5
+            : getTopicProgress(topic.id, snapshot) > 0
+              ? 3
+              : 2;
+        }
         else if (searchableText(topic.title).startsWith(needle)) score = 10;
         else if (searchableText(topic.title).includes(needle)) score = 8;
         else if (searchableText(chapter?.title ?? "").includes(needle)) score = 5;
@@ -151,8 +157,17 @@ export function CommandPalette() {
                 {results.length ? results.map(({ topic, chapter, progress }, index) => (
                   <button
                     key={topic.id}
-                    className={activeIndex === index ? "active" : ""}
-                    onMouseEnter={() => setActiveIndex(index)}
+                    className={
+                      (activeIndex === index ? "active " : "") +
+                      (topic.isStub ? "planned" : "")
+                    }
+                    onMouseEnter={() => {
+                      setActiveIndex(index);
+                      if (!topic.isStub) void import("./TopicPage");
+                    }}
+                    onFocus={() => {
+                      if (!topic.isStub) void import("./TopicPage");
+                    }}
                     onClick={() => openTopic(topic.id)}
                   >
                     <span className="command-result-number">§ {topic.number}</span>
@@ -160,10 +175,14 @@ export function CommandPalette() {
                       <strong>{topic.title}</strong>
                       <small>{chapter?.title} · {topic.summary}</small>
                     </span>
-                    <span className="command-result-progress">
-                      <i><span style={{ width: progress + "%" }} /></i>
-                      <b>{progress}%</b>
-                    </span>
+                    {topic.isStub ? (
+                      <span className="command-result-plan">PLANNED</span>
+                    ) : (
+                      <span className="command-result-progress">
+                        <i><span style={{ width: progress + "%" }} /></i>
+                        <b>{progress}%</b>
+                      </span>
+                    )}
                   </button>
                 )) : (
                   <div className="command-empty">
