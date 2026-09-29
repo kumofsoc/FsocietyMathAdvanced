@@ -11,7 +11,9 @@ export interface CourseIntegrityIssue {
     | "practice-topic"
     | "task-id"
     | "course-meta"
-    | "practice-meta";
+    | "practice-meta"
+    | "planned-prerequisite"
+    | "practice-missing";
   message: string;
 }
 
@@ -42,13 +44,33 @@ export function validateCourseIntegrity(): CourseIntegrityIssue[] {
   }
 
   for (const topic of Object.values(topics)) {
+    const meta = topicMeta[topic.id];
+
     for (const prerequisite of topic.prerequisites) {
       if (!topicIds.has(prerequisite)) {
         issues.push({
           kind: "prerequisite",
           message: `Тема ${topic.id} ссылается на отсутствующий prerequisite ${prerequisite}.`,
         });
+        continue;
       }
+
+      if (!meta?.isStub && topicMeta[prerequisite]?.isStub) {
+        issues.push({
+          kind: "planned-prerequisite",
+          message:
+            `READY-тема ${topic.id} зависит от PLANNED-темы ${prerequisite}. ` +
+            "Такой маршрут нельзя считать завершённым.",
+        });
+      }
+    }
+
+    if (!meta?.isStub && !(practiceByTopic[topic.id]?.length)) {
+      issues.push({
+        kind: "practice-missing",
+        message:
+          `READY-тема ${topic.id} не имеет банка задач и не сможет достичь 100% mastery.`,
+      });
     }
   }
 
