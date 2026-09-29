@@ -20,7 +20,7 @@ function routeFromHash() {
 }
 
 function isTrackedChapter(id: string) {
-  return id === "linear" || id === "vectors" || id === "plane-geometry" || id === "space-geometry" || id === "plane-transformations" || id === "abstract-linear" || id === "euclidean" || id === "affine-general" || id === "tensor-algebra" || id === "analysis-intro" || id === "indef-integral";
+  return id === "linear" || id === "vectors" || id === "plane-geometry" || id === "space-geometry" || id === "plane-transformations" || id === "abstract-linear" || id === "euclidean" || id === "affine-general" || id === "tensor-algebra" || id === "analysis-intro" || id === "indef-integral" || id === "def-integral";
 }
 
 function topicProgress(id: string) {
@@ -238,6 +238,16 @@ export default function App() {
     return Math.round(analysisIds.reduce((sum, id) => sum + topicProgress(id), 0) / analysisIds.length);
   }, [analysisIds, learningVersion]);
 
+  const definiteIntegralIds = useMemo(
+    () => chapters.find((chapter) => chapter.id === "def-integral")?.topicIds ?? [],
+    [],
+  );
+
+  const definiteIntegralProgress = useMemo(() => {
+    if (!definiteIntegralIds.length) return 0;
+    return Math.round(definiteIntegralIds.reduce((sum, id) => sum + topicProgress(id), 0) / definiteIntegralIds.length);
+  }, [definiteIntegralIds, learningVersion]);
+
   const topic = topics[route];
 
   return (
@@ -323,6 +333,15 @@ export default function App() {
           </div>
           <div className="progress-track"><i style={{ width: analysisProgress + "%" }} /></div>
           <small>Пределы · непрерывность · производная · Тейлор</small>
+        </div>
+
+        <div className="sidebar-progress sidebar-progress-secondary">
+          <div>
+            <span>Определённый интеграл</span>
+            <strong>{definiteIntegralProgress}%</strong>
+          </div>
+          <div className="progress-track"><i style={{ width: definiteIntegralProgress + "%" }} /></div>
+          <small>Риман · Ньютон–Лейбниц · несобственные · приложения</small>
         </div>
 
         <div className="chapter-list">
