@@ -28,6 +28,7 @@ export function getTopicProgress(
   topicId: string,
   snapshot: LearningSnapshot = getLearningSnapshot(),
 ) {
+  if (!isTrackedTopic(topicId)) return 0;
   const theory = snapshot.theory.has(topicId) ? 50 : 0;
   const taskIds = practiceTaskIdsByTopic[topicId] ?? [];
   if (!taskIds.length) return theory;
