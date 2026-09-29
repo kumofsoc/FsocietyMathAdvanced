@@ -16,6 +16,7 @@ import {
   getLearningSnapshot,
   getTopicProgress,
   isTrackedChapter,
+  isTrackedTopic,
 } from "./lib/progress";
 import type { Chapter } from "./types/course";
 
@@ -78,7 +79,7 @@ function ChapterAccordion({
               {chapter.topicIds.map((id) => {
                 const item = topicMeta[id];
                 if (!item) return null;
-                const tracked = isTrackedChapter(item.chapterId);
+                const tracked = isTrackedTopic(id);
                 const progress = tracked ? getTopicProgress(id, snapshot) : 0;
                 return (
                   <motion.button
