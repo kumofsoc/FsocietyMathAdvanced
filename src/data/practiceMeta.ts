@@ -501,4 +501,53 @@ export const practiceTaskIdsByTopic: Record<string, string[]> = {
     "series-061-5",
     "series-061-6"
   ]
+  "functional-series": [
+    "series-062-1",
+    "series-062-2",
+    "series-062-3",
+    "series-062-4",
+    "series-062-5"
+  ],
+  "power-convergence": [
+    "series-063-1",
+    "series-063-2",
+    "series-063-3",
+    "series-063-4",
+    "series-063-5"
+  ],
+  "taylor-series": [
+    "series-064-1",
+    "series-064-2",
+    "series-064-3",
+    "series-064-4",
+    "series-064-5"
+  ],
+  "series-applications": [
+    "series-065-1",
+    "series-065-2",
+    "series-065-3",
+    "series-065-4",
+    "series-065-5"
+  ],
+  "fourier-series": [
+    "fourier-066-1",
+    "fourier-066-2",
+    "fourier-066-3",
+    "fourier-066-4",
+    "fourier-066-5"
+  ],
+  "fourier-expansion": [
+    "fourier-067-1",
+    "fourier-067-2",
+    "fourier-067-3",
+    "fourier-067-4",
+    "fourier-067-5"
+  ],
+  "fourier-integral": [
+    "fourier-068-1",
+    "fourier-068-2",
+    "fourier-068-3",
+    "fourier-068-4",
+    "fourier-068-5"
+  ],
 };
