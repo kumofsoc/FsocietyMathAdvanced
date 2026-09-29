@@ -117,6 +117,16 @@ const SeriesVisualInsert = lazy(() =>
     default: module.SeriesVisualInsert,
   })),
 );
+const PowerSeriesVisualInsert = lazy(() =>
+  import("./PowerSeriesVisuals").then((module) => ({
+    default: module.PowerSeriesVisualInsert,
+  })),
+);
+const FourierVisualInsert = lazy(() =>
+  import("./FourierVisuals").then((module) => ({
+    default: module.FourierVisualInsert,
+  })),
+);
 const FieldVisualInsert = lazy(() =>
   import("./FieldVisuals").then((module) => ({
     default: module.FieldVisualInsert,
@@ -220,6 +230,15 @@ const SERIES_INSERTS = new Set([
   "numeric-series:1",
   "positive-series:8",
   "alternating-series:3",
+]);
+const POWER_SERIES_INSERTS = new Set([
+  "power-convergence:1",
+  "taylor-series:4",
+]);
+const FOURIER_INSERTS = new Set([
+  "fourier-series:1",
+  "fourier-expansion:2",
+  "fourier-integral:1",
 ]);
 const FIELD_INSERTS = new Set([
   "scalar-field:2",
@@ -398,6 +417,12 @@ export function TopicVisualInsert({
   }
   if (SERIES_INSERTS.has(identity)) {
     return shell(identity, () => <SeriesVisualInsert {...props} />);
+  }
+  if (POWER_SERIES_INSERTS.has(identity)) {
+    return shell(identity, () => <PowerSeriesVisualInsert {...props} />);
+  }
+  if (FOURIER_INSERTS.has(identity)) {
+    return shell(identity, () => <FourierVisualInsert {...props} />);
   }
   if (FIELD_INSERTS.has(identity)) {
     return shell(identity, () => <FieldVisualInsert {...props} />);
