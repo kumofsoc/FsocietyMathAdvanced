@@ -28,6 +28,7 @@ import { TensorVisualInsert } from "./TensorVisuals";
 import { AnalysisVisualInsert } from "./AnalysisVisuals";
 import { AnalysisAdvancedVisualInsert } from "./AnalysisAdvancedVisuals";
 import { IntegralVisualInsert } from "./IntegralVisuals";
+import { MultipleIntegralVisualInsert } from "./MultipleIntegralVisuals";
 import { ODEVisualInsert } from "./ODEVisuals";
 import { DefiniteIntegralVisualInsert } from "./DefiniteIntegralVisuals";
 import { MultivariableVisualInsert } from "./MultivariableVisuals";
@@ -440,6 +441,7 @@ export function TopicPage({ topic }: { topic: Topic }) {
             <AnalysisVisualInsert topicId={topic.id} index={index} />
             <AnalysisAdvancedVisualInsert topicId={topic.id} index={index} />
             <IntegralVisualInsert topicId={topic.id} index={index} />
+            <MultipleIntegralVisualInsert topicId={topic.id} index={index} />
             <ODEVisualInsert topicId={topic.id} index={index} />
             <DefiniteIntegralVisualInsert topicId={topic.id} index={index} />
             <MultivariableVisualInsert topicId={topic.id} index={index} />
