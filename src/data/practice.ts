@@ -2159,11 +2159,11 @@ export const practiceByTopic: Record<string, PracticeTask[]> = {
     { id:"tri-005", title:"Выбор координат", prompt:"Для шара x²+y²+z²≤R² какая система координат обычно наиболее естественна?", type:"choice", answer:"Сферическая", options:["Сферическая","Только декартова","Полярная двумерная","Логарифмическая"], difficulty:"base" },
   ],
   "line-integrals": [
-    { id:"line-001", title:"I род", prompt:"Что является элементом интегрирования в криволинейном интеграле I рода?", type:"choice", answer:"dl", options:["dl","dxdy","dV","dS"], difficulty:"base" },
-    { id:"line-002", title:"Параметризация", prompt:"Если x=x(t), y=y(t), чему равно dl?", type:"choice", answer:"√(x'²+y'²)dt", options:["√(x'²+y'²)dt","(x'+y')dt","dxdy","x'y'dt"], difficulty:"base" },
-    { id:"line-003", title:"II род и ориентация", prompt:"Что происходит с ∫_L Pdx+Qdy при смене направления пути?", type:"choice", answer:"Меняет знак", options:["Меняет знак","Не меняется","Становится нулём","Удваивается"], difficulty:"base" },
-    { id:"line-004", title:"Работа поля", prompt:"Что физически выражает ∫_L F·dr?", type:"choice", answer:"Работу поля вдоль пути", options:["Работу поля вдоль пути","Площадь области","Поток через поверхность","Объём тела"], difficulty:"base" },
-    { id:"line-005", title:"Формула Грина", prompt:"Что связывает формула Грина?", type:"choice", answer:"Интеграл по границе области и двойной интеграл по области", options:["Интеграл по границе области и двойной интеграл по области","Тройной и поверхностный интегралы","Только два неопределённых интеграла","Два ряда"], difficulty:"medium" },
+    { id:"lineint-001", title:"I род", prompt:"Что является элементом интегрирования в криволинейном интеграле I рода?", type:"choice", answer:"dl", options:["dl","dxdy","dV","dS"], difficulty:"base" },
+    { id:"lineint-002", title:"Параметризация", prompt:"Если x=x(t), y=y(t), чему равно dl?", type:"choice", answer:"√(x'²+y'²)dt", options:["√(x'²+y'²)dt","(x'+y')dt","dxdy","x'y'dt"], difficulty:"base" },
+    { id:"lineint-003", title:"II род и ориентация", prompt:"Что происходит с ∫_L Pdx+Qdy при смене направления пути?", type:"choice", answer:"Меняет знак", options:["Меняет знак","Не меняется","Становится нулём","Удваивается"], difficulty:"base" },
+    { id:"lineint-004", title:"Работа поля", prompt:"Что физически выражает ∫_L F·dr?", type:"choice", answer:"Работу поля вдоль пути", options:["Работу поля вдоль пути","Площадь области","Поток через поверхность","Объём тела"], difficulty:"base" },
+    { id:"lineint-005", title:"Формула Грина", prompt:"Что связывает формула Грина?", type:"choice", answer:"Интеграл по границе области и двойной интеграл по области", options:["Интеграл по границе области и двойной интеграл по области","Тройной и поверхностный интегралы","Только два неопределённых интеграла","Два ряда"], difficulty:"medium" },
   ],
   "surface-integrals": [
     { id:"surf-001", title:"I род", prompt:"Что даёт ∬_S 1 dS?", type:"choice", answer:"Площадь поверхности S", options:["Площадь поверхности S","Объём тела","Длину границы","0"], difficulty:"base" },
