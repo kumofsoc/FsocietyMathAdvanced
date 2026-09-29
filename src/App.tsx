@@ -20,7 +20,7 @@ function routeFromHash() {
 }
 
 function isTrackedChapter(id: string) {
-  return id === "linear" || id === "vectors" || id === "plane-geometry" || id === "space-geometry" || id === "plane-transformations" || id === "abstract-linear";
+  return id === "linear" || id === "vectors" || id === "plane-geometry" || id === "space-geometry" || id === "plane-transformations" || id === "abstract-linear" || id === "euclidean";
 }
 
 function topicProgress(id: string) {
@@ -198,6 +198,16 @@ export default function App() {
     return Math.round(abstractLinearIds.reduce((sum, id) => sum + topicProgress(id), 0) / abstractLinearIds.length);
   }, [abstractLinearIds, learningVersion]);
 
+  const euclideanIds = useMemo(
+    () => chapters.find((chapter) => chapter.id === "euclidean")?.topicIds ?? [],
+    [],
+  );
+
+  const euclideanProgress = useMemo(() => {
+    if (!euclideanIds.length) return 0;
+    return Math.round(euclideanIds.reduce((sum, id) => sum + topicProgress(id), 0) / euclideanIds.length);
+  }, [euclideanIds, learningVersion]);
+
   const topic = topics[route];
 
   return (
@@ -247,6 +257,15 @@ export default function App() {
           </div>
           <div className="progress-track"><i style={{ width: abstractLinearProgress + "%" }} /></div>
           <small>Базисы · Ker/Im · спектр · квадратичные формы</small>
+        </div>
+
+        <div className="sidebar-progress sidebar-progress-secondary">
+          <div>
+            <span>Евклидовы пространства</span>
+            <strong>{euclideanProgress}%</strong>
+          </div>
+          <div className="progress-track"><i style={{ width: euclideanProgress + "%" }} /></div>
+          <small>Ортогональность · QR · SVD · полярное разложение</small>
         </div>
 
         <div className="chapter-list">
