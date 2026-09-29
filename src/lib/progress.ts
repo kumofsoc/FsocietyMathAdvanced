@@ -1,31 +1,20 @@
-import { chapters } from "../data/courseMeta";
+import { chapters, topicMeta } from "../data/courseMeta";
 import { practiceTaskIdsByTopic } from "../data/practiceMeta";
 import { loadSet, SOLVED_KEY, THEORY_KEY } from "./learning";
 
-export const TRACKED_CHAPTER_IDS = new Set([
-  "linear",
-  "vectors",
-  "plane-geometry",
-  "space-geometry",
-  "plane-transformations",
-  "abstract-linear",
-  "euclidean",
-  "affine-general",
-  "tensor-algebra",
-  "analysis-intro",
-  "indef-integral",
-  "def-integral",
-  "multivariable",
-  "ode",
-]);
+export function isTrackedTopic(topicId: string) {
+  const topic = topicMeta[topicId];
+  return Boolean(topic && !topic.isStub);
+}
+
+export function isTrackedChapter(chapterId: string) {
+  const chapter = chapters.find((item) => item.id === chapterId);
+  return Boolean(chapter?.topicIds.some(isTrackedTopic));
+}
 
 export interface LearningSnapshot {
   theory: Set<string>;
   solved: Set<string>;
-}
-
-export function isTrackedChapter(id: string) {
-  return TRACKED_CHAPTER_IDS.has(id);
 }
 
 export function getLearningSnapshot(): LearningSnapshot {
@@ -56,21 +45,23 @@ export function getChapterProgress(
   snapshot: LearningSnapshot = getLearningSnapshot(),
 ) {
   const chapter = chapters.find((item) => item.id === chapterId);
-  if (!chapter || !isTrackedChapter(chapter.id) || !chapter.topicIds.length) return 0;
+  if (!chapter) return 0;
+
+  const topicIds = chapter.topicIds.filter(isTrackedTopic);
+  if (!topicIds.length) return 0;
 
   return Math.round(
-    chapter.topicIds.reduce(
+    topicIds.reduce(
       (sum, topicId) => sum + getTopicProgress(topicId, snapshot),
       0,
-    ) / chapter.topicIds.length,
+    ) / topicIds.length,
   );
 }
 
 export function getCourseProgress(snapshot: LearningSnapshot = getLearningSnapshot()) {
-  const tracked = chapters.filter((chapter) => isTrackedChapter(chapter.id));
-  if (!tracked.length) return 0;
-
-  const topicIds = tracked.flatMap((chapter) => chapter.topicIds);
+  const topicIds = chapters
+    .flatMap((chapter) => chapter.topicIds)
+    .filter(isTrackedTopic);
   if (!topicIds.length) return 0;
 
   return Math.round(
