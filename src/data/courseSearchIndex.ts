@@ -5718,4 +5718,430 @@ export const courseSearchIndex: CourseSearchEntry[] = [
     "title": "Итог",
     "kind": "summary"
   }
+  {
+    "topicId": "functional-series",
+    "index": 0,
+    "title": "62.1 · Последовательность функций",
+    "kind": "definition"
+  },
+  {
+    "topicId": "functional-series",
+    "index": 1,
+    "title": "62.2 · Функциональный ряд",
+    "kind": "definition"
+  },
+  {
+    "topicId": "functional-series",
+    "index": 2,
+    "title": "62.3 · Равномерная сходимость",
+    "kind": "definition"
+  },
+  {
+    "topicId": "functional-series",
+    "index": 3,
+    "title": "Теорема 62.1 · Равномерный критерий Коши",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "functional-series",
+    "index": 4,
+    "title": "Теорема 62.2 · Признак Вейерштрасса",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "functional-series",
+    "index": 5,
+    "title": "Теорема 62.3 · Непрерывность суммы",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "functional-series",
+    "index": 6,
+    "title": "Теорема 62.4 · Почленное интегрирование",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "functional-series",
+    "index": 7,
+    "title": "Почленное дифференцирование требует большего",
+    "kind": "note"
+  },
+  {
+    "topicId": "functional-series",
+    "index": 8,
+    "title": "Пример 62.1 · Геометрический функциональный ряд",
+    "kind": "example"
+  },
+  {
+    "topicId": "functional-series",
+    "index": 9,
+    "title": "Итог",
+    "kind": "summary"
+  },
+  {
+    "topicId": "power-convergence",
+    "index": 0,
+    "title": "63.1 · Степенной ряд",
+    "kind": "definition"
+  },
+  {
+    "topicId": "power-convergence",
+    "index": 1,
+    "title": "Теорема 63.1 · Структура области сходимости",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "power-convergence",
+    "index": 2,
+    "title": "Почему возникает интервал",
+    "kind": "proof"
+  },
+  {
+    "topicId": "power-convergence",
+    "index": 3,
+    "title": "63.2 · Формула Коши–Адамара",
+    "kind": "formula"
+  },
+  {
+    "topicId": "power-convergence",
+    "index": 4,
+    "title": "63.3 · Формула через отношение коэффициентов",
+    "kind": "formula"
+  },
+  {
+    "topicId": "power-convergence",
+    "index": 5,
+    "title": "63.4 · Равномерная сходимость внутри радиуса",
+    "kind": "property"
+  },
+  {
+    "topicId": "power-convergence",
+    "index": 6,
+    "title": "Теорема 63.2 · Почленное дифференцирование и интегрирование",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "power-convergence",
+    "index": 7,
+    "title": "Теорема 63.3 · Теорема Абеля",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "power-convergence",
+    "index": 8,
+    "title": "Как находить область сходимости",
+    "kind": "algorithm"
+  },
+  {
+    "topicId": "power-convergence",
+    "index": 9,
+    "title": "Пример 63.1 · Логарифмический ряд",
+    "kind": "example"
+  },
+  {
+    "topicId": "power-convergence",
+    "index": 10,
+    "title": "Итог",
+    "kind": "summary"
+  },
+  {
+    "topicId": "taylor-series",
+    "index": 0,
+    "title": "64.1 · Ряд Тейлора",
+    "kind": "definition"
+  },
+  {
+    "topicId": "taylor-series",
+    "index": 1,
+    "title": "64.2 · Ряд Маклорена",
+    "kind": "definition"
+  },
+  {
+    "topicId": "taylor-series",
+    "index": 2,
+    "title": "Бесконечная дифференцируемость ещё не равна аналитичности",
+    "kind": "note"
+  },
+  {
+    "topicId": "taylor-series",
+    "index": 3,
+    "title": "Теорема 64.1 · Критерий представимости рядом Тейлора",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "taylor-series",
+    "index": 4,
+    "title": "64.3 · Экспонента",
+    "kind": "formula"
+  },
+  {
+    "topicId": "taylor-series",
+    "index": 5,
+    "title": "64.4 · Синус и косинус",
+    "kind": "formula"
+  },
+  {
+    "topicId": "taylor-series",
+    "index": 6,
+    "title": "64.5 · Геометрическое ядро",
+    "kind": "formula"
+  },
+  {
+    "topicId": "taylor-series",
+    "index": 7,
+    "title": "64.6 · Логарифм и арктангенс",
+    "kind": "formula"
+  },
+  {
+    "topicId": "taylor-series",
+    "index": 8,
+    "title": "Как строить разложение",
+    "kind": "algorithm"
+  },
+  {
+    "topicId": "taylor-series",
+    "index": 9,
+    "title": "Пример 64.1 · Приближение e",
+    "kind": "example"
+  },
+  {
+    "topicId": "taylor-series",
+    "index": 10,
+    "title": "Итог",
+    "kind": "summary"
+  },
+  {
+    "topicId": "series-applications",
+    "index": 0,
+    "title": "65.1 · Зачем нужны ряды на практике",
+    "kind": "concepts"
+  },
+  {
+    "topicId": "series-applications",
+    "index": 1,
+    "title": "65.2 · Вычисление пределов",
+    "kind": "algorithm"
+  },
+  {
+    "topicId": "series-applications",
+    "index": 2,
+    "title": "Пример 65.1 · Классический предел",
+    "kind": "example"
+  },
+  {
+    "topicId": "series-applications",
+    "index": 3,
+    "title": "65.3 · Численное приближение",
+    "kind": "algorithm"
+  },
+  {
+    "topicId": "series-applications",
+    "index": 4,
+    "title": "Пример 65.2 · Приближение ln 2",
+    "kind": "example"
+  },
+  {
+    "topicId": "series-applications",
+    "index": 5,
+    "title": "65.4 · Интегрирование степенного ряда",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "series-applications",
+    "index": 6,
+    "title": "Пример 65.3 · Гауссово ядро локально",
+    "kind": "example"
+  },
+  {
+    "topicId": "series-applications",
+    "index": 7,
+    "title": "65.5 · Метод степенных рядов для ОДУ",
+    "kind": "concepts"
+  },
+  {
+    "topicId": "series-applications",
+    "index": 8,
+    "title": "Пример 65.4 · y'=y",
+    "kind": "example"
+  },
+  {
+    "topicId": "series-applications",
+    "index": 9,
+    "title": "Контроль ошибки обязателен",
+    "kind": "note"
+  },
+  {
+    "topicId": "series-applications",
+    "index": 10,
+    "title": "Итог",
+    "kind": "summary"
+  },
+  {
+    "topicId": "fourier-series",
+    "index": 0,
+    "title": "66.1 · Гармонический базис",
+    "kind": "concepts"
+  },
+  {
+    "topicId": "fourier-series",
+    "index": 1,
+    "title": "66.2 · Тригонометрический ряд Фурье",
+    "kind": "definition"
+  },
+  {
+    "topicId": "fourier-series",
+    "index": 2,
+    "title": "66.3 · Коэффициенты Фурье",
+    "kind": "formula"
+  },
+  {
+    "topicId": "fourier-series",
+    "index": 3,
+    "title": "66.4 · Чётность упрощает коэффициенты",
+    "kind": "property"
+  },
+  {
+    "topicId": "fourier-series",
+    "index": 4,
+    "title": "Теорема 66.1 · Неравенство Бесселя",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "fourier-series",
+    "index": 5,
+    "title": "Теорема 66.2 · Равенство Парсеваля",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "fourier-series",
+    "index": 6,
+    "title": "Геометрический смысл",
+    "kind": "geometry"
+  },
+  {
+    "topicId": "fourier-series",
+    "index": 7,
+    "title": "Пример 66.1 · Прямоугольная волна",
+    "kind": "example"
+  },
+  {
+    "topicId": "fourier-series",
+    "index": 8,
+    "title": "Итог",
+    "kind": "summary"
+  },
+  {
+    "topicId": "fourier-expansion",
+    "index": 0,
+    "title": "Теорема 67.1 · Условия Дирихле",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "fourier-expansion",
+    "index": 1,
+    "title": "В точке непрерывности",
+    "kind": "corollary"
+  },
+  {
+    "topicId": "fourier-expansion",
+    "index": 2,
+    "title": "67.2 · Явление Гиббса",
+    "kind": "concepts"
+  },
+  {
+    "topicId": "fourier-expansion",
+    "index": 3,
+    "title": "Алгоритм разложения",
+    "kind": "algorithm"
+  },
+  {
+    "topicId": "fourier-expansion",
+    "index": 4,
+    "title": "67.3 · Полудиапазонные разложения",
+    "kind": "property"
+  },
+  {
+    "topicId": "fourier-expansion",
+    "index": 5,
+    "title": "Пример 67.1 · f(x)=x на (−π,π)",
+    "kind": "example"
+  },
+  {
+    "topicId": "fourier-expansion",
+    "index": 6,
+    "title": "Пример 67.2 · Значение на границе",
+    "kind": "example"
+  },
+  {
+    "topicId": "fourier-expansion",
+    "index": 7,
+    "title": "Поточечная и равномерная сходимость различаются",
+    "kind": "note"
+  },
+  {
+    "topicId": "fourier-expansion",
+    "index": 8,
+    "title": "Итог",
+    "kind": "summary"
+  },
+  {
+    "topicId": "fourier-integral",
+    "index": 0,
+    "title": "68.1 · От ряда к интегралу",
+    "kind": "concepts"
+  },
+  {
+    "topicId": "fourier-integral",
+    "index": 1,
+    "title": "68.2 · Преобразование Фурье",
+    "kind": "definition"
+  },
+  {
+    "topicId": "fourier-integral",
+    "index": 2,
+    "title": "68.3 · Обратное преобразование",
+    "kind": "definition"
+  },
+  {
+    "topicId": "fourier-integral",
+    "index": 3,
+    "title": "68.4 · Линейность",
+    "kind": "property"
+  },
+  {
+    "topicId": "fourier-integral",
+    "index": 4,
+    "title": "68.5 · Сдвиг и модуляция",
+    "kind": "property"
+  },
+  {
+    "topicId": "fourier-integral",
+    "index": 5,
+    "title": "68.6 · Дифференцирование",
+    "kind": "property"
+  },
+  {
+    "topicId": "fourier-integral",
+    "index": 6,
+    "title": "Теорема 68.1 · Планшерель",
+    "kind": "theorem"
+  },
+  {
+    "topicId": "fourier-integral",
+    "index": 7,
+    "title": "Пример 68.1 · Гауссиан",
+    "kind": "example"
+  },
+  {
+    "topicId": "fourier-integral",
+    "index": 8,
+    "title": "Спектральный смысл",
+    "kind": "geometry"
+  },
+  {
+    "topicId": "fourier-integral",
+    "index": 9,
+    "title": "Итог",
+    "kind": "summary"
+  },
 ];
