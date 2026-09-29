@@ -311,7 +311,7 @@ function PSeriesLab() {
             <Axes yMin={yMin} yMax={yMax} />
             <path className="series-curve" d={pathFor(values, yMin, yMax)} />
             <DotPlot
-              values={values.filter((_, index) => index % 3 === 0 || index === values.length - 1)}
+              values={values}
               yMin={yMin}
               yMax={yMax}
               className="series-dot"
