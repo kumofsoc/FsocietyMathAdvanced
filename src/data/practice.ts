@@ -2050,5 +2050,36 @@ export const practiceByTopic: Record<string, PracticeTask[]> = {
     { id:"int-033-2", title:"Корень x²+a²", prompt:"Какая подстановка стандартна для √(x²+a²)?", type:"choice", answer:"x=a tg t", options:["x=a tg t","x=a sin t","x=a cos t","x=t²"], difficulty:"base" },
     { id:"int-033-3", title:"Неэлементарный интеграл", prompt:"Что означает фраза «интеграл не берётся» в §34?", type:"choice", answer:"Первообразная не выражается элементарными функциями", options:["Первообразная не выражается элементарными функциями","Первообразной не существует","Интеграл расходится","Функция разрывна"], difficulty:"medium" },
     { id:"int-033-4", title:"Пример специальной функции", prompt:"Какой из интегралов приводится в источнике как неэлементарный?", type:"choice", answer:"∫e^(−x²)dx", options:["∫e^(−x²)dx","∫x²dx","∫cos x dx","∫dx/x"], difficulty:"base" },
+  ],
+  "riemann-integral": [
+    { id:"def-035-1", title:"Интегральная сумма", prompt:"Как выглядит интегральная сумма функции f на разбиении?", type:"choice", answer:"Σ f(cᵢ)Δxᵢ", options:["Σ f(cᵢ)Δxᵢ","Σ f(xᵢ)/Δxᵢ","Π f(cᵢ)Δxᵢ","f(b)−f(a)"], difficulty:"base" },
+    { id:"def-035-2", title:"Диаметр разбиения", prompt:"Что означает λ в определении интеграла Римана?", type:"choice", answer:"Максимальную длину частичного отрезка", options:["Максимальную длину частичного отрезка","Число частей","Минимальное значение функции","Среднее значение функции"], difficulty:"base" },
+    { id:"def-035-3", title:"Постоянная функция", prompt:"Вычисли ∫₁⁵ 3 dx.", type:"number", answer:"12", difficulty:"base" },
+    { id:"def-038-1", title:"Аддитивность", prompt:"Как разложить ∫ₐᵇ f(x)dx через точку c между a и b?", type:"choice", answer:"∫ₐᶜf dx + ∫ᶜᵇf dx", options:["∫ₐᶜf dx + ∫ᶜᵇf dx","∫ₐᶜf dx − ∫ᶜᵇf dx","2∫ₐᶜf dx всегда","f(c)(a+b)"], difficulty:"base" },
+    { id:"def-038-2", title:"Теорема о среднем", prompt:"Если f непрерывна на [a,b], чему равен ∫ₐᵇf(x)dx для некоторого c∈[a,b]?", type:"choice", answer:"f(c)(b−a)", options:["f(c)(b−a)","f(c)/(b−a)","f(a)+f(b)","f'(c)(b−a)"], difficulty:"medium" },
+    { id:"def-038-3", title:"Порядок", prompt:"Если f(x)≤g(x) на [a,b], что верно?", type:"choice", answer:"∫ₐᵇf≤∫ₐᵇg", options:["∫ₐᵇf≤∫ₐᵇg","∫ₐᵇf≥∫ₐᵇg","Интегралы обязательно равны","Ничего нельзя сказать"], difficulty:"base" },
+  ],
+  "newton-leibniz": [
+    { id:"def-037-1", title:"Ньютон–Лейбниц", prompt:"Если F'=f, чему равен ∫ₐᵇf(x)dx?", type:"choice", answer:"F(b)−F(a)", options:["F(b)−F(a)","F(a)−F(b)","F(a)+F(b)","f(b)−f(a)"], difficulty:"base" },
+    { id:"def-037-2", title:"Прямое вычисление", prompt:"Вычисли ∫₀³ x² dx.", type:"number", answer:"9", difficulty:"base" },
+    { id:"def-039-1", title:"Замена переменной", prompt:"Что обязательно надо изменить вместе с x=φ(t) в определённом интеграле?", type:"choice", answer:"Пределы интегрирования", options:["Пределы интегрирования","Только знак интеграла","Название функции","Ничего"], difficulty:"base" },
+    { id:"def-039-2", title:"По частям", prompt:"Выбери правильную формулу для определённого интеграла.", type:"choice", answer:"∫ₐᵇu dv=uv|ₐᵇ−∫ₐᵇv du", options:["∫ₐᵇu dv=uv|ₐᵇ−∫ₐᵇv du","∫ₐᵇu dv=uv|ₐᵇ+∫ₐᵇv du","∫ₐᵇu dv=u/v","∫ₐᵇu dv=0"], difficulty:"base" },
+    { id:"def-039-3", title:"Нечётность", prompt:"f нечётна. Чему равен ∫₋ₐᵃ f(x)dx?", type:"number", answer:"0", difficulty:"base" },
+    { id:"def-039-4", title:"Чётность", prompt:"f чётна. Как переписать ∫₋ₐᵃf(x)dx?", type:"choice", answer:"2∫₀ᵃf(x)dx", options:["2∫₀ᵃf(x)dx","0","∫₀ᵃf(x)dx","−2∫₀ᵃf(x)dx"], difficulty:"base" },
+  ],
+  "improper-integrals": [
+    { id:"def-040-1", title:"I род", prompt:"Как определяется ∫ₐ^∞ f(x)dx?", type:"choice", answer:"lim(b→∞)∫ₐᵇf(x)dx", options:["lim(b→∞)∫ₐᵇf(x)dx","∫ₐᵇf(x)dx при b=∞","f(∞)−f(a)","Σf(n)"], difficulty:"base" },
+    { id:"def-040-2", title:"p-интеграл на бесконечности", prompt:"Когда сходится ∫₁^∞ dx/x^p?", type:"choice", answer:"p>1", options:["p>1","p≥0","p<1","Для любого p"], difficulty:"base" },
+    { id:"def-040-3", title:"II род", prompt:"Когда сходится ∫₀¹ dx/x^p?", type:"choice", answer:"p<1", options:["p<1","p>1","p=1 только","Для любого p"], difficulty:"base" },
+    { id:"def-040-4", title:"Внутренняя особая точка", prompt:"Если f имеет бесконечный разрыв внутри (a,b), когда общий несобственный интеграл сходится?", type:"choice", answer:"Когда сходятся обе части по разные стороны особой точки", options:["Когда сходятся обе части по разные стороны особой точки","Если хотя бы одна часть сходится","Всегда","Никогда"], difficulty:"medium" },
+    { id:"def-040-5", title:"Сравнение", prompt:"lim f(x)/g(x)=k, 0<k<∞ для положительных функций. Что можно сказать об интегралах?", type:"choice", answer:"Они сходятся или расходятся одновременно", options:["Они сходятся или расходятся одновременно","Оба всегда сходятся","Оба всегда расходятся","Их значения равны"], difficulty:"medium" },
+  ],
+  "integral-applications": [
+    { id:"def-041-1", title:"Площадь между графиками", prompt:"Если f≥g на [a,b], как найти площадь между графиками?", type:"choice", answer:"∫ₐᵇ(f−g)dx", options:["∫ₐᵇ(f−g)dx","∫ₐᵇ(f+g)dx","f(b)−g(a)","∫ₐᵇfg dx"], difficulty:"base" },
+    { id:"def-041-2", title:"Длина дуги", prompt:"Какая формула задаёт длину графика y=f(x)?", type:"choice", answer:"∫ₐᵇ√(1+(f')²)dx", options:["∫ₐᵇ√(1+(f')²)dx","∫ₐᵇf²dx","∫ₐᵇ|f'|dx всегда","π∫ₐᵇf²dx"], difficulty:"base" },
+    { id:"def-041-3", title:"Объём по сечениям", prompt:"Если S(x) — площадь поперечного сечения, чему равен объём?", type:"choice", answer:"∫ₐᵇS(x)dx", options:["∫ₐᵇS(x)dx","S(a)S(b)","π∫ₐᵇS²dx","S'(b)−S'(a)"], difficulty:"base" },
+    { id:"def-041-4", title:"Работа силы", prompt:"Как вычисляется работа переменной силы F(x) вдоль оси?", type:"choice", answer:"∫ₐᵇF(x)dx", options:["∫ₐᵇF(x)dx","F(a)+F(b)","F'(b)−F'(a)","∫ₐᵇF²(x)dx"], difficulty:"base" },
+    { id:"def-042-1", title:"Средние прямоугольники", prompt:"Где берётся значение функции на каждом маленьком отрезке в формуле средних прямоугольников?", type:"choice", answer:"В середине отрезка", options:["В середине отрезка","Только в левом конце","Только в правом конце","В точке максимума"], difficulty:"base" },
+    { id:"def-042-2", title:"Симпсон", prompt:"Как чередуются коэффициенты внутренних ординат в формуле Симпсона?", type:"choice", answer:"4,2,4,2,…,4", options:["4,2,4,2,…,4","1,1,1,…","2,2,2,…","3,1,3,1,…"], difficulty:"medium" },
   ]
 };
