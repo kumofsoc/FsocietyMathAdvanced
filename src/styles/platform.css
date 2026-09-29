@@ -1,0 +1,505 @@
+/* Platform-level states introduced after the course shell.
+   Kept outside styles.css so new architecture can continue moving toward feature CSS. */
+
+.visual-loading,
+.visual-failed {
+  width: 100%;
+  min-height: 116px;
+  margin: 18px 0 30px;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--border));
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      125deg,
+      color-mix(in srgb, var(--accent) 5%, transparent),
+      transparent 46%
+    ),
+    var(--surface);
+}
+
+.visual-loading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  overflow: hidden;
+  position: relative;
+}
+
+.visual-loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--text) 5%, transparent),
+    transparent
+  );
+  animation: visual-loading-scan 1.25s ease-in-out infinite;
+}
+
+.visual-loading > span {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: visual-loading-spin .8s linear infinite;
+}
+
+.visual-loading > div {
+  display: grid;
+  gap: 5px;
+}
+
+.visual-loading strong {
+  color: var(--text);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.visual-loading small {
+  color: var(--muted);
+  font-size: 8px;
+  letter-spacing: .04em;
+}
+
+.visual-failed {
+  display: grid;
+  gap: 9px;
+  align-content: center;
+  padding: 18px;
+  border-color: color-mix(in srgb, #ff6b7a 42%, var(--border));
+}
+
+.visual-failed > span {
+  color: #ff7c88;
+  font: 700 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .15em;
+}
+
+.visual-failed > strong {
+  color: var(--text);
+  font-size: 11px;
+}
+
+.visual-failed button {
+  justify-self: start;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--elevated);
+  color: var(--text);
+  cursor: pointer;
+}
+
+@keyframes visual-loading-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes visual-loading-scan {
+  60%, 100% { transform: translateX(100%); }
+}
+
+/* Planned topics */
+
+.chapter-topics button.planned,
+.sidebar-progress-topics button.planned {
+  opacity: .7;
+}
+
+.chapter-topics button.planned:hover,
+.sidebar-progress-topics button.planned:hover,
+.chapter-topics button.planned.active,
+.sidebar-progress-topics button.planned.active {
+  opacity: 1;
+}
+
+.chapter-topics button.planned > span:first-child,
+.sidebar-progress-topics button.planned .sidebar-topic-state {
+  color: var(--formula);
+}
+
+.sidebar-progress-topics button.planned .sidebar-topic-progress {
+  color: var(--formula);
+  letter-spacing: .09em;
+}
+
+.command-results > button.planned {
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--formula) 5%, transparent),
+    transparent 52%
+  );
+}
+
+.command-result-plan {
+  justify-self: end;
+  padding: 5px 7px;
+  border: 1px solid color-mix(in srgb, var(--formula) 36%, var(--border));
+  border-radius: 999px;
+  color: var(--formula);
+  background: color-mix(in srgb, var(--formula) 6%, transparent);
+  font: 700 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .09em;
+}
+
+.map-topic-shell.is-planned .map-topic-card {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--formula) 44%, var(--border));
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--formula) 6%, transparent),
+      transparent 60%
+    ),
+    var(--surface);
+}
+
+.map-topic-shell.is-planned .map-topic-meta span:last-child {
+  color: var(--formula);
+}
+
+.map-planned-state {
+  display: grid;
+  gap: 4px;
+  margin-top: 11px;
+  padding: 9px 10px;
+  border: 1px dashed color-mix(in srgb, var(--formula) 34%, var(--border));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--formula) 4%, transparent);
+}
+
+.map-planned-state span {
+  color: var(--formula);
+  font: 700 6px ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .12em;
+}
+
+.map-planned-state strong {
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 500;
+}
+
+.legend-planned {
+  border-radius: 2px;
+  background: var(--formula) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--formula) 12%, transparent);
+}
+
+/* Planned-topic roadmap */
+
+.stub-topic-page {
+  width: min(1220px, calc(100% - 34px));
+  margin: 0 auto;
+  padding: 58px 0 90px;
+}
+
+.stub-topic-hero {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(28px, 4vw, 54px);
+  border: 1px solid color-mix(in srgb, var(--formula) 24%, var(--border));
+  border-radius: 24px;
+  background:
+    radial-gradient(
+      circle at 78% 20%,
+      color-mix(in srgb, var(--formula) 12%, transparent),
+      transparent 28%
+    ),
+    linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--surface) 96%, transparent),
+      color-mix(in srgb, var(--elevated) 92%, transparent)
+    );
+}
+
+.stub-topic-hero::after {
+  content: "PLANNED";
+  position: absolute;
+  right: -10px;
+  bottom: -34px;
+  color: color-mix(in srgb, var(--text) 3%, transparent);
+  font: 900 clamp(74px, 12vw, 170px) ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: -.08em;
+  pointer-events: none;
+}
+
+.stub-topic-title-row {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 32px;
+  align-items: end;
+  margin-top: 18px;
+}
+
+.stub-topic-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 9px;
+  border: 1px solid color-mix(in srgb, var(--formula) 42%, var(--border));
+  border-radius: 999px;
+  color: var(--formula);
+  background: color-mix(in srgb, var(--formula) 7%, transparent);
+  font: 800 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .14em;
+}
+
+.stub-topic-title-row h1 {
+  max-width: 900px;
+  margin: 14px 0 12px;
+  color: var(--text);
+  font-size: clamp(46px, 7vw, 104px);
+  line-height: .9;
+  letter-spacing: -.065em;
+}
+
+.stub-topic-title-row p {
+  max-width: 720px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+.stub-topic-index {
+  min-width: 140px;
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+  padding-bottom: 5px;
+}
+
+.stub-topic-index strong {
+  color: var(--formula);
+  font: 500 clamp(38px, 5vw, 70px) ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: -.08em;
+}
+
+.stub-topic-index span {
+  color: var(--muted);
+  font-size: 7px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.stub-topic-grid {
+  display: grid;
+  grid-template-columns: .82fr 1.18fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.stub-topic-grid > article,
+.stub-prerequisites {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+}
+
+.stub-topic-grid > article {
+  min-height: 280px;
+  padding: 24px;
+}
+
+.stub-topic-grid article > span,
+.stub-prerequisites > div:first-child > span {
+  color: var(--muted);
+  font: 700 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .12em;
+}
+
+.stub-topic-grid h2,
+.stub-prerequisites h2 {
+  max-width: 700px;
+  margin: 13px 0 11px;
+  color: var(--text);
+  font-size: clamp(24px, 3vw, 42px);
+  line-height: 1;
+  letter-spacing: -.045em;
+}
+
+.stub-topic-grid article > p {
+  max-width: 620px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.stub-pipeline {
+  display: grid;
+  gap: 5px;
+  margin-top: 24px;
+}
+
+.stub-pipeline > div {
+  min-height: 34px;
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--elevated);
+}
+
+.stub-pipeline b {
+  color: var(--formula);
+  font: 700 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.stub-pipeline strong {
+  color: var(--text);
+  font-size: 9px;
+  font-weight: 540;
+}
+
+.stub-prerequisites {
+  display: grid;
+  grid-template-columns: .65fr 1.35fr;
+  gap: 24px;
+  margin-top: 14px;
+  padding: 24px;
+}
+
+.stub-prerequisite-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.stub-prerequisite-list button {
+  min-height: 74px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--elevated);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.stub-prerequisite-list button:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  transform: translateY(-1px);
+}
+
+.stub-prerequisite-list button > span {
+  padding: 4px 5px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--accent2) 9%, transparent);
+  color: var(--accent2);
+  font: 700 6px ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .07em;
+}
+
+.stub-prerequisite-list button > strong {
+  min-width: 0;
+  font-size: 9px;
+}
+
+.stub-prerequisite-list button > small {
+  color: var(--muted);
+  font-size: 7px;
+}
+
+.stub-no-prerequisites {
+  display: grid;
+  place-content: center;
+  min-height: 74px;
+  border: 1px dashed var(--border);
+  border-radius: 11px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.stub-neighbor-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.stub-neighbor-nav button {
+  min-height: 82px;
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.stub-neighbor-nav button:last-child {
+  text-align: right;
+}
+
+.stub-neighbor-nav button:disabled {
+  opacity: .35;
+  cursor: default;
+}
+
+.stub-neighbor-nav span {
+  color: var(--muted);
+  font-size: 7px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.stub-neighbor-nav strong {
+  font-size: 10px;
+}
+
+@media (max-width: 820px) {
+  .stub-topic-page {
+    width: min(100% - 20px, 1220px);
+    padding: 24px 0 70px;
+  }
+
+  .stub-topic-title-row,
+  .stub-topic-grid,
+  .stub-prerequisites {
+    grid-template-columns: 1fr;
+  }
+
+  .stub-topic-index {
+    justify-items: start;
+  }
+
+  .stub-prerequisite-list {
+    grid-template-columns: 1fr;
+  }
+
+  .stub-topic-grid > article {
+    min-height: 0;
+  }
+
+  .stub-neighbor-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .stub-neighbor-nav button:last-child {
+    text-align: left;
+  }
+}
+
+html[data-motion-profile="off"] .visual-loading > span,
+html[data-motion-profile="off"] .visual-loading::after {
+  animation: none;
+}
