@@ -12,7 +12,7 @@ import {
   SOLVED_KEY,
   THEORY_KEY,
 } from "../lib/learning";
-import { isTrackedChapter } from "../lib/progress";
+import { isTrackedTopic } from "../lib/progress";
 import type { BlockKind, ContentBlock, Topic } from "../types/course";
 import { MatrixLab } from "./MatrixLab";
 import { MatrixTypesGallery } from "./MatrixTypesGallery";
@@ -314,7 +314,7 @@ function NeighborNav({ topic }: { topic: Topic }) {
 export function TopicPage({ topicId }: { topicId: string }) {
   const topic = topics[topicId];
   const chapter = chapters.find((item) => item.id === topic.chapterId);
-  const tracksLearning = isTrackedChapter(topic.chapterId);
+  const tracksLearning = isTrackedTopic(topic.id);
   const theorySentinel = useRef<HTMLDivElement>(null);
   const [activeBlock, setActiveBlock] = useState(0);
   const [theoryRead, setTheoryRead] = useState(() => loadSet(THEORY_KEY).has(topic.id));
