@@ -34,9 +34,11 @@ const TopicPage = lazy(() =>
 function ChapterAccordion({
   chapter,
   route,
+  snapshot,
 }: {
   chapter: Chapter;
   route: string;
+  snapshot: ReturnType<typeof getLearningSnapshot>;
 }) {
   const containsRoute = chapter.topicIds.includes(route);
   const [open, setOpen] = useState(chapter.id === "linear" || containsRoute);
@@ -75,7 +77,7 @@ function ChapterAccordion({
                 const item = topics[id];
                 if (!item) return null;
                 const tracked = isTrackedChapter(item.chapterId);
-                const progress = tracked ? getTopicProgress(id) : 0;
+                const progress = tracked ? getTopicProgress(id, snapshot) : 0;
                 return (
                   <motion.button
                     key={id}
@@ -105,10 +107,12 @@ function SidebarProgressItem({
   chapter,
   route,
   progress,
+  snapshot,
 }: {
   chapter: Chapter;
   route: string;
   progress: number;
+  snapshot: ReturnType<typeof getLearningSnapshot>;
 }) {
   const containsRoute = chapter.topicIds.includes(route);
   const [open, setOpen] = useState(containsRoute);
@@ -150,7 +154,7 @@ function SidebarProgressItem({
               {chapter.topicIds.map((id) => {
                 const item = topics[id];
                 if (!item) return null;
-                const value = getTopicProgress(id);
+                const value = getTopicProgress(id, snapshot);
                 return (
                   <button
                     key={id}
@@ -263,25 +267,30 @@ export default function App() {
     return () => ctx.revert();
   }, [route]);
 
-  const linearProgress = useMemo(
-    () => getChapterProgress("linear"),
+  const learningSnapshot = useMemo(
+    () => getLearningSnapshot(),
     [learningVersion],
   );
 
+  const linearProgress = useMemo(
+    () => getChapterProgress("linear", learningSnapshot),
+    [learningSnapshot],
+  );
+
   const trackedProgressRows = useMemo(() => {
-    const snapshot = getLearningSnapshot();
+    const snapshot = learningSnapshot;
     return chapters
       .filter((chapter) => isTrackedChapter(chapter.id))
       .map((chapter) => ({
         chapter,
         progress: getChapterProgress(chapter.id, snapshot),
       }));
-  }, [learningVersion]);
+  }, [learningSnapshot]);
 
-  const courseProgress = useMemo(() => {
-    const snapshot = getLearningSnapshot();
-    return getCourseProgress(snapshot);
-  }, [learningVersion]);
+  const courseProgress = useMemo(
+    () => getCourseProgress(learningSnapshot),
+    [learningSnapshot],
+  );
 
   const topic = topics[route];
 
@@ -330,6 +339,7 @@ export default function App() {
               chapter={chapter}
               route={route}
               progress={progress}
+              snapshot={learningSnapshot}
             />
           ))}
         </div>
@@ -341,7 +351,12 @@ export default function App() {
 
         <div className="chapter-list">
           {chapters.map((chapter) => (
-            <ChapterAccordion key={chapter.id} chapter={chapter} route={route} />
+            <ChapterAccordion
+              key={chapter.id}
+              chapter={chapter}
+              route={route}
+              snapshot={learningSnapshot}
+            />
           ))}
         </div>
       </aside>
@@ -400,7 +415,7 @@ export default function App() {
                 }
               >
                 {route === "home" ? (
-                  <HomePage progress={linearProgress} />
+                  <HomePage progress={courseProgress} />
                 ) : route === "map" ? (
                   <CourseMap />
                 ) : topic ? (
