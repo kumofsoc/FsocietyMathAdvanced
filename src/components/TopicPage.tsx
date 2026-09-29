@@ -2,7 +2,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { BlockMath } from "react-katex";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { chapters, topicList, topics } from "../data/course";
-import { topicMeta } from "../data/courseMeta";
 import { practiceTaskIdsByTopic } from "../data/practiceMeta";
 import {
   LEARNING_EVENT,
@@ -349,10 +348,8 @@ function NeighborNav({ topic }: { topic: Topic }) {
 
 export function TopicPage({ topicId }: { topicId: string }) {
   const topic = topics[topicId];
-  const meta = topicMeta[topicId];
   const chapter = chapters.find((item) => item.id === topic.chapterId);
   const tracksLearning = isTrackedTopic(topic.id);
-  const isPlanned = Boolean(meta?.isStub);
   const theorySentinel = useRef<HTMLDivElement>(null);
   const [activeBlock, setActiveBlock] = useState(0);
   const [theoryRead, setTheoryRead] = useState(() => loadSet(THEORY_KEY).has(topic.id));
@@ -457,10 +454,9 @@ export function TopicPage({ topicId }: { topicId: string }) {
 
   return (
     <div className="topic-page">
-      <header className={"topic-hero " + (isPlanned ? "planned-topic-hero" : "")}>
+      <header className="topic-hero">
         <div className="eyebrow">
           ГЛАВА {chapter?.number} / § {topic.number} · {chapter?.title}
-          {isPlanned ? " · PLANNED" : ""}
         </div>
         <div className="hero-title-row">
           <div>
@@ -468,42 +464,21 @@ export function TopicPage({ topicId }: { topicId: string }) {
             <p>{topic.summary}</p>
           </div>
 
-          <div className={"topic-learning-status " + (isPlanned ? "planned" : "")}>
-            {isPlanned ? (
-              <>
-                <div>
-                  <span>СТАТУС</span>
-                  <strong>PLANNED</strong>
-                  <small>модуль в roadmap</small>
-                </div>
-                <div>
-                  <span>КОНТЕНТ</span>
-                  <strong>—</strong>
-                  <small>глубокое наполнение впереди</small>
-                </div>
-                <div className="topic-total">
-                  <span>MASTERY</span>
-                  <strong>—</strong>
-                </div>
-              </>
-            ) : (
-              <>
-                <div>
-                  <span>ТЕОРИЯ</span>
-                  <strong>{theoryRead ? "50 / 50" : "0 / 50"}</strong>
-                  <small>{theoryRead ? "прочитана" : "дочитай до практики"}</small>
-                </div>
-                <div>
-                  <span>ПРАКТИКА</span>
-                  <strong>{Math.round(practiceRatio * 50)} / 50</strong>
-                  <small>{taskIds.length ? solvedCount + " / " + taskIds.length + " задач" : "банк готовится"}</small>
-                </div>
-                <div className="topic-total">
-                  <span>ОСВОЕНИЕ</span>
-                  <strong>{topicProgress}%</strong>
-                </div>
-              </>
-            )}
+          <div className="topic-learning-status">
+            <div>
+              <span>ТЕОРИЯ</span>
+              <strong>{theoryRead ? "50 / 50" : "0 / 50"}</strong>
+              <small>{theoryRead ? "прочитана" : "дочитай до практики"}</small>
+            </div>
+            <div>
+              <span>ПРАКТИКА</span>
+              <strong>{Math.round(practiceRatio * 50)} / 50</strong>
+              <small>{taskIds.length ? solvedCount + " / " + taskIds.length + " задач" : "банк готовится"}</small>
+            </div>
+            <div className="topic-total">
+              <span>ОСВОЕНИЕ</span>
+              <strong>{topicProgress}%</strong>
+            </div>
           </div>
         </div>
 
@@ -519,24 +494,7 @@ export function TopicPage({ topicId }: { topicId: string }) {
         )}
       </header>
 
-      {isPlanned && (
-        <section className="planned-topic-banner">
-          <div>
-            <span>ROADMAP / PLANNED MODULE</span>
-            <h2>Структура темы уже включена в курс, но глубокий материал ещё не подключён.</h2>
-            <p>
-              Эта тема сохранена в графе зависимостей и последовательности курса. Когда модуль
-              будет развёрнут, здесь появятся определения, свойства, доказательства,
-              визуализации и полноценный банк задач — без смены URL и структуры навигации.
-            </p>
-          </div>
-          <button onClick={() => (window.location.hash = "map")}>
-            Посмотреть место на карте →
-          </button>
-        </section>
-      )}
-
-      {!isPlanned && <div className="topic-outline">
+      <div className="topic-outline">
         {topic.blocks.map((block, index) => (
           <button
             type="button"
@@ -548,9 +506,9 @@ export function TopicPage({ topicId }: { topicId: string }) {
             {String(index + 1).padStart(2, "0")} · {block.title}
           </button>
         ))}
-      </div>}
+      </div>
 
-      {!isPlanned && <section className="lesson-content">
+      <section className="lesson-content">
         {topic.blocks.map((block, index) => (
           <div
             id={"block-" + topic.id + "-" + index}
@@ -567,11 +525,11 @@ export function TopicPage({ topicId }: { topicId: string }) {
             />
           </div>
         ))}
-      </section>}
+      </section>
 
-      {!isPlanned && <TopicLabInsert topicId={topic.id} enabled={Boolean(topic.hasLab)} />}
+      <TopicLabInsert topicId={topic.id} enabled={Boolean(topic.hasLab)} />
 
-      {!isPlanned && tracksLearning && <div className="theory-finish" ref={theorySentinel}>
+      {tracksLearning && <div className="theory-finish" ref={theorySentinel}>
         <span>{theoryRead ? "✓" : "↓"}</span>
         <div>
           <strong>{theoryRead ? "Теоретический маршрут пройден" : "Финиш теоретической части"}</strong>
@@ -583,7 +541,7 @@ export function TopicPage({ topicId }: { topicId: string }) {
         </div>
       </div>}
 
-      {!isPlanned && tracksLearning && <DeferredPracticePanel topicId={topic.id} />}
+      {tracksLearning && <DeferredPracticePanel topicId={topic.id} />}
 
       <NeighborNav topic={topic} />
     </div>
