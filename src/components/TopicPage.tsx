@@ -415,21 +415,42 @@ export function TopicPage({ topicId }: { topicId: string }) {
             <p>{topic.summary}</p>
           </div>
 
-          <div className="topic-learning-status">
-            <div>
-              <span>ТЕОРИЯ</span>
-              <strong>{theoryRead ? "50 / 50" : "0 / 50"}</strong>
-              <small>{theoryRead ? "прочитана" : "дочитай до практики"}</small>
-            </div>
-            <div>
-              <span>ПРАКТИКА</span>
-              <strong>{Math.round(practiceRatio * 50)} / 50</strong>
-              <small>{tasks.length ? solvedCount + " / " + tasks.length + " задач" : "банк готовится"}</small>
-            </div>
-            <div className="topic-total">
-              <span>ОСВОЕНИЕ</span>
-              <strong>{topicProgress}%</strong>
-            </div>
+          <div className={"topic-learning-status " + (isPlanned ? "planned" : "")}>
+            {isPlanned ? (
+              <>
+                <div>
+                  <span>СТАТУС</span>
+                  <strong>PLANNED</strong>
+                  <small>модуль в roadmap</small>
+                </div>
+                <div>
+                  <span>КОНТЕНТ</span>
+                  <strong>—</strong>
+                  <small>глубокое наполнение впереди</small>
+                </div>
+                <div className="topic-total">
+                  <span>MASTERY</span>
+                  <strong>—</strong>
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <span>ТЕОРИЯ</span>
+                  <strong>{theoryRead ? "50 / 50" : "0 / 50"}</strong>
+                  <small>{theoryRead ? "прочитана" : "дочитай до практики"}</small>
+                </div>
+                <div>
+                  <span>ПРАКТИКА</span>
+                  <strong>{Math.round(practiceRatio * 50)} / 50</strong>
+                  <small>{tasks.length ? solvedCount + " / " + tasks.length + " задач" : "банк готовится"}</small>
+                </div>
+                <div className="topic-total">
+                  <span>ОСВОЕНИЕ</span>
+                  <strong>{topicProgress}%</strong>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -476,7 +497,7 @@ export function TopicPage({ topicId }: { topicId: string }) {
         ))}
       </div>}
 
-      <section className="lesson-content">
+      {!isPlanned && <section className="lesson-content">
         {topic.blocks.map((block, index) => (
           <div
             id={"block-" + topic.id + "-" + index}
@@ -493,7 +514,7 @@ export function TopicPage({ topicId }: { topicId: string }) {
             />
           </div>
         ))}
-      </section>
+      </section>}
 
       {!isPlanned && <TopicLabInsert topicId={topic.id} enabled={Boolean(topic.hasLab)} />}
 
