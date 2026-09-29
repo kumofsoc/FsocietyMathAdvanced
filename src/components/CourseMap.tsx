@@ -23,8 +23,8 @@ import {
   useState,
 } from "react";
 import { chapters, topicList, topics } from "../data/course";
-import { practiceByTopic } from "../data/practice";
-import { LEARNING_EVENT, loadSet, SOLVED_KEY, THEORY_KEY } from "../lib/learning";
+import { LEARNING_EVENT } from "../lib/learning";
+import { getChapterProgress, getTopicProgress } from "../lib/progress";
 import type { GraphNodeData } from "../types/course";
 
 const STORAGE_KEY = "fsociety-course-map-layout-v2";
@@ -61,27 +61,6 @@ function readLayout(): StoredLayout {
   } catch {
     return {};
   }
-}
-
-function progressForTopic(id: string) {
-  const chapterId = topics[id]?.chapterId;
-  if (!["linear", "vectors", "plane-geometry", "space-geometry", "plane-transformations", "abstract-linear", "euclidean", "affine-general", "tensor-algebra", "analysis-intro", "indef-integral", "def-integral", "multivariable", "ode"].includes(chapterId ?? "")) return 0;
-  const theory = loadSet(THEORY_KEY).has(id) ? 50 : 0;
-  const tasks = practiceByTopic[id] ?? [];
-  if (!tasks.length) return theory;
-
-  const solved = loadSet(SOLVED_KEY);
-  const solvedCount = tasks.filter((task) => solved.has(task.id)).length;
-  return Math.round(theory + (solvedCount / tasks.length) * 50);
-}
-
-function progressForChapter(chapterId: string) {
-  const chapter = chapters.find((item) => item.id === chapterId);
-  if (!chapter || !["linear", "vectors", "plane-geometry", "space-geometry", "plane-transformations", "abstract-linear", "euclidean", "affine-general", "tensor-algebra", "analysis-intro", "indef-integral", "def-integral", "multivariable", "ode"].includes(chapter.id)) return 0;
-  const values = chapter.topicIds.map(progressForTopic);
-  return values.length
-    ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length)
-    : 0;
 }
 
 function DependencyEdge(props: EdgeProps) {
@@ -434,7 +413,7 @@ function InnerCourseMap() {
             number: chapter.number,
             title: chapter.title,
             topicCount: chapter.topicIds.length,
-            progress: progressForChapter(chapter.id),
+            progress: getChapterProgress(chapter.id),
             rotation: saved?.rotation ?? 0,
             scale: saved?.scale ?? 1,
             onOpen: openChapter,
@@ -466,7 +445,7 @@ function InnerCourseMap() {
             summary: topic.summary,
             rotation: saved?.rotation ?? 0,
             scale: saved?.scale ?? 1,
-            progress: progressForTopic(topic.id),
+            progress: getTopicProgress(topic.id),
             onOpen: openTopic,
             onRotate: () => undefined,
             onScale: () => undefined,
