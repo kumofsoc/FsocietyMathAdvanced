@@ -9158,9 +9158,13 @@ body.quadric-fullscreen-open {
   cursor: pointer;
   transition: background .15s ease, transform .15s ease;
 }
-.command-results > button:hover {
+.command-results > button:hover,
+.command-results > button.active {
   background: color-mix(in srgb, var(--accent) 7%, var(--elevated));
   transform: translateX(2px);
+}
+.command-results > button.active {
+  box-shadow: inset 2px 0 0 var(--accent);
 }
 .command-result-number {
   color: var(--accent);
