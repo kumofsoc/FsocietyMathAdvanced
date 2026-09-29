@@ -44,7 +44,10 @@ button, a { -webkit-tap-highlight-color: transparent; }
   backdrop-filter: blur(20px);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .brand {
@@ -97,7 +100,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .progress-track { height: 4px; margin-top: 8px; background: var(--border); border-radius: 999px; overflow: hidden; }
 .progress-track i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: inherit; transition: width .4s ease; }
 
-.chapter-list { overflow: auto; padding: 0 10px 80px; }
+.chapter-list {
+  flex: 0 0 auto;
+  overflow: visible;
+  padding: 0 10px 80px;
+}
 .chapter-list details { border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent); }
 .chapter-list summary {
   list-style: none;
@@ -9854,4 +9861,27 @@ body.quadric-fullscreen-open {
 @keyframes practice-deferred-pulse {
   from { opacity: .62; }
   to { opacity: 1; }
+}
+
+
+/* Sidebar owns vertical scrolling after expandable progress navigation was added. */
+.sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: var(--border);
+  background-clip: padding-box;
+}
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--accent) 36%, var(--border));
+  background-clip: padding-box;
 }
