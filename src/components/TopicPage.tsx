@@ -335,6 +335,7 @@ export function TopicPage({ topic }: { topic: Topic }) {
 
   useEffect(() => {
     setActiveBlock(0);
+    let observer: IntersectionObserver | null = null;
 
     const frame = requestAnimationFrame(() => {
       const nodes = Array.from(
@@ -344,7 +345,7 @@ export function TopicPage({ topic }: { topic: Topic }) {
       );
       if (!nodes.length) return;
 
-      const observer = new IntersectionObserver(
+      observer = new IntersectionObserver(
         (entries) => {
           const visible = entries
             .filter((entry) => entry.isIntersecting)
@@ -366,16 +367,12 @@ export function TopicPage({ topic }: { topic: Topic }) {
         },
       );
 
-      nodes.forEach((node) => observer.observe(node));
-      (window as Window & { __fsTopicObserver?: IntersectionObserver }).__fsTopicObserver?.disconnect();
-      (window as Window & { __fsTopicObserver?: IntersectionObserver }).__fsTopicObserver = observer;
+      nodes.forEach((node) => observer?.observe(node));
     });
 
     return () => {
       cancelAnimationFrame(frame);
-      const holder = window as Window & { __fsTopicObserver?: IntersectionObserver };
-      holder.__fsTopicObserver?.disconnect();
-      delete holder.__fsTopicObserver;
+      observer?.disconnect();
     };
   }, [topic.id, topic.blocks.length]);
 
