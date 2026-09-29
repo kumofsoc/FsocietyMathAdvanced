@@ -1,6 +1,29 @@
 /* Platform-level states introduced after the course shell.
    Kept outside styles.css so new architecture can continue moving toward feature CSS. */
 
+.visual-deferred {
+  min-height: 74px;
+  margin: 16px 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 15px;
+  border: 1px dashed color-mix(in srgb, var(--accent) 20%, var(--border));
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  color: var(--muted);
+}
+
+.visual-deferred > span {
+  color: var(--accent);
+  font: 700 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .12em;
+}
+
+.visual-deferred > small {
+  font-size: 8px;
+}
+
 .visual-loading,
 .visual-failed {
   width: 100%;
