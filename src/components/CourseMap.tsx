@@ -19,9 +19,7 @@ import {
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import { chapters, topicList, topics } from "../data/course";
@@ -52,6 +50,8 @@ type DependencyEdgeData = {
   sourceNumber?: string;
   targetNumber?: string;
   relationLabel: string;
+  isActive?: boolean;
+  isDimmed?: boolean;
   onOpenTarget?: () => void;
 };
 
@@ -123,7 +123,11 @@ function DependencyEdge(props: EdgeProps) {
 
       <EdgeLabelRenderer>
         <button
-          className="map-edge-label nodrag nopan"
+          className={
+            "map-edge-label nodrag nopan " +
+            (meta.isActive ? "is-active " : "") +
+            (meta.isDimmed ? "is-dimmed" : "")
+          }
           style={{
             transform:
               "translate(-50%, -50%) translate(" + labelX + "px, " + labelY + "px)",
@@ -155,162 +159,70 @@ function DependencyEdge(props: EdgeProps) {
   );
 }
 
-function TransformGizmos({
-  selector,
+function MapTransformControls({
   rotation,
   scale,
   onRotate,
   onScale,
 }: {
-  selector: string;
   rotation: number;
   scale: number;
   onRotate: (delta: number) => void;
   onScale: (scale: number) => void;
 }) {
-  const hostRef = useRef<HTMLDivElement>(null);
-  const [anchors, setAnchors] = useState({
-    rotateLeft: 0,
-    rotateTop: 0,
-    scaleLeft: 0,
-    scaleTop: 0,
-    ready: false,
-  });
-
-  const measure = useCallback(() => {
-    const host = hostRef.current;
-    const root = host?.parentElement;
-    const card = root?.querySelector<HTMLElement>(selector);
-    if (!host || !root || !card) return;
-
-    const rootRect = root.getBoundingClientRect();
-    const cardRect = card.getBoundingClientRect();
-    const gap = 13;
-
-    setAnchors({
-      rotateLeft: cardRect.right - rootRect.left + gap,
-      rotateTop: cardRect.bottom - rootRect.top + gap,
-      scaleLeft: cardRect.left - rootRect.left - gap,
-      scaleTop: cardRect.bottom - rootRect.top + gap,
-      ready: true,
-    });
-  }, [selector]);
-
-  useLayoutEffect(() => {
-    const frame = requestAnimationFrame(measure);
-    const root = hostRef.current?.parentElement;
-    const card = root?.querySelector<HTMLElement>(selector);
-    const observer = new ResizeObserver(measure);
-    if (card) observer.observe(card);
-    window.addEventListener("resize", measure);
-
-    return () => {
-      cancelAnimationFrame(frame);
-      observer.disconnect();
-      window.removeEventListener("resize", measure);
-    };
-  }, [measure, rotation, scale]);
-
-  const startRotate = (event: React.PointerEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const root = hostRef.current?.parentElement;
-    const card = root?.querySelector<HTMLElement>(selector);
-    if (!card) return;
-
-    const rect = card.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    let lastAngle = Math.atan2(event.clientY - centerY, event.clientX - centerX);
-
-    const move = (pointer: PointerEvent) => {
-      const nextAngle = Math.atan2(pointer.clientY - centerY, pointer.clientX - centerX);
-      let delta = ((nextAngle - lastAngle) * 180) / Math.PI;
-      if (delta > 180) delta -= 360;
-      if (delta < -180) delta += 360;
-      lastAngle = nextAngle;
-      onRotate(delta);
-    };
-
-    const stop = () => {
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", stop);
-    };
-
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", stop, { once: true });
+  const changeScale = (delta: number) => {
+    const next = Math.min(1.45, Math.max(0.75, scale + delta));
+    onScale(Number(next.toFixed(2)));
   };
 
-  const startResize = (event: React.PointerEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const root = hostRef.current?.parentElement;
-    const card = root?.querySelector<HTMLElement>(selector);
-    if (!card) return;
-
-    const rect = card.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const startDistance = Math.max(
-      24,
-      Math.hypot(event.clientX - centerX, event.clientY - centerY),
-    );
-    const startScale = scale;
-
-    const move = (pointer: PointerEvent) => {
-      const distance = Math.max(
-        24,
-        Math.hypot(pointer.clientX - centerX, pointer.clientY - centerY),
-      );
-      const next = Math.min(
-        1.55,
-        Math.max(0.72, startScale * (distance / startDistance)),
-      );
-      onScale(Number(next.toFixed(3)));
-    };
-
-    const stop = () => {
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", stop);
-    };
-
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", stop, { once: true });
+  const reset = () => {
+    if (rotation !== 0) onRotate(-rotation);
+    if (scale !== 1) onScale(1);
   };
 
   return (
-    <div ref={hostRef} className={"map-transform-gizmos " + (anchors.ready ? "ready" : "")}>
-      <button
-        className="map-rotate-gizmo nodrag nopan"
-        style={{ left: anchors.rotateLeft, top: anchors.rotateTop }}
-        onPointerDown={startRotate}
-        title="Потяни по окружности, чтобы повернуть карточку"
-        aria-label="Повернуть карточку"
-      >
-        <span>↻</span>
-        <i />
-      </button>
+    <div className="map-transform-toolbar nodrag nopan" onPointerDown={(event) => event.stopPropagation()}>
+      <div className="map-transform-group" aria-label="Поворот карточки">
+        <span>ROTATE</span>
+        <button onClick={() => onRotate(-15)} title="Повернуть на 15° влево">↺</button>
+        <b>{Math.round(rotation)}°</b>
+        <button onClick={() => onRotate(15)} title="Повернуть на 15° вправо">↻</button>
+      </div>
 
-      <button
-        className="map-resize-gizmo nodrag nopan"
-        style={{ left: anchors.scaleLeft, top: anchors.scaleTop }}
-        onPointerDown={startResize}
-        title="Потяни наружу или внутрь, чтобы изменить размер"
-        aria-label="Изменить размер карточки"
-      >
-        <span>↘</span>
+      <div className="map-transform-divider" />
+
+      <div className="map-transform-group" aria-label="Масштаб карточки">
+        <span>SCALE</span>
+        <button onClick={() => changeScale(-0.1)} title="Уменьшить">−</button>
+        <b>{Math.round(scale * 100)}%</b>
+        <button onClick={() => changeScale(0.1)} title="Увеличить">+</button>
+      </div>
+
+      <button className="map-transform-reset" onClick={reset} title="Сбросить поворот и размер">
+        RESET
       </button>
     </div>
   );
 }
 
-function TopicNodeCard({ id, data }: NodeProps) {
+function TopicNodeCard({ id, data, selected }: NodeProps) {
   const value = data as unknown as GraphNodeData;
+  const scale = value.scale ?? 1;
 
   return (
-    <>
+    <div
+      className={"map-node-shell map-topic-shell " + (selected ? "is-selected" : "")}
+      style={{ width: Math.round(260 * scale) }}
+    >
+      {selected && (
+        <MapTransformControls
+          rotation={value.rotation ?? 0}
+          scale={scale}
+          onRotate={(delta) => value.onRotate(id, delta)}
+          onScale={(nextScale) => value.onScale?.(id, nextScale)}
+        />
+      )}
+
       <Handle
         id="in"
         type="target"
@@ -321,11 +233,8 @@ function TopicNodeCard({ id, data }: NodeProps) {
       <span className="map-port-caption map-port-caption-in">НУЖНО ДО</span>
 
       <div
-        className="map-topic-card"
-        style={{
-          transform:
-            "rotate(" + (value.rotation ?? 0) + "deg) scale(" + (value.scale ?? 1) + ")",
-        }}
+        className="map-topic-card map-card-visual"
+        style={{ transform: "rotate(" + (value.rotation ?? 0) + "deg)" }}
         data-cursor="active"
       >
         <div className="map-topic-meta">
@@ -341,18 +250,14 @@ function TopicNodeCard({ id, data }: NodeProps) {
         </div>
 
         <div className="map-card-actions">
-          <button onClick={() => value.onOpen(id)}>Открыть тему →</button>
+          <button className="nodrag nopan" onClick={() => value.onOpen(id)}>
+            Открыть тему →
+          </button>
         </div>
-        <div className="map-node-hint">drag = move · ↻ rotate · ↘ resize</div>
+        <div className="map-node-hint">
+          click = edit · drag = move · toolbar = rotate / scale
+        </div>
       </div>
-
-      <TransformGizmos
-        selector=".map-topic-card"
-        rotation={value.rotation ?? 0}
-        scale={value.scale ?? 1}
-        onRotate={(delta) => value.onRotate(id, delta)}
-        onScale={(nextScale) => value.onScale?.(id, nextScale)}
-      />
 
       <span className="map-port-caption map-port-caption-out">ВЕДЁТ К</span>
       <Handle
@@ -362,15 +267,28 @@ function TopicNodeCard({ id, data }: NodeProps) {
         className="map-handle map-handle-source"
         isConnectable={false}
       />
-    </>
+    </div>
   );
 }
 
-function ChapterGroupCard({ id, data }: NodeProps) {
+function ChapterGroupCard({ id, data, selected }: NodeProps) {
   const value = data as unknown as GroupNodeData;
+  const scale = value.scale ?? 1;
 
   return (
-    <>
+    <div
+      className={"map-node-shell map-group-shell " + (selected ? "is-selected" : "")}
+      style={{ width: Math.round(330 * scale) }}
+    >
+      {selected && (
+        <MapTransformControls
+          rotation={value.rotation ?? 0}
+          scale={scale}
+          onRotate={(delta) => value.onRotate(id, delta)}
+          onScale={(nextScale) => value.onScale(id, nextScale)}
+        />
+      )}
+
       <Handle
         id="in"
         type="target"
@@ -381,11 +299,8 @@ function ChapterGroupCard({ id, data }: NodeProps) {
       <span className="map-port-caption map-port-caption-in">ЗАВИСИТ ОТ</span>
 
       <div
-        className="map-group-card"
-        style={{
-          transform:
-            "rotate(" + (value.rotation ?? 0) + "deg) scale(" + (value.scale ?? 1) + ")",
-        }}
+        className="map-group-card map-card-visual"
+        style={{ transform: "rotate(" + (value.rotation ?? 0) + "deg)" }}
         data-cursor="active"
       >
         <div className="map-group-number">{value.number}</div>
@@ -396,17 +311,11 @@ function ChapterGroupCard({ id, data }: NodeProps) {
             <i style={{ width: value.progress + "%" }} />
             <span>{value.progress}%</span>
           </div>
-          <button onClick={() => value.onOpen(value.chapterId)}>Войти в группу →</button>
+          <button className="nodrag nopan" onClick={() => value.onOpen(value.chapterId)}>
+            Войти в группу →
+          </button>
         </div>
       </div>
-
-      <TransformGizmos
-        selector=".map-group-card"
-        rotation={value.rotation ?? 0}
-        scale={value.scale ?? 1}
-        onRotate={(delta) => value.onRotate(id, delta)}
-        onScale={(nextScale) => value.onScale(id, nextScale)}
-      />
 
       <span className="map-port-caption map-port-caption-out">ВЕДЁТ К</span>
       <Handle
@@ -416,7 +325,7 @@ function ChapterGroupCard({ id, data }: NodeProps) {
         className="map-handle group-handle"
         isConnectable={false}
       />
-    </>
+    </div>
   );
 }
 
@@ -430,6 +339,7 @@ function chapterForTopic(topicId: string) {
 function InnerCourseMap() {
   const [fullscreen, setFullscreen] = useState(false);
   const [activeChapterId, setActiveChapterId] = useState<string | null>("linear");
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [progressVersion, setProgressVersion] = useState(0);
 
   useEffect(() => {
@@ -448,6 +358,7 @@ function InnerCourseMap() {
   }, []);
 
   const openChapter = useCallback((id: string) => {
+    setSelectedNodeId(null);
     setActiveChapterId(id);
   }, []);
 
@@ -489,6 +400,13 @@ function InnerCourseMap() {
             sourceNumber: sourceChapter.number,
             targetNumber: targetChapter.number,
             relationLabel: "эта группа нужна перед следующей",
+            isActive:
+              selectedNodeId === "group:" + sourceChapterId ||
+              selectedNodeId === "group:" + targetChapterId,
+            isDimmed:
+              selectedNodeId !== null &&
+              selectedNodeId !== "group:" + sourceChapterId &&
+              selectedNodeId !== "group:" + targetChapterId,
             onOpenTarget: () => openChapter(targetChapterId),
           } satisfies DependencyEdgeData,
         });
@@ -496,7 +414,7 @@ function InnerCourseMap() {
     }
 
     return result;
-  }, [openChapter]);
+  }, [openChapter, selectedNodeId]);
 
   const buildNodes = useCallback((): Node[] => {
     const stored = readLayout();
@@ -594,13 +512,19 @@ function InnerCourseMap() {
               sourceNumber: "§ " + sourceTopic.number,
               targetNumber: "§ " + topic.number,
               relationLabel: "нужно знать перед этой темой",
+              isActive:
+                selectedNodeId === dependency || selectedNodeId === topic.id,
+              isDimmed:
+                selectedNodeId !== null &&
+                selectedNodeId !== dependency &&
+                selectedNodeId !== topic.id,
               onOpenTarget: () => openTopic(topic.id),
             } satisfies DependencyEdgeData,
           } satisfies Edge;
         })
         .filter((edge): edge is Edge => edge !== null);
     });
-  }, [activeChapterId, groupEdges, openTopic]);
+  }, [activeChapterId, groupEdges, openTopic, selectedNodeId]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(buildNodes());
 
@@ -627,11 +551,9 @@ function InnerCourseMap() {
       setNodes((current) => {
         const next = current.map((node) => {
           if (node.id !== id) return node;
-          const rotation = Number(
-            (
-              Number((node.data as { rotation?: number }).rotation ?? 0) + delta
-            ).toFixed(2),
-          );
+          const current = Number((node.data as { rotation?: number }).rotation ?? 0);
+          const raw = current + delta;
+          const rotation = Number((((raw + 180) % 360 + 360) % 360 - 180).toFixed(2));
           return { ...node, data: { ...node.data, rotation } };
         });
         persist(next);
@@ -643,10 +565,11 @@ function InnerCourseMap() {
 
   const handleScale = useCallback(
     (id: string, scale: number) => {
+      const safeScale = Math.min(1.45, Math.max(0.75, scale));
       setNodes((current) => {
         const next = current.map((node) => {
           if (node.id !== id) return node;
-          return { ...node, data: { ...node.data, scale } };
+          return { ...node, data: { ...node.data, scale: safeScale } };
         });
         persist(next);
         return next;
@@ -659,13 +582,19 @@ function InnerCourseMap() {
     () =>
       nodes.map((node) => ({
         ...node,
+        className:
+          selectedNodeId && node.id !== selectedNodeId
+            ? "map-node-dimmed"
+            : selectedNodeId === node.id
+              ? "map-node-focused"
+              : "",
         data: {
           ...node.data,
           onRotate: (id: string, delta: number) => handleRotate(id, delta),
           onScale: (id: string, scale: number) => handleScale(id, scale),
         },
       })),
-    [nodes, handleRotate, handleScale],
+    [nodes, handleRotate, handleScale, selectedNodeId],
   );
 
   const edges = useMemo(() => buildEdges(), [buildEdges, progressVersion]);
@@ -692,12 +621,12 @@ function InnerCourseMap() {
           <h1>{activeChapter?.title ?? "Карта курса"}</h1>
           <p>
             {activeChapter
-              ? "Каждая стрелка читается слева направо: от prerequisite к теме, которая на него опирается. На самой связи теперь прямо написано, какие две темы она соединяет; по подписи можно перейти в конечную тему."
-              : "На обзорном уровне связи тоже читаются слева направо: от группы-предпосылки к группе, которая использует её материал. Подпись на линии показывает оба конца связи."}
+              ? "Нажми на карточку, чтобы сфокусировать её связи и открыть локальные rotate / scale controls. Перетаскивание двигает узел, а кнопка внутри карточки открывает тему."
+              : "Нажми на группу, чтобы сфокусировать её зависимости. Controls появляются только у выбранной карточки и больше не перемещаются по canvas при изменении размера или поворота."}
           </p>
         </div>
         <div className="map-header-actions">
-          <button className="ghost-button" onClick={() => setActiveChapterId(null)}>
+          <button className="ghost-button" onClick={() => { setSelectedNodeId(null); setActiveChapterId(null); }}>
             ◫ Обзор групп
           </button>
           <button
@@ -722,7 +651,7 @@ function InnerCourseMap() {
       <div className="map-group-tabs" aria-label="Группы карты">
         <button
           className={activeChapterId === null ? "active" : ""}
-          onClick={() => setActiveChapterId(null)}
+          onClick={() => { setSelectedNodeId(null); setActiveChapterId(null); }}
         >
           Все группы
         </button>
@@ -730,7 +659,7 @@ function InnerCourseMap() {
           <button
             key={chapter.id}
             className={activeChapterId === chapter.id ? "active" : ""}
-            onClick={() => setActiveChapterId(chapter.id)}
+            onClick={() => { setSelectedNodeId(null); setActiveChapterId(chapter.id); }}
           >
             <span>{chapter.number}</span>
             {chapter.title}
@@ -746,6 +675,8 @@ function InnerCourseMap() {
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           onNodesChange={onNodesChange}
+          onNodeClick={(_event, node) => setSelectedNodeId(node.id)}
+          onPaneClick={() => setSelectedNodeId(null)}
           onNodeDragStop={(_event, _node, nextNodes) => persist(nextNodes)}
           fitView
           fitViewOptions={{ padding: activeChapterId ? 0.32 : 0.14 }}
