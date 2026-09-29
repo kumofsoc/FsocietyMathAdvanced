@@ -10,6 +10,7 @@ function searchableText(value: string) {
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -29,6 +30,7 @@ export function CommandPalette() {
   useEffect(() => {
     if (!open) {
       setQuery("");
+      setActiveIndex(0);
       return;
     }
     const frame = requestAnimationFrame(() => inputRef.current?.focus());
@@ -76,6 +78,21 @@ export function CommandPalette() {
     setOpen(false);
   };
 
+  const onSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!results.length) return;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveIndex((index) => (index + 1) % results.length);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveIndex((index) => (index - 1 + results.length) % results.length);
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      openTopic(results[Math.min(activeIndex, results.length - 1)].topic.id);
+    }
+  };
+
   return (
     <>
       <button className="command-trigger" onClick={() => setOpen(true)} data-cursor="active">
@@ -109,7 +126,11 @@ export function CommandPalette() {
                 <input
                   ref={inputRef}
                   value={query}
-                  onChange={(event) => setQuery(event.target.value)}
+                  onChange={(event) => {
+                    setQuery(event.target.value);
+                    setActiveIndex(0);
+                  }}
+                  onKeyDown={onSearchKeyDown}
                   placeholder="Тема, теорема, определитель, интеграл..."
                   aria-label="Поиск по курсу"
                 />
@@ -122,8 +143,13 @@ export function CommandPalette() {
               </div>
 
               <div className="command-results">
-                {results.length ? results.map(({ topic, chapter, progress }) => (
-                  <button key={topic.id} onClick={() => openTopic(topic.id)}>
+                {results.length ? results.map(({ topic, chapter, progress }, index) => (
+                  <button
+                    key={topic.id}
+                    className={activeIndex === index ? "active" : ""}
+                    onMouseEnter={() => setActiveIndex(index)}
+                    onClick={() => openTopic(topic.id)}
+                  >
                     <span className="command-result-number">§ {topic.number}</span>
                     <span className="command-result-copy">
                       <strong>{topic.title}</strong>
@@ -148,7 +174,7 @@ export function CommandPalette() {
                 <button onClick={() => { window.location.hash = "home"; setOpen(false); }}>
                   ∑ Главная
                 </button>
-                <span>Enter / click — открыть</span>
+                <span>↑ ↓ выбрать · Enter открыть · Esc закрыть</span>
               </footer>
             </motion.section>
           </motion.div>
