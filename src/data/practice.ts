@@ -2143,5 +2143,19 @@ export const practiceByTopic: Record<string, PracticeTask[]> = {
     { id:"ode-052-2", title:"Фазовое поле", prompt:"Что соответствует каждой точке фазовой плоскости автономной системы?", type:"choice", answer:"Вектор скорости", options:["Вектор скорости","Площадь","Собственное число обязательно","Только координата времени"], difficulty:"base" },
     { id:"ode-052-3", title:"Решение через экспоненту", prompt:"Как выглядит решение y'=Ay с y(x₀)=y₀?", type:"choice", answer:"y=e^{A(x−x₀)}y₀", options:["y=e^{A(x−x₀)}y₀","y=A(x−x₀)+y₀","y=det(A)y₀","y=A⁻¹y₀"], difficulty:"medium" },
     { id:"ode-052-4", title:"Спектр системы", prompt:"Что определяют собственные значения A в системе y'=Ay?", type:"choice", answer:"Характер роста, затухания и фазовых траекторий", options:["Характер роста, затухания и фазовых траекторий","Только размер матрицы","Только начальную точку","Количество переменных x"], difficulty:"medium" },
+  ],
+  "double-integral": [
+    { id:"dbl-001", title:"Интегральная сумма", prompt:"Что заменяет Δx в двойной интегральной сумме?", type:"choice", answer:"Площадь ΔS", options:["Площадь ΔS","Объём ΔV","Длина дуги Δs","Угол Δφ"], difficulty:"base" },
+    { id:"dbl-002", title:"Геометрический смысл", prompt:"Если f(x,y)≥0, что выражает ∬_D f(x,y)dS?", type:"choice", answer:"Объём под поверхностью над D", options:["Объём под поверхностью над D","Длину границы D","Только площадь D","Производную f"], difficulty:"base" },
+    { id:"dbl-003", title:"Повторный интеграл", prompt:"Для D={a≤x≤b, φ₁(x)≤y≤φ₂(x)} какой интеграл вычисляется первым?", type:"choice", answer:"По y", options:["По y","По x","По φ","Порядок всегда безразличен без изменения границ"], difficulty:"base" },
+    { id:"dbl-004", title:"Полярные координаты", prompt:"Какой множитель появляется в dxdy при переходе к полярным координатам?", type:"choice", answer:"r", options:["r","r²","sinφ","1/r"], difficulty:"base" },
+    { id:"dbl-005", title:"Среднее значение", prompt:"Если площадь D равна S и f непрерывна, чему равно среднее значение f по D?", type:"choice", answer:"(1/S)∬_D f dS", options:["(1/S)∬_D f dS","S∬_D f dS","∬_D f dS без деления","max f"], difficulty:"medium" },
+  ],
+  "triple-integral": [
+    { id:"tri-001", title:"Элемент объёма", prompt:"Что суммируется в интегральной сумме тройного интеграла?", type:"choice", answer:"f(Mᵢ)ΔVᵢ", options:["f(Mᵢ)ΔVᵢ","f(Mᵢ)ΔSᵢ","f(Mᵢ)Δxᵢ","Только ΔVᵢ"], difficulty:"base" },
+    { id:"tri-002", title:"Объём тела", prompt:"Чему равен ∭_V 1 dV?", type:"choice", answer:"Объёму V", options:["Объёму V","Площади поверхности V","0","1 всегда"], difficulty:"base" },
+    { id:"tri-003", title:"Цилиндрические координаты", prompt:"Как выглядит элемент объёма в цилиндрических координатах?", type:"choice", answer:"r dr dφ dz", options:["r dr dφ dz","dr dφ dz","r² dr dφ dz","ρ² sinθ dρ dθ dφ"], difficulty:"base" },
+    { id:"tri-004", title:"Сферические координаты", prompt:"Как выглядит элемент объёма в сферических координатах?", type:"choice", answer:"ρ² sinθ dρ dθ dφ", options:["ρ² sinθ dρ dθ dφ","ρ dρ dθ dφ","sinθ dρ dθ dφ","r dr dφ dz"], difficulty:"base" },
+    { id:"tri-005", title:"Выбор координат", prompt:"Для шара x²+y²+z²≤R² какая система координат обычно наиболее естественна?", type:"choice", answer:"Сферическая", options:["Сферическая","Только декартова","Полярная двумерная","Логарифмическая"], difficulty:"base" },
   ]
 };
