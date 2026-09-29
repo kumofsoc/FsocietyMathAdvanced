@@ -20,7 +20,7 @@ export const chapters: Chapter[] = [
   { id: "line-surface-integrals", number: "17", title: "Криволинейные и поверхностные интегралы", topicIds: ["line-integrals", "surface-integrals"] },
   { id: "series", number: "18", title: "Числовые ряды", topicIds: ["numeric-series", "positive-series", "alternating-series"] },
   { id: "power-series", number: "19", title: "Степенные ряды", topicIds: ["functional-series", "power-convergence", "taylor-series", "series-applications"] },
-  { id: "fourier", number: "20", title: "Ряды Фурье", topicIds: ["fourier-series", "fourier-expansion", "taylor-series", "series-applications"] },
+  { id: "fourier", number: "20", title: "Ряды Фурье", topicIds: ["fourier-series", "fourier-expansion", "fourier-integral"] },
   { id: "field-theory", number: "21", title: "Теория поля", topicIds: ["field-basics", "scalar-field", "vector-field", "hamilton-operator"] },
   { id: "complex-analysis", number: "22", title: "Комплексный анализ", topicIds: ["complex-functions", "complex-integration", "laurent-series", "residues"] },
   { id: "operational", number: "23", title: "Операционное исчисление", topicIds: ["laplace", "inverse-laplace", "laplace-ode"] },
