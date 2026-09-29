@@ -130,7 +130,7 @@ export function CommandPalette() {
                       <small>{chapter?.title} · {topic.summary}</small>
                     </span>
                     <span className="command-result-progress">
-                      <i style={{ width: progress + "%" }} />
+                      <i><span style={{ width: progress + "%" }} /></i>
                       <b>{progress}%</b>
                     </span>
                   </button>
