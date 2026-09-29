@@ -522,7 +522,11 @@ function InnerCourseMap() {
         scale: data.scale ?? 1,
       };
     });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+    } catch (error) {
+      console.warn("[FsocietyMath] could not persist map layout", error);
+    }
   }, []);
 
   const handleRotate = useCallback(
@@ -579,7 +583,11 @@ function InnerCourseMap() {
   const edges = useMemo(() => buildEdges(), [buildEdges, progressVersion]);
 
   const resetLayout = () => {
-    localStorage.removeItem(STORAGE_KEY);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+      console.warn("[FsocietyMath] could not reset map layout", error);
+    }
     window.location.reload();
   };
 
