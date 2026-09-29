@@ -3535,7 +3535,7 @@ export const topics: Record<string, Topic> = {
     title: "Множества и действительные числа",
     chapterId: "analysis-intro",
     summary: "Множества, операции над ними, числовые множества, устройство ℝ, промежутки и ε-окрестности.",
-    prerequisites: ["tensor-algebra"],
+    prerequisites: [],
     blocks: [
       {
         kind: "definition",
