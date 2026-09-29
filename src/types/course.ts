@@ -73,6 +73,7 @@ export interface GraphNodeData {
   rotation: number;
   scale?: number;
   progress?: number;
+  planned?: boolean;
   onOpen: (id: string) => void;
   onRotate: (id: string, delta: number) => void;
   onScale?: (id: string, scale: number) => void;
