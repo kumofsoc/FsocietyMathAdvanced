@@ -526,3 +526,33 @@ html[data-motion-profile="off"] .visual-loading > span,
 html[data-motion-profile="off"] .visual-loading::after {
   animation: none;
 }
+
+
+/* Deep command search */
+
+.command-results > button.block-result {
+  grid-template-columns: 96px minmax(0, 1fr) 78px;
+}
+
+.command-results > button.block-result .command-result-number {
+  overflow: hidden;
+  color: var(--accent2);
+  font-size: 6px;
+  line-height: 1.2;
+  letter-spacing: .07em;
+  text-overflow: ellipsis;
+}
+
+.command-results > button.block-result .command-result-copy strong {
+  color: color-mix(in srgb, var(--text) 94%, var(--accent2));
+}
+
+@media (max-width: 820px) {
+  .command-results > button.block-result {
+    grid-template-columns: 70px minmax(0, 1fr) 52px;
+  }
+
+  .command-results > button.block-result .command-result-number {
+    white-space: normal;
+  }
+}
