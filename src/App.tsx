@@ -229,7 +229,8 @@ export default function App() {
   const [learningVersion, setLearningVersion] = useState(0);
   const [lastTopicId, setLastTopicId] = useState<string | null>(() => {
     try {
-      return localStorage.getItem(LAST_TOPIC_KEY);
+      const stored = localStorage.getItem(LAST_TOPIC_KEY);
+      return stored && topicMeta[stored] && !topicMeta[stored].isStub ? stored : null;
     } catch {
       return null;
     }
@@ -280,7 +281,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!topicMeta[route]) return;
+    const current = topicMeta[route];
+    if (!current || current.isStub) return;
     try {
       localStorage.setItem(LAST_TOPIC_KEY, route);
       setLastTopicId(route);
