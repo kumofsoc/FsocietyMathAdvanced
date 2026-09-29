@@ -132,6 +132,16 @@ const FieldVisualInsert = lazy(() =>
     default: module.FieldVisualInsert,
   })),
 );
+const ComplexVisualInsert = lazy(() =>
+  import("./ComplexVisuals").then((module) => ({
+    default: module.ComplexVisualInsert,
+  })),
+);
+const LaplaceVisualInsert = lazy(() =>
+  import("./LaplaceVisuals").then((module) => ({
+    default: module.LaplaceVisualInsert,
+  })),
+);
 
 const VECTOR_INSERTS = new Set([
   "vectors:1",
@@ -244,6 +254,16 @@ const FIELD_INSERTS = new Set([
   "scalar-field:2",
   "vector-field:1",
   "hamilton-operator:4",
+]);
+const COMPLEX_INSERTS = new Set([
+  "complex-functions:2",
+  "laurent-series:3",
+  "residues:3",
+]);
+const LAPLACE_INSERTS = new Set([
+  "laplace:0",
+  "inverse-laplace:6",
+  "laplace-ode:2",
 ]);
 
 class VisualErrorBoundary extends Component<
@@ -426,6 +446,12 @@ export function TopicVisualInsert({
   }
   if (FIELD_INSERTS.has(identity)) {
     return shell(identity, () => <FieldVisualInsert {...props} />);
+  }
+  if (COMPLEX_INSERTS.has(identity)) {
+    return shell(identity, () => <ComplexVisualInsert {...props} />);
+  }
+  if (LAPLACE_INSERTS.has(identity)) {
+    return shell(identity, () => <LaplaceVisualInsert {...props} />);
   }
 
   return null;
