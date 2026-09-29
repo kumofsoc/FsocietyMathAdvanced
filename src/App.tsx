@@ -228,16 +228,10 @@ export default function App() {
     const onHash = () => {
       const positions = readPositions();
       positions[routeRef.current] = window.scrollY;
-      sessionStorage.setItem(key, JSON.stringify(positions));
-
-      const previousRoute = routeRef.current;
-      if (topicMeta[previousRoute]) {
-        try {
-          localStorage.setItem(LAST_TOPIC_KEY, previousRoute);
-        } catch {
-          // Resume state is optional.
-        }
-        setLastTopicId(previousRoute);
+      try {
+        sessionStorage.setItem(key, JSON.stringify(positions));
+      } catch {
+        // Scroll restoration is optional.
       }
 
       const next = routeFromHash();
@@ -254,6 +248,16 @@ export default function App() {
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
+
+  useEffect(() => {
+    if (!topicMeta[route]) return;
+    try {
+      localStorage.setItem(LAST_TOPIC_KEY, route);
+      setLastTopicId(route);
+    } catch {
+      // Resume state is optional.
+    }
+  }, [route]);
 
   useEffect(() => {
     try {
