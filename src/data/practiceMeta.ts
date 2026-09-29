@@ -448,6 +448,27 @@ export const practiceTaskIdsByTopic: Record<string, string[]> = {
     "surf-005",
     "surf-006"
   ],
+  "field-basics": [
+    "field-069-1",
+    "field-069-2",
+    "field-069-3",
+    "field-069-4",
+    "field-069-5"
+  ],
+  "scalar-field": [
+    "field-070-1",
+    "field-070-2",
+    "field-070-3",
+    "field-070-4",
+    "field-070-5"
+  ],
+  "vector-field": [
+    "field-071-1",
+    "field-071-2",
+    "field-071-3",
+    "field-071-4",
+    "field-071-5"
+  ],
   "numeric-series": [
     "series-059-1",
     "series-059-2",
