@@ -9198,28 +9198,11 @@ body.quadric-fullscreen-open {
   border-radius: 999px;
   background: var(--border);
 }
-.command-result-progress > i::before {
-  content: "";
+.command-result-progress > i > span {
   display: block;
-  width: var(--progress, 100%);
   height: 100%;
-}
-.command-result-progress > i > * {
-  display: none;
-}
-.command-result-progress i {
-  position: relative;
-}
-.command-result-progress i::after {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: inherit;
-}
-.command-result-progress i[style] {
-  background:
-    linear-gradient(90deg, var(--accent), var(--accent2)) left / var(--result-progress, 0%) 100% no-repeat,
-    var(--border);
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
 }
 .command-result-progress b {
   color: var(--muted);
