@@ -4654,7 +4654,7 @@ export const topics: Record<string, Topic> = {
     title: "Комплексные числа",
     chapterId: "complex",
     summary: "Алгебраическая, геометрическая, тригонометрическая и показательная формы комплексного числа; модуль, аргумент и сопряжение.",
-    prerequisites: ["analysis-intro"],
+    prerequisites: ["taylor"],
     blocks: [
       {
         kind: "definition",
