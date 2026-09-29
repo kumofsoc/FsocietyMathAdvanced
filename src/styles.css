@@ -8456,3 +8456,46 @@ body.quadric-fullscreen-open {
   .multi-lab{padding:12px}
   .multi-stage{min-height:285px}
 }
+
+
+/* ===== v0.19: differential equations labs ===== */
+.ode-lab{margin:16px 0 28px;padding:24px;border:1px solid var(--border);border-radius:20px;background:radial-gradient(circle at 84% 12%,color-mix(in srgb,var(--accent2) 8%,transparent),transparent 30%),color-mix(in srgb,var(--surface) 95%,transparent)}
+.ode-lab>header{max-width:930px;margin-bottom:18px}
+.ode-lab>header h2{margin:8px 0 0;font-size:clamp(30px,4.5vw,54px);line-height:.98;letter-spacing:-.056em}
+.ode-lab>header p{max-width:790px;margin:13px 0 0;color:var(--muted);font-size:10px;line-height:1.72}
+.ode-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(285px,.65fr);gap:12px}
+.ode-stage{min-height:430px;border:1px solid var(--border);border-radius:16px;background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--accent) 5%,transparent),transparent 46%),var(--elevated);display:grid;place-items:center;overflow:hidden}
+.ode-stage svg{width:100%;max-width:760px;height:auto}
+.ode-axes line{stroke:color-mix(in srgb,var(--muted) 42%,transparent);stroke-width:1}
+.ode-slope,.ode-phase-arrow{stroke:color-mix(in srgb,var(--muted) 45%,transparent);stroke-width:1.15;stroke-linecap:round}
+.ode-solution-curve{fill:none;stroke:var(--accent);stroke-width:3;filter:drop-shadow(0 0 7px color-mix(in srgb,var(--accent) 25%,transparent))}
+.ode-initial-point,.ode-equilibrium{fill:var(--formula);filter:drop-shadow(0 0 8px color-mix(in srgb,var(--formula) 42%,transparent))}
+.ode-controls{padding:15px;border:1px solid var(--border);border-radius:16px;background:var(--elevated);display:grid;align-content:start;gap:9px}
+.ode-controls>label{display:grid;grid-template-columns:90px minmax(80px,1fr) 46px;gap:8px;align-items:center;min-height:35px}
+.ode-controls>label>span{color:var(--muted);font-size:8px}
+.ode-controls input[type=range]{width:100%;accent-color:var(--accent)}
+.ode-controls b{font:8px ui-monospace,SFMono-Regular,Menlo,monospace;text-align:right}
+.ode-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.ode-tabs button{min-height:34px;padding:0 10px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--muted);font-size:8px}
+.ode-tabs button.active{color:var(--text);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--surface))}
+.ode-flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:7px;align-items:stretch}
+.ode-flow>div{padding:15px;border:1px solid var(--border);border-radius:12px;background:var(--elevated)}
+.ode-flow span{display:block;color:var(--muted);font:7px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.1em}
+.ode-flow strong{display:block;margin-top:8px;font-size:14px}
+.ode-flow small{display:block;margin-top:6px;color:var(--muted);font-size:7px}
+.ode-flow>i{align-self:center;color:var(--accent);font-style:normal}
+.characteristic-board{min-height:360px;padding:28px;border:1px solid var(--border);border-radius:16px;background:var(--elevated);display:grid;place-items:center;align-content:center;gap:16px;text-align:center}
+.characteristic-board>span{color:var(--muted);font:10px ui-monospace,SFMono-Regular,Menlo,monospace}
+.characteristic-board>strong{font:clamp(20px,3vw,34px) ui-monospace,SFMono-Regular,Menlo,monospace}
+.characteristic-board>b{padding:7px 10px;border-radius:999px;font:8px ui-monospace,SFMono-Regular,Menlo,monospace}
+.characteristic-board>b.real{background:color-mix(in srgb,#58dca2 12%,transparent);color:#58dca2}
+.characteristic-board>b.complex{background:color-mix(in srgb,#7f8cff 12%,transparent);color:#7f8cff}
+.characteristic-board>b.repeated{background:color-mix(in srgb,#ffcb6b 12%,transparent);color:#ffcb6b}
+.characteristic-board code{color:var(--formula);font:11px ui-monospace,SFMono-Regular,Menlo,monospace}
+.characteristic-board em{max-width:680px;color:var(--text);font:12px ui-monospace,SFMono-Regular,Menlo,monospace;font-style:normal}
+.ode-readout{display:grid;gap:6px}
+.ode-readout>div{display:flex;justify-content:space-between;gap:10px;padding:9px;border:1px solid var(--border);border-radius:9px;background:var(--surface)}
+.ode-readout span{color:var(--muted);font-size:7px}
+.ode-readout strong{font-size:8px}
+@media(max-width:920px){.ode-layout{grid-template-columns:1fr}.ode-stage{min-height:360px}}
+@media(max-width:620px){.ode-lab{padding:12px}.ode-lab>header h2{font-size:34px}.ode-stage{min-height:300px}.ode-flow{grid-template-columns:1fr}.ode-flow>i{transform:rotate(90deg);justify-self:center}.ode-controls>label{grid-template-columns:80px 1fr 42px}}
