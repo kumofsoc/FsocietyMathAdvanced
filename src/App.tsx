@@ -20,7 +20,7 @@ function routeFromHash() {
 }
 
 function isTrackedChapter(id: string) {
-  return id === "linear" || id === "vectors" || id === "plane-geometry" || id === "space-geometry" || id === "plane-transformations" || id === "abstract-linear" || id === "euclidean" || id === "affine-general";
+  return id === "linear" || id === "vectors" || id === "plane-geometry" || id === "space-geometry" || id === "plane-transformations" || id === "abstract-linear" || id === "euclidean" || id === "affine-general" || id === "tensor-algebra";
 }
 
 function topicProgress(id: string) {
@@ -218,6 +218,16 @@ export default function App() {
     return Math.round(affineGeneralIds.reduce((sum, id) => sum + topicProgress(id), 0) / affineGeneralIds.length);
   }, [affineGeneralIds, learningVersion]);
 
+  const tensorIds = useMemo(
+    () => chapters.find((chapter) => chapter.id === "tensor-algebra")?.topicIds ?? [],
+    [],
+  );
+
+  const tensorProgress = useMemo(() => {
+    if (!tensorIds.length) return 0;
+    return Math.round(tensorIds.reduce((sum, id) => sum + topicProgress(id), 0) / tensorIds.length);
+  }, [tensorIds, learningVersion]);
+
   const topic = topics[route];
 
   return (
@@ -285,6 +295,15 @@ export default function App() {
           </div>
           <div className="progress-track"><i style={{ width: affineGeneralProgress + "%" }} /></div>
           <small>Плоскости · квадрики · r, R, σ, Σ</small>
+        </div>
+
+        <div className="sidebar-progress sidebar-progress-secondary">
+          <div>
+            <span>Тензорная алгебра</span>
+            <strong>{tensorProgress}%</strong>
+          </div>
+          <div className="progress-track"><i style={{ width: tensorProgress + "%" }} /></div>
+          <small>Индексы · свёртка · метрика · внешние формы</small>
         </div>
 
         <div className="chapter-list">
