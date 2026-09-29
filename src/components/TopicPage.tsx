@@ -21,6 +21,7 @@ import { VectorVisualInsert } from "./VectorVisuals";
 import { GeometryVisualInsert } from "./GeometryVisuals";
 import { QuadricSurfaceLab } from "./QuadricSurfaceLab";
 import { TransformationVisualInsert } from "./TransformationVisuals";
+import { AbstractLinearVisualInsert } from "./AbstractLinearVisuals";
 import { PracticePanel } from "./PracticePanel";
 
 const labels: Record<BlockKind, string> = {
@@ -300,7 +301,7 @@ function NeighborNav({ topic }: { topic: Topic }) {
 
 export function TopicPage({ topic }: { topic: Topic }) {
   const chapter = chapters.find((item) => item.id === topic.chapterId);
-  const tracksLearning = ["linear", "vectors", "plane-geometry", "space-geometry", "plane-transformations"].includes(topic.chapterId);
+  const tracksLearning = ["linear", "vectors", "plane-geometry", "space-geometry", "plane-transformations", "abstract-linear"].includes(topic.chapterId);
   const theorySentinel = useRef<HTMLDivElement>(null);
   const [theoryRead, setTheoryRead] = useState(() => loadSet(THEORY_KEY).has(topic.id));
   const [solved, setSolved] = useState(() => loadSet(SOLVED_KEY));
@@ -423,6 +424,7 @@ export function TopicPage({ topic }: { topic: Topic }) {
             <GeometryVisualInsert topicId={topic.id} index={index} />
             {topic.id === "quadrics" && index === 1 && <QuadricSurfaceLab />}
             <TransformationVisualInsert topicId={topic.id} index={index} />
+            <AbstractLinearVisualInsert topicId={topic.id} index={index} />
           </div>
         ))}
       </section>
