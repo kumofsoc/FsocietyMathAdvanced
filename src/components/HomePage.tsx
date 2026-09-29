@@ -4,7 +4,13 @@ import { useLayoutEffect, useRef } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export function HomePage({ progress }: { progress: number }) {
+export function HomePage({
+  progress,
+  resumeTopic,
+}: {
+  progress: number;
+  resumeTopic?: { id: string; number: string; title: string };
+}) {
   const root = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -165,8 +171,12 @@ export function HomePage({ progress }: { progress: number }) {
             </p>
 
             <div className="home-actions" data-reveal>
-              <button className="home-primary" onClick={() => (window.location.hash = "matrices")}>
-                Начать
+              <button
+                className="home-primary"
+                onClick={() => (window.location.hash = resumeTopic?.id ?? "matrices")}
+                title={resumeTopic?.title}
+              >
+                {resumeTopic ? "Продолжить § " + resumeTopic.number : "Начать"}
               </button>
               <button className="home-secondary" onClick={() => (window.location.hash = "map")}>
                 Исследовать интерфейс
