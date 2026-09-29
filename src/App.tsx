@@ -102,6 +102,84 @@ function ChapterAccordion({
   );
 }
 
+function SidebarProgressItem({
+  chapter,
+  route,
+  progress,
+}: {
+  chapter: Chapter;
+  route: string;
+  progress: number;
+}) {
+  const containsRoute = chapter.topicIds.includes(route);
+  const [open, setOpen] = useState(containsRoute);
+
+  useEffect(() => {
+    if (containsRoute) setOpen(true);
+  }, [containsRoute]);
+
+  return (
+    <section className={"sidebar-progress-item " + (open ? "open" : "")}>
+      <button
+        className="sidebar-progress-trigger"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+      >
+        <span className="sidebar-progress-number">{chapter.number}</span>
+        <span className="sidebar-progress-copy">
+          <span className="sidebar-progress-title-row">
+            <strong>{chapter.title}</strong>
+            <b>{progress}%</b>
+          </span>
+          <span className="progress-track">
+            <i style={{ width: progress + "%" }} />
+          </span>
+        </span>
+        <i className="sidebar-progress-chevron">⌄</i>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            className="sidebar-progress-details"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="sidebar-progress-topics">
+              {chapter.topicIds.map((id) => {
+                const item = topics[id];
+                if (!item) return null;
+                const value = topicProgress(id);
+                return (
+                  <button
+                    key={id}
+                    className={route === id ? "active" : ""}
+                    onClick={() => (window.location.hash = id)}
+                  >
+                    <span className="sidebar-topic-state">
+                      {value >= 100 ? "●" : value > 0 ? "◐" : "○"}
+                    </span>
+                    <span className="sidebar-topic-copy">
+                      <em>§ {item.number}</em>
+                      <strong>{item.title}</strong>
+                    </span>
+                    <span className="sidebar-topic-progress">{value}%</span>
+                  </button>
+                );
+              })}
+            </div>
+            <small className="sidebar-progress-note">
+              50% теория + 50% практика по каждой теме
+            </small>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
+  );
+}
+
 export default function App() {
   const [route, setRoute] = useState(routeFromHash);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -178,85 +256,21 @@ export default function App() {
     return Math.round(linearIds.reduce((sum, id) => sum + topicProgress(id), 0) / linearIds.length);
   }, [linearIds, learningVersion]);
 
-  const vectorIds = useMemo(
-    () => chapters.find((chapter) => chapter.id === "vectors")?.topicIds ?? [],
-    [],
+  const trackedProgressRows = useMemo(
+    () =>
+      chapters
+        .filter((chapter) => isTrackedChapter(chapter.id))
+        .map((chapter) => ({
+          chapter,
+          progress: chapter.topicIds.length
+            ? Math.round(
+                chapter.topicIds.reduce((sum, id) => sum + topicProgress(id), 0) /
+                  chapter.topicIds.length,
+              )
+            : 0,
+        })),
+    [learningVersion],
   );
-
-  const vectorProgress = useMemo(() => {
-    if (!vectorIds.length) return 0;
-    return Math.round(vectorIds.reduce((sum, id) => sum + topicProgress(id), 0) / vectorIds.length);
-  }, [vectorIds, learningVersion]);
-
-  const abstractLinearIds = useMemo(
-    () => chapters.find((chapter) => chapter.id === "abstract-linear")?.topicIds ?? [],
-    [],
-  );
-
-  const abstractLinearProgress = useMemo(() => {
-    if (!abstractLinearIds.length) return 0;
-    return Math.round(abstractLinearIds.reduce((sum, id) => sum + topicProgress(id), 0) / abstractLinearIds.length);
-  }, [abstractLinearIds, learningVersion]);
-
-  const euclideanIds = useMemo(
-    () => chapters.find((chapter) => chapter.id === "euclidean")?.topicIds ?? [],
-    [],
-  );
-
-  const euclideanProgress = useMemo(() => {
-    if (!euclideanIds.length) return 0;
-    return Math.round(euclideanIds.reduce((sum, id) => sum + topicProgress(id), 0) / euclideanIds.length);
-  }, [euclideanIds, learningVersion]);
-
-  const affineGeneralIds = useMemo(
-    () => chapters.find((chapter) => chapter.id === "affine-general")?.topicIds ?? [],
-    [],
-  );
-
-  const affineGeneralProgress = useMemo(() => {
-    if (!affineGeneralIds.length) return 0;
-    return Math.round(affineGeneralIds.reduce((sum, id) => sum + topicProgress(id), 0) / affineGeneralIds.length);
-  }, [affineGeneralIds, learningVersion]);
-
-  const tensorIds = useMemo(
-    () => chapters.find((chapter) => chapter.id === "tensor-algebra")?.topicIds ?? [],
-    [],
-  );
-
-  const tensorProgress = useMemo(() => {
-    if (!tensorIds.length) return 0;
-    return Math.round(tensorIds.reduce((sum, id) => sum + topicProgress(id), 0) / tensorIds.length);
-  }, [tensorIds, learningVersion]);
-
-  const analysisIds = useMemo(
-    () => chapters.find((chapter) => chapter.id === "analysis-intro")?.topicIds ?? [],
-    [],
-  );
-
-  const analysisProgress = useMemo(() => {
-    if (!analysisIds.length) return 0;
-    return Math.round(analysisIds.reduce((sum, id) => sum + topicProgress(id), 0) / analysisIds.length);
-  }, [analysisIds, learningVersion]);
-
-  const definiteIntegralIds = useMemo(
-    () => chapters.find((chapter) => chapter.id === "def-integral")?.topicIds ?? [],
-    [],
-  );
-
-  const definiteIntegralProgress = useMemo(() => {
-    if (!definiteIntegralIds.length) return 0;
-    return Math.round(definiteIntegralIds.reduce((sum, id) => sum + topicProgress(id), 0) / definiteIntegralIds.length);
-  }, [definiteIntegralIds, learningVersion]);
-
-  const multivariableIds = useMemo(
-    () => chapters.find((chapter) => chapter.id === "multivariable")?.topicIds ?? [],
-    [],
-  );
-
-  const multivariableProgress = useMemo(() => {
-    if (!multivariableIds.length) return 0;
-    return Math.round(multivariableIds.reduce((sum, id) => sum + topicProgress(id), 0) / multivariableIds.length);
-  }, [multivariableIds, learningVersion]);
 
   const topic = topics[route];
 
@@ -282,85 +296,25 @@ export default function App() {
           <b>{topicList.length}</b>
         </button>
 
-        <div className="sidebar-progress">
-          <div>
-            <span>Линейная алгебра</span>
-            <strong>{linearProgress}%</strong>
-          </div>
-          <div className="progress-track"><i style={{ width: linearProgress + "%" }} /></div>
-          <small>50% теория + 50% практика по каждой теме</small>
+        <div className="sidebar-section-label">
+          <span>Прогресс по курсу</span>
+          <small>{trackedProgressRows.length} разделов</small>
         </div>
 
-        <div className="sidebar-progress sidebar-progress-secondary">
-          <div>
-            <span>Векторная алгебра</span>
-            <strong>{vectorProgress}%</strong>
-          </div>
-          <div className="progress-track"><i style={{ width: vectorProgress + "%" }} /></div>
-          <small>Визуальная теория + задачи + интерактивы</small>
+        <div className="sidebar-progress-list">
+          {trackedProgressRows.map(({ chapter, progress }) => (
+            <SidebarProgressItem
+              key={chapter.id}
+              chapter={chapter}
+              route={route}
+              progress={progress}
+            />
+          ))}
         </div>
 
-        <div className="sidebar-progress sidebar-progress-secondary">
-          <div>
-            <span>Линейные пространства</span>
-            <strong>{abstractLinearProgress}%</strong>
-          </div>
-          <div className="progress-track"><i style={{ width: abstractLinearProgress + "%" }} /></div>
-          <small>Базисы · Ker/Im · спектр · квадратичные формы</small>
-        </div>
-
-        <div className="sidebar-progress sidebar-progress-secondary">
-          <div>
-            <span>Евклидовы пространства</span>
-            <strong>{euclideanProgress}%</strong>
-          </div>
-          <div className="progress-track"><i style={{ width: euclideanProgress + "%" }} /></div>
-          <small>Ортогональность · QR · SVD · полярное разложение</small>
-        </div>
-
-        <div className="sidebar-progress sidebar-progress-secondary">
-          <div>
-            <span>Аффинные пространства</span>
-            <strong>{affineGeneralProgress}%</strong>
-          </div>
-          <div className="progress-track"><i style={{ width: affineGeneralProgress + "%" }} /></div>
-          <small>Плоскости · квадрики · r, R, σ, Σ</small>
-        </div>
-
-        <div className="sidebar-progress sidebar-progress-secondary">
-          <div>
-            <span>Тензорная алгебра</span>
-            <strong>{tensorProgress}%</strong>
-          </div>
-          <div className="progress-track"><i style={{ width: tensorProgress + "%" }} /></div>
-          <small>Индексы · свёртка · метрика · внешние формы</small>
-        </div>
-
-        <div className="sidebar-progress sidebar-progress-secondary">
-          <div>
-            <span>Введение в анализ</span>
-            <strong>{analysisProgress}%</strong>
-          </div>
-          <div className="progress-track"><i style={{ width: analysisProgress + "%" }} /></div>
-          <small>Пределы · непрерывность · производная · Тейлор</small>
-        </div>
-
-        <div className="sidebar-progress sidebar-progress-secondary">
-          <div>
-            <span>Определённый интеграл</span>
-            <strong>{definiteIntegralProgress}%</strong>
-          </div>
-          <div className="progress-track"><i style={{ width: definiteIntegralProgress + "%" }} /></div>
-          <small>Риман · Ньютон–Лейбниц · несобственные · приложения</small>
-        </div>
-
-        <div className="sidebar-progress sidebar-progress-secondary">
-          <div>
-            <span>Функции нескольких переменных</span>
-            <strong>{multivariableProgress}%</strong>
-          </div>
-          <div className="progress-track"><i style={{ width: multivariableProgress + "%" }} /></div>
-          <small>Пределы · ∂ · дифференциал · касательная · экстремум</small>
+        <div className="sidebar-section-label sidebar-section-label-all">
+          <span>Все разделы</span>
+          <small>{chapters.length}</small>
         </div>
 
         <div className="chapter-list">
