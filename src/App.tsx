@@ -9,6 +9,7 @@ import { HistoryDock } from "./components/HistoryDock";
 import { MathBackdrop } from "./components/MathBackdrop";
 import { ScrollProgress } from "./components/ScrollProgress";
 import { SettingsPanel } from "./components/SettingsPanel";
+import { reportCourseIntegrity } from "./lib/courseIntegrity";
 import { LEARNING_EVENT } from "./lib/learning";
 import {
   getChapterProgress,
@@ -205,6 +206,10 @@ export default function App() {
   });
   const mainRef = useRef<HTMLElement>(null);
   const routeRef = useRef(route);
+
+  useEffect(() => {
+    reportCourseIntegrity();
+  }, []);
 
   useEffect(() => {
     const key = "fsociety-route-scroll-v1";
