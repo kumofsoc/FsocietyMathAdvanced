@@ -447,5 +447,29 @@ export const practiceTaskIdsByTopic: Record<string, string[]> = {
     "surf-004",
     "surf-005",
     "surf-006"
+  ],
+  "numeric-series": [
+    "series-059-1",
+    "series-059-2",
+    "series-059-3",
+    "series-059-4",
+    "series-059-5",
+    "series-059-6"
+  ],
+  "positive-series": [
+    "series-060-1",
+    "series-060-2",
+    "series-060-3",
+    "series-060-4",
+    "series-060-5",
+    "series-060-6"
+  ],
+  "alternating-series": [
+    "series-061-1",
+    "series-061-2",
+    "series-061-3",
+    "series-061-4",
+    "series-061-5",
+    "series-061-6"
   ]
 };
