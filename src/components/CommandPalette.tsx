@@ -64,6 +64,26 @@ export function CommandPalette() {
     return () => cancelAnimationFrame(frame);
   }, [open]);
 
+  useEffect(() => {
+    if (!open || deepIndexReady) return;
+
+    let cancelled = false;
+    void import("../data/courseSearchIndex")
+      .then((module) => {
+        if (cancelled) return;
+        setDeepIndex(module.courseSearchIndex);
+        setDeepIndexReady(true);
+      })
+      .catch((error) => {
+        console.warn("[FsocietyMath] deep search index failed to load", error);
+        if (!cancelled) setDeepIndexReady(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, deepIndexReady]);
+
   const results = useMemo(() => {
     const needle = searchableText(query.trim());
     const snapshot = getLearningSnapshot();
