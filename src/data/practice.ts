@@ -2020,5 +2020,35 @@ export const practiceByTopic: Record<string, PracticeTask[]> = {
       ],
       difficulty: "base",
     },
+  ],
+  antiderivative: [
+    { id:"int-029-1", title:"Первообразная", prompt:"Какая функция является первообразной для f(x)=3x²?", type:"choice", answer:"x³+C", options:["x³+C","3x³+C","x²+C","6x+C"], difficulty:"base" },
+    { id:"int-029-2", title:"Почему появляется C", prompt:"Почему все первообразные одной функции отличаются на константу?", type:"choice", answer:"Их разность имеет нулевую производную", options:["Их разность имеет нулевую производную","У них одинаковые значения в нуле","Так определён логарифм","Потому что интеграл всегда положителен"], difficulty:"base" },
+    { id:"int-029-3", title:"Линейность", prompt:"Чему равен ∫(2x+3)dx?", type:"choice", answer:"x²+3x+C", options:["x²+3x+C","2x²+3x+C","x²+3+C","2+3x+C"], difficulty:"base" },
+    { id:"int-029-4", title:"Табличный интеграл", prompt:"Выбери ∫ dx/(1+x²).", type:"choice", answer:"arctg x + C", options:["arctg x + C","ln|x|+C","arcsin x+C","1/(1+x²)+C"], difficulty:"base" },
+  ],
+  "integration-methods": [
+    { id:"int-030-1", title:"Подстановка", prompt:"Для ∫2x(x²+1)^5 dx какая подстановка естественна?", type:"choice", answer:"u=x²+1", options:["u=x²+1","u=2x","u=x⁵","u=1/x"], difficulty:"base" },
+    { id:"int-030-2", title:"По частям", prompt:"Как выглядит формула интегрирования по частям?", type:"choice", answer:"∫u dv=uv−∫v du", options:["∫u dv=uv−∫v du","∫u dv=uv+∫v du","∫u dv=u/v","∫u dv=du·dv"], difficulty:"base" },
+    { id:"int-030-3", title:"Выбор u", prompt:"Для ∫x e^x dx что обычно выгодно взять за u?", type:"choice", answer:"x", options:["x","e^x","dx","1"], difficulty:"base" },
+    { id:"int-030-4", title:"Дважды по частям", prompt:"Чему равен ∫x²e^x dx?", type:"choice", answer:"e^x(x²−2x+2)+C", options:["e^x(x²−2x+2)+C","x²e^x+C","e^x(x²+2x+2)+C","2xe^x+C"], difficulty:"medium" },
+  ],
+  "rational-integration": [
+    { id:"int-031-1", title:"Правильная дробь", prompt:"Какая дробь правильная?", type:"choice", answer:"(x+1)/(x²+1)", options:["(x+1)/(x²+1)","(x³+1)/(x²+1)","x²/(x+1)","(x²+x)/(x²−1)"], difficulty:"base" },
+    { id:"int-031-2", title:"Разложение", prompt:"Чему равен коэффициент A при 1/((x−1)(x+2)) = A/(x−1)+B/(x+2)?", type:"choice", answer:"1/3", options:["1/3","−1/3","1","3"], difficulty:"medium" },
+    { id:"int-031-3", title:"Линейный множитель", prompt:"Как интегрируется A/(x−a)?", type:"choice", answer:"A ln|x−a|+C", options:["A ln|x−a|+C","A/(x−a)²+C","A arctg(x−a)+C","Ae^(x−a)+C"], difficulty:"base" },
+    { id:"int-031-4", title:"Рациональные функции", prompt:"Верно ли, что любая рациональная функция интегрируется в элементарных функциях?", type:"choice", answer:"Да", options:["Да","Нет","Только если знаменатель линейный","Только если числитель постоянный"], difficulty:"base" },
+  ],
+  "trig-integration": [
+    { id:"int-032-1", title:"Универсальная подстановка", prompt:"Какая подстановка называется универсальной тригонометрической?", type:"choice", answer:"t=tg(x/2)", options:["t=tg(x/2)","t=sin 2x","t=cos x","t=e^x"], difficulty:"base" },
+    { id:"int-032-2", title:"Нечётная степень cos", prompt:"Для ∫sin^4 x cos^5 x dx какая замена естественна?", type:"choice", answer:"t=sin x", options:["t=sin x","t=cos x","t=tg(x/2) обязательно","t=x²"], difficulty:"base" },
+    { id:"int-032-3", title:"Обе степени чётные", prompt:"Для ∫sin^4 x cos^2 x dx какой основной приём?", type:"choice", answer:"Формулы понижения степени", options:["Формулы понижения степени","Интегрирование по частям","Разложение на простейшие дроби","Подстановка e^x=t"], difficulty:"base" },
+    { id:"int-032-4", title:"Произведение частот", prompt:"Что удобно применить к sin(8x)cos(2x)?", type:"choice", answer:"Формулу произведение-в-сумму", options:["Формулу произведение-в-сумму","Формулу Крамера","Правило Лопиталя","Формулу Тейлора"], difficulty:"base" },
+  ],
+  "irrational-integration": [
+    { id:"int-033-1", title:"Корень a²−x²", prompt:"Какая подстановка стандартна для √(a²−x²)?", type:"choice", answer:"x=a sin t", options:["x=a sin t","x=a tg t","x=a cosh t только","x=e^t"], difficulty:"base" },
+    { id:"int-033-2", title:"Корень x²+a²", prompt:"Какая подстановка стандартна для √(x²+a²)?", type:"choice", answer:"x=a tg t", options:["x=a tg t","x=a sin t","x=a cos t","x=t²"], difficulty:"base" },
+    { id:"int-033-3", title:"Неэлементарный интеграл", prompt:"Что означает фраза «интеграл не берётся» в §34?", type:"choice", answer:"Первообразная не выражается элементарными функциями", options:["Первообразная не выражается элементарными функциями","Первообразной не существует","Интеграл расходится","Функция разрывна"], difficulty:"medium" },
+    { id:"int-033-4", title:"Пример специальной функции", prompt:"Какой из интегралов приводится в источнике как неэлементарный?", type:"choice", answer:"∫e^(−x²)dx", options:["∫e^(−x²)dx","∫x²dx","∫cos x dx","∫dx/x"], difficulty:"base" },
   ]
 };
