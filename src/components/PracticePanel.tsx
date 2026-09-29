@@ -176,6 +176,8 @@ export function PracticePanel({ topicId }: { topicId: string }) {
   const [solved, setSolved] = useState<Set<string>>(() => loadSet(SOLVED_KEY));
   const [difficulty, setDifficulty] = useState<DifficultyFilter>("all");
   const [hideSolved, setHideSolved] = useState(false);
+  const [view, setView] = useState<"grid" | "focus">("grid");
+  const [focusIndex, setFocusIndex] = useState(0);
 
   const completed = useMemo(
     () => tasks.filter((task) => solved.has(task.id)).length,
@@ -232,6 +234,8 @@ export function PracticePanel({ topicId }: { topicId: string }) {
   };
 
   const percent = Math.round((completed / tasks.length) * 100);
+  const safeFocusIndex = Math.min(focusIndex, Math.max(0, visibleTasks.length - 1));
+  const focusedTask = visibleTasks[safeFocusIndex];
 
   return (
     <section className="practice-panel">
@@ -276,8 +280,21 @@ export function PracticePanel({ topicId }: { topicId: string }) {
 
         <div className="practice-toolbar-actions">
           <button
+            className={view === "focus" ? "active" : ""}
+            onClick={() => {
+              setView((current) => current === "grid" ? "focus" : "grid");
+              setFocusIndex(0);
+            }}
+            aria-pressed={view === "focus"}
+          >
+            {view === "focus" ? "Сетка" : "Focus mode"}
+          </button>
+          <button
             className={hideSolved ? "active" : ""}
-            onClick={() => setHideSolved((value) => !value)}
+            onClick={() => {
+              setHideSolved((value) => !value);
+              setFocusIndex(0);
+            }}
             aria-pressed={hideSolved}
           >
             {hideSolved ? "Показать решённые" : "Только нерешённые"}
@@ -298,16 +315,74 @@ export function PracticePanel({ topicId }: { topicId: string }) {
       </div>
 
       {visibleTasks.length ? (
-        <div className="practice-grid">
-          {visibleTasks.map((task) => (
-            <TaskCard
-              key={task.id + "-" + (solved.has(task.id) ? "solved" : "open")}
-              task={task}
-              solved={solved.has(task.id)}
-              onSolved={markSolved}
-            />
-          ))}
-        </div>
+        view === "focus" && focusedTask ? (
+          <div className="practice-focus">
+            <header className="practice-focus-head">
+              <button
+                onClick={() =>
+                  setFocusIndex((index) =>
+                    index <= 0 ? visibleTasks.length - 1 : index - 1,
+                  )
+                }
+                aria-label="Предыдущая задача"
+              >
+                ←
+              </button>
+              <div>
+                <span>FOCUS SESSION</span>
+                <strong>
+                  {safeFocusIndex + 1} / {visibleTasks.length}
+                </strong>
+                <small>
+                  {difficulty === "all" ? "все сложности" : difficulty.toUpperCase()}
+                  {hideSolved ? " · только нерешённые" : ""}
+                </small>
+              </div>
+              <button
+                onClick={() =>
+                  setFocusIndex((index) =>
+                    index >= visibleTasks.length - 1 ? 0 : index + 1,
+                  )
+                }
+                aria-label="Следующая задача"
+              >
+                →
+              </button>
+            </header>
+
+            <div className="practice-focus-card">
+              <TaskCard
+                key={focusedTask.id + "-" + (solved.has(focusedTask.id) ? "solved" : "open")}
+                task={focusedTask}
+                solved={solved.has(focusedTask.id)}
+                onSolved={markSolved}
+              />
+            </div>
+
+            <div className="practice-focus-dots" aria-hidden="true">
+              {visibleTasks.slice(0, 24).map((task, index) => (
+                <i
+                  key={task.id}
+                  className={
+                    (index === safeFocusIndex ? "active " : "") +
+                    (solved.has(task.id) ? "solved" : "")
+                  }
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="practice-grid">
+            {visibleTasks.map((task) => (
+              <TaskCard
+                key={task.id + "-" + (solved.has(task.id) ? "solved" : "open")}
+                task={task}
+                solved={solved.has(task.id)}
+                onSolved={markSolved}
+              />
+            ))}
+          </div>
+        )
       ) : (
         <div className="practice-filter-empty">
           <strong>В этом режиме задач не осталось.</strong>
