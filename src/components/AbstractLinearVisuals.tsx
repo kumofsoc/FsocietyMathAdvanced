@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactElement } from "react";
 
 type V2 = [number, number];
 type M2 = [[number, number], [number, number]];
@@ -421,7 +421,7 @@ function QuadraticFormLab() {
   const posPaths=contourPath(B,1);
   const negPaths=contourPath(B,-1);
 
-  const samples=[] as JSX.Element[];
+  const samples: ReactElement[]=[];
   for(let ix=-5;ix<=5;ix++){
     for(let iy=-4;iy<=4;iy++){
       const x=ix*.7,y=iy*.7;
