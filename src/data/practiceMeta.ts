@@ -469,6 +469,14 @@ export const practiceTaskIdsByTopic: Record<string, string[]> = {
     "field-071-4",
     "field-071-5"
   ],
+  "hamilton-operator": [
+    "field-072-1",
+    "field-072-2",
+    "field-072-3",
+    "field-072-4",
+    "field-072-5",
+    "field-072-6"
+  ],
   "numeric-series": [
     "series-059-1",
     "series-059-2",
