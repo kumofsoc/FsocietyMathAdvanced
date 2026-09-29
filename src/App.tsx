@@ -1,10 +1,8 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { gsap } from "gsap";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { chapters, topicListMeta, topicMeta } from "./data/courseMeta";
 import { CommandPalette } from "./components/CommandPalette";
 import { CustomCursor } from "./components/CustomCursor";
-import { HomePage } from "./components/HomePage";
 import { HistoryDock } from "./components/HistoryDock";
 import { MathBackdrop } from "./components/MathBackdrop";
 import { ScrollProgress } from "./components/ScrollProgress";
@@ -28,6 +26,9 @@ function routeFromHash() {
   return raw || "home";
 }
 
+const HomePage = lazy(() =>
+  import("./components/HomePage").then((module) => ({ default: module.HomePage })),
+);
 const CourseMap = lazy(() =>
   import("./components/CourseMap").then((module) => ({ default: module.CourseMap })),
 );
@@ -235,7 +236,6 @@ export default function App() {
       return null;
     }
   });
-  const mainRef = useRef<HTMLElement>(null);
   const routeRef = useRef(route);
 
   useEffect(() => {
@@ -311,24 +311,6 @@ export default function App() {
       window.removeEventListener("storage", refresh);
     };
   }, []);
-
-  useEffect(() => {
-    const root = mainRef.current;
-    if (!root) return;
-
-    const targets = root.querySelectorAll<HTMLElement>(".topic-hero, .map-header");
-    if (!targets.length) return;
-
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        targets,
-        { opacity: 0, y: 20, filter: "blur(8px)" },
-        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.68, ease: "power3.out" },
-      );
-    }, root);
-
-    return () => ctx.revert();
-  }, [route]);
 
   const learningSnapshot = useMemo(
     () => getLearningSnapshot(),
@@ -461,7 +443,7 @@ export default function App() {
           <SettingsPanel />
         </header>
 
-        <main ref={mainRef} className="main-content">
+        <main className="main-content">
           <AnimatePresence mode="wait">
             <motion.div
               key={route}
