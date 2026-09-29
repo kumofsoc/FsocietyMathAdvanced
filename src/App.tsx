@@ -92,7 +92,7 @@ function ChapterAccordion({
                 return (
                   <motion.button
                     key={id}
-                    className={route === id ? "active" : ""}
+                    className={(route === id ? "active " : "") + (item.isStub ? "planned" : "")}
                     onMouseEnter={() => !item.isStub && preloadTopicPage()}
                     onFocus={() => !item.isStub && preloadTopicPage()}
                     onClick={() => (window.location.hash = id)}
@@ -108,7 +108,17 @@ function ChapterAccordion({
                       open: { opacity: 1, x: 0 },
                     }}
                   >
-                    <span>{tracked ? (progress >= 100 ? "●" : progress > 0 ? "◐" : "○") : "·"}</span>
+                    <span>
+                      {item.isStub
+                        ? "◇"
+                        : tracked
+                          ? progress >= 100
+                            ? "●"
+                            : progress > 0
+                              ? "◐"
+                              : "○"
+                          : "·"}
+                    </span>
                     <em>§ {item.number}</em>
                     {item.title}
                   </motion.button>
