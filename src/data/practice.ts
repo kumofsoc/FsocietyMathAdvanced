@@ -193,7 +193,7 @@ export const practiceByTopic: Record<string, PracticeTask[]> = {
       hint: "Сравни ранг с числом неизвестных.",
       difficulty: "base",
     },
-  ],,
+  ],
   vectors: [
     {
       id: "vec-001",
