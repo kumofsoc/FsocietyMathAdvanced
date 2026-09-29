@@ -6,10 +6,6 @@ const W = 520;
 const H = 330;
 const PAD = 36;
 
-function clamp(value: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, value));
-}
-
 function mapX(x: number, min = -5, max = 5) {
   return PAD + ((x - min) / (max - min)) * (W - PAD * 2);
 }
@@ -412,7 +408,6 @@ type ContinuityMode = "continuous" | "removable" | "jump" | "infinite";
 
 function ContinuityLab() {
   const [mode,setMode]=useState<ContinuityMode>("removable");
-  const x0=0;
   const segments=useMemo(()=>{
     if(mode==="continuous") return [{points:Array.from({length:201},(_,i):Point=>{const x=-4+i/200*8;return [x,.18*x*x+.4*x-.3]})}];
     if(mode==="removable") return [{points:Array.from({length:201},(_,i):Point=>{const x=-4+i/200*8;return [x,Math.abs(x)<.03?NaN:Math.sin(x)/x]})}];
