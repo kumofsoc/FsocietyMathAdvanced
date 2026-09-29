@@ -19,6 +19,8 @@ import {
 } from "./lib/progress";
 import type { Chapter } from "./types/course";
 
+const LAST_TOPIC_KEY = "fsociety-last-topic-v1";
+
 function routeFromHash() {
   const raw = window.location.hash.replace(/^#/, "");
   return raw || "home";
@@ -194,6 +196,13 @@ export default function App() {
     }
   });
   const [learningVersion, setLearningVersion] = useState(0);
+  const [lastTopicId, setLastTopicId] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem(LAST_TOPIC_KEY);
+    } catch {
+      return null;
+    }
+  });
   const mainRef = useRef<HTMLElement>(null);
   const routeRef = useRef(route);
 
@@ -212,6 +221,16 @@ export default function App() {
       const positions = readPositions();
       positions[routeRef.current] = window.scrollY;
       sessionStorage.setItem(key, JSON.stringify(positions));
+
+      const previousRoute = routeRef.current;
+      if (topics[previousRoute]) {
+        try {
+          localStorage.setItem(LAST_TOPIC_KEY, previousRoute);
+        } catch {
+          // Resume state is optional.
+        }
+        setLastTopicId(previousRoute);
+      }
 
       const next = routeFromHash();
       setRoute(next);
@@ -293,6 +312,7 @@ export default function App() {
   );
 
   const topic = topics[route];
+  const resumeTopic = lastTopicId ? topics[lastTopicId] : undefined;
 
   return (
     <div className={"app-shell " + (sidebarCollapsed ? "sidebar-collapsed" : "")}>
@@ -415,7 +435,18 @@ export default function App() {
                 }
               >
                 {route === "home" ? (
-                  <HomePage progress={courseProgress} />
+                  <HomePage
+                    progress={courseProgress}
+                    resumeTopic={
+                      resumeTopic
+                        ? {
+                            id: resumeTopic.id,
+                            number: resumeTopic.number,
+                            title: resumeTopic.title,
+                          }
+                        : undefined
+                    }
+                  />
                 ) : route === "map" ? (
                   <CourseMap />
                 ) : topic ? (
