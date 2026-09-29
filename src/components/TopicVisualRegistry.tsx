@@ -112,6 +112,11 @@ const MultivariableVisualInsert = lazy(() =>
     default: module.MultivariableVisualInsert,
   })),
 );
+const SeriesVisualInsert = lazy(() =>
+  import("./SeriesVisuals").then((module) => ({
+    default: module.SeriesVisualInsert,
+  })),
+);
 
 const VECTOR_INSERTS = new Set([
   "vectors:1",
@@ -205,6 +210,11 @@ const MULTIPLE_INTEGRAL_INSERTS = new Set([
 const LINE_SURFACE_INSERTS = new Set([
   "line-integrals:4",
   "surface-integrals:4",
+]);
+const SERIES_INSERTS = new Set([
+  "numeric-series:1",
+  "positive-series:8",
+  "alternating-series:3",
 ]);
 
 class VisualErrorBoundary extends Component<
@@ -375,6 +385,9 @@ export function TopicVisualInsert({
   }
   if (LINE_SURFACE_INSERTS.has(identity)) {
     return shell(identity, () => <LineSurfaceIntegralVisualInsert {...props} />);
+  }
+  if (SERIES_INSERTS.has(identity)) {
+    return shell(identity, () => <SeriesVisualInsert {...props} />);
   }
 
   return null;
