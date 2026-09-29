@@ -65,7 +65,7 @@ function readLayout(): StoredLayout {
 
 function progressForTopic(id: string) {
   const chapterId = topics[id]?.chapterId;
-  if (!["linear", "vectors", "plane-geometry", "space-geometry", "plane-transformations", "abstract-linear", "euclidean", "affine-general", "tensor-algebra"].includes(chapterId ?? "")) return 0;
+  if (!["linear", "vectors", "plane-geometry", "space-geometry", "plane-transformations", "abstract-linear", "euclidean", "affine-general", "tensor-algebra", "analysis-intro"].includes(chapterId ?? "")) return 0;
   const theory = loadSet(THEORY_KEY).has(id) ? 50 : 0;
   const tasks = practiceByTopic[id] ?? [];
   if (!tasks.length) return theory;
@@ -77,7 +77,7 @@ function progressForTopic(id: string) {
 
 function progressForChapter(chapterId: string) {
   const chapter = chapters.find((item) => item.id === chapterId);
-  if (!chapter || !["linear", "vectors", "plane-geometry", "space-geometry", "plane-transformations", "abstract-linear", "euclidean", "affine-general", "tensor-algebra"].includes(chapter.id)) return 0;
+  if (!chapter || !["linear", "vectors", "plane-geometry", "space-geometry", "plane-transformations", "abstract-linear", "euclidean", "affine-general", "tensor-algebra", "analysis-intro"].includes(chapter.id)) return 0;
   const values = chapter.topicIds.map(progressForTopic);
   return values.length
     ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length)
