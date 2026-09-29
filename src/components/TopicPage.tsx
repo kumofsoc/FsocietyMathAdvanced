@@ -26,6 +26,7 @@ import { AdvancedLinearVisualInsert } from "./AdvancedLinearVisuals";
 import { AffineGeometryVisualInsert } from "./AffineGeometryVisuals";
 import { TensorVisualInsert } from "./TensorVisuals";
 import { AnalysisVisualInsert } from "./AnalysisVisuals";
+import { AnalysisAdvancedVisualInsert } from "./AnalysisAdvancedVisuals";
 import { PracticePanel } from "./PracticePanel";
 
 const labels: Record<BlockKind, string> = {
@@ -433,6 +434,7 @@ export function TopicPage({ topic }: { topic: Topic }) {
             <AffineGeometryVisualInsert topicId={topic.id} index={index} />
             <TensorVisualInsert topicId={topic.id} index={index} />
             <AnalysisVisualInsert topicId={topic.id} index={index} />
+            <AnalysisAdvancedVisualInsert topicId={topic.id} index={index} />
             {topic.id === "quadric-invariants" && index === 14 && <QuadricSurfaceLab />}
           </div>
         ))}
