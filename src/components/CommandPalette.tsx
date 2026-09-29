@@ -1,5 +1,11 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
 import { chapters, topicList } from "../data/course";
 import { getLearningSnapshot, getTopicProgress } from "../lib/progress";
 
@@ -78,7 +84,7 @@ export function CommandPalette() {
     setOpen(false);
   };
 
-  const onSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const onSearchKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
     if (!results.length) return;
 
     if (event.key === "ArrowDown") {
