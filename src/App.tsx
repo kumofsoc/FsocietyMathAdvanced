@@ -20,7 +20,7 @@ function routeFromHash() {
 }
 
 function isTrackedChapter(id: string) {
-  return id === "linear" || id === "vectors" || id === "plane-geometry" || id === "space-geometry" || id === "plane-transformations" || id === "abstract-linear" || id === "euclidean" || id === "affine-general" || id === "tensor-algebra" || id === "analysis-intro" || id === "indef-integral" || id === "def-integral";
+  return id === "linear" || id === "vectors" || id === "plane-geometry" || id === "space-geometry" || id === "plane-transformations" || id === "abstract-linear" || id === "euclidean" || id === "affine-general" || id === "tensor-algebra" || id === "analysis-intro" || id === "indef-integral" || id === "def-integral" || id === "multivariable";
 }
 
 function topicProgress(id: string) {
@@ -248,6 +248,16 @@ export default function App() {
     return Math.round(definiteIntegralIds.reduce((sum, id) => sum + topicProgress(id), 0) / definiteIntegralIds.length);
   }, [definiteIntegralIds, learningVersion]);
 
+  const multivariableIds = useMemo(
+    () => chapters.find((chapter) => chapter.id === "multivariable")?.topicIds ?? [],
+    [],
+  );
+
+  const multivariableProgress = useMemo(() => {
+    if (!multivariableIds.length) return 0;
+    return Math.round(multivariableIds.reduce((sum, id) => sum + topicProgress(id), 0) / multivariableIds.length);
+  }, [multivariableIds, learningVersion]);
+
   const topic = topics[route];
 
   return (
@@ -342,6 +352,15 @@ export default function App() {
           </div>
           <div className="progress-track"><i style={{ width: definiteIntegralProgress + "%" }} /></div>
           <small>Риман · Ньютон–Лейбниц · несобственные · приложения</small>
+        </div>
+
+        <div className="sidebar-progress sidebar-progress-secondary">
+          <div>
+            <span>Функции нескольких переменных</span>
+            <strong>{multivariableProgress}%</strong>
+          </div>
+          <div className="progress-track"><i style={{ width: multivariableProgress + "%" }} /></div>
+          <small>Пределы · ∂ · дифференциал · касательная · экстремум</small>
         </div>
 
         <div className="chapter-list">
