@@ -14,27 +14,9 @@ import {
 } from "../lib/learning";
 import { isTrackedTopic } from "../lib/progress";
 import type { BlockKind, ContentBlock, Topic } from "../types/course";
-import { MatrixLab } from "./MatrixLab";
-import { MatrixTypesGallery } from "./MatrixTypesGallery";
-import { DeterminantVisual } from "./DeterminantVisual";
 import { RichMatrixText } from "./MatrixNotation";
-import { VectorVisualInsert } from "./VectorVisuals";
-import { GeometryVisualInsert } from "./GeometryVisuals";
-import { QuadricSurfaceLab } from "./QuadricSurfaceLab";
-import { TransformationVisualInsert } from "./TransformationVisuals";
-import { AbstractLinearVisualInsert } from "./AbstractLinearVisuals";
-import { AdvancedLinearVisualInsert } from "./AdvancedLinearVisuals";
-import { AffineGeometryVisualInsert } from "./AffineGeometryVisuals";
-import { TensorVisualInsert } from "./TensorVisuals";
-import { AnalysisVisualInsert } from "./AnalysisVisuals";
-import { AnalysisAdvancedVisualInsert } from "./AnalysisAdvancedVisuals";
-import { IntegralVisualInsert } from "./IntegralVisuals";
-import { MultipleIntegralVisualInsert } from "./MultipleIntegralVisuals";
-import { LineSurfaceIntegralVisualInsert } from "./LineSurfaceIntegralVisuals";
-import { ODEVisualInsert } from "./ODEVisuals";
-import { DefiniteIntegralVisualInsert } from "./DefiniteIntegralVisuals";
-import { MultivariableVisualInsert } from "./MultivariableVisuals";
 import { PracticePanel } from "./PracticePanel";
+import { TopicLabInsert, TopicVisualInsert } from "./TopicVisualRegistry";
 
 const labels: Record<BlockKind, string> = {
   definition: "ОПРЕДЕЛЕНИЕ",
@@ -483,30 +465,16 @@ export function TopicPage({ topicId }: { topicId: string }) {
             data-block-index={index}
           >
             <ContentCard topic={topic} block={block} index={index} />
-            {topic.id === "matrices" && index === 0 && <MatrixTypesGallery />}
-            {topic.id === "determinants" && block.title.includes("Определитель 3-го порядка") && <DeterminantVisual />}
-            <VectorVisualInsert topicId={topic.id} index={index} />
-            <GeometryVisualInsert topicId={topic.id} index={index} />
-            {topic.id === "quadrics" && index === 1 && <QuadricSurfaceLab />}
-            <TransformationVisualInsert topicId={topic.id} index={index} />
-            <AbstractLinearVisualInsert topicId={topic.id} index={index} />
-            <AdvancedLinearVisualInsert topicId={topic.id} index={index} />
-            <AffineGeometryVisualInsert topicId={topic.id} index={index} />
-            <TensorVisualInsert topicId={topic.id} index={index} />
-            <AnalysisVisualInsert topicId={topic.id} index={index} />
-            <AnalysisAdvancedVisualInsert topicId={topic.id} index={index} />
-            <IntegralVisualInsert topicId={topic.id} index={index} />
-            <MultipleIntegralVisualInsert topicId={topic.id} index={index} />
-            <LineSurfaceIntegralVisualInsert topicId={topic.id} index={index} />
-            <ODEVisualInsert topicId={topic.id} index={index} />
-            <DefiniteIntegralVisualInsert topicId={topic.id} index={index} />
-            <MultivariableVisualInsert topicId={topic.id} index={index} />
-            {topic.id === "quadric-invariants" && index === 14 && <QuadricSurfaceLab />}
+            <TopicVisualInsert
+              topicId={topic.id}
+              index={index}
+              blockTitle={block.title}
+            />
           </div>
         ))}
       </section>
 
-      {topic.hasLab && <MatrixLab />}
+      <TopicLabInsert topicId={topic.id} enabled={Boolean(topic.hasLab)} />
 
       {tracksLearning && <div className="theory-finish" ref={theorySentinel}>
         <span>{theoryRead ? "✓" : "↓"}</span>
