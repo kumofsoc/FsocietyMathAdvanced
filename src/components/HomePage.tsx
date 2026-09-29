@@ -5,34 +5,11 @@ import { useLayoutEffect, useRef } from "react";
 gsap.registerPlugin(ScrollTrigger);
 
 export function HomePage({ progress }: { progress: number }) {
-  void progress;
   const root = useRef<HTMLDivElement>(null);
-  const pulseRef = useRef<HTMLSpanElement>(null);
 
   useLayoutEffect(() => {
     const element = root.current;
     if (!element) return;
-
-    let pulseFrame = 0;
-    const pulseStart = performance.now();
-
-    const updatePulse = (now: number) => {
-      const profile = document.documentElement.dataset.motionProfile || "balanced";
-      if (pulseRef.current) {
-        if (profile === "off") {
-          pulseRef.current.textContent = "50%";
-        } else {
-          const duration = 6200;
-          const phase = ((now - pulseStart) % duration) / duration;
-          const value = phase < 0.5
-            ? 1 + Math.round(99 * (phase * 2))
-            : 100 - Math.round(100 * ((phase - 0.5) * 2));
-          pulseRef.current.textContent = Math.max(0, Math.min(100, value)) + "%";
-        }
-      }
-      pulseFrame = requestAnimationFrame(updatePulse);
-    };
-    pulseFrame = requestAnimationFrame(updatePulse);
 
     const ctx = gsap.context(() => {
       const profile = document.documentElement.dataset.motionProfile || "balanced";
@@ -161,7 +138,6 @@ export function HomePage({ progress }: { progress: number }) {
     requestAnimationFrame(() => ScrollTrigger.refresh());
 
     return () => {
-      cancelAnimationFrame(pulseFrame);
       ctx.revert();
     };
   }, []);
@@ -209,8 +185,8 @@ export function HomePage({ progress }: { progress: number }) {
           </div>
 
           <div className="project-pulse" data-reveal>
-            <span ref={pulseRef}>1%</span>
-            <small>LIVE SYSTEM PULSE</small>
+            <span>{progress}%</span>
+            <small>COURSE MASTERY</small>
             <i><b /></i>
           </div>
         </div>
