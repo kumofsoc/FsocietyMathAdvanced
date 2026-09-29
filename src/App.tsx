@@ -20,7 +20,7 @@ function routeFromHash() {
 }
 
 function isTrackedChapter(id: string) {
-  return id === "linear" || id === "vectors" || id === "plane-geometry" || id === "space-geometry" || id === "plane-transformations";
+  return id === "linear" || id === "vectors" || id === "plane-geometry" || id === "space-geometry" || id === "plane-transformations" || id === "abstract-linear";
 }
 
 function topicProgress(id: string) {
@@ -188,6 +188,16 @@ export default function App() {
     return Math.round(vectorIds.reduce((sum, id) => sum + topicProgress(id), 0) / vectorIds.length);
   }, [vectorIds, learningVersion]);
 
+  const abstractLinearIds = useMemo(
+    () => chapters.find((chapter) => chapter.id === "abstract-linear")?.topicIds ?? [],
+    [],
+  );
+
+  const abstractLinearProgress = useMemo(() => {
+    if (!abstractLinearIds.length) return 0;
+    return Math.round(abstractLinearIds.reduce((sum, id) => sum + topicProgress(id), 0) / abstractLinearIds.length);
+  }, [abstractLinearIds, learningVersion]);
+
   const topic = topics[route];
 
   return (
@@ -228,6 +238,15 @@ export default function App() {
           </div>
           <div className="progress-track"><i style={{ width: vectorProgress + "%" }} /></div>
           <small>Визуальная теория + задачи + интерактивы</small>
+        </div>
+
+        <div className="sidebar-progress sidebar-progress-secondary">
+          <div>
+            <span>Линейные пространства</span>
+            <strong>{abstractLinearProgress}%</strong>
+          </div>
+          <div className="progress-track"><i style={{ width: abstractLinearProgress + "%" }} /></div>
+          <small>Базисы · Ker/Im · спектр · квадратичные формы</small>
         </div>
 
         <div className="chapter-list">
