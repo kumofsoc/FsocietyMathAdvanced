@@ -1,9 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { BlockMath } from "react-katex";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { chapters, topicList, topics } from "../data/course";
 import { topicMeta } from "../data/courseMeta";
-import { practiceByTopic } from "../data/practice";
+import { practiceTaskIdsByTopic } from "../data/practiceMeta";
 import {
   LEARNING_EVENT,
   loadSavedTheorems,
@@ -16,8 +16,61 @@ import {
 import { isTrackedTopic } from "../lib/progress";
 import type { BlockKind, ContentBlock, Topic } from "../types/course";
 import { RichMatrixText } from "./MatrixNotation";
-import { PracticePanel } from "./PracticePanel";
 import { TopicLabInsert, TopicVisualInsert } from "./TopicVisualRegistry";
+
+const PracticePanel = lazy(() =>
+  import("./PracticePanel").then((module) => ({ default: module.PracticePanel })),
+);
+
+function DeferredPracticePanel({ topicId }: { topicId: string }) {
+  const anchor = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(false);
+
+  useEffect(() => {
+    if (active) return;
+    const node = anchor.current;
+    if (!node) return;
+
+    if (!("IntersectionObserver" in window)) {
+      setActive(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        setActive(true);
+        observer.disconnect();
+      },
+      { rootMargin: "900px 0px" },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [active]);
+
+  if (!active) {
+    return (
+      <div ref={anchor} className="practice-deferred">
+        <span>PRACTICE BANK</span>
+        <strong>Практика подключится при приближении к концу теории.</strong>
+      </div>
+    );
+  }
+
+  return (
+    <Suspense
+      fallback={
+        <div className="practice-deferred loading">
+          <span>PRACTICE BANK</span>
+          <strong>Загружаю задачи…</strong>
+        </div>
+      }
+    >
+      <PracticePanel topicId={topicId} />
+    </Suspense>
+  );
+}
 
 const labels: Record<BlockKind, string> = {
   definition: "ОПРЕДЕЛЕНИЕ",
@@ -394,12 +447,12 @@ export function TopicPage({ topicId }: { topicId: string }) {
     return () => observer.disconnect();
   }, [topic.id, theoryRead, tracksLearning]);
 
-  const tasks = practiceByTopic[topic.id] ?? [];
+  const taskIds = practiceTaskIdsByTopic[topic.id] ?? [];
   const solvedCount = useMemo(
-    () => tasks.filter((task) => solved.has(task.id)).length,
-    [tasks, solved],
+    () => taskIds.filter((taskId) => solved.has(taskId)).length,
+    [taskIds, solved],
   );
-  const practiceRatio = tasks.length ? solvedCount / tasks.length : 0;
+  const practiceRatio = taskIds.length ? solvedCount / taskIds.length : 0;
   const topicProgress = Math.round((theoryRead ? 50 : 0) + practiceRatio * 50);
 
   return (
@@ -443,7 +496,7 @@ export function TopicPage({ topicId }: { topicId: string }) {
                 <div>
                   <span>ПРАКТИКА</span>
                   <strong>{Math.round(practiceRatio * 50)} / 50</strong>
-                  <small>{tasks.length ? solvedCount + " / " + tasks.length + " задач" : "банк готовится"}</small>
+                  <small>{taskIds.length ? solvedCount + " / " + taskIds.length + " задач" : "банк готовится"}</small>
                 </div>
                 <div className="topic-total">
                   <span>ОСВОЕНИЕ</span>
@@ -530,7 +583,7 @@ export function TopicPage({ topicId }: { topicId: string }) {
         </div>
       </div>}
 
-      {!isPlanned && tracksLearning && <PracticePanel topicId={topic.id} />}
+      {!isPlanned && tracksLearning && <DeferredPracticePanel topicId={topic.id} />}
 
       <NeighborNav topic={topic} />
     </div>
