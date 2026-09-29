@@ -282,6 +282,20 @@ export const practiceTaskIdsByTopic: Record<string, string[]> = {
     "tay-005",
     "tay-006"
   ],
+  "complex-numbers": [
+    "cx-027-1",
+    "cx-027-2",
+    "cx-027-3",
+    "cx-027-4",
+    "cx-027-5"
+  ],
+  "complex-operations": [
+    "cx-028-1",
+    "cx-028-2",
+    "cx-028-3",
+    "cx-028-4",
+    "cx-028-5"
+  ],
   "antiderivative": [
     "int-029-1",
     "int-029-2",
