@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { gsap } from "gsap";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { chapters, topicList, topics } from "./data/course";
+import { chapters, topicListMeta, topicMeta } from "./data/courseMeta";
 import { CommandPalette } from "./components/CommandPalette";
 import { CustomCursor } from "./components/CustomCursor";
 import { HomePage } from "./components/HomePage";
@@ -9,7 +9,6 @@ import { HistoryDock } from "./components/HistoryDock";
 import { MathBackdrop } from "./components/MathBackdrop";
 import { ScrollProgress } from "./components/ScrollProgress";
 import { SettingsPanel } from "./components/SettingsPanel";
-import { reportCourseIntegrity } from "./lib/courseIntegrity";
 import { LEARNING_EVENT } from "./lib/learning";
 import {
   getChapterProgress,
@@ -77,7 +76,7 @@ function ChapterAccordion({
               }}
             >
               {chapter.topicIds.map((id) => {
-                const item = topics[id];
+                const item = topicMeta[id];
                 if (!item) return null;
                 const tracked = isTrackedChapter(item.chapterId);
                 const progress = tracked ? getTopicProgress(id, snapshot) : 0;
@@ -155,7 +154,7 @@ function SidebarProgressItem({
           >
             <div className="sidebar-progress-topics">
               {chapter.topicIds.map((id) => {
-                const item = topics[id];
+                const item = topicMeta[id];
                 if (!item) return null;
                 const value = getTopicProgress(id, snapshot);
                 return (
@@ -208,7 +207,10 @@ export default function App() {
   const routeRef = useRef(route);
 
   useEffect(() => {
-    reportCourseIntegrity();
+    if (!import.meta.env.DEV) return;
+    void import("./lib/courseIntegrity").then(({ reportCourseIntegrity }) => {
+      reportCourseIntegrity();
+    });
   }, []);
 
   useEffect(() => {
@@ -228,7 +230,7 @@ export default function App() {
       sessionStorage.setItem(key, JSON.stringify(positions));
 
       const previousRoute = routeRef.current;
-      if (topics[previousRoute]) {
+      if (topicMeta[previousRoute]) {
         try {
           localStorage.setItem(LAST_TOPIC_KEY, previousRoute);
         } catch {
@@ -311,8 +313,8 @@ export default function App() {
     [learningSnapshot],
   );
 
-  const topic = topics[route];
-  const resumeTopic = lastTopicId ? topics[lastTopicId] : undefined;
+  const topic = topicMeta[route];
+  const resumeTopic = lastTopicId ? topicMeta[lastTopicId] : undefined;
 
   return (
     <div className={"app-shell " + (sidebarCollapsed ? "sidebar-collapsed" : "")}>
@@ -344,7 +346,7 @@ export default function App() {
         <button className="map-entry" onClick={() => (window.location.hash = "map")}>
           <span>◌</span>
           Карта курса
-          <b>{topicList.length}</b>
+          <b>{topicListMeta.length}</b>
         </button>
 
         <div className="sidebar-section-label">
@@ -450,7 +452,7 @@ export default function App() {
                 ) : route === "map" ? (
                   <CourseMap />
                 ) : topic ? (
-                  <TopicPage topic={topic} />
+                  <TopicPage topicId={topic.id} />
                 ) : (
                   <section className="not-found">
                     <div className="eyebrow">404 / UNKNOWN TOPIC</div>
