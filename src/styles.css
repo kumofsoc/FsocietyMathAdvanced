@@ -9400,3 +9400,201 @@ body.quadric-fullscreen-open {
     display: none;
   }
 }
+
+
+/* ===== v1.4: practice bank controls ===== */
+
+.practice-progress-line {
+  height: 5px;
+  margin: 0 0 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--border);
+}
+.practice-progress-line > i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transition: width .28s ease;
+}
+
+.practice-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 10px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+}
+.practice-filters,
+.practice-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.practice-filters button,
+.practice-toolbar-actions button,
+.practice-filter-empty button {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--elevated);
+  color: var(--muted);
+  font-size: 8px;
+  cursor: pointer;
+  transition: border-color .16s ease, background .16s ease, color .16s ease, transform .16s ease;
+}
+.practice-filters button:hover,
+.practice-toolbar-actions button:hover,
+.practice-filter-empty button:hover {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
+  transform: translateY(-1px);
+}
+.practice-filters button.active,
+.practice-toolbar-actions button.active {
+  color: var(--text);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--elevated));
+}
+.practice-filters button > b {
+  min-width: 18px;
+  height: 18px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 7px;
+}
+.practice-toolbar-actions .practice-reset {
+  border-color: color-mix(in srgb, #ff7585 32%, var(--border));
+}
+.practice-toolbar-actions .practice-reset:hover {
+  border-color: #ff7585;
+  color: #ff9aa7;
+}
+
+.practice-bank-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 14px;
+}
+.practice-bank-meta > span {
+  min-height: 25px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  font: 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .04em;
+}
+
+.practice-card {
+  position: relative;
+  overflow: hidden;
+}
+.practice-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: var(--border);
+}
+.practice-card.difficulty-base::before {
+  background: var(--definition);
+}
+.practice-card.difficulty-medium::before {
+  background: var(--formula);
+}
+.practice-card.difficulty-hard::before {
+  background: #ff7585;
+}
+.practice-card.solved {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--proof) 4%, transparent), transparent 45%),
+    var(--surface);
+}
+.practice-card.solved .practice-card-head > b {
+  color: var(--proof);
+}
+.practice-options button {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+}
+.practice-options button > kbd {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--muted);
+  font: 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.practice-options button.selected > kbd {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.practice-attempts {
+  margin-left: auto;
+  color: color-mix(in srgb, var(--muted) 75%, transparent);
+  font: 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.practice-filter-empty {
+  min-height: 190px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 24px;
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  text-align: center;
+}
+.practice-filter-empty strong {
+  color: var(--text);
+  font-size: 12px;
+}
+.practice-filter-empty p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+@media (max-width: 760px) {
+  .practice-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .practice-filters,
+  .practice-toolbar-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .practice-filters button,
+  .practice-toolbar-actions button {
+    justify-content: space-between;
+  }
+  .practice-attempts {
+    width: 100%;
+    margin-left: 0;
+  }
+}
