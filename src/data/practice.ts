@@ -2081,5 +2081,34 @@ export const practiceByTopic: Record<string, PracticeTask[]> = {
     { id:"def-041-4", title:"Работа силы", prompt:"Как вычисляется работа переменной силы F(x) вдоль оси?", type:"choice", answer:"∫ₐᵇF(x)dx", options:["∫ₐᵇF(x)dx","F(a)+F(b)","F'(b)−F'(a)","∫ₐᵇF²(x)dx"], difficulty:"base" },
     { id:"def-042-1", title:"Средние прямоугольники", prompt:"Где берётся значение функции на каждом маленьком отрезке в формуле средних прямоугольников?", type:"choice", answer:"В середине отрезка", options:["В середине отрезка","Только в левом конце","Только в правом конце","В точке максимума"], difficulty:"base" },
     { id:"def-042-2", title:"Симпсон", prompt:"Как чередуются коэффициенты внутренних ординат в формуле Симпсона?", type:"choice", answer:"4,2,4,2,…,4", options:["4,2,4,2,…,4","1,1,1,…","2,2,2,…","3,1,3,1,…"], difficulty:"medium" },
+  ],
+  "multivariable-functions": [
+    { id:"mv-043-1", title:"Область определения", prompt:"Для z=√(4−x²−y²) выбери область определения.", type:"choice", answer:"x²+y²≤4", options:["x²+y²≤4","x²+y²≥4","x+y≤4","Все ℝ²"], difficulty:"base" },
+    { id:"mv-043-2", title:"Линии уровня", prompt:"Как выглядят линии уровня функции z=x²+y²?", type:"choice", answer:"Окружности x²+y²=c", options:["Окружности x²+y²=c","Прямые x+y=c","Гиперболы xy=c всегда","Параболы y=x²+c"], difficulty:"base" },
+    { id:"mv-043-3", title:"Предел по путям", prompt:"Для (x²−y²)/(x²+y²) при (x,y)→(0,0) что происходит?", type:"choice", answer:"Предел не существует", options:["Предел не существует","Предел равен 0","Предел равен 1","Предел равен −1"], difficulty:"medium" },
+    { id:"mv-043-4", title:"Непрерывность", prompt:"Что обязательно для непрерывности f в M₀?", type:"choice", answer:"lim(M→M₀)f(M)=f(M₀)", options:["lim(M→M₀)f(M)=f(M₀)","Все частные производные равны 0","f(M₀)=0","Область обязана быть кругом"], difficulty:"base" },
+    { id:"mv-043-5", title:"Замкнутая область", prompt:"Что гарантируется для непрерывной функции на ограниченной замкнутой области?", type:"choice", answer:"Она достигает максимума и минимума", options:["Она достигает максимума и минимума","Она обязана быть линейной","У неё нет критических точек","Она постоянна"], difficulty:"base" },
+  ],
+  "partial-derivatives": [
+    { id:"mv-044-1", title:"Частная производная", prompt:"Для f=x²y+3y найди fₓ.", type:"choice", answer:"2xy", options:["2xy","x²+3","2xy+3","x²"], difficulty:"base" },
+    { id:"mv-044-2", title:"Частная производная по y", prompt:"Для f=x²y+3y найди fᵧ.", type:"choice", answer:"x²+3", options:["x²+3","2xy","2x+3","x²y"], difficulty:"base" },
+    { id:"mv-044-3", title:"Шварц", prompt:"При каком условии в курсе гарантируется fₓᵧ=fᵧₓ?", type:"choice", answer:"При непрерывности соответствующих смешанных производных", options:["При непрерывности соответствующих смешанных производных","Всегда без условий","Только если f=0","Только для многочленов"], difficulty:"medium" },
+    { id:"mv-044-4", title:"Полный дифференциал", prompt:"Как записывается dz для z=f(x,y)?", type:"choice", answer:"fₓdx+fᵧdy", options:["fₓdx+fᵧdy","fₓ+fᵧ","fₓdx·fᵧdy","dx+dy"], difficulty:"base" },
+    { id:"mv-044-5", title:"Цепное правило", prompt:"x=x(t), y=y(t). Как найти dz/dt?", type:"choice", answer:"fₓ dx/dt + fᵧ dy/dt", options:["fₓ dx/dt + fᵧ dy/dt","fₓ+fᵧ","dx/dt+dy/dt","fₓfᵧ"], difficulty:"base" },
+    { id:"mv-044-6", title:"Неявная функция", prompt:"F(x,y,z)=0 и F_z≠0. Чему равен zₓ?", type:"choice", answer:"−Fₓ/F_z", options:["−Fₓ/F_z","Fₓ/F_z","−F_z/Fₓ","Fₓ+F_z"], difficulty:"medium" },
+  ],
+  "tangent-plane": [
+    { id:"mv-045-1", title:"Касательная плоскость", prompt:"Какое выражение стоит при (x−x₀) в касательной плоскости к z=f(x,y)?", type:"choice", answer:"fₓ(x₀,y₀)", options:["fₓ(x₀,y₀)","fᵧ(x₀,y₀)","f(x₀,y₀)²","1 всегда"], difficulty:"base" },
+    { id:"mv-045-2", title:"Нормальный вектор", prompt:"Какой вектор нормален к касательной плоскости графика z=f(x,y)?", type:"choice", answer:"(fₓ,fᵧ,−1)", options:["(fₓ,fᵧ,−1)","(1,1,1)","(fₓ,−fᵧ,0)","(x₀,y₀,z₀)"], difficulty:"base" },
+    { id:"mv-045-3", title:"Неявная поверхность", prompt:"Для F(x,y,z)=0 что задаёт направление нормали в обычной точке?", type:"choice", answer:"∇F", options:["∇F","F","det F","Только Fₓ"], difficulty:"base" },
+    { id:"mv-045-4", title:"Параболоид", prompt:"Для z=x²+y² в точке (1,−1,2) выбери касательную плоскость.", type:"choice", answer:"z−2=2(x−1)−2(y+1)", options:["z−2=2(x−1)−2(y+1)","z−2=x+y","z=2","z−2=−2(x−1)+2(y+1)"], difficulty:"medium" },
+  ],
+  "multivariable-extrema": [
+    { id:"mv-046-1", title:"Необходимое условие", prompt:"Что выполняется во внутренней точке локального экстремума дифференцируемой функции?", type:"choice", answer:"fₓ=fᵧ=0", options:["fₓ=fᵧ=0","fₓ=fᵧ=1","fₓₓ=fᵧᵧ=0 обязательно","Δ<0"], difficulty:"base" },
+    { id:"mv-046-2", title:"Критерий второго порядка", prompt:"A=fₓₓ, B=fₓᵧ, C=fᵧᵧ. Как определяется Δ?", type:"choice", answer:"AC−B²", options:["AC−B²","A+B+C","A²−BC","AB−C²"], difficulty:"base" },
+    { id:"mv-046-3", title:"Минимум", prompt:"В стационарной точке Δ>0 и A>0. Что это?", type:"choice", answer:"Локальный минимум", options:["Локальный минимум","Локальный максимум","Седло","Критерий ничего не говорит"], difficulty:"base" },
+    { id:"mv-046-4", title:"Седло", prompt:"В стационарной точке Δ<0. Что можно заключить?", type:"choice", answer:"Экстремума нет, точка седловая", options:["Экстремума нет, точка седловая","Есть минимум","Есть максимум","Обязательно глобальный минимум"], difficulty:"base" },
+    { id:"mv-046-5", title:"Вырожденный случай", prompt:"Что означает Δ=0?", type:"choice", answer:"Нужно дополнительное исследование", options:["Нужно дополнительное исследование","Всегда минимум","Всегда максимум","Всегда седло"], difficulty:"medium" },
+    { id:"mv-046-6", title:"Глобальный экстремум", prompt:"При поиске max/min на замкнутой области что кроме внутренних критических точек обязательно исследовать?", type:"choice", answer:"Границу области", options:["Границу области","Только центр области","Только ось Ox","Ничего"], difficulty:"base" },
   ]
 };
