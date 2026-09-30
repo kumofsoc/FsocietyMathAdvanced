@@ -1,340 +1,186 @@
 import {
   Background,
-  BaseEdge,
   Controls,
-  EdgeLabelRenderer,
   Handle,
   MarkerType,
   MiniMap,
   Position,
   ReactFlow,
   ReactFlowProvider,
-  getSmoothStepPath,
-  useNodesState,
   type Edge,
-  type EdgeProps,
   type Node,
   type NodeProps,
 } from "@xyflow/react";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import { chapters, topicList, topics } from "../data/course";
-import { topicMeta } from "../data/courseMeta";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { chapters, topicListMeta, topicMeta } from "../data/courseMeta";
 import { LEARNING_EVENT } from "../lib/learning";
-import { getChapterProgress, getTopicProgress } from "../lib/progress";
-import type { GraphNodeData } from "../types/course";
+import {
+  getChapterProgress,
+  getCourseProgress,
+  getLearningSnapshot,
+  getTopicProgress,
+} from "../lib/progress";
+import "../styles/course-map.css";
 
-const STORAGE_KEY = "fsociety-course-map-layout-v2";
-
-type StoredLayout = Record<string, { x: number; y: number; rotation: number; scale?: number }>;
-
-type GroupNodeData = {
+type ChapterNodeData = {
   chapterId: string;
   number: string;
   title: string;
   topicCount: number;
   readyCount: number;
-  plannedCount: number;
   progress: number;
-  rotation: number;
-  scale: number;
-  onOpen: (id: string) => void;
-  onRotate: (id: string, delta: number) => void;
-  onScale: (id: string, scale: number) => void;
+  onOpen: (chapterId: string) => void;
 };
 
-type DependencyEdgeData = {
-  sourceLabel: string;
-  targetLabel: string;
-  sourceNumber?: string;
-  targetNumber?: string;
-  relationLabel: string;
-  isActive?: boolean;
-  isDimmed?: boolean;
-  onOpenTarget?: () => void;
+type TopicNodeData = {
+  topicId: string;
+  number: string;
+  title: string;
+  summary: string;
+  progress: number;
+  prerequisiteCount: number;
+  nextCount: number;
+  onOpen: (topicId: string) => void;
 };
 
-function readLayout(): StoredLayout {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-  } catch {
-    return {};
+type GraphMode = { kind: "overview" } | { kind: "chapter"; chapterId: string };
+
+const NODE_WIDTH = 286;
+const CHAPTER_WIDTH = 322;
+
+function topologicalDepth(ids: string[], relations: Array<[string, string]>) {
+  const idSet = new Set(ids);
+  const indegree = new Map(ids.map((id) => [id, 0]));
+  const outgoing = new Map(ids.map((id) => [id, [] as string[]]));
+
+  for (const [source, target] of relations) {
+    if (!idSet.has(source) || !idSet.has(target) || source === target) continue;
+    outgoing.get(source)?.push(target);
+    indegree.set(target, (indegree.get(target) ?? 0) + 1);
   }
-}
 
-function DependencyEdge(props: EdgeProps) {
-  const {
-    id,
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
-    sourcePosition,
-    targetPosition,
-    markerEnd,
-    style,
-    data,
-  } = props;
+  const depth = new Map(ids.map((id) => [id, 0]));
+  const queue = ids.filter((id) => (indegree.get(id) ?? 0) === 0);
 
-  const [edgePath, labelX, labelY] = getSmoothStepPath({
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
-    sourcePosition,
-    targetPosition,
-    borderRadius: 18,
-    offset: 34,
+  for (let cursor = 0; cursor < queue.length; cursor += 1) {
+    const source = queue[cursor];
+    for (const target of outgoing.get(source) ?? []) {
+      depth.set(target, Math.max(depth.get(target) ?? 0, (depth.get(source) ?? 0) + 1));
+      const next = (indegree.get(target) ?? 1) - 1;
+      indegree.set(target, next);
+      if (next === 0) queue.push(target);
+    }
+  }
+
+  // Cycles are kept visible in the first lane instead of breaking layout.
+  ids.forEach((id) => {
+    if ((indegree.get(id) ?? 0) > 0) depth.set(id, 0);
   });
 
-  const meta = (data ?? {}) as DependencyEdgeData;
-
-  return (
-    <>
-      <BaseEdge
-        id={id}
-        path={edgePath}
-        markerEnd={markerEnd}
-        style={style}
-        interactionWidth={34}
-      />
-
-      <EdgeLabelRenderer>
-        <button
-          className={
-            "map-edge-label nodrag nopan " +
-            (meta.isActive ? "is-active " : "") +
-            (meta.isDimmed ? "is-dimmed" : "")
-          }
-          style={{
-            transform:
-              "translate(-50%, -50%) translate(" + labelX + "px, " + labelY + "px)",
-          }}
-          onClick={(event) => {
-            event.stopPropagation();
-            meta.onOpenTarget?.();
-          }}
-          title={
-            meta.sourceLabel && meta.targetLabel
-              ? meta.sourceLabel + " → " + meta.targetLabel
-              : undefined
-          }
-        >
-          <span className="map-edge-route">
-            {meta.sourceNumber && <b>{meta.sourceNumber}</b>}
-            <i>→</i>
-            {meta.targetNumber && <b>{meta.targetNumber}</b>}
-          </span>
-          <span className="map-edge-names">
-            <strong>{meta.sourceLabel}</strong>
-            <i>→</i>
-            <strong>{meta.targetLabel}</strong>
-          </span>
-          <small>{meta.relationLabel}</small>
-        </button>
-      </EdgeLabelRenderer>
-    </>
-  );
+  return depth;
 }
 
-function MapTransformControls({
-  rotation,
-  scale,
-  onRotate,
-  onScale,
-}: {
-  rotation: number;
-  scale: number;
-  onRotate: (delta: number) => void;
-  onScale: (scale: number) => void;
-}) {
-  const changeScale = (delta: number) => {
-    const next = Math.min(1.45, Math.max(0.75, scale + delta));
-    onScale(Number(next.toFixed(2)));
-  };
+function positionsByDepth(
+  ids: string[],
+  relations: Array<[string, string]>,
+  columnGap: number,
+  rowGap: number,
+) {
+  const depth = topologicalDepth(ids, relations);
+  const lanes = new Map<number, string[]>();
 
-  const reset = () => {
-    if (rotation !== 0) onRotate(-rotation);
-    if (scale !== 1) onScale(1);
-  };
+  ids.forEach((id) => {
+    const lane = depth.get(id) ?? 0;
+    const bucket = lanes.get(lane) ?? [];
+    bucket.push(id);
+    lanes.set(lane, bucket);
+  });
 
+  const positions = new Map<string, { x: number; y: number }>();
+  [...lanes.entries()]
+    .sort(([a], [b]) => a - b)
+    .forEach(([lane, bucket]) => {
+      const offset = -((bucket.length - 1) * rowGap) / 2;
+      bucket.forEach((id, row) => {
+        positions.set(id, {
+          x: lane * columnGap,
+          y: offset + row * rowGap,
+        });
+      });
+    });
+
+  return positions;
+}
+
+function ChapterNode({ data, selected }: NodeProps) {
+  const value = data as unknown as ChapterNodeData;
   return (
-    <div className="map-transform-toolbar nodrag nopan" onPointerDown={(event) => event.stopPropagation()}>
-      <div className="map-transform-group" aria-label="Поворот карточки">
-        <span>ROTATE</span>
-        <button onClick={() => onRotate(-15)} title="Повернуть на 15° влево">↺</button>
-        <b>{Math.round(rotation)}°</b>
-        <button onClick={() => onRotate(15)} title="Повернуть на 15° вправо">↻</button>
+    <article className={"knowledge-chapter-node " + (selected ? "selected" : "")}>
+      <Handle type="target" position={Position.Left} className="knowledge-handle" />
+      <div className="knowledge-node-kicker">
+        <span>CHAPTER {value.number}</span>
+        <small>{value.topicCount} TOPICS</small>
       </div>
-
-      <div className="map-transform-divider" />
-
-      <div className="map-transform-group" aria-label="Масштаб карточки">
-        <span>SCALE</span>
-        <button onClick={() => changeScale(-0.1)} title="Уменьшить">−</button>
-        <b>{Math.round(scale * 100)}%</b>
-        <button onClick={() => changeScale(0.1)} title="Увеличить">+</button>
+      <strong>{value.title}</strong>
+      <div className="knowledge-node-stats">
+        <span>{value.readyCount}/{value.topicCount} ready</span>
+        <b>{value.progress}%</b>
       </div>
-
-      <button className="map-transform-reset" onClick={reset} title="Сбросить поворот и размер">
-        RESET
+      <div className="knowledge-progress">
+        <i style={{ width: value.progress + "%" }} />
+      </div>
+      <button
+        className="nodrag nopan"
+        onClick={(event) => {
+          event.stopPropagation();
+          value.onOpen(value.chapterId);
+        }}
+      >
+        Открыть ветку →
       </button>
-    </div>
+      <Handle type="source" position={Position.Right} className="knowledge-handle" />
+    </article>
   );
 }
 
-function TopicNodeCard({ id, data, selected }: NodeProps) {
-  const value = data as unknown as GraphNodeData;
-  const scale = value.scale ?? 1;
-
+function TopicNode({ data, selected }: NodeProps) {
+  const value = data as unknown as TopicNodeData;
   return (
-    <div
-      className={
-        "map-node-shell map-topic-shell " +
-        (selected ? "is-selected " : "") +
-        (value.planned ? "is-planned" : "")
-      }
-      style={{ width: Math.round(260 * scale) }}
-    >
-      {selected && (
-        <MapTransformControls
-          rotation={value.rotation ?? 0}
-          scale={scale}
-          onRotate={(delta) => value.onRotate(id, delta)}
-          onScale={(nextScale) => value.onScale?.(id, nextScale)}
-        />
-      )}
-
-      <Handle
-        id="in"
-        type="target"
-        position={Position.Left}
-        className="map-handle map-handle-target"
-        isConnectable={false}
-      />
-      <span className="map-port-caption map-port-caption-in">НУЖНО ДО</span>
-
-      <div
-        className="map-topic-card map-card-visual"
-        style={{ transform: "rotate(" + (value.rotation ?? 0) + "deg)" }}
-        data-cursor="active"
-      >
-        <div className="map-topic-meta">
-          <span>§ {value.number}</span>
-          <span>{value.planned ? "PLANNED" : value.chapter}</span>
-        </div>
-        <strong>{value.label}</strong>
-        <p>{value.summary}</p>
-
-        {value.planned ? (
-          <div className="map-planned-state">
-            <span>ROADMAP NODE</span>
-            <strong>Контент готовится</strong>
-          </div>
-        ) : (
-          <div className="map-progress-mini">
-            <i style={{ width: (value.progress ?? 0) + "%" }} />
-            <span>{value.progress ?? 0}%</span>
-          </div>
-        )}
-
-        <div className="map-card-actions">
-          <button className="nodrag nopan" onClick={() => value.onOpen(id)}>
-            {value.planned ? "Открыть roadmap →" : "Открыть тему →"}
-          </button>
-        </div>
-        <div className="map-node-hint">
-          click = edit · drag = move · toolbar = rotate / scale
-        </div>
+    <article className={"knowledge-topic-node " + (selected ? "selected" : "")}>
+      <Handle type="target" position={Position.Left} className="knowledge-handle" />
+      <div className="knowledge-node-kicker">
+        <span>§ {value.number}</span>
+        <small>{value.prerequisiteCount} PRE · {value.nextCount} NEXT</small>
       </div>
-
-      <span className="map-port-caption map-port-caption-out">ВЕДЁТ К</span>
-      <Handle
-        id="out"
-        type="source"
-        position={Position.Right}
-        className="map-handle map-handle-source"
-        isConnectable={false}
-      />
-    </div>
+      <strong>{value.title}</strong>
+      <p>{value.summary}</p>
+      <div className="knowledge-progress">
+        <i style={{ width: value.progress + "%" }} />
+        <b>{value.progress}%</b>
+      </div>
+      <button
+        className="nodrag nopan"
+        onClick={(event) => {
+          event.stopPropagation();
+          value.onOpen(value.topicId);
+        }}
+      >
+        Открыть тему →
+      </button>
+      <Handle type="source" position={Position.Right} className="knowledge-handle" />
+    </article>
   );
 }
 
-function ChapterGroupCard({ id, data, selected }: NodeProps) {
-  const value = data as unknown as GroupNodeData;
-  const scale = value.scale ?? 1;
+const nodeTypes = {
+  chapter: ChapterNode,
+  topic: TopicNode,
+};
 
-  return (
-    <div
-      className={"map-node-shell map-group-shell " + (selected ? "is-selected" : "")}
-      style={{ width: Math.round(330 * scale) }}
-    >
-      {selected && (
-        <MapTransformControls
-          rotation={value.rotation ?? 0}
-          scale={scale}
-          onRotate={(delta) => value.onRotate(id, delta)}
-          onScale={(nextScale) => value.onScale(id, nextScale)}
-        />
-      )}
-
-      <Handle
-        id="in"
-        type="target"
-        position={Position.Left}
-        className="map-handle group-handle"
-        isConnectable={false}
-      />
-      <span className="map-port-caption map-port-caption-in">ЗАВИСИТ ОТ</span>
-
-      <div
-        className="map-group-card map-card-visual"
-        style={{ transform: "rotate(" + (value.rotation ?? 0) + "deg)" }}
-        data-cursor="active"
-      >
-        <div className="map-group-number">{value.number}</div>
-        <div className="map-group-copy">
-          <span>
-            ГРУППА / {value.readyCount} READY · {value.plannedCount} PLAN
-          </span>
-          <strong>{value.title}</strong>
-          <div className="map-progress-mini">
-            <i style={{ width: value.progress + "%" }} />
-            <span>{value.progress}%</span>
-          </div>
-          <button className="nodrag nopan" onClick={() => value.onOpen(value.chapterId)}>
-            Войти в группу →
-          </button>
-        </div>
-      </div>
-
-      <span className="map-port-caption map-port-caption-out">ВЕДЁТ К</span>
-      <Handle
-        id="out"
-        type="source"
-        position={Position.Right}
-        className="map-handle group-handle"
-        isConnectable={false}
-      />
-    </div>
-  );
-}
-
-const nodeTypes = { topic: TopicNodeCard, group: ChapterGroupCard };
-const edgeTypes = { dependency: DependencyEdge };
-
-function chapterForTopic(topicId: string) {
-  return topics[topicId]?.chapterId;
-}
-
-function InnerCourseMap() {
+function CourseMapInner() {
+  const [mode, setMode] = useState<GraphMode>({ kind: "overview" });
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
-  const [activeChapterId, setActiveChapterId] = useState<string | null>("linear");
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [progressVersion, setProgressVersion] = useState(0);
 
   useEffect(() => {
@@ -348,358 +194,476 @@ function InnerCourseMap() {
     return () => document.body.classList.remove("map-overlay-open");
   }, [fullscreen]);
 
-  const openTopic = useCallback((id: string) => {
-    window.location.hash = id;
+  const snapshot = useMemo(
+    () => getLearningSnapshot(),
+    [progressVersion],
+  );
+
+  const openTopic = useCallback((topicId: string) => {
+    window.location.hash = topicId;
   }, []);
 
-  const openChapter = useCallback((id: string) => {
-    setSelectedNodeId(null);
-    setActiveChapterId(id);
+  const openChapter = useCallback((chapterId: string) => {
+    setSelectedId(null);
+    setMode({ kind: "chapter", chapterId });
   }, []);
 
-  const groupEdges = useMemo<Edge[]>(() => {
+  const chapterRelations = useMemo(() => {
     const seen = new Set<string>();
-    const result: Edge[] = [];
+    const relations: Array<[string, string]> = [];
 
-    for (const topic of topicList) {
-      for (const dependency of topic.prerequisites) {
-        const sourceChapterId = chapterForTopic(dependency);
-        const targetChapterId = topic.chapterId;
-        if (!sourceChapterId || sourceChapterId === targetChapterId) continue;
-
-        const key = sourceChapterId + "->" + targetChapterId;
-        if (seen.has(key)) continue;
+    topicListMeta.forEach((topic) => {
+      topic.prerequisites.forEach((prerequisiteId) => {
+        const sourceChapter = topicMeta[prerequisiteId]?.chapterId;
+        if (!sourceChapter || sourceChapter === topic.chapterId) return;
+        const key = sourceChapter + "->" + topic.chapterId;
+        if (seen.has(key)) return;
         seen.add(key);
-
-        const sourceChapter = chapters.find((chapter) => chapter.id === sourceChapterId);
-        const targetChapter = chapters.find((chapter) => chapter.id === targetChapterId);
-        if (!sourceChapter || !targetChapter) continue;
-
-        result.push({
-          id: "group:" + key,
-          source: "group:" + sourceChapterId,
-          target: "group:" + targetChapterId,
-          sourceHandle: "out",
-          targetHandle: "in",
-          type: "dependency",
-          animated: true,
-          className: "edge-group",
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            width: 20,
-            height: 20,
-          },
-          data: {
-            sourceLabel: sourceChapter.title,
-            targetLabel: targetChapter.title,
-            sourceNumber: sourceChapter.number,
-            targetNumber: targetChapter.number,
-            relationLabel: "эта группа нужна перед следующей",
-            isActive:
-              selectedNodeId === "group:" + sourceChapterId ||
-              selectedNodeId === "group:" + targetChapterId,
-            isDimmed:
-              selectedNodeId !== null &&
-              selectedNodeId !== "group:" + sourceChapterId &&
-              selectedNodeId !== "group:" + targetChapterId,
-            onOpenTarget: () => openChapter(targetChapterId),
-          } satisfies DependencyEdgeData,
-        });
-      }
-    }
-
-    return result;
-  }, [openChapter, selectedNodeId]);
-
-  const buildNodes = useCallback((): Node[] => {
-    const stored = readLayout();
-
-    if (activeChapterId === null) {
-      return chapters.map((chapter, index) => {
-        const id = "group:" + chapter.id;
-        const saved = stored[id];
-        return {
-          id,
-          type: "group",
-          position: saved
-            ? { x: saved.x, y: saved.y }
-            : { x: (index % 3) * 390, y: Math.floor(index / 3) * 240 },
-          data: {
-            chapterId: chapter.id,
-            number: chapter.number,
-            title: chapter.title,
-            topicCount: chapter.topicIds.length,
-            readyCount: chapter.topicIds.filter((topicId) => !topicMeta[topicId]?.isStub).length,
-            plannedCount: chapter.topicIds.filter((topicId) => topicMeta[topicId]?.isStub).length,
-            progress: getChapterProgress(chapter.id),
-            rotation: saved?.rotation ?? 0,
-            scale: saved?.scale ?? 1,
-            onOpen: openChapter,
-            onRotate: () => undefined,
-            onScale: () => undefined,
-          } satisfies GroupNodeData,
-        };
+        relations.push([sourceChapter, topic.chapterId]);
       });
-    }
-
-    const chapter = chapters.find((item) => item.id === activeChapterId);
-    if (!chapter) return [];
-
-    return chapter.topicIds
-      .map((id) => topics[id])
-      .filter(Boolean)
-      .map((topic, index) => {
-        const saved = stored[topic.id];
-        return {
-          id: topic.id,
-          type: "topic",
-          position: saved
-            ? { x: saved.x, y: saved.y }
-            : { x: (index % 2) * 430, y: Math.floor(index / 2) * 235 },
-          data: {
-            label: topic.title,
-            number: topic.number,
-            chapter: chapter.title,
-            summary: topic.summary,
-            rotation: saved?.rotation ?? 0,
-            scale: saved?.scale ?? 1,
-            progress: getTopicProgress(topic.id),
-            planned: Boolean(topicMeta[topic.id]?.isStub),
-            onOpen: openTopic,
-            onRotate: () => undefined,
-            onScale: () => undefined,
-          } satisfies GraphNodeData,
-        };
-      });
-  }, [activeChapterId, openChapter, openTopic, progressVersion]);
-
-  const buildEdges = useCallback((): Edge[] => {
-    if (activeChapterId === null) return groupEdges;
-
-    const chapter = chapters.find((item) => item.id === activeChapterId);
-    if (!chapter) return [];
-    const visible = new Set(chapter.topicIds);
-
-    return chapter.topicIds.flatMap((id) => {
-      const topic = topics[id];
-      if (!topic) return [];
-
-      return topic.prerequisites
-        .filter((dependency) => visible.has(dependency))
-        .map((dependency) => {
-          const sourceTopic = topics[dependency];
-          if (!sourceTopic) return null;
-
-          return {
-            id: dependency + "->" + topic.id,
-            source: dependency,
-            target: topic.id,
-            sourceHandle: "out",
-            targetHandle: "in",
-            type: "dependency",
-            animated: chapter.id === "linear",
-            className: chapter.id === "linear" ? "edge-hot" : "edge-normal",
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-              width: 20,
-              height: 20,
-            },
-            data: {
-              sourceLabel: sourceTopic.title,
-              targetLabel: topic.title,
-              sourceNumber: "§ " + sourceTopic.number,
-              targetNumber: "§ " + topic.number,
-              relationLabel: "нужно знать перед этой темой",
-              isActive:
-                selectedNodeId === dependency || selectedNodeId === topic.id,
-              isDimmed:
-                selectedNodeId !== null &&
-                selectedNodeId !== dependency &&
-                selectedNodeId !== topic.id,
-              onOpenTarget: () => openTopic(topic.id),
-            } satisfies DependencyEdgeData,
-          } satisfies Edge;
-        })
-        .filter((edge): edge is Edge => edge !== null);
     });
-  }, [activeChapterId, groupEdges, openTopic, selectedNodeId]);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(buildNodes());
-
-  useEffect(() => {
-    setNodes(buildNodes());
-  }, [activeChapterId, progressVersion, buildNodes, setNodes]);
-
-  const persist = useCallback((nextNodes: Node[]) => {
-    const existing = readLayout();
-    nextNodes.forEach((node) => {
-      const data = node.data as { rotation?: number; scale?: number };
-      existing[node.id] = {
-        x: node.position.x,
-        y: node.position.y,
-        rotation: data.rotation ?? 0,
-        scale: data.scale ?? 1,
-      };
-    });
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
-    } catch (error) {
-      console.warn("[FsocietyMath] could not persist map layout", error);
-    }
+    return relations;
   }, []);
 
-  const handleRotate = useCallback(
-    (id: string, delta: number) => {
-      setNodes((current) => {
-        const next = current.map((node) => {
-          if (node.id !== id) return node;
-          const current = Number((node.data as { rotation?: number }).rotation ?? 0);
-          const raw = current + delta;
-          const rotation = Number((((raw + 180) % 360 + 360) % 360 - 180).toFixed(2));
-          return { ...node, data: { ...node.data, rotation } };
-        });
-        persist(next);
-        return next;
-      });
-    },
-    [persist, setNodes],
-  );
+  const chapterDependents = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    chapterRelations.forEach(([source, target]) => {
+      const next = map.get(source) ?? new Set<string>();
+      next.add(target);
+      map.set(source, next);
+    });
+    return map;
+  }, [chapterRelations]);
 
-  const handleScale = useCallback(
-    (id: string, scale: number) => {
-      const safeScale = Math.min(1.45, Math.max(0.75, scale));
-      setNodes((current) => {
-        const next = current.map((node) => {
-          if (node.id !== id) return node;
-          return { ...node, data: { ...node.data, scale: safeScale } };
-        });
-        persist(next);
-        return next;
-      });
-    },
-    [persist, setNodes],
-  );
-
-  const hydratedNodes = useMemo(
-    () =>
-      nodes.map((node) => ({
-        ...node,
-        className:
-          selectedNodeId && node.id !== selectedNodeId
-            ? "map-node-dimmed"
-            : selectedNodeId === node.id
-              ? "map-node-focused"
-              : "",
-        data: {
-          ...node.data,
-          onRotate: (id: string, delta: number) => handleRotate(id, delta),
-          onScale: (id: string, scale: number) => handleScale(id, scale),
-        },
-      })),
-    [nodes, handleRotate, handleScale, selectedNodeId],
-  );
-
-  const edges = useMemo(() => buildEdges(), [buildEdges, progressVersion]);
-
-  const resetLayout = () => {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch (error) {
-      console.warn("[FsocietyMath] could not reset map layout", error);
-    }
-    window.location.reload();
-  };
-
-  const activeChapter = activeChapterId
-    ? chapters.find((item) => item.id === activeChapterId)
+  const currentChapter = mode.kind === "chapter"
+    ? chapters.find((chapter) => chapter.id === mode.chapterId) ?? null
     : null;
 
+  const topicRelations = useMemo(() => {
+    if (!currentChapter) return [] as Array<[string, string]>;
+    const visible = new Set(currentChapter.topicIds);
+    const relations: Array<[string, string]> = [];
+
+    currentChapter.topicIds.forEach((topicId) => {
+      const topic = topicMeta[topicId];
+      topic?.prerequisites.forEach((source) => {
+        if (visible.has(source)) relations.push([source, topicId]);
+      });
+    });
+    return relations;
+  }, [currentChapter]);
+
+  const topicDependents = useMemo(() => {
+    const map = new Map<string, string[]>();
+    topicListMeta.forEach((topic) => {
+      topic.prerequisites.forEach((source) => {
+        const list = map.get(source) ?? [];
+        list.push(topic.id);
+        map.set(source, list);
+      });
+    });
+    return map;
+  }, []);
+
+  const graph = useMemo(() => {
+    if (mode.kind === "overview") {
+      const ids = chapters.map((chapter) => chapter.id);
+      const positions = positionsByDepth(ids, chapterRelations, 410, 190);
+
+      const nodes: Node[] = chapters.map((chapter) => ({
+        id: "chapter:" + chapter.id,
+        type: "chapter",
+        position: positions.get(chapter.id) ?? { x: 0, y: 0 },
+        width: CHAPTER_WIDTH,
+        selected: selectedId === "chapter:" + chapter.id,
+        data: {
+          chapterId: chapter.id,
+          number: chapter.number,
+          title: chapter.title,
+          topicCount: chapter.topicIds.length,
+          readyCount: chapter.topicIds.filter((id) => !topicMeta[id]?.isStub).length,
+          progress: getChapterProgress(chapter.id, snapshot),
+          onOpen: openChapter,
+        } satisfies ChapterNodeData,
+      }));
+
+      const edges: Edge[] = chapterRelations.map(([source, target]) => {
+        const sourceId = "chapter:" + source;
+        const targetId = "chapter:" + target;
+        const active = selectedId === sourceId || selectedId === targetId;
+        return {
+          id: sourceId + "->" + targetId,
+          source: sourceId,
+          target: targetId,
+          type: "smoothstep",
+          markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16 },
+          className:
+            selectedId === null
+              ? "knowledge-edge"
+              : active
+                ? "knowledge-edge active"
+                : "knowledge-edge dimmed",
+        };
+      });
+
+      return { nodes, edges };
+    }
+
+    const chapter = chapters.find((item) => item.id === mode.chapterId);
+    if (!chapter) return { nodes: [] as Node[], edges: [] as Edge[] };
+
+    const positions = positionsByDepth(chapter.topicIds, topicRelations, 370, 210);
+    const nodes: Node[] = chapter.topicIds.map((topicId) => {
+      const topic = topicMeta[topicId];
+      return {
+        id: topicId,
+        type: "topic",
+        position: positions.get(topicId) ?? { x: 0, y: 0 },
+        width: NODE_WIDTH,
+        selected: selectedId === topicId,
+        data: {
+          topicId,
+          number: topic.number,
+          title: topic.title,
+          summary: topic.summary,
+          progress: getTopicProgress(topicId, snapshot),
+          prerequisiteCount: topic.prerequisites.length,
+          nextCount: topicDependents.get(topicId)?.length ?? 0,
+          onOpen: openTopic,
+        } satisfies TopicNodeData,
+      };
+    });
+
+    const edges: Edge[] = topicRelations.map(([source, target]) => {
+      const active = selectedId === source || selectedId === target;
+      return {
+        id: source + "->" + target,
+        source,
+        target,
+        type: "smoothstep",
+        markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16 },
+        className:
+          selectedId === null
+            ? "knowledge-edge"
+            : active
+              ? "knowledge-edge active"
+              : "knowledge-edge dimmed",
+      };
+    });
+
+    return { nodes, edges };
+  }, [
+    mode,
+    selectedId,
+    snapshot,
+    chapterRelations,
+    topicRelations,
+    topicDependents,
+    openChapter,
+    openTopic,
+  ]);
+
+  const focusedNodeIds = useMemo(() => {
+    if (!selectedId) return null;
+    const result = new Set([selectedId]);
+
+    graph.edges.forEach((edge) => {
+      if (edge.source === selectedId) result.add(edge.target);
+      if (edge.target === selectedId) result.add(edge.source);
+    });
+
+    return result;
+  }, [graph.edges, selectedId]);
+
+  const renderedNodes = useMemo(
+    () =>
+      graph.nodes.map((node) => ({
+        ...node,
+        className:
+          !focusedNodeIds
+            ? ""
+            : focusedNodeIds.has(node.id)
+              ? "knowledge-node-focused"
+              : "knowledge-node-dimmed",
+      })),
+    [graph.nodes, focusedNodeIds],
+  );
+
+  const selectedTopic =
+    mode.kind === "chapter" && selectedId ? topicMeta[selectedId] : undefined;
+  const selectedChapterId =
+    mode.kind === "overview" && selectedId?.startsWith("chapter:")
+      ? selectedId.slice("chapter:".length)
+      : null;
+  const selectedChapter = selectedChapterId
+    ? chapters.find((chapter) => chapter.id === selectedChapterId)
+    : currentChapter;
+
+  const externalPrerequisites = selectedTopic
+    ? selectedTopic.prerequisites
+        .map((id) => topicMeta[id])
+        .filter((topic) => topic && topic.chapterId !== selectedTopic.chapterId)
+    : [];
+
+  const nextTopics = selectedTopic
+    ? (topicDependents.get(selectedTopic.id) ?? [])
+        .map((id) => topicMeta[id])
+        .filter(Boolean)
+    : [];
+
+  const courseProgress = getCourseProgress(snapshot);
+
   return (
-    <section className={"course-map-page " + (fullscreen ? "map-fullscreen" : "")}>
-      <header className="map-header">
+    <section className={"knowledge-map-page " + (fullscreen ? "knowledge-map-fullscreen" : "")}>
+      <header className="knowledge-map-header">
         <div>
           <div className="eyebrow">
-            {activeChapter
-              ? "GROUP / " + activeChapter.number
-              : "KNOWLEDGE GROUPS"}{" "}
-            · {edges.length} LINKS
+            KNOWLEDGE MAP / {mode.kind === "overview" ? "23 CHAPTERS" : "CHAPTER " + currentChapter?.number}
           </div>
-          <h1>{activeChapter?.title ?? "Карта курса"}</h1>
+          <h1>{currentChapter?.title ?? "Карта высшей математики"}</h1>
           <p>
-            {activeChapter
-              ? "Нажми на карточку, чтобы сфокусировать её связи и открыть локальные rotate / scale controls. Перетаскивание двигает узел, а кнопка внутри карточки открывает тему."
-              : "Нажми на группу, чтобы сфокусировать её зависимости. Controls появляются только у выбранной карточки и больше не перемещаются по canvas при изменении размера или поворота."}
+            {mode.kind === "overview"
+              ? "Карта строится из реальных prerequisite-связей. Чем правее раздел, тем больше предыдущих идей он использует."
+              : "Темы автоматически расположены по зависимостям. Выбери карточку, чтобы подсветить только её prerequisite и следующие шаги."}
           </p>
         </div>
-        <div className="map-header-actions">
-          <button className="ghost-button" onClick={() => { setSelectedNodeId(null); setActiveChapterId(null); }}>
-            ◫ Обзор групп
-          </button>
-          <button
-            className="ghost-button"
-            onClick={() => setFullscreen((value) => !value)}
-          >
-            {fullscreen ? "× Закрыть full screen" : "⛶ Full screen"}
-          </button>
-          <button className="ghost-button" onClick={resetLayout}>
-            Сбросить расположение
+
+        <div className="knowledge-map-header-actions">
+          {mode.kind === "chapter" && (
+            <button
+              onClick={() => {
+                setSelectedId(null);
+                setMode({ kind: "overview" });
+              }}
+            >
+              ← Все разделы
+            </button>
+          )}
+          <button onClick={() => setFullscreen((value) => !value)}>
+            {fullscreen ? "× Закрыть" : "⛶ Full screen"}
           </button>
         </div>
       </header>
 
-      <div className="map-legend">
-        <span><i className="legend-source" /> источник / prerequisite</span>
-        <b>→</b>
-        <span><i className="legend-target" /> тема, которая использует его</span>
-        <span><i className="legend-planned" /> planned / контент ещё строится</span>
-        <small>нажми на подпись связи, чтобы открыть конечную тему</small>
+      <div className="knowledge-map-summary">
+        <div><span>COURSE</span><strong>{courseProgress}%</strong></div>
+        <div><span>NODES</span><strong>{graph.nodes.length}</strong></div>
+        <div><span>DEPENDENCIES</span><strong>{graph.edges.length}</strong></div>
+        <div><span>MODE</span><strong>{mode.kind === "overview" ? "OVERVIEW" : "TOPICS"}</strong></div>
       </div>
 
-      <div className="map-group-tabs" aria-label="Группы карты">
+      <nav className="knowledge-map-tabs" aria-label="Разделы карты">
         <button
-          className={activeChapterId === null ? "active" : ""}
-          onClick={() => { setSelectedNodeId(null); setActiveChapterId(null); }}
+          className={mode.kind === "overview" ? "active" : ""}
+          onClick={() => {
+            setSelectedId(null);
+            setMode({ kind: "overview" });
+          }}
         >
-          Все группы
+          <span>00</span>
+          Весь курс
         </button>
         {chapters.map((chapter) => (
           <button
             key={chapter.id}
-            className={activeChapterId === chapter.id ? "active" : ""}
-            onClick={() => { setSelectedNodeId(null); setActiveChapterId(chapter.id); }}
+            className={mode.kind === "chapter" && mode.chapterId === chapter.id ? "active" : ""}
+            onClick={() => openChapter(chapter.id)}
           >
             <span>{chapter.number}</span>
             {chapter.title}
           </button>
         ))}
-      </div>
+      </nav>
 
-      <div className="map-stage">
-        <ReactFlow
-          key={activeChapterId ?? "overview"}
-          nodes={hydratedNodes}
-          edges={edges}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          onNodesChange={onNodesChange}
-          onNodeClick={(_event, node) => setSelectedNodeId(node.id)}
-          onPaneClick={() => setSelectedNodeId(null)}
-          onNodeDragStop={(_event, _node, nextNodes) => persist(nextNodes)}
-          fitView
-          fitViewOptions={{ padding: activeChapterId ? 0.32 : 0.14 }}
-          minZoom={0.08}
-          maxZoom={2.1}
-          nodesDraggable
-          panOnDrag
-          zoomOnScroll
-          zoomOnPinch
-          selectionOnDrag
-          edgesFocusable
-        >
-          <Background gap={26} size={1} />
-          <MiniMap pannable zoomable nodeStrokeWidth={2} />
-          <Controls />
-        </ReactFlow>
+      <div className="knowledge-map-workspace">
+        <div className="knowledge-map-canvas">
+          <ReactFlow
+            key={mode.kind === "overview" ? "overview" : mode.chapterId}
+            nodes={renderedNodes}
+            edges={graph.edges}
+            nodeTypes={nodeTypes}
+            onNodeClick={(_event, node) => setSelectedId(node.id)}
+            onNodeDoubleClick={(_event, node) => {
+              if (mode.kind === "overview") {
+                openChapter(node.id.replace("chapter:", ""));
+              } else {
+                openTopic(node.id);
+              }
+            }}
+            onPaneClick={() => setSelectedId(null)}
+            fitView
+            fitViewOptions={{ padding: 0.2, maxZoom: 0.95 }}
+            minZoom={0.12}
+            maxZoom={1.65}
+            nodesDraggable={false}
+            nodesConnectable={false}
+            elementsSelectable
+            panOnDrag
+            zoomOnScroll
+            zoomOnPinch
+            selectionOnDrag={false}
+          >
+            <Background gap={30} size={1} />
+            <MiniMap
+              pannable
+              zoomable
+              nodeStrokeWidth={2}
+              maskColor="color-mix(in srgb, var(--bg) 76%, transparent)"
+            />
+            <Controls showInteractive={false} />
+          </ReactFlow>
+
+          <div className="knowledge-map-canvas-hint">
+            <span>drag canvas</span>
+            <span>wheel / pinch = zoom</span>
+            <span>click = inspect</span>
+            <span>double click = open</span>
+          </div>
+        </div>
+
+        <aside className="knowledge-map-inspector">
+          {selectedTopic ? (
+            <>
+              <div className="knowledge-inspector-kicker">SELECTED / § {selectedTopic.number}</div>
+              <h2>{selectedTopic.title}</h2>
+              <p>{selectedTopic.summary}</p>
+
+              <div className="knowledge-inspector-progress">
+                <span>MASTERY</span>
+                <strong>{getTopicProgress(selectedTopic.id, snapshot)}%</strong>
+                <i><b style={{ width: getTopicProgress(selectedTopic.id, snapshot) + "%" }} /></i>
+              </div>
+
+              <div className="knowledge-inspector-section">
+                <span>PREREQUISITES</span>
+                {selectedTopic.prerequisites.length ? (
+                  <div className="knowledge-inspector-links">
+                    {selectedTopic.prerequisites.map((id) => {
+                      const prerequisite = topicMeta[id];
+                      if (!prerequisite) return null;
+                      return (
+                        <button
+                          key={id}
+                          onClick={() => {
+                            if (prerequisite.chapterId === selectedTopic.chapterId) {
+                              setSelectedId(id);
+                            } else {
+                              openChapter(prerequisite.chapterId);
+                            }
+                          }}
+                        >
+                          <small>§ {prerequisite.number}</small>
+                          <strong>{prerequisite.title}</strong>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <em>Стартовая тема: prerequisites нет.</em>
+                )}
+              </div>
+
+              <div className="knowledge-inspector-section">
+                <span>NEXT</span>
+                {nextTopics.length ? (
+                  <div className="knowledge-inspector-links">
+                    {nextTopics.slice(0, 8).map((topic) => (
+                      <button
+                        key={topic.id}
+                        onClick={() => {
+                          if (topic.chapterId === selectedTopic.chapterId) {
+                            setSelectedId(topic.id);
+                          } else {
+                            openChapter(topic.chapterId);
+                          }
+                        }}
+                      >
+                        <small>§ {topic.number}</small>
+                        <strong>{topic.title}</strong>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <em>Из этой темы нет прямой исходящей зависимости.</em>
+                )}
+              </div>
+
+              {externalPrerequisites.length > 0 && (
+                <div className="knowledge-inspector-note">
+                  Есть prerequisites из других разделов — клик по ним переключит ветку карты.
+                </div>
+              )}
+
+              <button
+                className="knowledge-inspector-primary"
+                onClick={() => openTopic(selectedTopic.id)}
+              >
+                Открыть тему →
+              </button>
+            </>
+          ) : selectedChapter ? (
+            <>
+              <div className="knowledge-inspector-kicker">
+                {mode.kind === "overview" ? "SELECTED CHAPTER" : "CURRENT BRANCH"}
+              </div>
+              <h2>{selectedChapter.title}</h2>
+              <p>
+                {selectedChapter.topicIds.length} тем. Карта показывает только реальные
+                зависимости, а не искусственную линейную последовательность.
+              </p>
+              <div className="knowledge-inspector-progress">
+                <span>CHAPTER MASTERY</span>
+                <strong>{getChapterProgress(selectedChapter.id, snapshot)}%</strong>
+                <i>
+                  <b
+                    style={{
+                      width: getChapterProgress(selectedChapter.id, snapshot) + "%",
+                    }}
+                  />
+                </i>
+              </div>
+              {mode.kind === "overview" && (
+                <>
+                  <div className="knowledge-inspector-section">
+                    <span>LEADS TO</span>
+                    <div className="knowledge-inspector-links">
+                      {[...(chapterDependents.get(selectedChapter.id) ?? [])].map((id) => {
+                        const chapter = chapters.find((item) => item.id === id);
+                        return chapter ? (
+                          <button key={id} onClick={() => setSelectedId("chapter:" + id)}>
+                            <small>{chapter.number}</small>
+                            <strong>{chapter.title}</strong>
+                          </button>
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
+                  <button
+                    className="knowledge-inspector-primary"
+                    onClick={() => openChapter(selectedChapter.id)}
+                  >
+                    Открыть ветку →
+                  </button>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="knowledge-inspector-kicker">MAP INSPECTOR</div>
+              <h2>Выбери узел.</h2>
+              <p>
+                Карта больше не является редактором карточек. Никаких rotate, scale и
+                сохранённых ручных раскладок: только структура курса и зависимости.
+              </p>
+              <div className="knowledge-inspector-empty">
+                <span>01</span><strong>Click</strong><small>подсветить локальную сеть</small>
+                <span>02</span><strong>Inspect</strong><small>увидеть prerequisites и next</small>
+                <span>03</span><strong>Open</strong><small>перейти в учебный материал</small>
+              </div>
+            </>
+          )}
+        </aside>
       </div>
     </section>
   );
@@ -708,7 +672,7 @@ function InnerCourseMap() {
 export function CourseMap() {
   return (
     <ReactFlowProvider>
-      <InnerCourseMap />
+      <CourseMapInner />
     </ReactFlowProvider>
   );
 }
