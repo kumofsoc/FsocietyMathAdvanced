@@ -12,7 +12,12 @@ import {
   type NodeProps,
 } from "@xyflow/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { chapters, topicListMeta, topicMeta } from "../data/courseMeta";
+import {
+  chapters,
+  topicListMeta,
+  topicMeta,
+  type TopicMeta,
+} from "../data/courseMeta";
 import { LEARNING_EVENT } from "../lib/learning";
 import {
   getChapterProgress,
@@ -403,13 +408,16 @@ function CourseMapInner() {
   const externalPrerequisites = selectedTopic
     ? selectedTopic.prerequisites
         .map((id) => topicMeta[id])
-        .filter((topic) => topic && topic.chapterId !== selectedTopic.chapterId)
+        .filter(
+          (topic): topic is TopicMeta =>
+            Boolean(topic && topic.chapterId !== selectedTopic.chapterId),
+        )
     : [];
 
   const nextTopics = selectedTopic
     ? (topicDependents.get(selectedTopic.id) ?? [])
         .map((id) => topicMeta[id])
-        .filter(Boolean)
+        .filter((topic): topic is TopicMeta => Boolean(topic))
     : [];
 
   const courseProgress = getCourseProgress(snapshot);
