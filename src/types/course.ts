@@ -64,17 +64,3 @@ export interface Chapter {
   title: string;
   topicIds: string[];
 }
-
-export interface GraphNodeData {
-  label: string;
-  number: string;
-  chapter: string;
-  summary: string;
-  rotation: number;
-  scale?: number;
-  progress?: number;
-  planned?: boolean;
-  onOpen: (id: string) => void;
-  onRotate: (id: string, delta: number) => void;
-  onScale?: (id: string, scale: number) => void;
-}
