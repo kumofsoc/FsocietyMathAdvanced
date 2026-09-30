@@ -1,5 +1,3 @@
-@import "@xyflow/react/dist/style.css";
-
 .knowledge-map-page {
   width: min(1600px, calc(100% - 32px));
   margin: 0 auto;
