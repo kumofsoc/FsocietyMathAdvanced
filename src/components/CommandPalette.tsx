@@ -313,6 +313,9 @@ export function CommandPalette() {
                 <button onClick={() => { window.location.hash = "map"; setOpen(false); }}>
                   ◫ Карта курса
                 </button>
+                <button onClick={() => { window.location.hash = "academy"; setOpen(false); }}>
+                  λ Linear Academy
+                </button>
                 <button onClick={() => { window.location.hash = "home"; setOpen(false); }}>
                   ∑ Главная
                 </button>
