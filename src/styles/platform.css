@@ -1369,3 +1369,15 @@ html[data-motion-profile="off"] .visual-loading::after {
   margin:0;
   padding-left:18px;
 }
+
+.practice-toolbar-actions .proof-filter{
+  border-color:color-mix(in srgb,var(--proof) 34%,var(--border));
+}
+.practice-toolbar-actions .proof-filter.active{
+  color:var(--proof);
+  border-color:var(--proof);
+  background:color-mix(in srgb,var(--proof) 9%,var(--elevated));
+}
+.practice-card:has(.practice-proof-input){
+  border-color:color-mix(in srgb,var(--proof) 28%,var(--border));
+}
