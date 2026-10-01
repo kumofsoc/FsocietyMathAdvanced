@@ -712,7 +712,7 @@ function UnitaryPhaseLab() {
   const q=p(r*Math.cos(a),r*Math.sin(a));
   return (
     <section className="academy-lab">
-      <header><div className="eyebrow">ACADEMY LAB / UNITARY PHASE</div><h2>Фаза меняется, норма остаётся.</h2><p>Умножение на e^{iθ} — простейший унитарный оператор: это чистый поворот комплексной плоскости без изменения внутреннего произведения.</p></header>
+      <header><div className="eyebrow">ACADEMY LAB / UNITARY PHASE</div><h2>Фаза меняется, норма остаётся.</h2><p>Умножение на exp(iθ) — простейший унитарный оператор: это чистый поворот комплексной плоскости без изменения внутреннего произведения.</p></header>
       <div className="academy-layout">
         <div className="academy-stage">
           <svg viewBox={`0 0 ${W} ${H}`}>
@@ -722,7 +722,7 @@ function UnitaryPhaseLab() {
             <line className="academy-vector-v" x1={CX} y1={CY} x2={q.x} y2={q.y}/>
             <circle className="academy-dynamic-point" cx={q.x} cy={q.y} r="6"/>
           </svg>
-          <div className="academy-stage-badges"><span>|z|={r.toFixed(2)}</span><span>arg z={phase}°</span><span>|e^{iθ}z|=|z|</span></div>
+          <div className="academy-stage-badges"><span>|z|={r.toFixed(2)}</span><span>arg z={phase}°</span><span>|exp(iθ)z| = |z|</span></div>
         </div>
         <aside className="academy-controls">
           <label><span>phase</span><input type="range" min="-180" max="180" step="1" value={phase} onChange={e=>setPhase(Number(e.target.value))}/><b>{phase}°</b></label>
