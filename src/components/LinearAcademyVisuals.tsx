@@ -483,6 +483,194 @@ function TensorLab({ topicId }: { topicId: string }) {
 }
 
 
+
+function LinearSystemGeometryLab() {
+  const [m1, setM1] = useState(.7);
+  const [b1, setB1] = useState(.45);
+  const [m2, setM2] = useState(-.55);
+  const [b2, setB2] = useState(-.2);
+
+  const denom = m1 - m2;
+  const parallel = Math.abs(denom) < .035;
+  const x = parallel ? 0 : (b2 - b1) / denom;
+  const y = m1 * x + b1;
+  const coincident = parallel && Math.abs(b1 - b2) < .06;
+
+  const linePoints = (m:number,b:number) => {
+    const x1=-2.7,x2=2.7;
+    return [p(x1,m*x1+b),p(x2,m*x2+b)];
+  };
+  const [a1,a2]=linePoints(m1,b1);
+  const [c1,c2]=linePoints(m2,b2);
+  const qi=p(x,y);
+
+  return (
+    <section className="academy-lab">
+      <header>
+        <div className="eyebrow">ACADEMY LAB / LINEAR SYSTEM GEOMETRY</div>
+        <h2>Rank видно как геометрию пересечения ограничений.</h2>
+        <p>
+          Две строки системы задают две прямые. Независимые ограничения пересекаются
+          в одной точке; параллельные несовместимы, совпадающие дают бесконечно много решений.
+        </p>
+      </header>
+      <div className="academy-layout">
+        <div className="academy-stage">
+          <svg viewBox={`0 0 ${W} ${H}`}>
+            <line className="academy-axis" x1="18" y1={CY} x2={W-18} y2={CY}/>
+            <line className="academy-axis" x1={CX} y1="18" x2={CX} y2={H-18}/>
+            <line className="academy-system-line one" x1={a1.x} y1={a1.y} x2={a2.x} y2={a2.y}/>
+            <line className="academy-system-line two" x1={c1.x} y1={c1.y} x2={c2.x} y2={c2.y}/>
+            {!parallel && Math.abs(x)<3.1 && Math.abs(y)<3.1 && <circle className="academy-intersection" cx={qi.x} cy={qi.y} r="6"/>}
+          </svg>
+          <div className="academy-stage-badges">
+            <span>{coincident ? "∞ solutions" : parallel ? "no solution" : "unique solution"}</span>
+            {!parallel && <span>x={x.toFixed(2)}, y={y.toFixed(2)}</span>}
+            <span>rank logic ↔ intersection geometry</span>
+          </div>
+        </div>
+        <aside className="academy-controls">
+          <label><span>m₁</span><input type="range" min="-1.8" max="1.8" step=".05" value={m1} onChange={e=>setM1(Number(e.target.value))}/><b>{m1.toFixed(2)}</b></label>
+          <label><span>b₁</span><input type="range" min="-1.5" max="1.5" step=".05" value={b1} onChange={e=>setB1(Number(e.target.value))}/><b>{b1.toFixed(2)}</b></label>
+          <label><span>m₂</span><input type="range" min="-1.8" max="1.8" step=".05" value={m2} onChange={e=>setM2(Number(e.target.value))}/><b>{m2.toFixed(2)}</b></label>
+          <label><span>b₂</span><input type="range" min="-1.5" max="1.5" step=".05" value={b2} onChange={e=>setB2(Number(e.target.value))}/><b>{b2.toFixed(2)}</b></label>
+          <div className="academy-equation"><span>RANK TEST</span><strong>rank A = rank[A|b]</strong><small>совместность = отсутствие нового независимого ограничения от b</small></div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+function LevelSetLab() {
+  const [cx, setCx] = useState(1.2);
+  const [cy, setCy] = useState(.8);
+  const [radius, setRadius] = useState(1.45);
+  const [theta, setTheta] = useState(45);
+  const t = theta * Math.PI / 180;
+  const x = cx + radius * Math.cos(t);
+  const y = cy + radius * Math.sin(t);
+  const point = p(x,y);
+  const center = p(cx,cy);
+  const grad = {x:2*(x-cx),y:2*(y-cy)};
+  const gnorm=Math.max(.001,Math.hypot(grad.x,grad.y));
+  const normalEnd=p(x+grad.x/gnorm*.85,y+grad.y/gnorm*.85);
+  const tangent={x:-grad.y/gnorm,y:grad.x/gnorm};
+  const t1=p(x-tangent.x*.95,y-tangent.y*.95);
+  const t2=p(x+tangent.x*.95,y+tangent.y*.95);
+
+  return (
+    <section className="academy-lab">
+      <header><div className="eyebrow">ACADEMY LAB / LEVEL SET + GRADIENT</div><h2>Неявное уравнение превращается в кривую, а ∇F — в её нормаль.</h2><p>Для F=(x−cₓ)²+(y−cᵧ)²−R²=0 выбери точку на уровне и наблюдай: касательная всегда ортогональна градиенту.</p></header>
+      <div className="academy-layout">
+        <div className="academy-stage">
+          <svg viewBox={`0 0 ${W} ${H}`}>
+            <line className="academy-axis" x1="18" y1={CY} x2={W-18} y2={CY}/>
+            <line className="academy-axis" x1={CX} y1="18" x2={CX} y2={H-18}/>
+            <circle className="academy-level-circle" cx={center.x} cy={center.y} r={radius*54}/>
+            <line className="academy-gradient" x1={point.x} y1={point.y} x2={normalEnd.x} y2={normalEnd.y}/>
+            <line className="academy-tangent" x1={t1.x} y1={t1.y} x2={t2.x} y2={t2.y}/>
+            <circle className="academy-point" cx={point.x} cy={point.y} r="6"/>
+          </svg>
+          <div className="academy-stage-badges"><span>F=0</span><span>∇F=({grad.x.toFixed(2)}, {grad.y.toFixed(2)})</span><span>∇F·t=0</span></div>
+        </div>
+        <aside className="academy-controls">
+          <label><span>cₓ</span><input type="range" min="-1.2" max="1.2" step=".05" value={cx} onChange={e=>setCx(Number(e.target.value))}/><b>{cx.toFixed(2)}</b></label>
+          <label><span>cᵧ</span><input type="range" min="-1.2" max="1.2" step=".05" value={cy} onChange={e=>setCy(Number(e.target.value))}/><b>{cy.toFixed(2)}</b></label>
+          <label><span>R</span><input type="range" min=".45" max="2.1" step=".05" value={radius} onChange={e=>setRadius(Number(e.target.value))}/><b>{radius.toFixed(2)}</b></label>
+          <label><span>point</span><input type="range" min="0" max="360" step="1" value={theta} onChange={e=>setTheta(Number(e.target.value))}/><b>{theta}°</b></label>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+function LineDistanceLab() {
+  const [A,setA]=useState(1.1);
+  const [B,setB]=useState(.8);
+  const [C,setC]=useState(-.4);
+  const [px,setPx]=useState(1.4);
+  const [py,setPy]=useState(1.15);
+  const denom=Math.max(.001,A*A+B*B);
+  const signed=(A*px+B*py+C)/Math.sqrt(denom);
+  const foot={
+    x:px-A*(A*px+B*py+C)/denom,
+    y:py-B*(A*px+B*py+C)/denom,
+  };
+  const lineEndpoints=()=>{
+    const x1=-2.8,x2=2.8;
+    if(Math.abs(B)>.08) return [p(x1,(-A*x1-C)/B),p(x2,(-A*x2-C)/B)];
+    const x=-C/(Math.abs(A)<.01?.01:A);return [p(x,-2.7),p(x,2.7)];
+  };
+  const [l1,l2]=lineEndpoints();
+  const q=p(px,py), f=p(foot.x,foot.y);
+
+  return (
+    <section className="academy-lab">
+      <header><div className="eyebrow">ACADEMY LAB / POINT–LINE DISTANCE</div><h2>Кратчайший путь к прямой всегда идёт по нормали.</h2><p>Меняй коэффициенты Ax+By+C=0 и точку P. Проекция P на прямую напрямую визуализирует формулу расстояния.</p></header>
+      <div className="academy-layout">
+        <div className="academy-stage">
+          <svg viewBox={`0 0 ${W} ${H}`}>
+            <line className="academy-axis" x1="18" y1={CY} x2={W-18} y2={CY}/>
+            <line className="academy-axis" x1={CX} y1="18" x2={CX} y2={H-18}/>
+            <line className="academy-main-line" x1={l1.x} y1={l1.y} x2={l2.x} y2={l2.y}/>
+            <line className="academy-distance" x1={q.x} y1={q.y} x2={f.x} y2={f.y}/>
+            <circle className="academy-point" cx={q.x} cy={q.y} r="6"/>
+            <circle className="academy-projection-point" cx={f.x} cy={f.y} r="5"/>
+          </svg>
+          <div className="academy-stage-badges"><span>d={Math.abs(signed).toFixed(3)}</span><span>normal=({A.toFixed(2)},{B.toFixed(2)})</span></div>
+        </div>
+        <aside className="academy-controls">
+          <label><span>A</span><input type="range" min="-2" max="2" step=".05" value={A} onChange={e=>setA(Number(e.target.value))}/><b>{A.toFixed(2)}</b></label>
+          <label><span>B</span><input type="range" min="-2" max="2" step=".05" value={B} onChange={e=>setB(Number(e.target.value))}/><b>{B.toFixed(2)}</b></label>
+          <label><span>C</span><input type="range" min="-1.5" max="1.5" step=".05" value={C} onChange={e=>setC(Number(e.target.value))}/><b>{C.toFixed(2)}</b></label>
+          <label><span>Pₓ</span><input type="range" min="-2.2" max="2.2" step=".05" value={px} onChange={e=>setPx(Number(e.target.value))}/><b>{px.toFixed(2)}</b></label>
+          <label><span>Pᵧ</span><input type="range" min="-2.2" max="2.2" step=".05" value={py} onChange={e=>setPy(Number(e.target.value))}/><b>{py.toFixed(2)}</b></label>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+function CrossProductLab({ volume = false }: { volume?: boolean }) {
+  const [angle,setAngle]=useState(55);
+  const [height,setHeight]=useState(1.15);
+  const r=angle*Math.PI/180;
+  const a={x:1.7,y:0};
+  const b={x:1.35*Math.cos(r),y:1.35*Math.sin(r)};
+  const signedArea=a.x*b.y-a.y*b.x;
+  const o=p(0,0), pa=p(a.x,a.y), pb=p(b.x,b.y), pab=p(a.x+b.x,a.y+b.y);
+  const lift=Math.max(24,height*44);
+  const top=[o,pa,pab,pb].map(q=>({x:q.x+30,y:q.y-lift}));
+  const base=[o,pa,pab,pb];
+
+  return (
+    <section className="academy-lab">
+      <header><div className="eyebrow">{volume?"ACADEMY LAB / MIXED PRODUCT":"ACADEMY LAB / CROSS PRODUCT"}</div><h2>{volume?"Площадь основания × высота = ориентированный объём.":"a×b кодирует площадь и ориентацию одновременно."}</h2><p>{volume?"Смешанное произведение измеряет проекцию третьего направления на нормаль к основанию.":"Угол между a и b меняет площадь параллелограмма; перестановка векторов меняет знак ориентации."}</p></header>
+      <div className="academy-layout">
+        <div className="academy-stage">
+          <svg viewBox={`0 0 ${W} ${H}`}>
+            <line className="academy-axis" x1="18" y1={CY} x2={W-18} y2={CY}/>
+            <line className="academy-axis" x1={CX} y1="18" x2={CX} y2={H-18}/>
+            <polygon className="academy-cross-area" points={base.map(q=>q.x+","+q.y).join(" ")}/>
+            <line className="academy-e1" x1={o.x} y1={o.y} x2={pa.x} y2={pa.y}/>
+            <line className="academy-e2" x1={o.x} y1={o.y} x2={pb.x} y2={pb.y}/>
+            {volume && <>
+              <polygon className="academy-volume-top" points={top.map(q=>q.x+","+q.y).join(" ")}/>
+              {base.map((q,i)=><line key={i} className="academy-volume-edge" x1={q.x} y1={q.y} x2={top[i].x} y2={top[i].y}/>)}
+            </>}
+          </svg>
+          <div className="academy-stage-badges"><span>area={Math.abs(signedArea).toFixed(3)}</span><span>orientation={signedArea>=0?"+":"−"}</span>{volume&&<span>volume≈{(Math.abs(signedArea)*height).toFixed(3)}</span>}</div>
+        </div>
+        <aside className="academy-controls">
+          <label><span>angle</span><input type="range" min="-170" max="170" step="1" value={angle} onChange={e=>setAngle(Number(e.target.value))}/><b>{angle}°</b></label>
+          {volume&&<label><span>height</span><input type="range" min=".1" max="2.2" step=".05" value={height} onChange={e=>setHeight(Number(e.target.value))}/><b>{height.toFixed(2)}</b></label>}
+          <div className="academy-equation"><span>{volume?"TRIPLE PRODUCT":"CROSS PRODUCT"}</span><strong>{volume?"V=|a·(b×c)|":"||a×b||=||a||||b||sinθ"}</strong><small>ноль означает вырождение соответствующего ориентированного объёма</small></div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
 function RankNullityLab() {
   const [sx, setSx] = useState(1.35);
   const [sy, setSy] = useState(0.35);
@@ -767,7 +955,12 @@ function WedgeLab() {
 }
 
 export function LinearAcademyVisualInsert({ topicId }: Props) {
-  if (topicId === "inverse-rank" || topicId === "linear-systems" || topicId === "linear-maps") {
+  if (topicId === "linear-systems") return <LinearSystemGeometryLab />;
+  if (topicId === "plane-coordinates") return <LevelSetLab />;
+  if (topicId === "plane-lines") return <LineDistanceLab />;
+  if (topicId === "cross-product") return <CrossProductLab />;
+  if (topicId === "mixed-product") return <CrossProductLab volume />;
+  if (topicId === "inverse-rank" || topicId === "linear-maps") {
     return <RankNullityLab />;
   }
   if (topicId === "eigenproblem") return <EigenDynamicsLab />;
