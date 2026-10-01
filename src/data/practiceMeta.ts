@@ -1,4 +1,5 @@
 import { linearAcademyPracticeTaskIdsByTopic } from "./linearAcademyPracticeMeta";
+import { linearAcademyExamTaskIdsByTopic } from "./linearAcademyExamPracticeMeta";
 
 export const practiceTaskIdsByTopic: Record<string, string[]> = {
   "matrices": [
@@ -604,5 +605,9 @@ export const practiceTaskIdsByTopic: Record<string, string[]> = {
 };
 
 Object.entries(linearAcademyPracticeTaskIdsByTopic).forEach(([topicId, ids]) => {
+  practiceTaskIdsByTopic[topicId] = [...(practiceTaskIdsByTopic[topicId] ?? []), ...ids];
+});
+
+Object.entries(linearAcademyExamTaskIdsByTopic).forEach(([topicId, ids]) => {
   practiceTaskIdsByTopic[topicId] = [...(practiceTaskIdsByTopic[topicId] ?? []), ...ids];
 });
