@@ -482,7 +482,302 @@ function TensorLab({ topicId }: { topicId: string }) {
   );
 }
 
+
+function RankNullityLab() {
+  const [sx, setSx] = useState(1.35);
+  const [sy, setSy] = useState(0.35);
+  const [angle, setAngle] = useState(22);
+  const r = angle * Math.PI / 180;
+  const circle = Array.from({ length: 129 }, (_, i) => {
+    const t = (i / 128) * Math.PI * 2;
+    const x = Math.cos(t);
+    const y = Math.sin(t);
+    const tx = sx * x;
+    const ty = sy * y;
+    return p(
+      tx * Math.cos(r) - ty * Math.sin(r),
+      tx * Math.sin(r) + ty * Math.cos(r),
+    );
+  });
+  const d = circle.map((q,i)=>(i?"L":"M")+q.x+" "+q.y).join(" ");
+  const numericalRank = Math.abs(sx) < .04 && Math.abs(sy) < .04 ? 0 : Math.abs(sx) < .04 || Math.abs(sy) < .04 ? 1 : 2;
+  const nullity = 2 - numericalRank;
+
+  return (
+    <section className="academy-lab">
+      <header>
+        <div className="eyebrow">ACADEMY LAB / RANK–NULLITY</div>
+        <h2>Смотри, как оператор физически теряет размерность.</h2>
+        <p>
+          Единичная окружность превращается в эллипс, отрезок или точку.
+          Rank — размерность образа, nullity — число независимых направлений, уничтоженных оператором.
+        </p>
+      </header>
+      <div className="academy-layout">
+        <div className="academy-stage">
+          <svg viewBox={`0 0 ${W} ${H}`}>
+            <line className="academy-axis" x1="18" y1={CY} x2={W-18} y2={CY}/>
+            <line className="academy-axis" x1={CX} y1="18" x2={CX} y2={H-18}/>
+            <circle className="academy-unit-circle" cx={CX} cy={CY} r="54"/>
+            <path className="academy-image-ellipse" d={d}/>
+            {numericalRank < 2 && <line className="academy-kernel-line" x1={CX-150*Math.cos(r)} y1={CY-150*Math.sin(r)} x2={CX+150*Math.cos(r)} y2={CY+150*Math.sin(r)}/>}
+          </svg>
+          <div className="academy-stage-badges">
+            <span>rank = {numericalRank}</span>
+            <span>nullity = {nullity}</span>
+            <span>rank + nullity = 2</span>
+          </div>
+        </div>
+        <aside className="academy-controls">
+          <label><span>σ₁</span><input type="range" min="0" max="2" step=".02" value={sx} onChange={e=>setSx(Number(e.target.value))}/><b>{sx.toFixed(2)}</b></label>
+          <label><span>σ₂</span><input type="range" min="0" max="2" step=".02" value={sy} onChange={e=>setSy(Number(e.target.value))}/><b>{sy.toFixed(2)}</b></label>
+          <label><span>angle</span><input type="range" min="-80" max="80" step="1" value={angle} onChange={e=>setAngle(Number(e.target.value))}/><b>{angle}°</b></label>
+          <div className="academy-equation"><span>THEOREM</span><strong>dim V = rank T + nullity T</strong><small>kernel = потерянные направления · image = достижимые направления</small></div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+function EigenDynamicsLab({ jordan = false }: { jordan?: boolean }) {
+  const [lambda1, setLambda1] = useState(1.35);
+  const [lambda2, setLambda2] = useState(.72);
+  const [steps, setSteps] = useState(4);
+  const [theta, setTheta] = useState(28);
+  const r = theta * Math.PI / 180;
+  const rotate = (x:number,y:number,a:number) => ({
+    x:x*Math.cos(a)-y*Math.sin(a),
+    y:x*Math.sin(a)+y*Math.cos(a),
+  });
+  const apply = (x:number,y:number) => {
+    if (jordan) return { x: lambda1*x + .55*y, y: lambda1*y };
+    const local=rotate(x,y,-r);
+    return rotate(lambda1*local.x,lambda2*local.y,r);
+  };
+  const trajectory=[{x:1.15,y:.82}];
+  for(let i=0;i<steps;i++) trajectory.push(apply(trajectory.at(-1)!.x,trajectory.at(-1)!.y));
+  const e1=rotate(1.5,0,r), e2=rotate(0,1.5,r);
+
+  return (
+    <section className="academy-lab">
+      <header>
+        <div className="eyebrow">{jordan ? "ACADEMY LAB / JORDAN DYNAMICS" : "ACADEMY LAB / EIGEN DYNAMICS"}</div>
+        <h2>{jordan ? "Одно λ, но нильпотентная часть создаёт drift." : "Собственные направления переживают действие оператора без поворота."}</h2>
+        <p>
+          {jordan
+            ? "Повторяй J=λI+N: даже при λ=1 координаты могут расти полиномиально из-за N."
+            : "Разложи произвольный вектор по собственным направлениям: каждое масштабируется своим λ, поэтому долгосрочная динамика становится прозрачной."}
+        </p>
+      </header>
+      <div className="academy-layout">
+        <div className="academy-stage">
+          <svg viewBox={`0 0 ${W} ${H}`}>
+            <line className="academy-axis" x1="18" y1={CY} x2={W-18} y2={CY}/>
+            <line className="academy-axis" x1={CX} y1="18" x2={CX} y2={H-18}/>
+            {!jordan && <>
+              <line className="academy-eigen-line one" x1={p(-e1.x,-e1.y).x} y1={p(-e1.x,-e1.y).y} x2={p(e1.x,e1.y).x} y2={p(e1.x,e1.y).y}/>
+              <line className="academy-eigen-line two" x1={p(-e2.x,-e2.y).x} y1={p(-e2.x,-e2.y).y} x2={p(e2.x,e2.y).x} y2={p(e2.x,e2.y).y}/>
+            </>}
+            <polyline className="academy-trajectory" points={trajectory.map(q=>p(q.x,q.y)).map(q=>q.x+","+q.y).join(" ")}/>
+            {trajectory.map((q,i)=><circle key={i} className={i===0?"academy-dynamic-point start":"academy-dynamic-point"} cx={p(q.x,q.y).x} cy={p(q.x,q.y).y} r={i===0?6:4}/>)}
+          </svg>
+          <div className="academy-stage-badges">
+            <span>steps={steps}</span>
+            <span>λ₁={lambda1.toFixed(2)}</span>
+            {!jordan && <span>λ₂={lambda2.toFixed(2)}</span>}
+            {jordan && <span>N ≠ 0</span>}
+          </div>
+        </div>
+        <aside className="academy-controls">
+          <label><span>λ₁</span><input type="range" min="-.4" max="1.7" step=".05" value={lambda1} onChange={e=>setLambda1(Number(e.target.value))}/><b>{lambda1.toFixed(2)}</b></label>
+          {!jordan && <label><span>λ₂</span><input type="range" min="-.4" max="1.7" step=".05" value={lambda2} onChange={e=>setLambda2(Number(e.target.value))}/><b>{lambda2.toFixed(2)}</b></label>}
+          {!jordan && <label><span>basis</span><input type="range" min="-80" max="80" step="1" value={theta} onChange={e=>setTheta(Number(e.target.value))}/><b>{theta}°</b></label>}
+          <label><span>n</span><input type="range" min="1" max="9" step="1" value={steps} onChange={e=>setSteps(Number(e.target.value))}/><b>{steps}</b></label>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+function GramSchmidtLab() {
+  const [bx, setBx] = useState(.65);
+  const [by, setBy] = useState(1.55);
+  const a={x:1.45,y:.45};
+  const aa=a.x*a.x+a.y*a.y;
+  const coeff=(bx*a.x+by*a.y)/aa;
+  const proj={x:coeff*a.x,y:coeff*a.y};
+  const orth={x:bx-proj.x,y:by-proj.y};
+  const pa=p(a.x,a.y), pb=p(bx,by), pp=p(proj.x,proj.y), po=p(orth.x,orth.y);
+
+  return (
+    <section className="academy-lab">
+      <header><div className="eyebrow">ACADEMY LAB / GRAM–SCHMIDT</div><h2>Ортогональный базис строится вычитанием уже объяснённых направлений.</h2><p>b раскладывается на проекцию вдоль a и новый компонент u₂⊥a. Нормирование превращает их в ортонормированный базис и напрямую ведёт к QR.</p></header>
+      <div className="academy-layout">
+        <div className="academy-stage">
+          <svg viewBox={`0 0 ${W} ${H}`}>
+            <line className="academy-axis" x1="18" y1={CY} x2={W-18} y2={CY}/>
+            <line className="academy-axis" x1={CX} y1="18" x2={CX} y2={H-18}/>
+            <line className="academy-vector-a" x1={CX} y1={CY} x2={pa.x} y2={pa.y}/>
+            <line className="academy-vector-v" x1={CX} y1={CY} x2={pb.x} y2={pb.y}/>
+            <line className="academy-vector-proj" x1={CX} y1={CY} x2={pp.x} y2={pp.y}/>
+            <line className="academy-residual" x1={pp.x} y1={pp.y} x2={pb.x} y2={pb.y}/>
+            <line className="academy-e2" x1={CX} y1={CY} x2={po.x} y2={po.y}/>
+          </svg>
+          <div className="academy-stage-badges"><span>proj coefficient={coeff.toFixed(3)}</span><span>a·u₂={(a.x*orth.x+a.y*orth.y).toFixed(3)}</span><span>||u₂||={Math.hypot(orth.x,orth.y).toFixed(3)}</span></div>
+        </div>
+        <aside className="academy-controls">
+          <label><span>bₓ</span><input type="range" min="-2" max="2" step=".05" value={bx} onChange={e=>setBx(Number(e.target.value))}/><b>{bx.toFixed(2)}</b></label>
+          <label><span>bᵧ</span><input type="range" min="-2" max="2" step=".05" value={by} onChange={e=>setBy(Number(e.target.value))}/><b>{by.toFixed(2)}</b></label>
+          <div className="academy-equation"><span>STEP</span><strong>u₂ = b − projₐb</strong><small>после нормирования q₁,q₂ формируют Q в QR</small></div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+function SVDLab() {
+  const [sigma1, setSigma1] = useState(1.65);
+  const [sigma2, setSigma2] = useState(.65);
+  const [angle, setAngle] = useState(27);
+  const r=angle*Math.PI/180;
+  const circle=Array.from({length:129},(_,i)=>{
+    const t=(i/128)*Math.PI*2;
+    const x=sigma1*Math.cos(t), y=sigma2*Math.sin(t);
+    return p(x*Math.cos(r)-y*Math.sin(r),x*Math.sin(r)+y*Math.cos(r));
+  });
+  const d=circle.map((q,i)=>(i?"L":"M")+q.x+" "+q.y).join(" ");
+  return (
+    <section className="academy-lab">
+      <header><div className="eyebrow">ACADEMY LAB / SVD</div><h2>Любой оператор = rotate → stretch → rotate.</h2><p>Сингулярные значения — полуоси эллипса-образа единичной окружности. Они устойчивее собственных значений для анализа общего прямоугольного оператора.</p></header>
+      <div className="academy-layout">
+        <div className="academy-stage">
+          <svg viewBox={`0 0 ${W} ${H}`}>
+            <line className="academy-axis" x1="18" y1={CY} x2={W-18} y2={CY}/>
+            <line className="academy-axis" x1={CX} y1="18" x2={CX} y2={H-18}/>
+            <circle className="academy-unit-circle" cx={CX} cy={CY} r="54"/>
+            <path className="academy-svd-ellipse" d={d}/>
+          </svg>
+          <div className="academy-stage-badges"><span>σ₁={sigma1.toFixed(2)}</span><span>σ₂={sigma2.toFixed(2)}</span><span>condition≈{(sigma1/Math.max(.01,sigma2)).toFixed(2)}</span></div>
+        </div>
+        <aside className="academy-controls">
+          <label><span>σ₁</span><input type="range" min=".2" max="2.2" step=".05" value={sigma1} onChange={e=>setSigma1(Number(e.target.value))}/><b>{sigma1.toFixed(2)}</b></label>
+          <label><span>σ₂</span><input type="range" min=".1" max="2" step=".05" value={sigma2} onChange={e=>setSigma2(Number(e.target.value))}/><b>{sigma2.toFixed(2)}</b></label>
+          <label><span>U angle</span><input type="range" min="-80" max="80" step="1" value={angle} onChange={e=>setAngle(Number(e.target.value))}/><b>{angle}°</b></label>
+          <div className="academy-equation"><span>SVD</span><strong>A = UΣVᵀ</strong><small>σᵢ² — собственные значения AᵀA</small></div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+function FunctionalLevelLab() {
+  const [a,setA]=useState(1.2);
+  const [b,setB]=useState(-.7);
+  const norm=Math.max(.001,Math.hypot(a,b));
+  const levels=[-1.5,-.75,0,.75,1.5];
+  const lineFor=(k:number)=>{
+    const x1=-2.7,x2=2.7;
+    if(Math.abs(b)>.08) return [p(x1,(k-a*x1)/b),p(x2,(k-a*x2)/b)];
+    const x=k/a; return [p(x,-2.5),p(x,2.5)];
+  };
+  const n=p(a/norm*1.4,b/norm*1.4);
+
+  return (
+    <section className="academy-lab">
+      <header><div className="eyebrow">ACADEMY LAB / COVECTOR</div><h2>Функционал режет пространство параллельными уровнями.</h2><p>φ(x)=ax+by. Все уровни φ=c параллельны ker φ, а представляющий вектор (a,b) перпендикулярен им в евклидовой метрике.</p></header>
+      <div className="academy-layout">
+        <div className="academy-stage">
+          <svg viewBox={`0 0 ${W} ${H}`}>
+            <line className="academy-axis" x1="18" y1={CY} x2={W-18} y2={CY}/>
+            <line className="academy-axis" x1={CX} y1="18" x2={CX} y2={H-18}/>
+            {levels.map(k=>{const [u,v]=lineFor(k);return <line key={k} className={k===0?"academy-level kernel":"academy-level"} x1={u.x} y1={u.y} x2={v.x} y2={v.y}/>;})}
+            <line className="academy-normal" x1={CX} y1={CY} x2={n.x} y2={n.y}/>
+          </svg>
+          <div className="academy-stage-badges"><span>ker φ: ax+by=0</span><span>||φ||≈{norm.toFixed(2)}</span></div>
+        </div>
+        <aside className="academy-controls">
+          <label><span>a</span><input type="range" min="-2" max="2" step=".05" value={a} onChange={e=>setA(Number(e.target.value))}/><b>{a.toFixed(2)}</b></label>
+          <label><span>b</span><input type="range" min="-2" max="2" step=".05" value={b} onChange={e=>setB(Number(e.target.value))}/><b>{b.toFixed(2)}</b></label>
+          <div className="academy-equation"><span>RIESZ</span><strong>φ(x)=⟨n,x⟩</strong><small>dual coordinates are linear measurements</small></div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+function UnitaryPhaseLab() {
+  const [phase,setPhase]=useState(45);
+  const [r,setR]=useState(1.4);
+  const a=phase*Math.PI/180;
+  const q=p(r*Math.cos(a),r*Math.sin(a));
+  return (
+    <section className="academy-lab">
+      <header><div className="eyebrow">ACADEMY LAB / UNITARY PHASE</div><h2>Фаза меняется, норма остаётся.</h2><p>Умножение на e^{iθ} — простейший унитарный оператор: это чистый поворот комплексной плоскости без изменения внутреннего произведения.</p></header>
+      <div className="academy-layout">
+        <div className="academy-stage">
+          <svg viewBox={`0 0 ${W} ${H}`}>
+            <line className="academy-axis" x1="18" y1={CY} x2={W-18} y2={CY}/>
+            <line className="academy-axis" x1={CX} y1="18" x2={CX} y2={H-18}/>
+            <circle className="academy-unit-circle" cx={CX} cy={CY} r={r*54}/>
+            <line className="academy-vector-v" x1={CX} y1={CY} x2={q.x} y2={q.y}/>
+            <circle className="academy-dynamic-point" cx={q.x} cy={q.y} r="6"/>
+          </svg>
+          <div className="academy-stage-badges"><span>|z|={r.toFixed(2)}</span><span>arg z={phase}°</span><span>|e^{iθ}z|=|z|</span></div>
+        </div>
+        <aside className="academy-controls">
+          <label><span>phase</span><input type="range" min="-180" max="180" step="1" value={phase} onChange={e=>setPhase(Number(e.target.value))}/><b>{phase}°</b></label>
+          <label><span>|z|</span><input type="range" min=".2" max="2.2" step=".05" value={r} onChange={e=>setR(Number(e.target.value))}/><b>{r.toFixed(2)}</b></label>
+          <div className="academy-equation"><span>UNITARY</span><strong>U*U = I</strong><small>norm and Hermitian product are preserved</small></div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+function WedgeLab() {
+  const [angle,setAngle]=useState(58);
+  const [length,setLength]=useState(1.45);
+  const r=angle*Math.PI/180;
+  const u={x:1.5,y:0};
+  const v={x:length*Math.cos(r),y:length*Math.sin(r)};
+  const area=u.x*v.y-u.y*v.x;
+  const pts=[p(0,0),p(u.x,u.y),p(u.x+v.x,u.y+v.y),p(v.x,v.y)];
+  return (
+    <section className="academy-lab">
+      <header><div className="eyebrow">ACADEMY LAB / EXTERIOR ALGEBRA</div><h2>u∧v — ориентированная площадь, не “ещё один вектор”.</h2><p>При совпадении направлений площадь схлопывается в ноль; перестановка u и v меняет ориентацию и знак wedge-product.</p></header>
+      <div className="academy-layout">
+        <div className="academy-stage">
+          <svg viewBox={`0 0 ${W} ${H}`}>
+            <line className="academy-axis" x1="18" y1={CY} x2={W-18} y2={CY}/>
+            <line className="academy-axis" x1={CX} y1="18" x2={CX} y2={H-18}/>
+            <polygon className="academy-wedge" points={pts.map(q=>q.x+","+q.y).join(" ")}/>
+            <line className="academy-e1" x1={CX} y1={CY} x2={p(u.x,u.y).x} y2={p(u.x,u.y).y}/>
+            <line className="academy-e2" x1={CX} y1={CY} x2={p(v.x,v.y).x} y2={p(v.x,v.y).y}/>
+          </svg>
+          <div className="academy-stage-badges"><span>u∧v={area.toFixed(3)}</span><span>{Math.abs(area)<.03?"dependent":"independent"}</span></div>
+        </div>
+        <aside className="academy-controls">
+          <label><span>angle</span><input type="range" min="-175" max="175" step="1" value={angle} onChange={e=>setAngle(Number(e.target.value))}/><b>{angle}°</b></label>
+          <label><span>|v|</span><input type="range" min=".2" max="2.2" step=".05" value={length} onChange={e=>setLength(Number(e.target.value))}/><b>{length.toFixed(2)}</b></label>
+          <div className="academy-equation"><span>DEPENDENCE</span><strong>u∧v=0 ⇔ u,v dependent</strong><small>v∧u = −u∧v</small></div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
 export function LinearAcademyVisualInsert({ topicId }: Props) {
+  if (topicId === "inverse-rank" || topicId === "linear-systems" || topicId === "linear-maps") {
+    return <RankNullityLab />;
+  }
+  if (topicId === "eigenproblem") return <EigenDynamicsLab />;
+  if (topicId === "jordan-form") return <EigenDynamicsLab jordan />;
+  if (topicId === "euclidean-spaces") return <GramSchmidtLab />;
+  if (topicId === "euclidean-operators") return <SVDLab />;
+  if (topicId === "linear-functionals" || topicId === "euclidean-functions") return <FunctionalLevelLab />;
+  if (topicId === "unitary-spaces") return <UnitaryPhaseLab />;
+  if (topicId === "exterior-algebra") return <WedgeLab />;
+  if (topicId === "quadratic-forms") return <ConicLab topicId={topicId} />;
   if (MATRIX_TOPICS.has(topicId)) return <MatrixOperatorLab topicId={topicId} />;
   if (VECTOR_TOPICS.has(topicId)) return <VectorProjectionLab topicId={topicId} />;
   if (SUBSPACE_TOPICS.has(topicId)) return <SubspaceLab topicId={topicId} />;
