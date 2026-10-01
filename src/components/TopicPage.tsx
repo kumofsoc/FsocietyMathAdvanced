@@ -58,16 +58,18 @@ function DeferredPracticePanel({ topicId }: { topicId: string }) {
   }
 
   return (
-    <Suspense
-      fallback={
-        <div className="practice-deferred loading">
-          <span>PRACTICE BANK</span>
-          <strong>Загружаю задачи…</strong>
-        </div>
-      }
-    >
-      <PracticePanel topicId={topicId} />
-    </Suspense>
+    <div id={"practice-" + topicId}>
+      <Suspense
+        fallback={
+          <div className="practice-deferred loading">
+            <span>PRACTICE BANK</span>
+            <strong>Загружаю задачи…</strong>
+          </div>
+        }
+      >
+        <PracticePanel topicId={topicId} />
+      </Suspense>
+    </div>
   );
 }
 
@@ -467,6 +469,21 @@ export function TopicPage({ topicId }: { topicId: string }) {
   );
   const practiceRatio = taskIds.length ? solvedCount / taskIds.length : 0;
   const topicProgress = Math.round((theoryRead ? 50 : 0) + practiceRatio * 50);
+  const academyEnabled = Boolean(chapter && ACADEMY_CHAPTERS.has(chapter.id));
+  const academyStartIndex = academyEnabled
+    ? topic.blocks.findIndex((block) => block.title.startsWith("ACADEMY"))
+    : -1;
+  const academyTaskIds = academyEnabled
+    ? taskIds.filter((id) => id.startsWith("academy-"))
+    : [];
+  const academyProofCount = academyTaskIds.filter((id) => id.startsWith("academy-proof-")).length;
+  const academyCapstoneCount = academyTaskIds.filter((id) => id.includes("capstone")).length;
+
+  const jumpToBlock = (index: number) => {
+    document
+      .getElementById("block-" + topic.id + "-" + index)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <div className="topic-page">
@@ -510,6 +527,41 @@ export function TopicPage({ topicId }: { topicId: string }) {
           </div>
         )}
       </header>
+
+      {academyEnabled && academyStartIndex >= 0 && (
+        <section className="academy-track-banner">
+          <div className="academy-track-copy">
+            <div className="academy-track-kicker">ACADEMY PRO / LINEAR MATHEMATICS</div>
+            <h2>Углублённый слой этой темы уже встроен в курс.</h2>
+            <p>
+              Не дополнительная справка: отдельная концептуальная модель, theorem + proof,
+              worked example, интерактивная геометрия и повышенный банк задач.
+            </p>
+          </div>
+
+          <div className="academy-track-metrics">
+            <div><span>DEEP BLOCKS</span><strong>4</strong></div>
+            <div><span>ACADEMY TASKS</span><strong>{academyTaskIds.length}</strong></div>
+            <div><span>PROOF</span><strong>{academyProofCount}</strong></div>
+            <div><span>CAPSTONE</span><strong>{academyCapstoneCount}</strong></div>
+          </div>
+
+          <div className="academy-track-actions">
+            <button onClick={() => jumpToBlock(academyStartIndex)}>
+              ↓ Academy Core
+            </button>
+            <button
+              onClick={() =>
+                document
+                  .getElementById("practice-" + topic.id)
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
+              }
+            >
+              ↓ Academy Practice
+            </button>
+          </div>
+        </section>
+      )}
 
       <div className="topic-outline">
         {topic.blocks.map((block, index) => (
