@@ -1,5 +1,6 @@
 import type { Chapter, Topic } from "../types/course";
 import { linearAcademyBlocks } from "./linearAcademy";
+import { linearAcademyPitfallBlocks } from "./linearAcademyPitfalls";
 
 export const chapters: Chapter[] = [
   { id: "linear", number: "01", title: "Линейная алгебра", topicIds: ["matrices", "determinants", "inverse-rank", "linear-systems"] },
@@ -7132,6 +7133,12 @@ export const topics: Record<string, Topic> = {
 };
 
 Object.entries(linearAcademyBlocks).forEach(([topicId, blocks]) => {
+  const topic = topics[topicId];
+  if (!topic) return;
+  topic.blocks.push(...blocks);
+});
+
+Object.entries(linearAcademyPitfallBlocks).forEach(([topicId, blocks]) => {
   const topic = topics[topicId];
   if (!topic) return;
   topic.blocks.push(...blocks);
