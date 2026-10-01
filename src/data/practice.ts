@@ -1,5 +1,6 @@
 import type { PracticeTask } from "../types/course";
 import { linearAcademyPracticeByTopic } from "./linearAcademyPractice";
+import { linearAcademyExamPracticeByTopic } from "./linearAcademyExamPractice";
 
 export const practiceByTopic: Record<string, PracticeTask[]> = {
   matrices: [
@@ -3281,5 +3282,9 @@ export const practiceByTopic: Record<string, PracticeTask[]> = {
 };
 
 Object.entries(linearAcademyPracticeByTopic).forEach(([topicId, items]) => {
+  practiceByTopic[topicId] = [...(practiceByTopic[topicId] ?? []), ...items];
+});
+
+Object.entries(linearAcademyExamPracticeByTopic).forEach(([topicId, items]) => {
   practiceByTopic[topicId] = [...(practiceByTopic[topicId] ?? []), ...items];
 });
