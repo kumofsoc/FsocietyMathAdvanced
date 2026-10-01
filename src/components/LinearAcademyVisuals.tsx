@@ -177,7 +177,7 @@ function VectorProjectionLab({ topicId }: { topicId: string }) {
           <svg viewBox={`0 0 ${W} ${H}`}>
             <line className="academy-axis" x1="18" y1={CY} x2={W - 18} y2={CY} />
             <line className="academy-axis" x1={CX} y1="18" x2={CX} y2={H - 18} />
-            <line className="academy-vector-a" d="" x1={CX} y1={CY} x2={a.x} y2={a.y} />
+            <line className="academy-vector-a" x1={CX} y1={CY} x2={a.x} y2={a.y} />
             <path className="academy-vector-v" d={arrowPath(vx, vy)} />
             <path className="academy-vector-proj" d={arrowPath(px, py)} />
             <line className="academy-residual" x1={proj.x} y1={proj.y} x2={v.x} y2={v.y} />
