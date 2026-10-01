@@ -540,7 +540,7 @@ export function TopicPage({ topicId }: { topicId: string }) {
           </div>
 
           <div className="academy-track-metrics">
-            <div><span>DEEP BLOCKS</span><strong>4</strong></div>
+            <div><span>DEEP BLOCKS</span><strong>5</strong></div>
             <div><span>ACADEMY TASKS</span><strong>{academyTaskIds.length}</strong></div>
             <div><span>PROOF</span><strong>{academyProofCount}</strong></div>
             <div><span>CAPSTONE</span><strong>{academyCapstoneCount}</strong></div>
