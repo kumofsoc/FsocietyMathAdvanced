@@ -52,6 +52,7 @@ function answersMatch(task: PracticeTask, value: string) {
 }
 
 function difficultyLabel(task: PracticeTask) {
+  if (task.type === "proof") return "PROOF";
   if (task.difficulty === "hard") return "HARD";
   if (task.difficulty === "medium") return "MEDIUM";
   return "BASE";
@@ -225,6 +226,7 @@ export function PracticePanel({ topicId }: { topicId: string }) {
   const [difficulty, setDifficulty] = useState<DifficultyFilter>("all");
   const [hideSolved, setHideSolved] = useState(false);
   const [academyOnly, setAcademyOnly] = useState(false);
+  const [proofOnly, setProofOnly] = useState(false);
   const [view, setView] = useState<"grid" | "focus">("grid");
   const [focusIndex, setFocusIndex] = useState(0);
 
@@ -240,15 +242,17 @@ export function PracticePanel({ topicId }: { topicId: string }) {
         if (difficulty !== "all" && taskDifficulty !== difficulty) return false;
         if (hideSolved && solved.has(task.id)) return false;
         if (academyOnly && !task.id.startsWith("academy-")) return false;
+        if (proofOnly && task.type !== "proof") return false;
         return true;
       }),
-    [tasks, solved, difficulty, hideSolved, academyOnly],
+    [tasks, solved, difficulty, hideSolved, academyOnly, proofOnly],
   );
 
   const counts = useMemo(() => ({
     base: tasks.filter((task) => (task.difficulty ?? "base") === "base").length,
     medium: tasks.filter((task) => task.difficulty === "medium").length,
     hard: tasks.filter((task) => task.difficulty === "hard").length,
+    proof: tasks.filter((task) => task.type === "proof").length,
   }), [tasks]);
 
   if (tasks.length === 0) {
@@ -329,6 +333,18 @@ export function PracticePanel({ topicId }: { topicId: string }) {
         </div>
 
         <div className="practice-toolbar-actions">
+          {counts.proof > 0 && (
+            <button
+              className={proofOnly ? "active proof-filter" : "proof-filter"}
+              onClick={() => {
+                setProofOnly((value) => !value);
+                setFocusIndex(0);
+              }}
+              aria-pressed={proofOnly}
+            >
+              {proofOnly ? "Proof seminar ✓" : "Proof seminar"}
+            </button>
+          )}
           <button
             className={academyOnly ? "active academy-filter" : "academy-filter"}
             onClick={() => {
@@ -372,6 +388,7 @@ export function PracticePanel({ topicId }: { topicId: string }) {
         <span>BASE {counts.base}</span>
         <span>MEDIUM {counts.medium}</span>
         <span>HARD {counts.hard}</span>
+        {counts.proof > 0 && <span>PROOF {counts.proof}</span>}
       </div>
 
       {visibleTasks.length ? (
@@ -397,6 +414,7 @@ export function PracticePanel({ topicId }: { topicId: string }) {
                   {difficulty === "all" ? "все сложности" : difficulty.toUpperCase()}
                   {hideSolved ? " · только нерешённые" : ""}
                   {academyOnly ? " · ACADEMY" : ""}
+                  {proofOnly ? " · PROOF" : ""}
                 </small>
               </div>
               <button
@@ -453,6 +471,7 @@ export function PracticePanel({ topicId }: { topicId: string }) {
               setDifficulty("all");
               setHideSolved(false);
               setAcademyOnly(false);
+              setProofOnly(false);
             }}
           >
             Показать весь банк
