@@ -32,6 +32,11 @@ const HomePage = lazy(() =>
 const CourseMap = lazy(() =>
   import("./components/CourseMap").then((module) => ({ default: module.CourseMap })),
 );
+const LinearAcademyHub = lazy(() =>
+  import("./components/LinearAcademyHub").then((module) => ({
+    default: module.LinearAcademyHub,
+  })),
+);
 const TopicPage = lazy(() =>
   import("./components/TopicPage").then((module) => ({ default: module.TopicPage })),
 );
@@ -41,6 +46,9 @@ const preloadTopicPage = () => {
 };
 const preloadCourseMap = () => {
   void import("./components/CourseMap");
+};
+const preloadLinearAcademy = () => {
+  void import("./components/LinearAcademyHub");
 };
 
 function ChapterAccordion({
@@ -373,6 +381,17 @@ export default function App() {
           <b>{topicListMeta.length}</b>
         </button>
 
+        <button
+          className={"map-entry academy-entry " + (route === "academy" ? "active" : "")}
+          onMouseEnter={preloadLinearAcademy}
+          onFocus={preloadLinearAcademy}
+          onClick={() => (window.location.hash = "academy")}
+        >
+          <span>λ</span>
+          Linear Academy
+          <b>PRO</b>
+        </button>
+
         <div className="sidebar-section-label">
           <span>Прогресс по курсу</span>
           <small>{trackedProgressRows.length} разделов</small>
@@ -475,6 +494,8 @@ export default function App() {
                   />
                 ) : route === "map" ? (
                   <CourseMap />
+                ) : route === "academy" ? (
+                  <LinearAcademyHub />
                 ) : topic?.isStub ? (
                   <StubTopicPage topicId={topic.id} />
                 ) : topic ? (
