@@ -36,6 +36,11 @@ const QuadricSurfaceLab = lazy(() =>
 const MatrixLab = lazy(() =>
   import("./MatrixLab").then((module) => ({ default: module.MatrixLab })),
 );
+const LinearAcademyVisualInsert = lazy(() =>
+  import("./LinearAcademyVisuals").then((module) => ({
+    default: module.LinearAcademyVisualInsert,
+  })),
+);
 
 const VectorVisualInsert = lazy(() =>
   import("./VectorVisuals").then((module) => ({
@@ -371,6 +376,12 @@ export function TopicVisualInsert({
   blockTitle,
 }: TopicVisualProps) {
   const identity = topicId + "::" + index;
+
+  if (blockTitle.startsWith("ACADEMY VISUAL")) {
+    return shell(identity, () => (
+      <LinearAcademyVisualInsert topicId={topicId} index={index} />
+    ));
+  }
 
   if (topicId === "matrices" && index === 0) {
     return shell(identity, () => <MatrixTypesGallery />);
