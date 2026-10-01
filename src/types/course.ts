@@ -40,10 +40,12 @@ export interface PracticeTask {
   id: string;
   title: string;
   prompt: string;
-  type: "number" | "choice" | "text";
+  type: "number" | "choice" | "text" | "proof";
   answer: string;
   options?: string[];
   hint?: string;
+  solution?: string;
+  rubric?: string[];
   difficulty?: "base" | "medium" | "hard";
 }
 
