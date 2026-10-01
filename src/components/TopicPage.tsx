@@ -88,6 +88,17 @@ const labels: Record<BlockKind, string> = {
 };
 
 const BLOCK_TARGET_KEY = "fsociety-block-target-v1";
+const ACADEMY_CHAPTERS = new Set([
+  "linear",
+  "vectors",
+  "plane-geometry",
+  "space-geometry",
+  "plane-transformations",
+  "abstract-linear",
+  "euclidean",
+  "affine-general",
+  "tensor-algebra",
+]);
 
 function dependencyTarget(dependency: string) {
   const marker = dependency.toLowerCase().match(/(теорема|свойство)\s*(\d+(?:\.\d+)?)/);
@@ -132,6 +143,7 @@ function ContentCard({
   index: number;
 }) {
   const theoremId = topic.id + "::" + index;
+  const academyBlock = block.title.startsWith("ACADEMY");
   const [saved, setSaved] = useState(() => loadSavedTheorems().some((item) => item.id === theoremId));
   const [propertyPanel, setPropertyPanel] = useState<"proof" | "corollary" | null>(null);
 
@@ -159,14 +171,18 @@ function ContentCard({
 
   return (
     <motion.article
-      className={"content-block kind-" + block.kind}
+      className={
+        "content-block kind-" +
+        block.kind +
+        (academyBlock ? " academy-content-block" : "")
+      }
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-12% 0px" }}
       transition={{ duration: 0.44, delay: Math.min(index * 0.018, 0.16) }}
     >
       <div className="block-rail">
-        <span>{labels[block.kind]}</span>
+        <span>{academyBlock ? "ACADEMY / " + labels[block.kind] : labels[block.kind]}</span>
         <small>{String(index + 1).padStart(2, "0")}</small>
       </div>
 
@@ -457,6 +473,7 @@ export function TopicPage({ topicId }: { topicId: string }) {
       <header className="topic-hero">
         <div className="eyebrow">
           ГЛАВА {chapter?.number} / § {topic.number} · {chapter?.title}
+          {chapter && ACADEMY_CHAPTERS.has(chapter.id) ? " · ACADEMY PRO" : ""}
         </div>
         <div className="hero-title-row">
           <div>
