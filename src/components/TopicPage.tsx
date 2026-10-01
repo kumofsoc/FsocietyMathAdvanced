@@ -534,8 +534,8 @@ export function TopicPage({ topicId }: { topicId: string }) {
             <div className="academy-track-kicker">ACADEMY PRO / LINEAR MATHEMATICS</div>
             <h2>Углублённый слой этой темы уже встроен в курс.</h2>
             <p>
-              Не дополнительная справка: отдельная концептуальная модель, theorem + proof,
-              worked example, интерактивная геометрия и повышенный банк задач.
+              Не дополнительная справка: отдельная концептуальная модель, theorem + proof, worked example,
+              интерактивная геометрия, pitfall/counterexample и повышенный банк задач.
             </p>
           </div>
 
