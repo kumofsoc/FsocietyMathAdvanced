@@ -1479,3 +1479,22 @@ html[data-motion-profile="off"] .visual-loading::after {
   border-color:var(--formula);
   color:var(--text);
 }
+
+.map-entry.academy-entry{
+  border-color:color-mix(in srgb,var(--accent) 28%,var(--border));
+  background:
+    linear-gradient(120deg,color-mix(in srgb,var(--accent) 7%,var(--elevated)),var(--elevated));
+}
+.map-entry.academy-entry>span{
+  color:var(--formula);
+  font-weight:800;
+}
+.map-entry.academy-entry>b{
+  color:var(--accent);
+  font:700 7px ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.08em;
+}
+.map-entry.academy-entry.active{
+  border-color:var(--accent);
+  box-shadow:inset 2px 0 0 var(--accent);
+}
