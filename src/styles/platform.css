@@ -1286,3 +1286,21 @@ html[data-motion-profile="off"] .visual-loading::after {
   background: color-mix(in srgb, var(--accent) 36%, var(--border));
   background-clip: padding-box;
 }
+
+/* Academy theory/practice presentation is part of the core topic UI. */
+.academy-content-block{
+  border-color:color-mix(in srgb,var(--accent) 34%,var(--border));
+  background:
+    linear-gradient(110deg,color-mix(in srgb,var(--accent) 5%,transparent),transparent 46%),
+    color-mix(in srgb,var(--surface) 90%,transparent);
+  box-shadow:0 18px 58px rgba(0,0,0,.10),inset 3px 0 0 color-mix(in srgb,var(--accent) 58%,transparent);
+}
+.academy-content-block .block-rail span{color:var(--accent);letter-spacing:.08em}
+.practice-toolbar-actions .academy-filter{
+  border-color:color-mix(in srgb,var(--accent) 34%,var(--border));
+}
+.practice-toolbar-actions .academy-filter.active{
+  color:var(--text);
+  border-color:var(--accent);
+  background:color-mix(in srgb,var(--accent) 10%,var(--elevated));
+}
