@@ -176,6 +176,7 @@ export function PracticePanel({ topicId }: { topicId: string }) {
   const [solved, setSolved] = useState<Set<string>>(() => loadSet(SOLVED_KEY));
   const [difficulty, setDifficulty] = useState<DifficultyFilter>("all");
   const [hideSolved, setHideSolved] = useState(false);
+  const [academyOnly, setAcademyOnly] = useState(false);
   const [view, setView] = useState<"grid" | "focus">("grid");
   const [focusIndex, setFocusIndex] = useState(0);
 
@@ -190,9 +191,10 @@ export function PracticePanel({ topicId }: { topicId: string }) {
         const taskDifficulty = task.difficulty ?? "base";
         if (difficulty !== "all" && taskDifficulty !== difficulty) return false;
         if (hideSolved && solved.has(task.id)) return false;
+        if (academyOnly && !task.id.startsWith("academy-")) return false;
         return true;
       }),
-    [tasks, solved, difficulty, hideSolved],
+    [tasks, solved, difficulty, hideSolved, academyOnly],
   );
 
   const counts = useMemo(() => ({
@@ -280,6 +282,16 @@ export function PracticePanel({ topicId }: { topicId: string }) {
 
         <div className="practice-toolbar-actions">
           <button
+            className={academyOnly ? "active academy-filter" : "academy-filter"}
+            onClick={() => {
+              setAcademyOnly((value) => !value);
+              setFocusIndex(0);
+            }}
+            aria-pressed={academyOnly}
+          >
+            {academyOnly ? "Academy only ✓" : "Academy PRO"}
+          </button>
+          <button
             className={view === "focus" ? "active" : ""}
             onClick={() => {
               setView((current) => current === "grid" ? "focus" : "grid");
@@ -336,6 +348,7 @@ export function PracticePanel({ topicId }: { topicId: string }) {
                 <small>
                   {difficulty === "all" ? "все сложности" : difficulty.toUpperCase()}
                   {hideSolved ? " · только нерешённые" : ""}
+                  {academyOnly ? " · ACADEMY" : ""}
                 </small>
               </div>
               <button
@@ -391,6 +404,7 @@ export function PracticePanel({ topicId }: { topicId: string }) {
             onClick={() => {
               setDifficulty("all");
               setHideSolved(false);
+              setAcademyOnly(false);
             }}
           >
             Показать весь банк
