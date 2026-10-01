@@ -1,3 +1,5 @@
+import { linearAcademyPracticeTaskIdsByTopic } from "./linearAcademyPracticeMeta";
+
 export const practiceTaskIdsByTopic: Record<string, string[]> = {
   "matrices": [
     "mat-788",
@@ -600,3 +602,7 @@ export const practiceTaskIdsByTopic: Record<string, string[]> = {
     "laplace-080-5"
   ],
 };
+
+Object.entries(linearAcademyPracticeTaskIdsByTopic).forEach(([topicId, ids]) => {
+  practiceTaskIdsByTopic[topicId] = [...(practiceTaskIdsByTopic[topicId] ?? []), ...ids];
+});
