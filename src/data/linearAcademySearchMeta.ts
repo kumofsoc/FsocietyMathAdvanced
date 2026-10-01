@@ -1,6 +1,11 @@
-import type { CourseSearchEntry } from "./courseSearchIndex";
+export interface LinearAcademySearchEntry {
+  topicId: string;
+  index: number;
+  title: string;
+  kind: string;
+}
 
-export const linearAcademySearchEntries: CourseSearchEntry[] = [
+export const linearAcademySearchEntries: LinearAcademySearchEntry[] = [
   {
     "topicId": "matrices",
     "index": 33,
