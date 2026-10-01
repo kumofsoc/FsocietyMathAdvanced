@@ -1304,3 +1304,68 @@ html[data-motion-profile="off"] .visual-loading::after {
   border-color:var(--accent);
   background:color-mix(in srgb,var(--accent) 10%,var(--elevated));
 }
+
+
+/* Academy open-response / proof practice */
+.practice-proof-input{
+  width:100%;
+  min-height:190px;
+  resize:vertical;
+  padding:14px;
+  border:1px solid color-mix(in srgb,var(--accent) 26%,var(--border));
+  border-radius:12px;
+  outline:none;
+  background:color-mix(in srgb,var(--surface) 96%,transparent);
+  color:var(--text);
+  font:9px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;
+  transition:border-color .18s ease,box-shadow .18s ease;
+}
+.practice-proof-input:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 8%,transparent);
+}
+.practice-self-check{
+  min-height:32px;
+  padding:0 10px;
+  border:1px solid color-mix(in srgb,var(--proof) 42%,var(--border));
+  border-radius:9px;
+  background:color-mix(in srgb,var(--proof) 8%,var(--surface));
+  color:var(--proof);
+  font-size:8px;
+  cursor:pointer;
+}
+.practice-proof-solution{
+  display:grid;
+  gap:10px;
+  margin-top:10px;
+  padding:14px;
+  border:1px solid color-mix(in srgb,var(--proof) 34%,var(--border));
+  border-radius:12px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--proof) 6%,transparent),transparent 55%),var(--surface);
+}
+.practice-proof-solution-head{
+  display:grid;
+  gap:4px;
+}
+.practice-proof-solution-head span{
+  color:var(--proof);
+  font:700 7px ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.12em;
+}
+.practice-proof-solution-head strong{
+  color:var(--text);
+  font-size:9px;
+}
+.practice-proof-solution p,
+.practice-proof-solution li{
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.7;
+}
+.practice-proof-solution p{margin:0}
+.practice-proof-solution ul{
+  display:grid;
+  gap:5px;
+  margin:0;
+  padding-left:18px;
+}
