@@ -1,3 +1,5 @@
+import { linearAcademySearchEntries } from "./linearAcademySearchMeta";
+
 export interface CourseSearchEntry {
   topicId: string;
   index: number;
@@ -6565,3 +6567,5 @@ export const courseSearchIndex: CourseSearchEntry[] = [
     "kind": "summary"
   },
 ];
+
+courseSearchIndex.push(...linearAcademySearchEntries);
