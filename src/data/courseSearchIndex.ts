@@ -5719,7 +5719,7 @@ export const courseSearchIndex: CourseSearchEntry[] = [
     "index": 14,
     "title": "Итог",
     "kind": "summary"
-  }
+  },
   {
     "topicId": "functional-series",
     "index": 0,
