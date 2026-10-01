@@ -25,10 +25,11 @@
 Главы 01–09 (линейная алгебра, векторная и аналитическая геометрия, преобразования, абстрактный линал, евклидовы/унитарные и аффинные пространства, тензорная алгебра) имеют отдельный углублённый слой:
 
 - **32 темы** в Academy-track;
-- **128 дополнительных блоков**: conceptual core → theorem + proof → worked example → interactive visual;
+- **160 дополнительных блоков**: conceptual core → theorem + proof → worked example → interactive visual → pitfall/counterexample;
 - **125 дополнительных Academy-задач**: 64 checkpoint + 32 topic-exam + 9 chapter-capstone + 20 proof-seminar задач;
 - отдельные режимы **Academy PRO** и **Proof Seminar** в банке задач; proof-задачи решаются открытым ответом с последующей сверкой по solution sketch/rubric;
-- специализированные интерактивы для rank-nullity, eigen dynamics, Jordan blocks, Gram–Schmidt, SVD, dual spaces, quadratic geometry, affine geometry, complex phase и exterior algebra;
+- специализированные интерактивы для rank-nullity, eigen dynamics, Jordan blocks, Gram–Schmidt, SVD, level sets, line distance, cross/mixed products, dual spaces, quadratic geometry, affine geometry, complex phase и exterior algebra;
+- отдельный слой контрпримеров/типичных ошибок для всех 32 Academy-тем;
 - Academy-блоки индексируются глобальным deep search и учитываются в общей теории темы.
 
 ## Что уже есть
