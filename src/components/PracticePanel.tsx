@@ -288,6 +288,16 @@ export function PracticePanel({ topicId }: { topicId: string }) {
   };
 
   const percent = Math.round((completed / tasks.length) * 100);
+
+  const startAcademyExam = () => {
+    setAcademyOnly(true);
+    setProofOnly(false);
+    setDifficulty("hard");
+    setHideSolved(true);
+    setView("focus");
+    setFocusIndex(0);
+  };
+
   const safeFocusIndex = Math.min(focusIndex, Math.max(0, visibleTasks.length - 1));
   const focusedTask = visibleTasks[safeFocusIndex];
 
@@ -333,6 +343,11 @@ export function PracticePanel({ topicId }: { topicId: string }) {
         </div>
 
         <div className="practice-toolbar-actions">
+          {tasks.some((task) => task.id.startsWith("academy-")) && (
+            <button className="academy-exam-button" onClick={startAcademyExam}>
+              Academy Exam
+            </button>
+          )}
           {counts.proof > 0 && (
             <button
               className={proofOnly ? "active proof-filter" : "proof-filter"}
