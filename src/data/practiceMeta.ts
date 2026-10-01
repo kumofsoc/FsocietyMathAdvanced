@@ -502,7 +502,7 @@ export const practiceTaskIdsByTopic: Record<string, string[]> = {
     "series-061-4",
     "series-061-5",
     "series-061-6"
-  ]
+  ],
   "functional-series": [
     "series-062-1",
     "series-062-2",
