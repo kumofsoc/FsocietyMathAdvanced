@@ -71,10 +71,11 @@ function TaskCard({
     solved ? "right" : "idle",
   );
   const [hint, setHint] = useState(false);
+  const [solutionOpen, setSolutionOpen] = useState(false);
   const [attempts, setAttempts] = useState(0);
 
   const check = () => {
-    if (!value.trim()) return;
+    if (!value.trim() || task.type === "proof") return;
     const right = answersMatch(task, value);
     setAttempts((count) => count + 1);
     setStatus(right ? "right" : "wrong");
@@ -122,6 +123,14 @@ function TaskCard({
             </button>
           ))}
         </div>
+      ) : task.type === "proof" ? (
+        <textarea
+          className="practice-proof-input"
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          placeholder="Напиши доказательство: идея → ключевые равенства → вывод. Не подглядывай в разбор до попытки."
+          rows={8}
+        />
       ) : (
         <input
           className="practice-input"
@@ -137,9 +146,32 @@ function TaskCard({
       )}
 
       <div className="practice-actions">
-        <button className="practice-check" onClick={check} disabled={!value.trim()}>
-          {status === "right" ? "Проверено" : "Проверить"}
-        </button>
+        {task.type === "proof" ? (
+          <>
+            <button
+              className="practice-check"
+              onClick={() => setSolutionOpen((open) => !open)}
+              disabled={value.trim().length < 12}
+            >
+              {solutionOpen ? "Скрыть эталон" : "Сверить с эталоном"}
+            </button>
+            {solutionOpen && !solved && status !== "right" && (
+              <button
+                className="practice-self-check"
+                onClick={() => {
+                  setStatus("right");
+                  onSolved(task.id);
+                }}
+              >
+                Мой разбор выдержал сверку ✓
+              </button>
+            )}
+          </>
+        ) : (
+          <button className="practice-check" onClick={check} disabled={!value.trim()}>
+            {status === "right" ? "Проверено" : "Проверить"}
+          </button>
+        )}
         {task.hint && (
           <button
             className="practice-hint-button"
@@ -157,14 +189,30 @@ function TaskCard({
       </div>
 
       {hint && task.hint && <div className="practice-hint">{task.hint}</div>}
-      {status === "wrong" && (
+      {solutionOpen && task.type === "proof" && (
+        <div className="practice-proof-solution">
+          <div className="practice-proof-solution-head">
+            <span>ACADEMY SOLUTION SKETCH</span>
+            <strong>Сверь структуру доказательства, а не формулировки.</strong>
+          </div>
+          {task.solution && <p><RichMatrixText text={task.solution} /></p>}
+          {task.rubric && (
+            <ul>
+              {task.rubric.map((item) => <li key={item}><RichMatrixText text={item} /></li>)}
+            </ul>
+          )}
+        </div>
+      )}
+      {status === "wrong" && task.type !== "proof" && (
         <div className="practice-feedback bad">
           Пока нет. Проверь вычисления и попробуй ещё.
         </div>
       )}
       {status === "right" && (
         <div className="practice-feedback good">
-          Верно. Задача засчитана в практику.
+          {task.type === "proof"
+            ? "Proof-задача засчитана после самостоятельной сверки."
+            : "Верно. Задача засчитана в практику."}
         </div>
       )}
     </article>
