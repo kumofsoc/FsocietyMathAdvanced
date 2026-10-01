@@ -1468,3 +1468,14 @@ html[data-motion-profile="off"] .visual-loading::after {
 @media(max-width:560px){
   .academy-track-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+.practice-toolbar-actions .academy-exam-button{
+  border-color:color-mix(in srgb,var(--formula) 42%,var(--border));
+  background:linear-gradient(135deg,color-mix(in srgb,var(--formula) 8%,var(--elevated)),var(--elevated));
+  color:var(--formula);
+  font-weight:650;
+}
+.practice-toolbar-actions .academy-exam-button:hover{
+  border-color:var(--formula);
+  color:var(--text);
+}
