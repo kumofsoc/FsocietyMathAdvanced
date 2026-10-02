@@ -1796,3 +1796,237 @@ html[data-motion-profile="off"] .visual-loading::after {
   .topic-mastery-path{grid-template-columns:1fr;padding:7px}
   .topic-mastery-path>div{min-height:70px}
 }
+
+
+/* ===== Clarity-first topic architecture ===== */
+.topic-clarity-map{
+  margin:0 0 20px;
+  padding:18px;
+  border:1px solid color-mix(in srgb,var(--accent) 26%,var(--border));
+  background:
+    radial-gradient(circle at 92% 8%,color-mix(in srgb,var(--accent) 7%,transparent),transparent 24%),
+    linear-gradient(145deg,color-mix(in srgb,var(--surface) 95%,transparent),color-mix(in srgb,var(--elevated) 76%,transparent));
+}
+.topic-clarity-map>header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:18px;
+}
+.topic-clarity-map>header span{
+  color:var(--accent);
+  font:700 10px ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.11em;
+}
+.topic-clarity-map>header h2{
+  max-width:980px;
+  margin:8px 0 0;
+  font-size:clamp(24px,2.6vw,40px);
+  line-height:1.02;
+  letter-spacing:-.045em;
+}
+.topic-clarity-map>header>b{
+  flex:0 0 auto;
+  padding:6px 8px;
+  border:1px solid var(--border);
+  color:var(--muted);
+  font:700 9px ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.07em;
+}
+.topic-clarity-goals{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:6px;
+  margin-top:16px;
+}
+.topic-clarity-goals>div{
+  min-height:82px;
+  display:grid;
+  grid-template-columns:28px minmax(0,1fr);
+  gap:9px;
+  align-items:start;
+  padding:11px;
+  border:1px solid var(--border);
+  background:color-mix(in srgb,var(--elevated) 86%,transparent);
+}
+.topic-clarity-goals span{
+  color:var(--accent2);
+  font:800 9px ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.topic-clarity-goals p{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.55;
+}
+.topic-layer-rail{
+  display:flex;
+  gap:5px;
+  margin-top:10px;
+  overflow-x:auto;
+  padding-bottom:5px;
+  scrollbar-width:thin;
+}
+.topic-layer-rail button{
+  flex:0 0 154px;
+  min-height:84px;
+  display:grid;
+  align-content:center;
+  gap:4px;
+  padding:9px 10px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text);
+  text-align:left;
+  cursor:pointer;
+}
+.topic-layer-rail button:hover:not(:disabled){
+  border-color:color-mix(in srgb,var(--accent) 52%,var(--border));
+  background:color-mix(in srgb,var(--accent) 5%,var(--surface));
+  transform:translateY(-2px);
+}
+.topic-layer-rail button:disabled{opacity:.55;cursor:default}
+.topic-layer-rail button>span{
+  color:var(--accent);
+  font:700 9px ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.topic-layer-rail button>strong{
+  font-size:12px;
+  line-height:1.25;
+}
+.topic-layer-rail button>small{
+  color:var(--muted);
+  font-size:11px;
+}
+@media(max-width:920px){.topic-clarity-goals{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.topic-clarity-map{padding:13px}.topic-clarity-map>header{display:grid}.topic-clarity-map>header>b{justify-self:start}.topic-clarity-goals{grid-template-columns:1fr}.topic-layer-rail button{flex-basis:138px}}
+
+
+/* ===== Rigorous statement proofs ===== */
+.rigorous-statements{
+  display:grid;
+  gap:10px;
+  margin-top:16px;
+}
+.rigorous-statement{
+  position:relative;
+  display:grid;
+  grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);
+  gap:8px;
+  padding:14px;
+  border:1px solid color-mix(in srgb,var(--accent) 28%,var(--border));
+  background:
+    linear-gradient(145deg,color-mix(in srgb,var(--surface) 96%,transparent),color-mix(in srgb,var(--elevated) 86%,transparent));
+}
+.rigorous-statement-head{
+  grid-column:1/-1;
+  display:grid;
+  gap:7px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--border);
+}
+.rigorous-statement-head>span,
+.rigorous-conditions>b,
+.rigorous-proof>b,
+.rigorous-example>b,
+.rigorous-boundary>b{
+  color:var(--accent);
+  font:800 10px ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.11em;
+}
+.rigorous-statement-head>strong{
+  font-size:clamp(16px,1.5vw,21px);
+  line-height:1.35;
+}
+.rigorous-conditions,
+.rigorous-proof,
+.rigorous-example,
+.rigorous-boundary{
+  min-width:0;
+  padding:11px;
+  border:1px solid var(--border);
+  background:color-mix(in srgb,var(--elevated) 78%,transparent);
+}
+.rigorous-conditions{
+  grid-column:1/-1;
+}
+.rigorous-proof{
+  border-color:color-mix(in srgb,var(--accent2) 30%,var(--border));
+}
+.rigorous-example{
+  border-color:color-mix(in srgb,var(--formula) 28%,var(--border));
+}
+.rigorous-boundary{
+  grid-column:1/-1;
+  border-style:dashed;
+}
+.rigorous-proof>b{color:var(--accent2)}
+.rigorous-example>b{color:var(--formula)}
+.rigorous-boundary>b{color:#ff9a72}
+.rigorous-proof h4{
+  margin:7px 0 0;
+  font-size:14px;
+}
+.rigorous-conditions p,
+.rigorous-proof p,
+.rigorous-example p,
+.rigorous-boundary p{
+  margin:7px 0 0;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.7;
+}
+@media(max-width:760px){
+  .rigorous-statement{grid-template-columns:1fr}
+  .rigorous-statement-head,
+  .rigorous-conditions,
+  .rigorous-boundary{grid-column:auto}
+}
+
+/* ===== Skill-aware practice ===== */
+.practice-skill-filters{
+  grid-column:1/-1;
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:5px;
+  padding:8px;
+  border:1px solid var(--border);
+  background:color-mix(in srgb,var(--surface) 88%,transparent);
+}
+.practice-skill-filters>span{
+  margin-right:4px;
+  color:var(--muted);
+  font:800 9px ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.1em;
+}
+.practice-skill-filters button{
+  min-height:32px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:0 9px;
+  border:1px solid transparent;
+  background:transparent;
+  color:var(--muted);
+  font-size:11px;
+  cursor:pointer;
+}
+.practice-skill-filters button:hover{
+  background:var(--elevated);
+  color:var(--text);
+}
+.practice-skill-filters button.active{
+  border-color:color-mix(in srgb,var(--accent2) 42%,var(--border));
+  background:color-mix(in srgb,var(--accent2) 7%,var(--elevated));
+  color:var(--text);
+}
+.practice-skill-filters button b{
+  min-width:20px;
+  height:20px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--border);
+  color:var(--accent2);
+  font:700 9px ui-monospace,SFMono-Regular,Menlo,monospace;
+}

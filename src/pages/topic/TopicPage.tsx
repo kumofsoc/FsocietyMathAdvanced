@@ -24,6 +24,9 @@ import {
 } from "@/features/learning/model/progress";
 import type { BlockKind, ContentBlock, Topic } from "@/entities/course/model/types";
 import { RichMatrixText } from "@/visualizations/linear/MatrixNotation";
+import { toLayeredTopic } from "@/entities/course/model/learning-architecture/adapter";
+import { linearFoundationBlueprints } from "@/data/learning-architecture/linear-foundations";
+import { composeTopicWithSupplements } from "@/data/topic-supplements";
 import { TopicLabInsert, TopicVisualInsert } from "@/visualizations/registry/TopicVisualRegistry";
 
 const PracticePanel = lazy(() =>
@@ -173,7 +176,9 @@ function ContentCard({
   const theoremId = topic.id + "::" + index;
   const academyBlock = isAdvancedLearningBlock(topic.id, block);
   const [saved, setSaved] = useState(() => loadSavedTheorems().some((item) => item.id === theoremId));
-  const [propertyPanel, setPropertyPanel] = useState<"proof" | "corollary" | null>(null);
+  const [propertyPanel, setPropertyPanel] = useState<"proof" | "corollary" | null>(
+    () => block.proofs?.length ? "proof" : null,
+  );
 
   const toggleSaved = () => {
     const current = loadSavedTheorems();
@@ -246,7 +251,67 @@ function ContentCard({
           </ul>
         )}
 
-        {block.kind === "property" && (block.proofs?.length || block.corollaries?.length) && (
+        {block.kind === "theorem" && block.workedExamples?.length ? (
+          <div className="theorem-worked-examples">
+            {block.workedExamples.map((example, exampleIndex) => (
+              <article key={example.body + exampleIndex}>
+                <div className="property-panel-label">ПРИМЕР К ТЕОРЕМЕ {exampleIndex + 1}</div>
+                <p><RichMatrixText text={example.body} /></p>
+                {example.formula && (
+                  <div className="property-panel-formula">
+                    <BlockMath math={example.formula} />
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+        ) : null}
+
+        {block.statements?.length ? (
+          <div className="rigorous-statements">
+            {block.statements.map((statement, statementIndex) => (
+              <article key={statement.id} className="rigorous-statement">
+                <div className="rigorous-statement-head">
+                  <span>СВОЙСТВО {String(statementIndex + 1).padStart(2, "0")}</span>
+                  <strong><RichMatrixText text={statement.claim} /></strong>
+                </div>
+                {statement.conditions && (
+                  <div className="rigorous-conditions">
+                    <b>УСЛОВИЯ</b>
+                    <p><RichMatrixText text={statement.conditions} /></p>
+                  </div>
+                )}
+                <div className="rigorous-proof">
+                  <b>ДОКАЗАТЕЛЬСТВО</b>
+                  <h4>{statement.proof.label}</h4>
+                  <p><RichMatrixText text={statement.proof.body} /></p>
+                  {statement.proof.formula && (
+                    <div className="property-panel-formula">
+                      <BlockMath math={statement.proof.formula} />
+                    </div>
+                  )}
+                </div>
+                <div className="rigorous-example">
+                  <b>ПРИМЕР</b>
+                  <p><RichMatrixText text={statement.example.body} /></p>
+                  {statement.example.formula && (
+                    <div className="property-panel-formula">
+                      <BlockMath math={statement.example.formula} />
+                    </div>
+                  )}
+                </div>
+                {statement.withoutConditions && (
+                  <div className="rigorous-boundary">
+                    <b>БЕЗ УСЛОВИЙ</b>
+                    <p><RichMatrixText text={statement.withoutConditions} /></p>
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+        ) : null}
+
+        {(block.kind === "property" || block.kind === "theorem") && !block.statements?.length && (block.proofs?.length || block.corollaries?.length) && (
           <div className="property-disclosures">
             <div className="property-disclosure-actions">
               {block.proofs?.length ? (
@@ -255,7 +320,7 @@ function ContentCard({
                   onClick={() => setPropertyPanel((current) => current === "proof" ? null : "proof")}
                 >
                   <span>∵</span>
-                  Доказательство
+                  {block.kind === "theorem" ? "Доказательство теоремы" : "Доказательство"}
                   <b>{propertyPanel === "proof" ? "−" : "+"}</b>
                 </button>
               ) : null}
@@ -391,7 +456,8 @@ function NeighborNav({ topic }: { topic: Topic }) {
 }
 
 export function TopicPage({ topicId }: { topicId: string }) {
-  const topic = topics[topicId];
+  const baseTopic = topics[topicId];
+  const topic = useMemo(() => composeTopicWithSupplements(baseTopic), [baseTopic]);
   const chapter = chapters.find((item) => item.id === topic.chapterId);
   const tracksLearning = isTrackedTopic(topic.id);
   const theorySentinel = useRef<HTMLDivElement>(null);
@@ -581,6 +647,15 @@ export function TopicPage({ topicId }: { topicId: string }) {
   const academyProofCount = academyTaskIds.filter((id) => id.startsWith("academy-proof-")).length;
   const academyCapstoneCount = academyTaskIds.filter((id) => id.includes("capstone")).length;
 
+  const learningArchitecture = useMemo(
+    () =>
+      toLayeredTopic({
+        topic,
+        blueprint: linearFoundationBlueprints[topic.id],
+      }),
+    [topic],
+  );
+
   const completeTheory = () => {
     if (!tracksLearning || theoryRead) return;
     if (!reachedTheoryEnd || !progressBreakdown.canCompleteTheory) return;
@@ -674,6 +749,50 @@ export function TopicPage({ topicId }: { topicId: string }) {
           </div>
         </nav>
       )}
+
+      <section className="topic-clarity-map" aria-label="Как устроено изучение темы">
+        <header>
+          <div>
+            <span>КАК ПОНЯТЬ ЭТУ ТЕМУ</span>
+            <h2>{learningArchitecture.clarityGoal}</h2>
+          </div>
+          <b>{learningArchitecture.source === "native-v2" ? "СТРУКТУРА V2" : "АДАПТИРОВАНО ИЗ ТЕКУЩЕГО КУРСА"}</b>
+        </header>
+
+        <div className="topic-clarity-goals">
+          {learningArchitecture.learningGoals.map((goal, index) => (
+            <div key={goal}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <p>{goal}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="topic-layer-rail" aria-label="Слои темы">
+          {learningArchitecture.layers.map((layer, index) => {
+            const firstBlock = layer.units.find(
+              (unit) => unit.legacyBlockIndex !== undefined,
+            );
+            return (
+              <button
+                key={layer.id}
+                type="button"
+                onClick={() => {
+                  if (firstBlock?.legacyBlockIndex !== undefined) {
+                    jumpToBlock(firstBlock.legacyBlockIndex);
+                  }
+                }}
+                disabled={firstBlock?.legacyBlockIndex === undefined}
+                title={layer.purpose}
+              >
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <strong>{layer.title}</strong>
+                <small>{layer.units.length} {layer.units.length === 1 ? "блок" : "блоков"}</small>
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
       {academyEnabled && academyStartIndex >= 0 && (
         <section className="academy-track-banner">

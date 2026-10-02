@@ -361,10 +361,10 @@ export function G6CourseGraph({
     <div className="g6-course-graph">
       <div ref={containerRef} className="g6-course-graph-canvas" />
       <div className="g6-course-graph-hint" aria-hidden="true">
-        <span>drag = move</span>
-        <span>wheel = zoom</span>
-        <span>click = inspect</span>
-        <span>double click = open</span>
+        <span>drag = двигать карту</span>
+        <span>колесо = масштаб</span>
+        <span>клик = связи</span>
+        <span>двойной клик = открыть</span>
       </div>
     </div>
   );

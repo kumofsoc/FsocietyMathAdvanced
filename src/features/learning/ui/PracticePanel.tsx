@@ -3,8 +3,32 @@ import { practiceByTopic } from "@/data/practice";
 import { loadSet, saveSet, SOLVED_KEY } from "@/lib/learning";
 import type { PracticeTask } from "@/types/course";
 import { RichMatrixText } from "@/visualizations/linear/MatrixNotation";
+import { practiceSkillForTask } from "@/entities/course/model/learning-architecture/adapter";
+import type { PracticeSkillKind } from "@/entities/course/model/learning-architecture/types";
 
 type DifficultyFilter = "all" | "base" | "medium" | "hard";
+type SkillFilter = "all" | PracticeSkillKind;
+
+const skillLabels: Record<PracticeSkillKind, string> = {
+  "recall-definition": "Определения",
+  "recognize-object": "Распознавание",
+  compute: "Вычисление",
+  "choose-method": "Выбор метода",
+  explain: "Объяснение",
+  "construct-example": "Построить пример",
+  "construct-counterexample": "Контрпример",
+  prove: "Доказательство",
+  "repair-proof": "Исправить доказательство",
+  derive: "Вывод",
+  model: "Моделирование",
+  estimate: "Оценка",
+  "analyze-data": "Анализ данных",
+  "design-experiment": "Эксперимент",
+  simulate: "Симуляция",
+  mixed: "Смешанные",
+  challenge: "Сложные",
+  research: "Исследование",
+};
 
 function normalize(value: string) {
   return value
@@ -224,6 +248,7 @@ export function PracticePanel({ topicId }: { topicId: string }) {
   const tasks = practiceByTopic[topicId] ?? [];
   const [solved, setSolved] = useState<Set<string>>(() => loadSet(SOLVED_KEY));
   const [difficulty, setDifficulty] = useState<DifficultyFilter>("all");
+  const [skill, setSkill] = useState<SkillFilter>("all");
   const [hideSolved, setHideSolved] = useState(false);
   const [academyOnly, setAcademyOnly] = useState(false);
   const [proofOnly, setProofOnly] = useState(false);
@@ -239,13 +264,15 @@ export function PracticePanel({ topicId }: { topicId: string }) {
     () =>
       tasks.filter((task) => {
         const taskDifficulty = task.difficulty ?? "base";
+        const taskSkill = practiceSkillForTask(task);
         if (difficulty !== "all" && taskDifficulty !== difficulty) return false;
+        if (skill !== "all" && taskSkill !== skill) return false;
         if (hideSolved && solved.has(task.id)) return false;
         if (academyOnly && !task.id.startsWith("academy-")) return false;
         if (proofOnly && task.type !== "proof") return false;
         return true;
       }),
-    [tasks, solved, difficulty, hideSolved, academyOnly, proofOnly],
+    [tasks, solved, difficulty, skill, hideSolved, academyOnly, proofOnly],
   );
 
   const counts = useMemo(() => ({
@@ -254,6 +281,15 @@ export function PracticePanel({ topicId }: { topicId: string }) {
     hard: tasks.filter((task) => task.difficulty === "hard").length,
     proof: tasks.filter((task) => task.type === "proof").length,
   }), [tasks]);
+
+  const availableSkills = useMemo(() => {
+    const map = new Map<PracticeSkillKind, number>();
+    tasks.forEach((task) => {
+      const taskSkill = practiceSkillForTask(task);
+      map.set(taskSkill, (map.get(taskSkill) ?? 0) + 1);
+    });
+    return [...map.entries()].sort((a, b) => b[1] - a[1]);
+  }, [tasks]);
 
   if (tasks.length === 0) {
     return (
@@ -342,6 +378,34 @@ export function PracticePanel({ topicId }: { topicId: string }) {
           ))}
         </div>
 
+        {availableSkills.length > 1 && (
+          <div className="practice-skill-filters" aria-label="Навык">
+            <span>НАВЫК</span>
+            <button
+              className={skill === "all" ? "active" : ""}
+              onClick={() => {
+                setSkill("all");
+                setFocusIndex(0);
+              }}
+            >
+              Все
+            </button>
+            {availableSkills.map(([skillId, count]) => (
+              <button
+                key={skillId}
+                className={skill === skillId ? "active" : ""}
+                onClick={() => {
+                  setSkill(skillId);
+                  setFocusIndex(0);
+                }}
+              >
+                {skillLabels[skillId]}
+                <b>{count}</b>
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="practice-toolbar-actions">
           {tasks.some((task) => task.id.startsWith("academy-")) && (
             <button className="academy-exam-button" onClick={startAcademyExam}>
@@ -427,6 +491,7 @@ export function PracticePanel({ topicId }: { topicId: string }) {
                 </strong>
                 <small>
                   {difficulty === "all" ? "все сложности" : difficulty.toUpperCase()}
+                  {skill !== "all" ? " · " + skillLabels[skill].toUpperCase() : ""}
                   {hideSolved ? " · только нерешённые" : ""}
                   {academyOnly ? " · УГЛУБЛЁННЫЕ" : ""}
                   {proofOnly ? " · ДОКАЗАТЕЛЬСТВА" : ""}

@@ -10,6 +10,7 @@ import { HomePersonalSystem } from "@/features/home-experience/ui/HomePersonalSy
 import { HomePortalScene } from "@/features/home-experience/ui/HomePortalScene";
 import { HomeSectionRail } from "@/features/home-experience/ui/HomeSectionRail";
 import { HomeSystemStatus } from "@/features/home-experience/ui/HomeSystemStatus";
+import { HomeSiteOverview } from "@/features/home-experience/ui/HomeSiteOverview";
 import "@/features/home-experience/styles/home-experience.css";
 import { mockUserGrowth } from "./home.data";
 
@@ -57,6 +58,16 @@ export function HomePage({
       <HomeGrowthScene data={mockUserGrowth} />
 
       <HomeInterfaceDNA />
+
+      <HomeSiteOverview
+        onAction={(action) => {
+          if (action === "map") window.location.hash = "map";
+          else if (action === "academy") window.location.hash = "academy";
+          else if (action === "review") window.location.hash = "review";
+          else if (action === "account") window.location.hash = "account";
+          else openPrimary();
+        }}
+      />
 
       <HomeMotionLab motionTier={motionTier} />
 
