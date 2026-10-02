@@ -327,9 +327,9 @@ export function PracticePanel({ topicId }: { topicId: string }) {
         <div className="practice-filters" aria-label="Сложность">
           {([
             ["all", "Все", tasks.length],
-            ["base", "Base", counts.base],
-            ["medium", "Medium", counts.medium],
-            ["hard", "Hard", counts.hard],
+            ["base", "Базовые", counts.base],
+            ["medium", "Средние", counts.medium],
+            ["hard", "Сложные", counts.hard],
           ] as const).map(([id, label, count]) => (
             <button
               key={id}
