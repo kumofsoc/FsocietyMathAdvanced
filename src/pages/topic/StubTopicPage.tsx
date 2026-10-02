@@ -1,5 +1,5 @@
-import { chapters, topicMeta } from "../data/courseMeta";
-import { isTrackedTopic } from "../lib/progress";
+import { chapters, topicMeta } from "@/data/courseMeta";
+import { isTrackedTopic } from "@/lib/progress";
 
 export function StubTopicPage({ topicId }: { topicId: string }) {
   const topic = topicMeta[topicId];

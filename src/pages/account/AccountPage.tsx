@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
-import { chapters } from "../data/courseMeta";
-import { getChapterProgress, isTrackedChapter, isTrackedTopic, type LearningSnapshot } from "../lib/progress";
-import { loadSavedTheorems } from "../lib/learning";
+import { chapters } from "@/data/courseMeta";
+import { getChapterProgress, isTrackedChapter, isTrackedTopic, type LearningSnapshot } from "@/lib/progress";
+import { loadSavedTheorems } from "@/lib/learning";
 
 const PROFILE_KEY = "visualmath-local-profile-v1";
 const PERSONAL_VISITS = [

@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { chapters, topicMeta } from "../data/courseMeta";
-import { practiceTaskIdsByTopic } from "../data/practiceMeta";
-import { LEARNING_EVENT } from "../lib/learning";
-import { getLearningSnapshot, getTopicProgress } from "../lib/progress";
-import "../styles/linear-academy-hub.css";
+import { chapters, topicMeta } from "@/data/courseMeta";
+import { practiceTaskIdsByTopic } from "@/data/practiceMeta";
+import { LEARNING_EVENT } from "@/lib/learning";
+import { getLearningSnapshot, getTopicProgress } from "@/lib/progress";
+import "@/styles/linear-academy-hub.css";
 
 const ACADEMY_CHAPTER_IDS = [
   "linear",

@@ -1,15 +1,15 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { chapters, topicListMeta, topicMeta } from "./data/courseMeta";
-import { BackgroundMusicPlayer } from "./components/BackgroundMusicPlayer";
-import { CommandPalette } from "./components/CommandPalette";
-import { CustomCursor } from "./components/CustomCursor";
-import { HistoryDock } from "./components/HistoryDock";
-import { MathBackdrop } from "./components/MathBackdrop";
-import { ScrollProgress } from "./components/ScrollProgress";
-import { SettingsPanel } from "./components/SettingsPanel";
-import { StubTopicPage } from "./components/StubTopicPage";
-import { LEARNING_EVENT } from "./lib/learning";
+import { chapters, topicListMeta, topicMeta } from "@/data/courseMeta";
+import { BackgroundMusicPlayer } from "@/features/background-music/ui/BackgroundMusicPlayer";
+import { CommandPalette } from "@/features/navigation/ui/CommandPalette";
+import { CustomCursor } from "@/features/personalization/ui/CustomCursor";
+import { HistoryDock } from "@/features/navigation/ui/HistoryDock";
+import { MathBackdrop } from "@/shared/ui/MathBackdrop";
+import { ScrollProgress } from "@/features/navigation/ui/ScrollProgress";
+import { SettingsPanel } from "@/features/personalization/ui/SettingsPanel";
+import { StubTopicPage } from "@/pages/topic/StubTopicPage";
+import { LEARNING_EVENT } from "@/lib/learning";
 import {
   getChapterProgress,
   getCourseProgress,
@@ -17,8 +17,9 @@ import {
   getTopicProgress,
   isTrackedChapter,
   isTrackedTopic,
-} from "./lib/progress";
-import type { Chapter } from "./types/course";
+} from "@/lib/progress";
+import type { Chapter } from "@/types/course";
+import { useAppShellStore } from "@/app/store/useAppShellStore";
 
 const LAST_TOPIC_KEY = "fsociety-last-topic-v1";
 
@@ -28,42 +29,42 @@ function routeFromHash() {
 }
 
 const HomePage = lazy(() =>
-  import("./components/HomePage").then((module) => ({ default: module.HomePage })),
+  import("@/pages/home/HomePage").then((module) => ({ default: module.HomePage })),
 );
 const AccountPage = lazy(() =>
-  import("./components/AccountPage").then((module) => ({ default: module.AccountPage })),
+  import("@/pages/account/AccountPage").then((module) => ({ default: module.AccountPage })),
 );
 const CourseMap = lazy(() =>
-  import("./components/CourseMap").then((module) => ({ default: module.CourseMap })),
+  import("@/pages/course-map/CourseMap").then((module) => ({ default: module.CourseMap })),
 );
 const LinearAcademyHub = lazy(() =>
-  import("./components/LinearAcademyHub").then((module) => ({
+  import("@/pages/linear-academy/LinearAcademyHub").then((module) => ({
     default: module.LinearAcademyHub,
   })),
 );
 const ReviewHub = lazy(() =>
-  import("./components/ReviewHub").then((module) => ({
+  import("@/pages/review/ReviewHub").then((module) => ({
     default: module.ReviewHub,
   })),
 );
 const TopicPage = lazy(() =>
-  import("./components/TopicPage").then((module) => ({ default: module.TopicPage })),
+  import("@/pages/topic/TopicPage").then((module) => ({ default: module.TopicPage })),
 );
 
 const preloadAccountPage = () => {
-  void import("./components/AccountPage");
+  void import("@/pages/account/AccountPage");
 };
 const preloadTopicPage = () => {
-  void import("./components/TopicPage");
+  void import("@/pages/topic/TopicPage");
 };
 const preloadCourseMap = () => {
-  void import("./components/CourseMap");
+  void import("@/pages/course-map/CourseMap");
 };
 const preloadLinearAcademy = () => {
-  void import("./components/LinearAcademyHub");
+  void import("@/pages/linear-academy/LinearAcademyHub");
 };
 const preloadReviewHub = () => {
-  void import("./components/ReviewHub");
+  void import("@/pages/review/ReviewHub");
 };
 
 function ChapterAccordion({
@@ -242,14 +243,10 @@ function SidebarProgressItem({
 
 export default function App() {
   const [route, setRoute] = useState(routeFromHash);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    try {
-      return localStorage.getItem("fsociety-sidebar-collapsed-v1") === "1";
-    } catch {
-      return false;
-    }
-  });
+  const sidebarOpen = useAppShellStore((state) => state.sidebarOpen);
+  const sidebarCollapsed = useAppShellStore((state) => state.sidebarCollapsed);
+  const setSidebarOpen = useAppShellStore((state) => state.setSidebarOpen);
+  const setSidebarCollapsed = useAppShellStore((state) => state.setSidebarCollapsed);
   const [learningVersion, setLearningVersion] = useState(0);
   const [lastTopicId, setLastTopicId] = useState<string | null>(() => {
     try {
@@ -263,7 +260,7 @@ export default function App() {
 
   useEffect(() => {
     if (!import.meta.env.DEV) return;
-    void import("./lib/courseIntegrity").then(({ reportCourseIntegrity }) => {
+    void import("@/lib/courseIntegrity").then(({ reportCourseIntegrity }) => {
       reportCourseIntegrity();
     });
   }, []);
@@ -313,17 +310,6 @@ export default function App() {
       // Resume state is optional.
     }
   }, [route]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        "fsociety-sidebar-collapsed-v1",
-        sidebarCollapsed ? "1" : "0",
-      );
-    } catch {
-      // Storage may be unavailable in strict/private contexts.
-    }
-  }, [sidebarCollapsed]);
 
   useEffect(() => {
     const refresh = () => setLearningVersion((value) => value + 1);

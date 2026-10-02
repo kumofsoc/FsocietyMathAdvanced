@@ -1,8 +1,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { BlockMath } from "react-katex";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { chapters, topicList, topics } from "../data/course";
-import { practiceTaskIdsByTopic } from "../data/practiceMeta";
+import { chapters, topicList, topics } from "@/data/course";
+import { practiceTaskIdsByTopic } from "@/data/practiceMeta";
 import {
   LEARNING_EVENT,
   loadSavedTheorems,
@@ -11,14 +11,14 @@ import {
   saveTheorems,
   SOLVED_KEY,
   THEORY_KEY,
-} from "../lib/learning";
-import { isTrackedTopic } from "../lib/progress";
-import type { BlockKind, ContentBlock, Topic } from "../types/course";
-import { RichMatrixText } from "./MatrixNotation";
-import { TopicLabInsert, TopicVisualInsert } from "./TopicVisualRegistry";
+} from "@/lib/learning";
+import { isTrackedTopic } from "@/lib/progress";
+import type { BlockKind, ContentBlock, Topic } from "@/types/course";
+import { RichMatrixText } from "@/visualizations/linear/MatrixNotation";
+import { TopicLabInsert, TopicVisualInsert } from "@/visualizations/registry/TopicVisualRegistry";
 
 const PracticePanel = lazy(() =>
-  import("./PracticePanel").then((module) => ({ default: module.PracticePanel })),
+  import("@/features/learning/ui/PracticePanel").then((module) => ({ default: module.PracticePanel })),
 );
 
 function DeferredPracticePanel({ topicId }: { topicId: string }) {

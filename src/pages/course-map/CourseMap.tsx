@@ -18,15 +18,15 @@ import {
   topicListMeta,
   topicMeta,
   type TopicMeta,
-} from "../data/courseMeta";
-import { LEARNING_EVENT } from "../lib/learning";
+} from "@/data/courseMeta";
+import { LEARNING_EVENT } from "@/lib/learning";
 import {
   getChapterProgress,
   getCourseProgress,
   getLearningSnapshot,
   getTopicProgress,
-} from "../lib/progress";
-import "../styles/course-map.css";
+} from "@/lib/progress";
+import "@/styles/course-map.css";
 
 type ChapterNodeData = {
   chapterId: string;
