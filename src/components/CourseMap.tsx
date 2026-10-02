@@ -250,15 +250,42 @@ function CourseMapInner() {
     if (!currentChapter) return [] as Array<[string, string]>;
     const visible = new Set(currentChapter.topicIds);
     const relations: Array<[string, string]> = [];
+    const seen = new Set<string>();
 
     currentChapter.topicIds.forEach((topicId) => {
       const topic = topicMeta[topicId];
       topic?.prerequisites.forEach((source) => {
-        if (visible.has(source)) relations.push([source, topicId]);
+        if (!visible.has(source)) return;
+        const key = source + "->" + topicId;
+        if (seen.has(key)) return;
+        seen.add(key);
+        relations.push([source, topicId]);
       });
     });
     return relations;
   }, [currentChapter]);
+
+  const topicLayoutRelations = useMemo(() => {
+    if (!currentChapter) return [] as Array<[string, string]>;
+
+    const relations = [...topicRelations];
+    const seen = new Set(relations.map(([source, target]) => source + "->" + target));
+
+    // Inside a chapter, metadata can intentionally omit strict prerequisites.
+    // Add a separate study-flow spine so every sub-map gets the same stable,
+    // left-to-right topology as the course overview without pretending the
+    // fallback edges are mathematical prerequisites.
+    for (let index = 1; index < currentChapter.topicIds.length; index += 1) {
+      const source = currentChapter.topicIds[index - 1];
+      const target = currentChapter.topicIds[index];
+      const key = source + "->" + target;
+      if (seen.has(key)) continue;
+      relations.push([source, target]);
+      seen.add(key);
+    }
+
+    return relations;
+  }, [currentChapter, topicRelations]);
 
   const topicDependents = useMemo(() => {
     const map = new Map<string, string[]>();
@@ -319,7 +346,7 @@ function CourseMapInner() {
     const chapter = chapters.find((item) => item.id === mode.chapterId);
     if (!chapter) return { nodes: [] as Node[], edges: [] as Edge[] };
 
-    const positions = positionsByDepth(chapter.topicIds, topicRelations, 370, 210);
+    const positions = positionsByDepth(chapter.topicIds, topicLayoutRelations, 380, 205);
     const nodes: Node[] = chapter.topicIds.map((topicId) => {
       const topic = topicMeta[topicId];
       return {
@@ -341,20 +368,25 @@ function CourseMapInner() {
       };
     });
 
-    const edges: Edge[] = topicRelations.map(([source, target]) => {
+    const strictKeys = new Set(
+      topicRelations.map(([source, target]) => source + "->" + target),
+    );
+    const edges: Edge[] = topicLayoutRelations.map(([source, target]) => {
       const active = selectedId === source || selectedId === target;
+      const strict = strictKeys.has(source + "->" + target);
+      const baseClass = strict ? "knowledge-edge" : "knowledge-edge study-flow";
       return {
-        id: source + "->" + target,
+        id: (strict ? "pre:" : "flow:") + source + "->" + target,
         source,
         target,
         type: "smoothstep",
         markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16 },
         className:
           selectedId === null
-            ? "knowledge-edge"
+            ? baseClass
             : active
-              ? "knowledge-edge active"
-              : "knowledge-edge dimmed",
+              ? baseClass + " active"
+              : baseClass + " dimmed",
       };
     });
 
@@ -365,6 +397,7 @@ function CourseMapInner() {
     snapshot,
     chapterRelations,
     topicRelations,
+    topicLayoutRelations,
     topicDependents,
     openChapter,
     openTopic,
