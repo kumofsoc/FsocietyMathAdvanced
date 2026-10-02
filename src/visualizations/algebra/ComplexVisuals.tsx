@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import "../styles/complex.css";
+import "@/styles/complex.css";
 
 const W=580;
 const H=300;

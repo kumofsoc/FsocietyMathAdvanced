@@ -19,131 +19,131 @@ interface TopicVisualProps extends InsertProps {
 }
 
 const MatrixTypesGallery = lazy(() =>
-  import("./MatrixTypesGallery").then((module) => ({
+  import("@/visualizations/linear/MatrixTypesGallery").then((module) => ({
     default: module.MatrixTypesGallery,
   })),
 );
 const DeterminantVisual = lazy(() =>
-  import("./DeterminantVisual").then((module) => ({
+  import("@/visualizations/linear/DeterminantVisual").then((module) => ({
     default: module.DeterminantVisual,
   })),
 );
 const QuadricSurfaceLab = lazy(() =>
-  import("./QuadricSurfaceLab").then((module) => ({
+  import("@/visualizations/geometry/QuadricSurfaceLab").then((module) => ({
     default: module.QuadricSurfaceLab,
   })),
 );
 const MatrixLab = lazy(() =>
-  import("./MatrixLab").then((module) => ({ default: module.MatrixLab })),
+  import("@/visualizations/linear/MatrixLab").then((module) => ({ default: module.MatrixLab })),
 );
 const LinearAcademyVisualInsert = lazy(() =>
-  import("./LinearAcademyVisuals").then((module) => ({
+  import("@/visualizations/linear/LinearAcademyVisuals").then((module) => ({
     default: module.LinearAcademyVisualInsert,
   })),
 );
 
 const VectorVisualInsert = lazy(() =>
-  import("./VectorVisuals").then((module) => ({
+  import("@/visualizations/linear/VectorVisuals").then((module) => ({
     default: module.VectorVisualInsert,
   })),
 );
 const GeometryVisualInsert = lazy(() =>
-  import("./GeometryVisuals").then((module) => ({
+  import("@/visualizations/geometry/GeometryVisuals").then((module) => ({
     default: module.GeometryVisualInsert,
   })),
 );
 const TransformationVisualInsert = lazy(() =>
-  import("./TransformationVisuals").then((module) => ({
+  import("@/visualizations/linear/TransformationVisuals").then((module) => ({
     default: module.TransformationVisualInsert,
   })),
 );
 const AbstractLinearVisualInsert = lazy(() =>
-  import("./AbstractLinearVisuals").then((module) => ({
+  import("@/visualizations/linear/AbstractLinearVisuals").then((module) => ({
     default: module.AbstractLinearVisualInsert,
   })),
 );
 const AdvancedLinearVisualInsert = lazy(() =>
-  import("./AdvancedLinearVisuals").then((module) => ({
+  import("@/visualizations/linear/AdvancedLinearVisuals").then((module) => ({
     default: module.AdvancedLinearVisualInsert,
   })),
 );
 const AffineGeometryVisualInsert = lazy(() =>
-  import("./AffineGeometryVisuals").then((module) => ({
+  import("@/visualizations/geometry/AffineGeometryVisuals").then((module) => ({
     default: module.AffineGeometryVisualInsert,
   })),
 );
 const TensorVisualInsert = lazy(() =>
-  import("./TensorVisuals").then((module) => ({
+  import("@/visualizations/algebra/TensorVisuals").then((module) => ({
     default: module.TensorVisualInsert,
   })),
 );
 const AnalysisVisualInsert = lazy(() =>
-  import("./AnalysisVisuals").then((module) => ({
+  import("@/visualizations/analysis/AnalysisVisuals").then((module) => ({
     default: module.AnalysisVisualInsert,
   })),
 );
 const AnalysisAdvancedVisualInsert = lazy(() =>
-  import("./AnalysisAdvancedVisuals").then((module) => ({
+  import("@/visualizations/analysis/AnalysisAdvancedVisuals").then((module) => ({
     default: module.AnalysisAdvancedVisualInsert,
   })),
 );
 const IntegralVisualInsert = lazy(() =>
-  import("./IntegralVisuals").then((module) => ({
+  import("@/visualizations/analysis/IntegralVisuals").then((module) => ({
     default: module.IntegralVisualInsert,
   })),
 );
 const MultipleIntegralVisualInsert = lazy(() =>
-  import("./MultipleIntegralVisuals").then((module) => ({
+  import("@/visualizations/analysis/MultipleIntegralVisuals").then((module) => ({
     default: module.MultipleIntegralVisualInsert,
   })),
 );
 const LineSurfaceIntegralVisualInsert = lazy(() =>
-  import("./LineSurfaceIntegralVisuals").then((module) => ({
+  import("@/visualizations/analysis/LineSurfaceIntegralVisuals").then((module) => ({
     default: module.LineSurfaceIntegralVisualInsert,
   })),
 );
 const ODEVisualInsert = lazy(() =>
-  import("./ODEVisuals").then((module) => ({
+  import("@/visualizations/analysis/ODEVisuals").then((module) => ({
     default: module.ODEVisualInsert,
   })),
 );
 const DefiniteIntegralVisualInsert = lazy(() =>
-  import("./DefiniteIntegralVisuals").then((module) => ({
+  import("@/visualizations/analysis/DefiniteIntegralVisuals").then((module) => ({
     default: module.DefiniteIntegralVisualInsert,
   })),
 );
 const MultivariableVisualInsert = lazy(() =>
-  import("./MultivariableVisuals").then((module) => ({
+  import("@/visualizations/analysis/MultivariableVisuals").then((module) => ({
     default: module.MultivariableVisualInsert,
   })),
 );
 const SeriesVisualInsert = lazy(() =>
-  import("./SeriesVisuals").then((module) => ({
+  import("@/visualizations/analysis/SeriesVisuals").then((module) => ({
     default: module.SeriesVisualInsert,
   })),
 );
 const PowerSeriesVisualInsert = lazy(() =>
-  import("./PowerSeriesVisuals").then((module) => ({
+  import("@/visualizations/analysis/PowerSeriesVisuals").then((module) => ({
     default: module.PowerSeriesVisualInsert,
   })),
 );
 const FourierVisualInsert = lazy(() =>
-  import("./FourierVisuals").then((module) => ({
+  import("@/visualizations/analysis/FourierVisuals").then((module) => ({
     default: module.FourierVisualInsert,
   })),
 );
 const FieldVisualInsert = lazy(() =>
-  import("./FieldVisuals").then((module) => ({
+  import("@/visualizations/analysis/FieldVisuals").then((module) => ({
     default: module.FieldVisualInsert,
   })),
 );
 const ComplexVisualInsert = lazy(() =>
-  import("./ComplexVisuals").then((module) => ({
+  import("@/visualizations/algebra/ComplexVisuals").then((module) => ({
     default: module.ComplexVisualInsert,
   })),
 );
 const LaplaceVisualInsert = lazy(() =>
-  import("./LaplaceVisuals").then((module) => ({
+  import("@/visualizations/analysis/LaplaceVisuals").then((module) => ({
     default: module.LaplaceVisualInsert,
   })),
 );
