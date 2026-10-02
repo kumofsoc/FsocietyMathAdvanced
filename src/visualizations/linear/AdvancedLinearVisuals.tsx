@@ -95,7 +95,7 @@ function JordanChainLab() {
   return (
     <section className="advanced-lab jordan-lab">
       <header>
-        <div className="eyebrow">JORDAN LAB / ЦЕПОЧКА</div>
+        <div className="eyebrow">ВИЗУАЛИЗАЦИЯ / ЖОРДАНОВА ЦЕПОЧКА</div>
         <h2>Недостающие собственные векторы заменяются присоединёнными.</h2>
         <p>
           Для одной клетки Jₘ(λ) оператор N=A−λI нильпотентен. Он сдвигает
