@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import "../styles/power-series.css";
+import "@/styles/power-series.css";
 
 const W = 620;
 const H = 300;

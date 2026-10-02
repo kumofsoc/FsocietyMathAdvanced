@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import "../styles/fourier.css";
+import "@/styles/fourier.css";
 
 const W = 620;
 const H = 300;

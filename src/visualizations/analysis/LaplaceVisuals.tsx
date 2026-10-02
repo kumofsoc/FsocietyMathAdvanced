@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import "../styles/laplace.css";
+import "@/styles/laplace.css";
 
 const W=600,H=280,P=28;
 

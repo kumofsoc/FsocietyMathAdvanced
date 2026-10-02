@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import "../styles/series.css";
+import "@/styles/series.css";
 
 type Point = [number, number];
 

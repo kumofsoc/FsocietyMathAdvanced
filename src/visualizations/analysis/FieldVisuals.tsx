@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import "../styles/field.css";
+import "@/styles/field.css";
 
 type V2 = [number, number];
 type ScalarMode = "radial" | "plane";
