@@ -3,6 +3,8 @@ import { BlockMath } from "react-katex";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { chapters, topicList, topics } from "@/data/course";
 import { practiceTaskIdsByTopic } from "@/data/practiceMeta";
+import { linearAcademyBlocks } from "@/data/linearAcademy";
+import { linearAcademyPitfallBlocks } from "@/data/linearAcademyPitfalls";
 import {
   LEARNING_EVENT,
   loadReadingProgress,
@@ -106,6 +108,14 @@ function displayBlockTitle(title: string) {
 }
 
 const BLOCK_TARGET_KEY = "fsociety-block-target-v1";
+function isAdvancedLearningBlock(topicId: string, block: ContentBlock) {
+  return (
+    linearAcademyBlocks[topicId]?.includes(block) ||
+    linearAcademyPitfallBlocks[topicId]?.includes(block) ||
+    false
+  );
+}
+
 const ACADEMY_CHAPTERS = new Set([
   "linear",
   "vectors",
@@ -161,7 +171,7 @@ function ContentCard({
   index: number;
 }) {
   const theoremId = topic.id + "::" + index;
-  const academyBlock = block.title.startsWith("ACADEMY");
+  const academyBlock = isAdvancedLearningBlock(topic.id, block);
   const [saved, setSaved] = useState(() => loadSavedTheorems().some((item) => item.id === theoremId));
   const [propertyPanel, setPropertyPanel] = useState<"proof" | "corollary" | null>(null);
 
@@ -535,7 +545,7 @@ export function TopicPage({ topicId }: { topicId: string }) {
   const topicProgress = progressBreakdown.total;
   const academyEnabled = Boolean(chapter && ACADEMY_CHAPTERS.has(chapter.id));
   const academyStartIndex = academyEnabled
-    ? topic.blocks.findIndex((block) => block.title.startsWith("ACADEMY"))
+    ? topic.blocks.findIndex((block) => isAdvancedLearningBlock(topic.id, block))
     : -1;
   const academyTaskIds = academyEnabled
     ? taskIds.filter((id) => id.startsWith("academy-"))
