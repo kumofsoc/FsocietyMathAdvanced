@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { BlockMath } from "react-katex";
 import { chapters, topicMeta } from "@/data/courseMeta";
 import { topics } from "@/data/course";
-import type { ContentBlock } from "@/types/course";
+import type { ContentBlock } from "@/entities/course/model/types";
 import "@/styles/review-hub.css";
 
 const REVIEW_KINDS = new Set([

@@ -9,7 +9,7 @@ import { MathBackdrop } from "@/shared/ui/MathBackdrop";
 import { ScrollProgress } from "@/features/navigation/ui/ScrollProgress";
 import { SettingsPanel } from "@/features/personalization/ui/SettingsPanel";
 import { StubTopicPage } from "@/pages/topic/StubTopicPage";
-import { LEARNING_EVENT } from "@/lib/learning";
+import { LEARNING_EVENT } from "@/features/learning/model/learning";
 import {
   getChapterProgress,
   getCourseProgress,
@@ -17,8 +17,8 @@ import {
   getTopicProgress,
   isTrackedChapter,
   isTrackedTopic,
-} from "@/lib/progress";
-import type { Chapter } from "@/types/course";
+} from "@/features/learning/model/progress";
+import type { Chapter } from "@/entities/course/model/types";
 import { useAppShellStore } from "@/app/store/useAppShellStore";
 
 const LAST_TOPIC_KEY = "fsociety-last-topic-v1";
@@ -260,7 +260,7 @@ export default function App() {
 
   useEffect(() => {
     if (!import.meta.env.DEV) return;
-    void import("@/lib/courseIntegrity").then(({ reportCourseIntegrity }) => {
+    void import("@/entities/course/lib/courseIntegrity").then(({ reportCourseIntegrity }) => {
       reportCourseIntegrity();
     });
   }, []);

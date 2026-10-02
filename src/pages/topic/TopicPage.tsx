@@ -11,9 +11,9 @@ import {
   saveTheorems,
   SOLVED_KEY,
   THEORY_KEY,
-} from "@/lib/learning";
-import { isTrackedTopic } from "@/lib/progress";
-import type { BlockKind, ContentBlock, Topic } from "@/types/course";
+} from "@/features/learning/model/learning";
+import { isTrackedTopic } from "@/features/learning/model/progress";
+import type { BlockKind, ContentBlock, Topic } from "@/entities/course/model/types";
 import { RichMatrixText } from "@/visualizations/linear/MatrixNotation";
 import { TopicLabInsert, TopicVisualInsert } from "@/visualizations/registry/TopicVisualRegistry";
 
