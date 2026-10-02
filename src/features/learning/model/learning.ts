@@ -2,6 +2,7 @@ export const THEORY_KEY = "fsociety-theory-read-v2";
 export const SOLVED_KEY = "fsociety-solved-tasks-v2";
 export const SAVED_THEOREMS_KEY = "fsociety-saved-theorems-v1";
 export const READING_PROGRESS_KEY = "visualmath-reading-progress-v1";
+export const READING_BLOCKS_KEY = "visualmath-reading-blocks-v1";
 export const LEARNING_EVENT = "fsociety-learning-change";
 
 export interface SavedTheorem {
@@ -75,4 +76,33 @@ export function saveReadingProgress(topicId: string, ratio: number) {
   }
   window.dispatchEvent(new CustomEvent(LEARNING_EVENT));
   return nextRatio;
+}
+
+
+export function getReadingCoverageFromBlocks(
+  topicId: string,
+  totalBlocks: number,
+  seenBlocks: Set<string>,
+) {
+  if (totalBlocks <= 0) return 0;
+  const prefix = topicId + "::";
+  const count = [...seenBlocks].filter((key) => key.startsWith(prefix)).length;
+  return Math.min(1, count / totalBlocks);
+}
+
+export function loadReadingBlocks() {
+  return loadSet(READING_BLOCKS_KEY);
+}
+
+export function markReadingBlock(topicId: string, blockIndex: number, totalBlocks: number) {
+  const current = loadReadingBlocks();
+  const key = topicId + "::" + blockIndex;
+  if (!current.has(key)) {
+    current.add(key);
+    saveSet(READING_BLOCKS_KEY, current);
+  }
+
+  const ratio = getReadingCoverageFromBlocks(topicId, totalBlocks, current);
+  saveReadingProgress(topicId, ratio);
+  return ratio;
 }
