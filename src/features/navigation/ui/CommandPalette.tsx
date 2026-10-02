@@ -270,10 +270,10 @@ export function CommandPalette() {
                       }
                       onMouseEnter={() => {
                         setActiveIndex(index);
-                        if (!topic.isStub) void import("@/components/TopicPage");
+                        if (!topic.isStub) void import("@/pages/topic/TopicPage");
                       }}
                       onFocus={() => {
-                        if (!topic.isStub) void import("@/components/TopicPage");
+                        if (!topic.isStub) void import("@/pages/topic/TopicPage");
                       }}
                       onClick={() =>
                         openTopic(topic.id, isBlock ? result.blockIndex : undefined)
