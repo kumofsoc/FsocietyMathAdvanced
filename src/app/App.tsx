@@ -390,8 +390,8 @@ export default function App() {
           onClick={() => (window.location.hash = "academy")}
         >
           <span>λ</span>
-          Linear Academy
-          <b>PRO</b>
+          Линейная математика
+          <b>КУРС</b>
         </button>
 
         <button
