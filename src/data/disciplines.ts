@@ -1,6 +1,7 @@
 import type {
   CourseDefinition,
   DisciplineDefinition,
+  KnowledgeDomainDefinition,
 } from "@/entities/course/model/learning-architecture/types";
 import { chapters } from "@/data/courseMeta";
 
@@ -8,9 +9,20 @@ export interface DisciplineCatalogEntry extends DisciplineDefinition {
   status: "active" | "planned";
 }
 
+export const knowledgeDomains: KnowledgeDomainDefinition[] = [
+  {
+    id: "fundamental-sciences",
+    title: "Фундаментальные науки",
+    description:
+      "Единая карта фундаментальных дисциплин, где междисциплинарные зависимости могут связывать математику, физику и будущие научные курсы.",
+    disciplineIds: ["mathematics", "physics"],
+  },
+];
+
 export const disciplines: DisciplineCatalogEntry[] = [
   {
     id: "mathematics",
+    domainId: "fundamental-sciences",
     kind: "mathematics",
     title: "Математика",
     description:
@@ -20,6 +32,7 @@ export const disciplines: DisciplineCatalogEntry[] = [
   },
   {
     id: "physics",
+    domainId: "fundamental-sciences",
     kind: "physics",
     title: "Физика",
     description:
@@ -46,4 +59,16 @@ export function getDiscipline(id: string) {
 
 export function getCoursesForDiscipline(disciplineId: string) {
   return scienceCourses.filter((course) => course.disciplineId === disciplineId);
+}
+
+
+export function getKnowledgeDomain(id: string) {
+  return knowledgeDomains.find((domain) => domain.id === id);
+}
+
+export function getDisciplinesForDomain(domainId: string) {
+  const domain = getKnowledgeDomain(domainId);
+  if (!domain) return [];
+  const allowed = new Set(domain.disciplineIds);
+  return disciplines.filter((discipline) => allowed.has(discipline.id));
 }
