@@ -169,11 +169,6 @@ export function HomePage({
               <br />
               <span>Целая среда.</span>
             </h1>
-            <p data-reveal>
-              VisualMath соединяет теорию, навигацию, интерактив, персонализацию,
-              историю действий и визуальные инструменты в один живой интерфейс.
-              Здесь хочется не просто открыть тему — хочется исследовать сам проект.
-            </p>
 
             <div className="home-actions" data-reveal>
               <button
@@ -201,7 +196,6 @@ export function HomePage({
 
           <div className="project-pulse" data-reveal>
             <span>{progress}%</span>
-            <small>COURSE MASTERY</small>
             <i><b /></i>
           </div>
         </div>
@@ -209,7 +203,6 @@ export function HomePage({
         <div className="home-snap-cue">
           <span>SCROLL</span>
           <i />
-          <small>каждый экран — отдельная сцена</small>
         </div>
       </section>
 
@@ -219,27 +212,19 @@ export function HomePage({
           <div className="project-activity-copy">
             <div className="eyebrow" data-reveal>VISUALMATH GROWTH / DEMO DATA</div>
             <h2 data-reveal>Проект растёт вместе с сообществом.</h2>
-            <p data-reveal>
-              Здесь будет публичная динамика аудитории VisualMath: сколько пользователей
-              присоединялось к платформе с запуска и как менялся масштаб проекта.
-            </p>
 
             <div className="project-activity-stats" data-reveal>
               <article>
                 <span>{mockUserGrowth[0].year}</span>
-                <small>точка отсчёта</small>
               </article>
               <article>
                 <span>{mockUserGrowth.at(-1)!.users.toLocaleString("ru-RU")}</span>
-                <small>пользователей сейчас</small>
               </article>
               <article>
                 <span>×{growthMultiple}</span>
-                <small>рост аудитории</small>
               </article>
               <article>
                 <span>{mockUserGrowth.length}</span>
-                <small>лет на графике</small>
               </article>
             </div>
           </div>
@@ -311,28 +296,20 @@ export function HomePage({
           <div className="project-feature-copy">
             <div className="eyebrow" data-reveal>DESIGNED AS A SYSTEM</div>
             <h2 data-reveal data-parallax>Интерфейс не разваливается на отдельные страницы.</h2>
-            <p data-reveal>
-              Карта, история переходов, сохранённые элементы, настройки, прогресс,
-              интерактивные лаборатории и контент работают как части одного продукта.
-              Любое действие ощущается связанным с предыдущим.
-            </p>
           </div>
 
           <div className="project-window-stack" data-parallax>
             <article className="project-window window-a" data-float-safe="a">
               <span>01</span>
               <strong>Контекст сохраняется</strong>
-              <p>Можно уйти глубже, вернуться назад и продолжить с того же места.</p>
             </article>
             <article className="project-window window-b" data-float-safe="b">
               <span>02</span>
               <strong>Интерфейс отвечает</strong>
-              <p>Наведение, переходы, прокрутка и трансформации имеют собственный визуальный отклик.</p>
             </article>
             <article className="project-window window-c" data-float-safe="c">
               <span>03</span>
               <strong>Всё персонализируется</strong>
-              <p>Тема, курсор и интенсивность движения настраиваются под пользователя.</p>
             </article>
           </div>
         </div>
@@ -353,11 +330,6 @@ export function HomePage({
           <div className="project-feature-copy">
             <div className="eyebrow" data-reveal>МАТЕМАТИКА В ДВИЖЕНИИ</div>
             <h2 data-reveal>Формулы превращаются в объекты, которые можно исследовать.</h2>
-            <p data-reveal>
-              Векторы, матрицы, графики и геометрические преобразования показываются не как
-              статичные иллюстрации, а как связанные математические структуры. Можно менять
-              параметры и сразу видеть, что именно происходит с объектом.
-            </p>
           </div>
         </div>
       </section>
@@ -367,42 +339,32 @@ export function HomePage({
           <header className="project-guide-head">
             <div className="eyebrow" data-reveal>WHERE EVERYTHING LIVES</div>
             <h2 data-reveal>Один экран — одна роль. Никакой охоты за функциями.</h2>
-            <p data-reveal>
-              Основные возможности разнесены по понятным зонам, поэтому даже насыщенный
-              интерфейс остаётся предсказуемым.
-            </p>
           </header>
 
           <div className="project-guide-grid">
             <article data-reveal data-float-safe="guide">
               <span>01</span>
               <strong>Навигация</strong>
-              <p>Разделы и темы находятся в боковой панели и раскрываются плавно.</p>
             </article>
             <article data-reveal data-float-safe="guide">
               <span>02</span>
               <strong>Карта</strong>
-              <p>Отдельная рабочая сцена с группами, связями, перемещением, вращением и масштабом.</p>
             </article>
             <article data-reveal data-float-safe="guide">
               <span>03</span>
               <strong>История</strong>
-              <p>Назад и вперёд работают как полноценная навигационная история с восстановлением позиции.</p>
             </article>
             <article data-reveal data-float-safe="guide">
               <span>04</span>
               <strong>Настройки</strong>
-              <p>Темы, курсоры, движение и сохранённые элементы собраны в одном месте.</p>
             </article>
             <article data-reveal data-float-safe="guide">
               <span>05</span>
               <strong>Интерактив</strong>
-              <p>Сложные вещи можно не только читать — ими можно управлять прямо в интерфейсе.</p>
             </article>
             <article data-reveal data-float-safe="guide">
               <span>06</span>
               <strong>Адаптив</strong>
-              <p>Desktop получает максимум пространства и движения, mobile — тот же характер без развала layout.</p>
             </article>
           </div>
         </div>
@@ -413,11 +375,6 @@ export function HomePage({
           <div className="project-feature-copy">
             <div className="eyebrow" data-reveal>YOUR VERSION OF THE PROJECT</div>
             <h2 data-reveal>Один продукт может выглядеть совершенно по-разному.</h2>
-            <p data-reveal>
-              Система тем меняет весь визуальный язык. Система курсоров меняет само ощущение
-              управления. Профили движения позволяют оставить максимум эффектов или получить
-              полностью статичный интерфейс.
-            </p>
           </div>
 
           <div className="project-theme-showcase" data-parallax>
@@ -440,10 +397,6 @@ export function HomePage({
             <br />
             Исследуй.
           </h2>
-          <p data-reveal>
-            VisualMath задуман как пространство, которое хочется открыть ещё до того,
-            как ты решил, что именно собираешься изучать.
-          </p>
           <div className="home-actions" data-reveal>
             <button className="home-primary" onClick={() => (window.location.hash = "matrices")}>
               Начать
