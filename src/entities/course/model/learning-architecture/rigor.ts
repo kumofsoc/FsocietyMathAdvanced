@@ -32,12 +32,21 @@ export function auditRigorousBlocks(blocks: ContentBlock[]): RigorIssue[] {
       }
     }
 
-    if (block.kind === "theorem" && !block.proofs?.length) {
-      issues.push({
-        blockIndex,
-        title: block.title,
-        reason: "theorem has no explicit proof",
-      });
+    if (block.kind === "theorem") {
+      if (!block.proofs?.length) {
+        issues.push({
+          blockIndex,
+          title: block.title,
+          reason: "theorem has no explicit proof",
+        });
+      }
+      if (!block.workedExamples?.length) {
+        issues.push({
+          blockIndex,
+          title: block.title,
+          reason: "theorem has no worked example",
+        });
+      }
     }
   });
 
