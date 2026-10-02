@@ -6,7 +6,7 @@ export interface CourseMapChapter {
   id: string;
   number: string;
   title: string;
-  topicIds: string[];
+  topicIds: readonly string[];
 }
 
 export interface CourseMapTopic {
@@ -14,7 +14,7 @@ export interface CourseMapTopic {
   number: string;
   title: string;
   chapterId: string;
-  prerequisites: string[];
+  prerequisites: readonly string[];
   isStub?: boolean;
 }
 
@@ -42,8 +42,8 @@ export interface CourseMapGraphModel {
 
 export interface BuildCourseMapGraphInput {
   mode: CourseMapMode;
-  chapters: CourseMapChapter[];
-  topics: Record<string, CourseMapTopic>;
+  chapters: readonly CourseMapChapter[];
+  topics: Readonly<Record<string, CourseMapTopic>>;
   chapterProgress: (chapterId: string) => number;
   topicProgress: (topicId: string) => number;
 }
