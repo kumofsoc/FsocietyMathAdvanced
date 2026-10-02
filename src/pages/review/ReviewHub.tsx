@@ -70,7 +70,7 @@ export function ReviewHub() {
   return (
     <section className="review-hub">
       <header className="review-hero">
-        <div className="eyebrow">REVIEW MODE / СУХОЙ КОНСПЕКТ</div>
+        <div className="eyebrow">REVIEW ARCHIVE / СУХОЙ КОНСПЕКТ</div>
         <h1>Повторение без лишних слов.</h1>
         <p>
           Только определения, ключевые свойства, теоремы, формулы и алгоритмы.
