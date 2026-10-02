@@ -69,13 +69,13 @@ export function LinearAcademyHub() {
     <section className="academy-hub">
       <header className="academy-hub-hero">
         <div>
-          <div className="eyebrow">LINEAR LAB / PROTOCOL TRACK</div>
+          <div className="eyebrow">УГЛУБЛЁННЫЙ КУРС / ЛИНЕЙНАЯ МАТЕМАТИКА</div>
           <h1>Линейная математика как единая система.</h1>
           <p>
-            От матриц и векторов до Jordan, SVD, аффинной геометрии, квадрик,
-            тензоров и exterior algebra. Здесь собран именно углублённый Academy-слой:
-            доказательства, worked examples, визуальные лаборатории, pitfalls,
-            hard-exams и proof seminar.
+            От матриц и векторов до жордановой формы, SVD, аффинной геометрии и квадрик,
+            тензоров и внешней алгебры. Здесь собран углублённый маршрут: доказательства, подробно разобранные примеры,
+            визуальные лаборатории, типичные ошибки, сложные проверочные задачи
+            и отдельные задачи на доказательство.
           </p>
         </div>
 
@@ -84,34 +84,34 @@ export function LinearAcademyHub() {
             className="academy-hub-primary"
             onClick={() => continueTopic && (window.location.hash = continueTopic)}
           >
-            Продолжить Academy →
+            Продолжить обучение →
           </button>
           <button onClick={() => (window.location.hash = "map")}>
-            Открыть knowledge map
+            Открыть карту курса
           </button>
         </div>
       </header>
 
       <div className="academy-hub-metrics">
-        <div><span>CHAPTERS</span><strong>{academyChapters.length}</strong><small>единая ветка</small></div>
-        <div><span>TOPICS</span><strong>{topicIds.length}</strong><small>{stats.complete} mastered</small></div>
-        <div><span>ACADEMY TASKS</span><strong>{stats.academyTasks}</strong><small>checkpoint + exam + proof</small></div>
-        <div><span>PROOF SEMINAR</span><strong>{stats.proofTasks}</strong><small>open response</small></div>
-        <div><span>CAPSTONES</span><strong>{stats.capstones}</strong><small>межтемные задачи</small></div>
+        <div><span>РАЗДЕЛЫ</span><strong>{academyChapters.length}</strong><small>единая ветка</small></div>
+        <div><span>ТЕМЫ</span><strong>{topicIds.length}</strong><small>{stats.complete} завершено</small></div>
+        <div><span>УГЛУБЛЁННЫЕ ЗАДАЧИ</span><strong>{stats.academyTasks}</strong><small>проверка + итоговая задача + доказательство</small></div>
+        <div><span>ДОКАЗАТЕЛЬСТВА</span><strong>{stats.proofTasks}</strong><small>развёрнутый ответ</small></div>
+        <div><span>ИТОГОВЫЕ ЗАДАЧИ</span><strong>{stats.capstones}</strong><small>межтематические задачи</small></div>
         <div className="academy-hub-mastery">
-          <span>ACADEMY MASTERY</span>
+          <span>ОСВОЕНИЕ</span>
           <strong>{stats.mastery}%</strong>
           <i><b style={{ width: stats.mastery + "%" }} /></i>
         </div>
       </div>
 
       <div className="academy-hub-flow">
-        <span>01 MATRIX LANGUAGE</span><i>→</i>
-        <span>02 VECTOR GEOMETRY</span><i>→</i>
-        <span>03–05 ANALYTIC / AFFINE</span><i>→</i>
-        <span>06 ABSTRACT LINEAR</span><i>→</i>
-        <span>07 METRIC / SPECTRAL</span><i>→</i>
-        <span>08–09 AFFINE / TENSOR</span>
+        <span>01 МАТРИЦЫ</span><i>→</i>
+        <span>02 ВЕКТОРНАЯ ГЕОМЕТРИЯ</span><i>→</i>
+        <span>03–05 АНАЛИТИЧЕСКАЯ И АФФИННАЯ</span><i>→</i>
+        <span>06 ЛИНЕЙНЫЕ ПРОСТРАНСТВА</span><i>→</i>
+        <span>07 МЕТРИКА И СПЕКТР</span><i>→</i>
+        <span>08–09 АФФИННАЯ И ТЕНЗОРЫ</span>
       </div>
 
       <div className="academy-hub-chapters">
@@ -128,7 +128,7 @@ export function LinearAcademyHub() {
               <header>
                 <span>{chapter.number}</span>
                 <div>
-                  <small>ACADEMY CHAPTER</small>
+                  <small>РАЗДЕЛ КУРСА</small>
                   <h2>{chapter.title}</h2>
                 </div>
                 <strong>{progress}%</strong>
@@ -139,9 +139,9 @@ export function LinearAcademyHub() {
               </div>
 
               <div className="academy-hub-chapter-meta">
-                <span>{chapter.topicIds.length} topics</span>
-                <span>{academyTasks} academy tasks</span>
-                {proofTasks > 0 && <span>{proofTasks} proof</span>}
+                <span>{chapter.topicIds.length} тем</span>
+                <span>{academyTasks} углублённых задач</span>
+                {proofTasks > 0 && <span>{proofTasks} доказательств</span>}
               </div>
 
               <div className="academy-hub-topic-list">
@@ -160,8 +160,8 @@ export function LinearAcademyHub() {
                         <strong>{topic.title}</strong>
                       </span>
                       <span className="academy-hub-topic-tags">
-                        {t.proof > 0 && <em>PROOF</em>}
-                        {t.capstone > 0 && <em>CAPSTONE</em>}
+                        {t.proof > 0 && <em>ДОКАЗАТЕЛЬСТВО</em>}
+                        {t.capstone > 0 && <em>ИТОГОВАЯ</em>}
                         <b>{progress}%</b>
                       </span>
                     </button>

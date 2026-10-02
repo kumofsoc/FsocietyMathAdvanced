@@ -4,7 +4,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "matrices": [
     {
       "id": "academy-matrices-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Что на самом деле представляют столбцы матрицы линейного оператора в фиксированном базисе?",
       "type": "choice",
       "answer": "Образы базисных векторов",
@@ -19,7 +19,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-matrices-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Почему AB и BA в общем случае различны?",
       "type": "choice",
       "answer": "Они кодируют разный порядок композиции линейных действий",
@@ -36,7 +36,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "determinants": [
     {
       "id": "academy-determinants-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Что геометрически означает |det A| для A:ℝ²→ℝ²?",
       "type": "choice",
       "answer": "Коэффициент изменения площади",
@@ -51,7 +51,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-determinants-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Если det A=−3, что верно?",
       "type": "choice",
       "answer": "Площадь масштабируется в 3 раза и ориентация меняется",
@@ -68,7 +68,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "inverse-rank": [
     {
       "id": "academy-inverse-rank-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Для квадратной n×n матрицы rank A=n. Что следует?",
       "type": "choice",
       "answer": "A обратима",
@@ -83,7 +83,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-inverse-rank-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Матрица 3×3 переводит всё ℝ³ в одну прямую. Каков её ранг?",
       "type": "choice",
       "answer": "1",
@@ -100,7 +100,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "linear-systems": [
     {
       "id": "academy-linear-systems-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Совместная система Ax=b имеет n=7 неизвестных и rank A=5. Какова размерность множества решений?",
       "type": "choice",
       "answer": "2",
@@ -115,7 +115,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-linear-systems-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Как интерпретировать условие b∈Im A?",
       "type": "choice",
       "answer": "Правая часть достижима как линейная комбинация столбцов A",
@@ -132,7 +132,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "vectors": [
     {
       "id": "academy-vectors-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Что меняется при смене базиса?",
       "type": "choice",
       "answer": "Координаты вектора, но не сам вектор",
@@ -147,7 +147,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-vectors-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Почему координаты в базисе единственны?",
       "type": "choice",
       "answer": "Из линейной независимости базисных векторов",
@@ -164,7 +164,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "dot-product": [
     {
       "id": "academy-dot-product-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Когда достигается равенство в неравенстве Коши–Буняковского?",
       "type": "choice",
       "answer": "Когда векторы линейно зависимы",
@@ -179,7 +179,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-dot-product-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Какой вектор является остатком после ортогональной проекции x на U?",
       "type": "choice",
       "answer": "x−P_Ux, и он ортогонален U",
@@ -196,7 +196,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "cross-product": [
     {
       "id": "academy-cross-product-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Чему равна ||a×b||?",
       "type": "choice",
       "answer": "Площади параллелограмма на a и b",
@@ -211,7 +211,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-cross-product-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Что произойдёт с a×b при перестановке a и b?",
       "type": "choice",
       "answer": "Поменяет знак",
@@ -228,7 +228,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "mixed-product": [
     {
       "id": "academy-mixed-product-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Какой критерий компланарности трёх векторов?",
       "type": "choice",
       "answer": "Их смешанное произведение равно нулю",
@@ -243,7 +243,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-mixed-product-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Как вычислить высоту параллелепипеда над основанием a,b?",
       "type": "choice",
       "answer": "|[a,b,c]|/||a×b||",
@@ -260,7 +260,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "plane-coordinates": [
     {
       "id": "academy-plane-coordinates-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Почему ∇F перпендикулярен гладкой линии уровня F=c?",
       "type": "choice",
       "answer": "Производная F вдоль касательной равна нулю",
@@ -275,7 +275,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-plane-coordinates-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Для F=x²+y²−9 чему равен ∇F в точке (0,3)?",
       "type": "choice",
       "answer": "(0,6)",
@@ -292,7 +292,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "plane-lines": [
     {
       "id": "academy-plane-lines-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Какая часть Ax+By+C=0 задаёт направление нормали?",
       "type": "choice",
       "answer": "(A,B)",
@@ -307,7 +307,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-plane-lines-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Для прямой 3x+4y−10=0 и точки (0,0) расстояние равно:",
       "type": "choice",
       "answer": "2",
@@ -324,7 +324,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "conics": [
     {
       "id": "academy-conics-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Для эллипса a=5,b=4 чему равен c?",
       "type": "choice",
       "answer": "3",
@@ -339,7 +339,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-conics-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Какой эксцентриситет у параболы в стандартной классификации коник?",
       "type": "choice",
       "answer": "1",
@@ -356,7 +356,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "space-lines-planes": [
     {
       "id": "academy-space-lines-planes-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Что является общей нормалью к двум непараллельным направлениям a и b?",
       "type": "choice",
       "answer": "a×b",
@@ -371,7 +371,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-space-lines-planes-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Если направление прямой s перпендикулярно нормали плоскости n, то прямая:",
       "type": "choice",
       "answer": "Параллельна плоскости или лежит в ней",
@@ -388,7 +388,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "quadrics": [
     {
       "id": "academy-quadrics-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Как устраняются смешанные квадратичные члены у вещественной симметричной квадрики?",
       "type": "choice",
       "answer": "Ортогональной диагонализацией квадратичной части",
@@ -403,7 +403,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-quadrics-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Что определяют знаки собственных значений квадратичной части?",
       "type": "choice",
       "answer": "Тип локальной квадратичной геометрии",
@@ -420,7 +420,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "mappings-transformations": [
     {
       "id": "academy-mappings-transformations-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Чему равно (g∘f)⁻¹ для биекций f,g?",
       "type": "choice",
       "answer": "f⁻¹∘g⁻¹",
@@ -435,7 +435,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-mappings-transformations-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Почему порядок преобразований важен?",
       "type": "choice",
       "answer": "Композиция в общем случае некоммутативна",
@@ -452,7 +452,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "linear-transformations": [
     {
       "id": "academy-linear-transformations-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Чем однозначно определяется линейный оператор?",
       "type": "choice",
       "answer": "Образами базисных векторов",
@@ -467,7 +467,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-linear-transformations-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Матрица [[1,k],[0,1]] имеет det=1. Что она делает с площадью?",
       "type": "choice",
       "answer": "Сохраняет площадь",
@@ -484,7 +484,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "affine-transformations": [
     {
       "id": "academy-affine-transformations-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Что обязательно сохраняет аффинное преобразование?",
       "type": "choice",
       "answer": "Прямые и параллельность",
@@ -499,7 +499,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-affine-transformations-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Почему центроид треугольника сохраняется как центроид образа?",
       "type": "choice",
       "answer": "Потому что это барицентрическая комбинация с суммой коэффициентов 1",
@@ -516,7 +516,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "linear-spaces": [
     {
       "id": "academy-linear-spaces-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Что является главным условием базиса?",
       "type": "choice",
       "answer": "Линейная независимость и порождаемость",
@@ -531,7 +531,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-linear-spaces-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Какова размерность пространства P₂ многочленов степени ≤2?",
       "type": "choice",
       "answer": "3",
@@ -548,7 +548,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "subspaces": [
     {
       "id": "academy-subspaces-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Если dim U=4, dim W=3, dim(U∩W)=2, чему равна dim(U+W)?",
       "type": "choice",
       "answer": "5",
@@ -563,7 +563,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-subspaces-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Что нужно проверить, чтобы непустое множество было линейным подпространством?",
       "type": "choice",
       "answer": "Замкнутость относительно линейных комбинаций",
@@ -580,7 +580,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "linear-maps": [
     {
       "id": "academy-linear-maps-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Для T:V→W, dim V=8 и rank T=5. Чему равна nullity?",
       "type": "choice",
       "answer": "3",
@@ -595,7 +595,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-linear-maps-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Что геометрически кодирует ker T?",
       "type": "choice",
       "answer": "Направления, которые оператор уничтожает",
@@ -612,7 +612,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "eigenproblem": [
     {
       "id": "academy-eigenproblem-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Почему собственные векторы разных собственных значений независимы?",
       "type": "choice",
       "answer": "Линейная зависимость противоречит действию T с различными коэффициентами λ",
@@ -627,7 +627,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-eigenproblem-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Если A=PDP⁻¹, чему равно Aⁿ?",
       "type": "choice",
       "answer": "PDⁿP⁻¹",
@@ -644,7 +644,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "linear-functionals": [
     {
       "id": "academy-linear-functionals-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Что геометрически является ker ненулевого функционала V→F?",
       "type": "choice",
       "answer": "Гиперплоскость",
@@ -659,7 +659,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-linear-functionals-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Что делает элемент двойственного базиса εⁱ?",
       "type": "choice",
       "answer": "Извлекает i-ю координату",
@@ -676,7 +676,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "quadratic-forms": [
     {
       "id": "academy-quadratic-forms-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Матрица симметричной формы имеет собственные значения 4 и −2. Каков тип формы?",
       "type": "choice",
       "answer": "Неопределённая",
@@ -691,7 +691,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-quadratic-forms-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Что происходит с q(x)=xᵀAx после ортогональной диагонализации A?",
       "type": "choice",
       "answer": "Исчезают смешанные члены",
@@ -708,7 +708,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "jordan-form": [
     {
       "id": "academy-jordan-form-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Для J=[[1,1],[0,1]] чему равен верхний правый элемент Jⁿ?",
       "type": "choice",
       "answer": "n",
@@ -723,7 +723,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-jordan-form-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Что означает наличие жорданова блока размера >1?",
       "type": "choice",
       "answer": "Недостаток обычных собственных векторов и наличие обобщённых",
@@ -740,7 +740,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "euclidean-spaces": [
     {
       "id": "academy-euclidean-spaces-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Почему ортогональная проекция даёт ближайшую точку подпространства?",
       "type": "choice",
       "answer": "По теореме Пифагора любой другой кандидат добавляет квадрат ненулевой компоненты",
@@ -755,7 +755,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-euclidean-spaces-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Какое уравнение даёт least squares?",
       "type": "choice",
       "answer": "AᵀAx=Aᵀb",
@@ -772,7 +772,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "euclidean-operators": [
     {
       "id": "academy-euclidean-operators-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Что являются сингулярные числа A?",
       "type": "choice",
       "answer": "Квадратные корни собственных значений AᵀA",
@@ -787,7 +787,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-euclidean-operators-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Что делает SVD с единичной окружностью?",
       "type": "choice",
       "answer": "Переводит её в эллипс с полуосями σᵢ",
@@ -804,7 +804,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "euclidean-functions": [
     {
       "id": "academy-euclidean-functions-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Как в конечномерном евклидовом пространстве выглядит любой линейный функционал?",
       "type": "choice",
       "answer": "φ(x)=⟨a,x⟩ для единственного a",
@@ -819,7 +819,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-euclidean-functions-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Для φ(x,y)=3x−4y представляющий вектор равен:",
       "type": "choice",
       "answer": "(3,−4)",
@@ -836,7 +836,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "unitary-spaces": [
     {
       "id": "academy-unitary-spaces-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Каковы собственные значения эрмитова оператора?",
       "type": "choice",
       "answer": "Вещественные",
@@ -851,7 +851,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-unitary-spaces-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Что сохраняет унитарный оператор?",
       "type": "choice",
       "answer": "Комплексное скалярное произведение и норму",
@@ -868,7 +868,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "affine-spaces": [
     {
       "id": "academy-affine-spaces-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Множество решений Ax=b при наличии одного решения x₀ имеет вид:",
       "type": "choice",
       "answer": "x₀+ker A",
@@ -883,7 +883,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-affine-spaces-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Что отличает аффинное пространство от линейного?",
       "type": "choice",
       "answer": "Нет выделенного нуля среди точек",
@@ -900,7 +900,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "quadric-invariants": [
     {
       "id": "academy-quadric-invariants-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Почему rank A сохраняется при A'=SᵀAS с обратимой S?",
       "type": "choice",
       "answer": "Умножение на обратимые матрицы не меняет ранг",
@@ -915,7 +915,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-quadric-invariants-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Какие данные используются для аффинной классификации квадрик в курсе?",
       "type": "choice",
       "answer": "Ранги и сигнатуры малой и большой квадратичных форм",
@@ -932,7 +932,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "tensor-linear": [
     {
       "id": "academy-tensor-linear-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Каков тип линейного оператора как тензора?",
       "type": "choice",
       "answer": "(1,1)",
@@ -947,7 +947,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-tensor-linear-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Чему равна свёртка тензора типа (1,1) по его индексам?",
       "type": "choice",
       "answer": "Следу оператора",
@@ -964,7 +964,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "tensor-euclidean": [
     {
       "id": "academy-tensor-euclidean-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Чем связаны v_i и v^j?",
       "type": "choice",
       "answer": "Метрическим тензором g_ij",
@@ -979,7 +979,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-tensor-euclidean-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Когда ковариантные и контрвариантные компоненты численно совпадают в стандартной записи?",
       "type": "choice",
       "answer": "В ортонормированном базисе с g=I",
@@ -996,7 +996,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
   "exterior-algebra": [
     {
       "id": "academy-exterior-algebra-01",
-      "title": "ACADEMY · Концептуальная проверка",
+      "title": "Концептуальная проверка",
       "prompt": "Когда v₁∧…∧v_k=0?",
       "type": "choice",
       "answer": "Когда векторы линейно зависимы",
@@ -1011,7 +1011,7 @@ export const linearAcademyPracticeByTopic: Record<string, PracticeTask[]> = {
     },
     {
       "id": "academy-exterior-algebra-02",
-      "title": "ACADEMY · Hard checkpoint",
+      "title": "Сложная проверка",
       "prompt": "Что происходит с u∧v при перестановке u и v?",
       "type": "choice",
       "answer": "Меняется знак",

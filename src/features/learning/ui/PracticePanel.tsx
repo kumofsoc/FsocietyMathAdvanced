@@ -52,10 +52,10 @@ function answersMatch(task: PracticeTask, value: string) {
 }
 
 function difficultyLabel(task: PracticeTask) {
-  if (task.type === "proof") return "PROOF";
-  if (task.difficulty === "hard") return "HARD";
-  if (task.difficulty === "medium") return "MEDIUM";
-  return "BASE";
+  if (task.type === "proof") return "ДОКАЗАТЕЛЬСТВА";
+  if (task.difficulty === "hard") return "СЛОЖНЫЕ";
+  if (task.difficulty === "medium") return "СРЕДНИЕ";
+  return "БАЗОВЫЕ";
 }
 
 function TaskCard({
@@ -193,7 +193,7 @@ function TaskCard({
       {solutionOpen && task.type === "proof" && (
         <div className="practice-proof-solution">
           <div className="practice-proof-solution-head">
-            <span>ACADEMY SOLUTION SKETCH</span>
+            <span>ОРИЕНТИР ДЛЯ СВЕРКИ</span>
             <strong>Сверь структуру доказательства, а не формулировки.</strong>
           </div>
           {task.solution && <p><RichMatrixText text={task.solution} /></p>}
@@ -212,7 +212,7 @@ function TaskCard({
       {status === "right" && (
         <div className="practice-feedback good">
           {task.type === "proof"
-            ? "Proof-задача засчитана после самостоятельной сверки."
+            ? "Задача на доказательство засчитана после самостоятельной сверки."
             : "Верно. Задача засчитана в практику."}
         </div>
       )}
@@ -327,9 +327,9 @@ export function PracticePanel({ topicId }: { topicId: string }) {
         <div className="practice-filters" aria-label="Сложность">
           {([
             ["all", "Все", tasks.length],
-            ["base", "Base", counts.base],
-            ["medium", "Medium", counts.medium],
-            ["hard", "Hard", counts.hard],
+            ["base", "Базовые", counts.base],
+            ["medium", "Средние", counts.medium],
+            ["hard", "Сложные", counts.hard],
           ] as const).map(([id, label, count]) => (
             <button
               key={id}
@@ -345,7 +345,7 @@ export function PracticePanel({ topicId }: { topicId: string }) {
         <div className="practice-toolbar-actions">
           {tasks.some((task) => task.id.startsWith("academy-")) && (
             <button className="academy-exam-button" onClick={startAcademyExam}>
-              Academy Exam
+              Итоговая проверка
             </button>
           )}
           {counts.proof > 0 && (
@@ -357,7 +357,7 @@ export function PracticePanel({ topicId }: { topicId: string }) {
               }}
               aria-pressed={proofOnly}
             >
-              {proofOnly ? "Proof seminar ✓" : "Proof seminar"}
+              {proofOnly ? "Только доказательства ✓" : "Только доказательства"}
             </button>
           )}
           <button
@@ -368,7 +368,7 @@ export function PracticePanel({ topicId }: { topicId: string }) {
             }}
             aria-pressed={academyOnly}
           >
-            {academyOnly ? "Academy only ✓" : "Academy PRO"}
+            {academyOnly ? "Только углублённые ✓" : "Углублённые задачи"}
           </button>
           <button
             className={view === "focus" ? "active" : ""}
@@ -400,10 +400,10 @@ export function PracticePanel({ topicId }: { topicId: string }) {
 
       <div className="practice-bank-meta">
         <span>Показано {visibleTasks.length} из {tasks.length}</span>
-        <span>BASE {counts.base}</span>
-        <span>MEDIUM {counts.medium}</span>
-        <span>HARD {counts.hard}</span>
-        {counts.proof > 0 && <span>PROOF {counts.proof}</span>}
+        <span>БАЗОВЫЕ {counts.base}</span>
+        <span>СРЕДНИЕ {counts.medium}</span>
+        <span>СЛОЖНЫЕ {counts.hard}</span>
+        {counts.proof > 0 && <span>ДОКАЗАТЕЛЬСТВА {counts.proof}</span>}
       </div>
 
       {visibleTasks.length ? (
@@ -421,15 +421,15 @@ export function PracticePanel({ topicId }: { topicId: string }) {
                 ←
               </button>
               <div>
-                <span>FOCUS SESSION</span>
+                <span>РЕЖИМ ОДНОЙ ЗАДАЧИ</span>
                 <strong>
                   {safeFocusIndex + 1} / {visibleTasks.length}
                 </strong>
                 <small>
                   {difficulty === "all" ? "все сложности" : difficulty.toUpperCase()}
                   {hideSolved ? " · только нерешённые" : ""}
-                  {academyOnly ? " · ACADEMY" : ""}
-                  {proofOnly ? " · PROOF" : ""}
+                  {academyOnly ? " · УГЛУБЛЁННЫЕ" : ""}
+                  {proofOnly ? " · ДОКАЗАТЕЛЬСТВА" : ""}
                 </small>
               </div>
               <button

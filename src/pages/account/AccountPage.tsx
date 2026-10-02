@@ -124,62 +124,62 @@ export function AccountPage({
             style={{ "--identity-progress": progress } as CSSProperties}
             aria-hidden="true"
           />
-          <em className="identity-tag tag-a">LOCAL ID</em>
-          <em className="identity-tag tag-b">SYNC READY</em>
+          <em className="identity-tag tag-a">ЛОКАЛЬНЫЙ ПРОФИЛЬ</em>
+          <em className="identity-tag tag-b">ГОТОВ К СИНХРОНИЗАЦИИ</em>
         </div>
 
         <div className="identity-copy">
-          <div className="identity-kicker"><span>PERSONAL OS</span><i>IDENTITY CORE / LOCAL</i></div>
+          <div className="identity-kicker"><span>ПРОФИЛЬ</span><i>ДАННЫЕ ПРОФИЛЯ / НА ЭТОМ УСТРОЙСТВЕ</i></div>
           <h1>{profile.displayName}</h1>
           <div className="identity-handle">@{profile.handle}</div>
           <p>{profile.bio}</p>
           <div className="identity-meta">
             <span>JOINED / {joined}</span>
             <span>MASTERY / {progress}%</span>
-            <span>SECTORS / {chapterRows.length}</span>
+            <span>РАЗДЕЛОВ / {chapterRows.length}</span>
           </div>
           <div className="identity-actions">
             <button className="identity-primary" onClick={() => setEditing((value) => !value)}>
-              <small>IDENTITY CONSOLE</small>
-              <strong>{editing ? "CLOSE EDITOR" : "EDIT PROFILE"}</strong>
+              <small>РЕДАКТИРОВАНИЕ ПРОФИЛЯ</small>
+              <strong>{editing ? "ЗАКРЫТЬ" : "ИЗМЕНИТЬ ПРОФИЛЬ"}</strong>
             </button>
             <button onClick={() => (window.location.hash = "map")}>
-              <small>KNOWLEDGE SPACE</small>
-              <strong>OPEN MAP ↗</strong>
+              <small>КАРТА КУРСА</small>
+              <strong>ОТКРЫТЬ ↗</strong>
             </button>
           </div>
         </div>
 
         <aside className="identity-signature">
-          <span>SYSTEM SIGNATURE</span>
+          <span>СТАТИСТИКА ОБУЧЕНИЯ</span>
           <strong>{String(snapshot.theory.size).padStart(2, "0")}·{String(snapshot.solved.size).padStart(2, "0")}</strong>
-          <small>THEORY / SOLVED</small>
+          <small>ТЕМЫ / ЗАДАЧИ</small>
           <div aria-hidden="true">
             {Array.from({ length: 28 }, (_, index) => (
               <i key={index} style={{ height: 18 + ((index * 31 + progress) % 72) + "%" }} />
             ))}
           </div>
-          <em>REAL LOCAL COUNTS</em>
+          <em>ЛОКАЛЬНЫЕ ДАННЫЕ</em>
         </aside>
       </header>
 
       {editing && (
         <section className="identity-editor">
-          <header><span>IDENTITY CONSOLE</span><b>WRITE / LOCAL STORAGE</b></header>
+          <header><span>РЕДАКТИРОВАНИЕ ПРОФИЛЯ</span><b>ИЗМЕНЕНИЯ СОХРАНЯЮТСЯ НА ЭТОМ УСТРОЙСТВЕ</b></header>
           <div>
             <label>
-              <span>DISPLAY NAME</span>
+              <span>ИМЯ</span>
               <input value={draft.displayName} onChange={(event) => setDraft({ ...draft, displayName: event.target.value })} />
             </label>
             <label>
-              <span>HANDLE</span>
+              <span>НИК</span>
               <input value={draft.handle} onChange={(event) => setDraft({ ...draft, handle: event.target.value })} />
             </label>
             <label className="identity-editor-bio">
-              <span>BIO / MANIFEST</span>
+              <span>О СЕБЕ</span>
               <textarea value={draft.bio} onChange={(event) => setDraft({ ...draft, bio: event.target.value })} />
             </label>
-            <button onClick={saveProfile}><small>COMMIT</small><strong>SAVE CHANGES ↘</strong></button>
+            <button onClick={saveProfile}><small>СОХРАНИТЬ</small><strong>СОХРАНИТЬ ИЗМЕНЕНИЯ</strong></button>
           </div>
         </section>
       )}
@@ -187,12 +187,12 @@ export function AccountPage({
       <section className="identity-stat-strip">
         {[
           ["01", progress + "%", "Освоение курса", "TRACKED MASTERY"],
-          ["02", snapshot.solved.size, "Решено задач", "LOCAL PROGRESS"],
+          ["02", snapshot.solved.size, "Решено задач", "ЛОКАЛЬНЫЙ ПРОГРЕСС"],
           ["03", snapshot.theory.size, "Изучено тем", "THEORY MARKED"],
-          ["04", savedCount, "Сохранено", "THEOREMS + NOTES"],
+          ["04", savedCount, "Сохранено", "ТЕОРЕМЫ И ЗАМЕТКИ"],
         ].map(([code, value, title, copy]) => (
           <article key={code}>
-            <div><span>{code}</span><small>REAL DATA</small></div>
+            <div><span>{code}</span><small>ДАННЫЕ ПРОГРЕССА</small></div>
             <strong>{value}</strong>
             <h2>{title}</h2>
             <p>{copy}</p>
@@ -202,7 +202,7 @@ export function AccountPage({
 
       <div className="identity-dashboard">
         <section className="identity-module identity-activity">
-          <header><div><span>ACTIVITY MATRIX</span><h2>Год как сигнал.</h2></div><b>DEMO + LOCAL</b></header>
+          <header><div><span>АКТИВНОСТЬ</span><h2>Активность по дням.</h2></div><b>ДЕМОНСТРАЦИОННЫЙ ВИД</b></header>
           <div className="identity-heatmap-frame">
             <div className="identity-heatmap" aria-label="Демонстрационная карта активности">
               {heatmap.map((level, index) => (
@@ -214,7 +214,7 @@ export function AccountPage({
         </section>
 
         <section className="identity-module identity-wave">
-          <header><div><span>VISIT WAVEFORM</span><h2>28 дней движения.</h2></div><b>DEMO DATA</b></header>
+          <header><div><span>ПОСЕЩЕНИЯ</span><h2>Последние 28 дней.</h2></div><b>ДЕМОНСТРАЦИОННЫЕ ДАННЫЕ</b></header>
           <svg viewBox="0 0 720 240" role="img" aria-label="Личный мок-график посещений">
             <g>{[46,86,126,166,206].map((y)=><line key={y} x1="20" x2="700" y1={y} y2={y}/>)}</g>
             <polyline points={visitPoints}/>
@@ -229,7 +229,7 @@ export function AccountPage({
       </div>
 
       <section className="identity-module identity-sectors">
-        <header><div><span>KNOWLEDGE SECTORS</span><h2>Прогресс по разделам.</h2></div><b>{chapterRows.length} TRACKED</b></header>
+        <header><div><span>РАЗДЕЛЫ КУРСА</span><h2>Прогресс по разделам.</h2></div><b>{chapterRows.length} ОТСЛЕЖИВАЕТСЯ</b></header>
         <div className="identity-sector-grid">
           {chapterRows.map((row,index)=>(
             <button key={row.id} onClick={() => (window.location.hash = row.topicId)}>

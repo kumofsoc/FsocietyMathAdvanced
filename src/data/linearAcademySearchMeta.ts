@@ -10,768 +10,768 @@ export const linearAcademySearchEntries: LinearAcademySearchEntry[] = [
     "topicId": "matrices",
     "index": 33,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "matrices",
     "index": 34,
     "kind": "theorem",
-    "title": "ACADEMY · Ассоциативность матричного умножения"
+    "title": "Ассоциативность матричного умножения"
   },
   {
     "topicId": "matrices",
     "index": 35,
     "kind": "example",
-    "title": "ACADEMY · Worked example: оператор как произведение"
+    "title": "Разбор: оператор как произведение"
   },
   {
     "topicId": "matrices",
     "index": 36,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Матрица как деформация координатной сетки"
+    "title": "Визуализация · Матрица как деформация координатной сетки"
   },
   {
     "topicId": "determinants",
     "index": 31,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "determinants",
     "index": 32,
     "kind": "theorem",
-    "title": "ACADEMY · Мультипликативность определителя"
+    "title": "Мультипликативность определителя"
   },
   {
     "topicId": "determinants",
     "index": 33,
     "kind": "example",
-    "title": "ACADEMY · Worked example: знак det"
+    "title": "Разбор: знак det"
   },
   {
     "topicId": "determinants",
     "index": 34,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Определитель как ориентированная площадь"
+    "title": "Визуализация · Определитель как ориентированная площадь"
   },
   {
     "topicId": "inverse-rank",
     "index": 17,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "inverse-rank",
     "index": 18,
     "kind": "theorem",
-    "title": "ACADEMY · Ранг и обратимость"
+    "title": "Ранг и обратимость"
   },
   {
     "topicId": "inverse-rank",
     "index": 19,
     "kind": "example",
-    "title": "ACADEMY · Worked example: ранг без полного Гаусса"
+    "title": "Разбор: ранг без полного Гаусса"
   },
   {
     "topicId": "inverse-rank",
     "index": 20,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Ранг как потеря размерности"
+    "title": "Визуализация · Ранг как потеря размерности"
   },
   {
     "topicId": "linear-systems",
     "index": 25,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "linear-systems",
     "index": 26,
     "kind": "theorem",
-    "title": "ACADEMY · Кронекер–Капелли в операторной форме"
+    "title": "Кронекер–Капелли в операторной форме"
   },
   {
     "topicId": "linear-systems",
     "index": 27,
     "kind": "example",
-    "title": "ACADEMY · Worked example: число параметров"
+    "title": "Разбор: число параметров"
   },
   {
     "topicId": "linear-systems",
     "index": 28,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Система как пересечение прямых и плоскостей"
+    "title": "Визуализация · Система как пересечение прямых и плоскостей"
   },
   {
     "topicId": "vectors",
     "index": 16,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "vectors",
     "index": 17,
     "kind": "theorem",
-    "title": "ACADEMY · Единственность координат"
+    "title": "Единственность координат"
   },
   {
     "topicId": "vectors",
     "index": 18,
     "kind": "example",
-    "title": "ACADEMY · Worked example: смена базиса"
+    "title": "Разбор: смена базиса"
   },
   {
     "topicId": "vectors",
     "index": 19,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Базис, координаты и один и тот же вектор"
+    "title": "Визуализация · Базис, координаты и один и тот же вектор"
   },
   {
     "topicId": "dot-product",
     "index": 8,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "dot-product",
     "index": 9,
     "kind": "theorem",
-    "title": "ACADEMY · Неравенство Коши–Буняковского"
+    "title": "Неравенство Коши–Буняковского"
   },
   {
     "topicId": "dot-product",
     "index": 10,
     "kind": "example",
-    "title": "ACADEMY · Worked example: ортогональная проекция"
+    "title": "Разбор: ортогональная проекция"
   },
   {
     "topicId": "dot-product",
     "index": 11,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Проекция и разложение на параллельную/ортогональную части"
+    "title": "Визуализация · Проекция и разложение на параллельную/ортогональную части"
   },
   {
     "topicId": "cross-product",
     "index": 9,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "cross-product",
     "index": 10,
     "kind": "theorem",
-    "title": "ACADEMY · Норма векторного произведения"
+    "title": "Норма векторного произведения"
   },
   {
     "topicId": "cross-product",
     "index": 11,
     "kind": "example",
-    "title": "ACADEMY · Worked example: нормаль плоскости"
+    "title": "Разбор: нормаль плоскости"
   },
   {
     "topicId": "cross-product",
     "index": 12,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Площадь и правило правой руки"
+    "title": "Визуализация · Площадь и правило правой руки"
   },
   {
     "topicId": "mixed-product",
     "index": 8,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "mixed-product",
     "index": 9,
     "kind": "theorem",
-    "title": "ACADEMY · Критерий компланарности"
+    "title": "Критерий компланарности"
   },
   {
     "topicId": "mixed-product",
     "index": 10,
     "kind": "example",
-    "title": "ACADEMY · Worked example: расстояние через объём"
+    "title": "Разбор: расстояние через объём"
   },
   {
     "topicId": "mixed-product",
     "index": 11,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Ориентированный объём параллелепипеда"
+    "title": "Визуализация · Ориентированный объём параллелепипеда"
   },
   {
     "topicId": "plane-coordinates",
     "index": 7,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "plane-coordinates",
     "index": 8,
     "kind": "theorem",
-    "title": "ACADEMY · Градиент как нормаль к уровню"
+    "title": "Градиент как нормаль к уровню"
   },
   {
     "topicId": "plane-coordinates",
     "index": 9,
     "kind": "example",
-    "title": "ACADEMY · Worked example: окружность как уровень"
+    "title": "Разбор: окружность как уровень"
   },
   {
     "topicId": "plane-coordinates",
     "index": 10,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Неявная кривая и поле нормалей"
+    "title": "Визуализация · Неявная кривая и поле нормалей"
   },
   {
     "topicId": "plane-lines",
     "index": 8,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "plane-lines",
     "index": 9,
     "kind": "theorem",
-    "title": "ACADEMY · Расстояние от точки до прямой"
+    "title": "Расстояние от точки до прямой"
   },
   {
     "topicId": "plane-lines",
     "index": 10,
     "kind": "example",
-    "title": "ACADEMY · Worked example: пересечение двух прямых"
+    "title": "Разбор: пересечение двух прямых"
   },
   {
     "topicId": "plane-lines",
     "index": 11,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Точка, прямая, нормаль и кратчайший отрезок"
+    "title": "Визуализация · Точка, прямая, нормаль и кратчайший отрезок"
   },
   {
     "topicId": "conics",
     "index": 9,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "conics",
     "index": 10,
     "kind": "theorem",
-    "title": "ACADEMY · Фокусное определение эллипса"
+    "title": "Фокусное определение эллипса"
   },
   {
     "topicId": "conics",
     "index": 11,
     "kind": "example",
-    "title": "ACADEMY · Worked example: эксцентриситет"
+    "title": "Разбор: эксцентриситет"
   },
   {
     "topicId": "conics",
     "index": 12,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Фокусы, директрисы и эксцентриситет коник"
+    "title": "Визуализация · Фокусы, директрисы и эксцентриситет коник"
   },
   {
     "topicId": "space-lines-planes",
     "index": 8,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "space-lines-planes",
     "index": 9,
     "kind": "theorem",
-    "title": "ACADEMY · Расстояние между скрещивающимися прямыми"
+    "title": "Расстояние между скрещивающимися прямыми"
   },
   {
     "topicId": "space-lines-planes",
     "index": 10,
     "kind": "example",
-    "title": "ACADEMY · Worked example: угол прямой и плоскости"
+    "title": "Разбор: угол прямой и плоскости"
   },
   {
     "topicId": "space-lines-planes",
     "index": 11,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Прямая, плоскость, нормаль и угол"
+    "title": "Визуализация · Прямая, плоскость, нормаль и угол"
   },
   {
     "topicId": "quadrics",
     "index": 18,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "quadrics",
     "index": 19,
     "kind": "theorem",
-    "title": "ACADEMY · Главные оси квадрики"
+    "title": "Главные оси квадрики"
   },
   {
     "topicId": "quadrics",
     "index": 20,
     "kind": "example",
-    "title": "ACADEMY · Worked example: распознавание по сечениям"
+    "title": "Разбор: распознавание по сечениям"
   },
   {
     "topicId": "quadrics",
     "index": 21,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Главные сечения поверхности второго порядка"
+    "title": "Визуализация · Главные сечения поверхности второго порядка"
   },
   {
     "topicId": "mappings-transformations",
     "index": 11,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "mappings-transformations",
     "index": 12,
     "kind": "theorem",
-    "title": "ACADEMY · Обратимость композиции"
+    "title": "Обратимость композиции"
   },
   {
     "topicId": "mappings-transformations",
     "index": 13,
     "kind": "example",
-    "title": "ACADEMY · Worked example: преобразование координат"
+    "title": "Разбор: преобразование координат"
   },
   {
     "topicId": "mappings-transformations",
     "index": 14,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Композиция отображений как pipeline"
+    "title": "Визуализация · Композиция отображений как pipeline"
   },
   {
     "topicId": "linear-transformations",
     "index": 15,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "linear-transformations",
     "index": 16,
     "kind": "theorem",
-    "title": "ACADEMY · Определение оператора по базису"
+    "title": "Определение оператора по базису"
   },
   {
     "topicId": "linear-transformations",
     "index": 17,
     "kind": "example",
-    "title": "ACADEMY · Worked example: shear"
+    "title": "Разбор: shear"
   },
   {
     "topicId": "linear-transformations",
     "index": 18,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Линейный оператор на сетке и базисе"
+    "title": "Визуализация · Линейный оператор на сетке и базисе"
   },
   {
     "topicId": "affine-transformations",
     "index": 12,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "affine-transformations",
     "index": 13,
     "kind": "theorem",
-    "title": "ACADEMY · Сохранение барицентрических комбинаций"
+    "title": "Сохранение барицентрических комбинаций"
   },
   {
     "topicId": "affine-transformations",
     "index": 14,
     "kind": "example",
-    "title": "ACADEMY · Worked example: центр масс треугольника"
+    "title": "Разбор: центр масс треугольника"
   },
   {
     "topicId": "affine-transformations",
     "index": 15,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Аффинная деформация треугольника и барицентрические точки"
+    "title": "Визуализация · Аффинная деформация треугольника и барицентрические точки"
   },
   {
     "topicId": "linear-spaces",
     "index": 12,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "linear-spaces",
     "index": 13,
     "kind": "theorem",
-    "title": "ACADEMY · Эквивалентность базиса и единственности координат"
+    "title": "Эквивалентность базиса и единственности координат"
   },
   {
     "topicId": "linear-spaces",
     "index": 14,
     "kind": "example",
-    "title": "ACADEMY · Worked example: пространство полиномов"
+    "title": "Разбор: пространство полиномов"
   },
   {
     "topicId": "linear-spaces",
     "index": 15,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Один язык базиса для стрелок, полиномов и матриц"
+    "title": "Визуализация · Один язык базиса для стрелок, полиномов и матриц"
   },
   {
     "topicId": "subspaces",
     "index": 11,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "subspaces",
     "index": 12,
     "kind": "theorem",
-    "title": "ACADEMY · Формула Грассмана"
+    "title": "Формула Грассмана"
   },
   {
     "topicId": "subspaces",
     "index": 13,
     "kind": "example",
-    "title": "ACADEMY · Worked example: две плоскости в ℝ³"
+    "title": "Разбор: две плоскости в ℝ³"
   },
   {
     "topicId": "subspaces",
     "index": 14,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Сумма и пересечение подпространств"
+    "title": "Визуализация · Сумма и пересечение подпространств"
   },
   {
     "topicId": "linear-maps",
     "index": 12,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "linear-maps",
     "index": 13,
     "kind": "theorem",
-    "title": "ACADEMY · Теорема о ранге и дефекте"
+    "title": "Теорема о ранге и дефекте"
   },
   {
     "topicId": "linear-maps",
     "index": 14,
     "kind": "example",
-    "title": "ACADEMY · Worked example: проекция ℝ³→плоскость"
+    "title": "Разбор: проекция ℝ³→плоскость"
   },
   {
     "topicId": "linear-maps",
     "index": 15,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Kernel → operator → image"
+    "title": "Визуализация · Kernel → operator → image"
   },
   {
     "topicId": "eigenproblem",
     "index": 13,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "eigenproblem",
     "index": 14,
     "kind": "theorem",
-    "title": "ACADEMY · Независимость собственных векторов разных λ"
+    "title": "Независимость собственных векторов разных λ"
   },
   {
     "topicId": "eigenproblem",
     "index": 15,
     "kind": "example",
-    "title": "ACADEMY · Worked example: динамика A^n"
+    "title": "Разбор: динамика A^n"
   },
   {
     "topicId": "eigenproblem",
     "index": 16,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Собственные направления под повторным действием оператора"
+    "title": "Визуализация · Собственные направления под повторным действием оператора"
   },
   {
     "topicId": "linear-functionals",
     "index": 7,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "linear-functionals",
     "index": 8,
     "kind": "theorem",
-    "title": "ACADEMY · Двойственный базис"
+    "title": "Двойственный базис"
   },
   {
     "topicId": "linear-functionals",
     "index": 9,
     "kind": "example",
-    "title": "ACADEMY · Worked example: гиперплоскость уровня"
+    "title": "Разбор: гиперплоскость уровня"
   },
   {
     "topicId": "linear-functionals",
     "index": 10,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Ковектор как семейство параллельных гиперплоскостей"
+    "title": "Визуализация · Ковектор как семейство параллельных гиперплоскостей"
   },
   {
     "topicId": "quadratic-forms",
     "index": 14,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "quadratic-forms",
     "index": 15,
     "kind": "theorem",
-    "title": "ACADEMY · Спектральная нормальная форма"
+    "title": "Спектральная нормальная форма"
   },
   {
     "topicId": "quadratic-forms",
     "index": 16,
     "kind": "example",
-    "title": "ACADEMY · Worked example: definiteness"
+    "title": "Разбор: definiteness"
   },
   {
     "topicId": "quadratic-forms",
     "index": 17,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Квадратичная форма как вращаемый эллипс/гипербола"
+    "title": "Визуализация · Квадратичная форма как вращаемый эллипс/гипербола"
   },
   {
     "topicId": "jordan-form",
     "index": 15,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "jordan-form",
     "index": 16,
     "kind": "theorem",
-    "title": "ACADEMY · Цепочка Жордана"
+    "title": "Цепочка Жордана"
   },
   {
     "topicId": "jordan-form",
     "index": 17,
     "kind": "example",
-    "title": "ACADEMY · Worked example: рост при λ=1"
+    "title": "Разбор: рост при λ=1"
   },
   {
     "topicId": "jordan-form",
     "index": 18,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Жорданов блок как shear + scaling"
+    "title": "Визуализация · Жорданов блок как shear + scaling"
   },
   {
     "topicId": "euclidean-spaces",
     "index": 13,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "euclidean-spaces",
     "index": 14,
     "kind": "theorem",
-    "title": "ACADEMY · Теорема об ортогональной проекции"
+    "title": "Теорема об ортогональной проекции"
   },
   {
     "topicId": "euclidean-spaces",
     "index": 15,
     "kind": "example",
-    "title": "ACADEMY · Worked example: least squares"
+    "title": "Разбор: least squares"
   },
   {
     "topicId": "euclidean-spaces",
     "index": 16,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Gram–Schmidt и ортогональная проекция"
+    "title": "Визуализация · Gram–Schmidt и ортогональная проекция"
   },
   {
     "topicId": "euclidean-operators",
     "index": 12,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "euclidean-operators",
     "index": 13,
     "kind": "theorem",
-    "title": "ACADEMY · SVD"
+    "title": "SVD"
   },
   {
     "topicId": "euclidean-operators",
     "index": 14,
     "kind": "example",
-    "title": "ACADEMY · Worked example: единичная окружность → эллипс"
+    "title": "Разбор: единичная окружность → эллипс"
   },
   {
     "topicId": "euclidean-operators",
     "index": 15,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · SVD: круг → вращение → растяжение → вращение"
+    "title": "Визуализация · SVD: круг → вращение → растяжение → вращение"
   },
   {
     "topicId": "euclidean-functions",
     "index": 9,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "euclidean-functions",
     "index": 10,
     "kind": "theorem",
-    "title": "ACADEMY · Представление линейного функционала"
+    "title": "Представление линейного функционала"
   },
   {
     "topicId": "euclidean-functions",
     "index": 11,
     "kind": "example",
-    "title": "ACADEMY · Worked example: градиент линейной функции"
+    "title": "Разбор: градиент линейной функции"
   },
   {
     "topicId": "euclidean-functions",
     "index": 12,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Функционал ↔ представляющий вектор"
+    "title": "Визуализация · Функционал ↔ представляющий вектор"
   },
   {
     "topicId": "unitary-spaces",
     "index": 11,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "unitary-spaces",
     "index": 12,
     "kind": "theorem",
-    "title": "ACADEMY · Спектр эрмитова оператора"
+    "title": "Спектр эрмитова оператора"
   },
   {
     "topicId": "unitary-spaces",
     "index": 13,
     "kind": "example",
-    "title": "ACADEMY · Worked example: фазовый поворот"
+    "title": "Разбор: фазовый поворот"
   },
   {
     "topicId": "unitary-spaces",
     "index": 14,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Комплексная фаза и сохранение нормы"
+    "title": "Визуализация · Комплексная фаза и сохранение нормы"
   },
   {
     "topicId": "affine-spaces",
     "index": 15,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "affine-spaces",
     "index": 16,
     "kind": "theorem",
-    "title": "ACADEMY · Аффинная плоскость как смещение подпространства"
+    "title": "Аффинная плоскость как смещение подпространства"
   },
   {
     "topicId": "affine-spaces",
     "index": 17,
     "kind": "example",
-    "title": "ACADEMY · Worked example: плоскость решений"
+    "title": "Разбор: плоскость решений"
   },
   {
     "topicId": "affine-spaces",
     "index": 18,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Точка + направляющее подпространство"
+    "title": "Визуализация · Точка + направляющее подпространство"
   },
   {
     "topicId": "quadric-invariants",
     "index": 17,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "quadric-invariants",
     "index": 18,
     "kind": "theorem",
-    "title": "ACADEMY · Инвариантность ранга квадратичной части"
+    "title": "Инвариантность ранга квадратичной части"
   },
   {
     "topicId": "quadric-invariants",
     "index": 19,
     "kind": "example",
-    "title": "ACADEMY · Worked example: знак сигнатуры"
+    "title": "Разбор: знак сигнатуры"
   },
   {
     "topicId": "quadric-invariants",
     "index": 20,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Инварианты квадрики при смене координат"
+    "title": "Визуализация · Инварианты квадрики при смене координат"
   },
   {
     "topicId": "tensor-linear",
     "index": 20,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "tensor-linear",
     "index": 21,
     "kind": "theorem",
-    "title": "ACADEMY · Тензорное произведение базисов"
+    "title": "Тензорное произведение базисов"
   },
   {
     "topicId": "tensor-linear",
     "index": 22,
     "kind": "example",
-    "title": "ACADEMY · Worked example: trace как свёртка"
+    "title": "Разбор: trace как свёртка"
   },
   {
     "topicId": "tensor-linear",
     "index": 23,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Индексы и закон преобразования компонент"
+    "title": "Визуализация · Индексы и закон преобразования компонент"
   },
   {
     "topicId": "tensor-euclidean",
     "index": 9,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "tensor-euclidean",
     "index": 10,
     "kind": "theorem",
-    "title": "ACADEMY · Поднятие и опускание индексов взаимно обратны"
+    "title": "Поднятие и опускание индексов взаимно обратны"
   },
   {
     "topicId": "tensor-euclidean",
     "index": 11,
     "kind": "example",
-    "title": "ACADEMY · Worked example: косой базис"
+    "title": "Разбор: косой базис"
   },
   {
     "topicId": "tensor-euclidean",
     "index": 12,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Метрика как деформация единичной окружности"
+    "title": "Визуализация · Метрика как деформация единичной окружности"
   },
   {
     "topicId": "exterior-algebra",
     "index": 14,
     "kind": "concepts",
-    "title": "ACADEMY CORE · Концептуальная модель"
+    "title": "Концептуальная модель"
   },
   {
     "topicId": "exterior-algebra",
     "index": 15,
     "kind": "theorem",
-    "title": "ACADEMY · Критерий зависимости через wedge"
+    "title": "Критерий зависимости через wedge"
   },
   {
     "topicId": "exterior-algebra",
     "index": 16,
     "kind": "example",
-    "title": "ACADEMY · Worked example: площадь без cross product"
+    "title": "Разбор: площадь без cross product"
   },
   {
     "topicId": "exterior-algebra",
     "index": 17,
     "kind": "geometry",
-    "title": "ACADEMY VISUAL · Wedge-product как ориентированный k-объём"
+    "title": "Визуализация · Wedge-product как ориентированный k-объём"
   }
 ];

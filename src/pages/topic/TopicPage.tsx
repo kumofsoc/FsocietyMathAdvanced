@@ -3,16 +3,25 @@ import { BlockMath } from "react-katex";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { chapters, topicList, topics } from "@/data/course";
 import { practiceTaskIdsByTopic } from "@/data/practiceMeta";
+import { linearAcademyBlocks } from "@/data/linearAcademy";
+import { linearAcademyPitfallBlocks } from "@/data/linearAcademyPitfalls";
 import {
   LEARNING_EVENT,
+  loadReadingProgress,
   loadSavedTheorems,
   loadSet,
+  markReadingBlock,
+  saveReadingProgress,
   saveSet,
   saveTheorems,
   SOLVED_KEY,
   THEORY_KEY,
 } from "@/features/learning/model/learning";
-import { isTrackedTopic } from "@/features/learning/model/progress";
+import {
+  getTopicProgressBreakdown,
+  isTrackedTopic,
+  THEORY_CHECKPOINT_THRESHOLD,
+} from "@/features/learning/model/progress";
 import type { BlockKind, ContentBlock, Topic } from "@/entities/course/model/types";
 import { RichMatrixText } from "@/visualizations/linear/MatrixNotation";
 import { TopicLabInsert, TopicVisualInsert } from "@/visualizations/registry/TopicVisualRegistry";
@@ -89,7 +98,24 @@ const labels: Record<BlockKind, string> = {
   summary: "ИТОГ",
 };
 
+function displayBlockTitle(title: string) {
+  return title
+    .replace(/^ACADEMY\s+VISUAL\s*[·/]\s*/i, "Визуализация · ")
+    .replace(/^ACADEMY\s+LAB\s*\/\s*/i, "Интерактивная лаборатория · ")
+    .replace(/^ACADEMY\s+PRO\s*\/\s*/i, "Углублённое изучение · ")
+    .replace(/^ACADEMY\s*\/\s*/i, "")
+    .replace(/^ACADEMY\s+/i, "");
+}
+
 const BLOCK_TARGET_KEY = "fsociety-block-target-v1";
+function isAdvancedLearningBlock(topicId: string, block: ContentBlock) {
+  return (
+    linearAcademyBlocks[topicId]?.includes(block) ||
+    linearAcademyPitfallBlocks[topicId]?.includes(block) ||
+    false
+  );
+}
+
 const ACADEMY_CHAPTERS = new Set([
   "linear",
   "vectors",
@@ -145,7 +171,7 @@ function ContentCard({
   index: number;
 }) {
   const theoremId = topic.id + "::" + index;
-  const academyBlock = block.title.startsWith("ACADEMY");
+  const academyBlock = isAdvancedLearningBlock(topic.id, block);
   const [saved, setSaved] = useState(() => loadSavedTheorems().some((item) => item.id === theoremId));
   const [propertyPanel, setPropertyPanel] = useState<"proof" | "corollary" | null>(null);
 
@@ -163,7 +189,7 @@ function ContentCard({
         id: theoremId,
         topicId: topic.id,
         topicTitle: topic.title,
-        title: block.title,
+        title: displayBlockTitle(block.title),
         body: block.body,
         formula: block.formula,
       },
@@ -184,13 +210,13 @@ function ContentCard({
       transition={{ duration: 0.44, delay: Math.min(index * 0.018, 0.16) }}
     >
       <div className="block-rail">
-        <span>{academyBlock ? "ACADEMY / " + labels[block.kind] : labels[block.kind]}</span>
+        <span>{academyBlock ? "УГЛУБЛЁННО / " + labels[block.kind] : labels[block.kind]}</span>
         <small>{String(index + 1).padStart(2, "0")}</small>
       </div>
 
       <div className="block-body">
         <div className="block-title-row">
-          <h3>{block.title}</h3>
+          <h3>{displayBlockTitle(block.title)}</h3>
           {block.kind === "theorem" && (
             <button
               className={"save-theorem-button " + (saved ? "saved" : "")}
@@ -371,6 +397,10 @@ export function TopicPage({ topicId }: { topicId: string }) {
   const theorySentinel = useRef<HTMLDivElement>(null);
   const [activeBlock, setActiveBlock] = useState(0);
   const [theoryRead, setTheoryRead] = useState(() => loadSet(THEORY_KEY).has(topic.id));
+  const [readingRatio, setReadingRatio] = useState(() =>
+    theoryRead ? 1 : (loadReadingProgress()[topic.id] ?? 0),
+  );
+  const [reachedTheoryEnd, setReachedTheoryEnd] = useState(theoryRead);
   const [solved, setSolved] = useState(() => loadSet(SOLVED_KEY));
 
   useEffect(() => {
@@ -431,53 +461,137 @@ export function TopicPage({ topicId }: { topicId: string }) {
   }, [topic.id, topic.blocks.length]);
 
   useEffect(() => {
-    setTheoryRead(loadSet(THEORY_KEY).has(topic.id));
-    setSolved(loadSet(SOLVED_KEY));
-
-    const refresh = () => {
-      setTheoryRead(loadSet(THEORY_KEY).has(topic.id));
+    const sync = () => {
+      const complete = loadSet(THEORY_KEY).has(topic.id);
+      setTheoryRead(complete);
+      setReadingRatio(complete ? 1 : (loadReadingProgress()[topic.id] ?? 0));
       setSolved(loadSet(SOLVED_KEY));
     };
+    sync();
+
+    const refresh = () => sync();
     window.addEventListener(LEARNING_EVENT, refresh);
     return () => window.removeEventListener(LEARNING_EVENT, refresh);
   }, [topic.id]);
 
   useEffect(() => {
+    if (!tracksLearning || theoryRead) return;
+
+    const dwellTimers = new Map<Element, number>();
+    let observer: IntersectionObserver | null = null;
+
+    const cancelDwell = (target: Element) => {
+      const timer = dwellTimers.get(target);
+      if (timer !== undefined) {
+        window.clearTimeout(timer);
+        dwellTimers.delete(target);
+      }
+    };
+
+    const frame = requestAnimationFrame(() => {
+      const nodes = Array.from(
+        document.querySelectorAll<HTMLElement>(
+          '[data-topic-block="' + topic.id + '"]',
+        ),
+      );
+      if (!nodes.length) return;
+
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            const enoughVisible =
+              entry.isIntersecting &&
+              (
+                entry.intersectionRatio >= 0.35 ||
+                entry.intersectionRect.height >= Math.min(320, window.innerHeight * 0.4)
+              );
+
+            if (!enoughVisible) {
+              cancelDwell(entry.target);
+              return;
+            }
+
+            if (dwellTimers.has(entry.target)) return;
+
+            const timer = window.setTimeout(() => {
+              dwellTimers.delete(entry.target);
+              if (document.visibilityState !== "visible") return;
+
+              const index = Number((entry.target as HTMLElement).dataset.blockIndex ?? "-1");
+              if (index < 0) return;
+
+              const ratio = markReadingBlock(topic.id, index, topic.blocks.length);
+              setReadingRatio((current) => Math.max(current, ratio));
+            }, 1200);
+
+            dwellTimers.set(entry.target, timer);
+          });
+        },
+        { threshold: [0.15, 0.35, 0.6] },
+      );
+
+      nodes.forEach((node) => observer?.observe(node));
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      observer?.disconnect();
+      dwellTimers.forEach((timer) => window.clearTimeout(timer));
+      dwellTimers.clear();
+    };
+  }, [topic.id, topic.blocks.length, theoryRead, tracksLearning]);
+
+  useEffect(() => {
     const target = theorySentinel.current;
-    if (!tracksLearning || !target || theoryRead) return;
+    if (!tracksLearning || !target) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) return;
-        const current = loadSet(THEORY_KEY);
-        current.add(topic.id);
-        saveSet(THEORY_KEY, current);
-        setTheoryRead(true);
-        observer.disconnect();
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setReachedTheoryEnd(true);
+        }
       },
-      { threshold: 0.65 },
+      { threshold: 0.25 },
     );
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [topic.id, theoryRead, tracksLearning]);
+  }, [topic.id, tracksLearning]);
 
   const taskIds = practiceTaskIdsByTopic[topic.id] ?? [];
-  const solvedCount = useMemo(
-    () => taskIds.filter((taskId) => solved.has(taskId)).length,
-    [taskIds, solved],
+  const progressBreakdown = useMemo(
+    () =>
+      getTopicProgressBreakdown(topic.id, {
+        theory: theoryRead ? new Set([topic.id]) : new Set(),
+        solved,
+        reading: { [topic.id]: readingRatio },
+      }),
+    [topic.id, theoryRead, solved, readingRatio],
   );
-  const practiceRatio = taskIds.length ? solvedCount / taskIds.length : 0;
-  const topicProgress = Math.round((theoryRead ? 50 : 0) + practiceRatio * 50);
+  const solvedCount = progressBreakdown.solvedCount;
+  const practiceRatio = progressBreakdown.practiceRatio;
+  const topicProgress = progressBreakdown.total;
   const academyEnabled = Boolean(chapter && ACADEMY_CHAPTERS.has(chapter.id));
   const academyStartIndex = academyEnabled
-    ? topic.blocks.findIndex((block) => block.title.startsWith("ACADEMY"))
+    ? topic.blocks.findIndex((block) => isAdvancedLearningBlock(topic.id, block))
     : -1;
   const academyTaskIds = academyEnabled
     ? taskIds.filter((id) => id.startsWith("academy-"))
     : [];
   const academyProofCount = academyTaskIds.filter((id) => id.startsWith("academy-proof-")).length;
   const academyCapstoneCount = academyTaskIds.filter((id) => id.includes("capstone")).length;
+
+  const completeTheory = () => {
+    if (!tracksLearning || theoryRead) return;
+    if (!reachedTheoryEnd || !progressBreakdown.canCompleteTheory) return;
+
+    const current = loadSet(THEORY_KEY);
+    current.add(topic.id);
+    saveReadingProgress(topic.id, 1);
+    saveSet(THEORY_KEY, current);
+    setReadingRatio(1);
+    setTheoryRead(true);
+  };
 
   const jumpToBlock = (index: number) => {
     document
@@ -490,7 +604,7 @@ export function TopicPage({ topicId }: { topicId: string }) {
       <header className="topic-hero">
         <div className="eyebrow">
           ГЛАВА {chapter?.number} / § {topic.number} · {chapter?.title}
-          {chapter && ACADEMY_CHAPTERS.has(chapter.id) ? " · ACADEMY PRO" : ""}
+          {chapter && ACADEMY_CHAPTERS.has(chapter.id) ? " · УГЛУБЛЁННЫЙ МАРШРУТ" : ""}
         </div>
         <div className="hero-title-row">
           <div>
@@ -500,14 +614,19 @@ export function TopicPage({ topicId }: { topicId: string }) {
 
           <div className="topic-learning-status">
             <div>
+              <span>МАТЕРИАЛ</span>
+              <strong>{Math.round(progressBreakdown.readingRatio * 100)}%</strong>
+              <small>просмотрено смысловых блоков</small>
+            </div>
+            <div>
               <span>ТЕОРИЯ</span>
-              <strong>{theoryRead ? "50 / 50" : "0 / 50"}</strong>
-              <small>{theoryRead ? "прочитана" : "дочитай до практики"}</small>
+              <strong>{theoryRead ? "Завершена" : progressBreakdown.canCompleteTheory ? "Готова" : "В процессе"}</strong>
+              <small>{theoryRead ? "можно сосредоточиться на задачах" : "нужен контрольный шаг"}</small>
             </div>
             <div>
               <span>ПРАКТИКА</span>
-              <strong>{Math.round(practiceRatio * 50)} / 50</strong>
-              <small>{taskIds.length ? solvedCount + " / " + taskIds.length + " задач" : "банк готовится"}</small>
+              <strong>{taskIds.length ? solvedCount + " / " + taskIds.length : "—"}</strong>
+              <small>{taskIds.length ? Math.round(practiceRatio * 100) + "% задач решено" : "банк задач готовится"}</small>
             </div>
             <div className="topic-total">
               <span>ОСВОЕНИЕ</span>
@@ -528,27 +647,55 @@ export function TopicPage({ topicId }: { topicId: string }) {
         )}
       </header>
 
+      {tracksLearning && (
+        <nav className="topic-mastery-path" aria-label="Этапы освоения темы">
+          <div className={progressBreakdown.readingRatio > 0 ? "active" : ""}>
+            <span>01</span>
+            <strong>Изучение материала</strong>
+            <small>{Math.round(progressBreakdown.readingRatio * 100)}% блоков просмотрено</small>
+          </div>
+          <i aria-hidden="true" />
+          <div className={theoryRead ? "complete" : progressBreakdown.canCompleteTheory ? "active" : ""}>
+            <span>02</span>
+            <strong>Завершение теории</strong>
+            <small>{theoryRead ? "завершено" : progressBreakdown.canCompleteTheory ? "можно завершить" : "после основного материала"}</small>
+          </div>
+          <i aria-hidden="true" />
+          <div className={practiceRatio > 0 ? "active" : ""}>
+            <span>03</span>
+            <strong>Практика</strong>
+            <small>{taskIds.length ? solvedCount + " из " + taskIds.length + " задач" : "банк задач готовится"}</small>
+          </div>
+          <i aria-hidden="true" />
+          <div className={topicProgress >= 100 ? "complete" : ""}>
+            <span>04</span>
+            <strong>Освоение темы</strong>
+            <small>{topicProgress >= 100 ? "тема освоена" : topicProgress + "% общего прогресса"}</small>
+          </div>
+        </nav>
+      )}
+
       {academyEnabled && academyStartIndex >= 0 && (
         <section className="academy-track-banner">
           <div className="academy-track-copy">
-            <div className="academy-track-kicker">ACADEMY PRO / LINEAR MATHEMATICS</div>
+            <div className="academy-track-kicker">УГЛУБЛЁННОЕ ИЗУЧЕНИЕ / ЛИНЕЙНАЯ МАТЕМАТИКА</div>
             <h2>Углублённый слой этой темы уже встроен в курс.</h2>
             <p>
-              Не дополнительная справка: отдельная концептуальная модель, theorem + proof, worked example,
-              интерактивная геометрия, pitfall/counterexample и повышенный банк задач.
+              Здесь тема разобрана глубже: концептуальная модель, теоремы и доказательства,
+              подробные примеры, интерактивная геометрия, типичные ошибки и более сложные задачи.
             </p>
           </div>
 
           <div className="academy-track-metrics">
-            <div><span>DEEP BLOCKS</span><strong>5</strong></div>
-            <div><span>ACADEMY TASKS</span><strong>{academyTaskIds.length}</strong></div>
-            <div><span>PROOF</span><strong>{academyProofCount}</strong></div>
-            <div><span>CAPSTONE</span><strong>{academyCapstoneCount}</strong></div>
+            <div><span>УГЛУБЛЁННЫЕ БЛОКИ</span><strong>5</strong></div>
+            <div><span>ДОП. ЗАДАЧИ</span><strong>{academyTaskIds.length}</strong></div>
+            <div><span>ДОКАЗАТЕЛЬСТВА</span><strong>{academyProofCount}</strong></div>
+            <div><span>ИТОГОВЫЕ ЗАДАЧИ</span><strong>{academyCapstoneCount}</strong></div>
           </div>
 
           <div className="academy-track-actions">
             <button onClick={() => jumpToBlock(academyStartIndex)}>
-              ↓ Academy Core
+              ↓ К углублённой теории
             </button>
             <button
               onClick={() =>
@@ -557,7 +704,7 @@ export function TopicPage({ topicId }: { topicId: string }) {
                   ?.scrollIntoView({ behavior: "smooth", block: "start" })
               }
             >
-              ↓ Academy Practice
+              ↓ К углублённым задачам
             </button>
           </div>
         </section>
@@ -572,7 +719,7 @@ export function TopicPage({ topicId }: { topicId: string }) {
             aria-current={activeBlock === index ? "step" : undefined}
             onClick={() => document.getElementById("block-" + topic.id + "-" + index)?.scrollIntoView({ behavior: "smooth", block: "start" })}
           >
-            {String(index + 1).padStart(2, "0")} · {block.title}
+            {String(index + 1).padStart(2, "0")} · {displayBlockTitle(block.title)}
           </button>
         ))}
       </div>
@@ -598,15 +745,34 @@ export function TopicPage({ topicId }: { topicId: string }) {
 
       <TopicLabInsert topicId={topic.id} enabled={Boolean(topic.hasLab)} />
 
-      {tracksLearning && <div className="theory-finish" ref={theorySentinel}>
-        <span>{theoryRead ? "✓" : "↓"}</span>
+      {tracksLearning && <div className={"theory-finish " + (theoryRead ? "complete" : progressBreakdown.canCompleteTheory && reachedTheoryEnd ? "ready" : "")} ref={theorySentinel}>
+        <span>{theoryRead ? "✓" : Math.round(progressBreakdown.readingRatio * 100) + "%"}</span>
         <div>
-          <strong>{theoryRead ? "Теоретический маршрут пройден" : "Финиш теоретической части"}</strong>
+          <strong>
+            {theoryRead
+              ? "Теория завершена"
+              : progressBreakdown.canCompleteTheory && reachedTheoryEnd
+                ? "Материал достаточно изучен"
+                : "Продолжай разбирать теорию"}
+          </strong>
           <p>
             {theoryRead
-              ? "Система зафиксировала, что ты дошёл до конца материала. Теперь практика проверит, можешь ли ты самостоятельно использовать определения, свойства и методы этой темы."
-              : "Когда этот блок попадёт в область просмотра, система отметит теоретический материал как пройденный и откроет следующий этап — проверку на задачах."}
+              ? "Следующий этап — практика. Прогресс темы будет расти по мере самостоятельного решения задач."
+              : progressBreakdown.canCompleteTheory && reachedTheoryEnd
+                ? "Если определения, свойства и основные методы понятны, заверши теоретическую часть и переходи к задачам."
+                : "Прогресс учитывает только блоки, которые действительно задержались в зоне чтения, а не быстрый скролл страницы. Для завершения теории нужно изучить не менее " + Math.round(THEORY_CHECKPOINT_THRESHOLD * 100) + "% материала и дойти до конца раздела."}
           </p>
+          {!theoryRead && (
+            <button
+              className="theory-complete-button"
+              onClick={completeTheory}
+              disabled={!reachedTheoryEnd || !progressBreakdown.canCompleteTheory}
+            >
+              {progressBreakdown.canCompleteTheory && reachedTheoryEnd
+                ? "Завершить теорию и перейти к задачам"
+                : "Сначала изучи основную часть материала"}
+            </button>
+          )}
         </div>
       </div>}
 

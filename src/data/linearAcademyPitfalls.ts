@@ -38,7 +38,7 @@ export const linearAcademyPitfallBlocks: Record<string, ContentBlock[]> = Object
     topicId,
     [{
       kind: "note",
-      title: "ACADEMY PITFALL · Контрпример / типичная ошибка",
+      title: "Контрпример / типичная ошибка",
       body,
     }] satisfies ContentBlock[],
   ]),

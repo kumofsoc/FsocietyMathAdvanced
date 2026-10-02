@@ -11,18 +11,18 @@ export function HomePortalScene({ resumeTopic, onPrimary, onMap }: PortalProps) 
       <div className="portal-halo" data-ambient="pulse" aria-hidden="true"/>
       <div className="portal-code" aria-hidden="true">09 / ENTER</div>
       <div className="portal-content">
-        <div className="future-kicker" data-reveal><span>OPEN THE SYSTEM</span><i>NO RETURN REQUIRED</i></div>
+        <div className="future-kicker" data-reveal><span>OPEN THE SYSTEM</span><i>ПРОДОЛЖАЙ В СВОЁМ ТЕМПЕ</i></div>
         <h2 data-reveal>
           НЕ СМОТРИ.
           <span>ВХОДИ.</span>
         </h2>
         <p data-reveal>{resumeTopic ? "Точка продолжения сохранена: § " + resumeTopic.number + " / " + resumeTopic.title : "Первая точка входа уже готова."}</p>
         <div className="portal-actions" data-reveal>
-          <button className="future-primary portal-primary" onClick={onPrimary}><span>{resumeTopic ? "CONTINUE" : "START"}</span><strong>ENTER ↘</strong></button>
-          <button className="future-secondary" onClick={onMap}><span>UNIVERSE</span><strong>MAP ↗</strong></button>
+          <button className="future-primary portal-primary" onClick={onPrimary}><span>{resumeTopic ? "CONTINUE" : "START"}</span><strong>ПЕРЕЙТИ ↘</strong></button>
+          <button className="future-secondary" onClick={onMap}><span>КАРТА</span><strong>ОТКРЫТЬ ↗</strong></button>
         </div>
       </div>
-      <div className="portal-footer" aria-hidden="true"><span>VISUALMATH</span><span>MATHEMATICS / INTERFACE / MOTION</span><span>3026</span></div>
+      <div className="portal-footer" aria-hidden="true"><span>VISUALMATH</span><span>MATHEMATICS / INTERFACE / MOTION</span><span>VISUALMATH</span></div>
     </section>
   );
 }
