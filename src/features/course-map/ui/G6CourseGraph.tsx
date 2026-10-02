@@ -255,11 +255,14 @@ export function G6CourseGraph({
 
     graphRef.current = graph;
 
+    const nodeIdFromEvent = (event: unknown) =>
+      String((event as { target: { id: string } }).target.id);
+
     graph.on(NodeEvent.CLICK, (event) => {
-      callbacksRef.current.onSelect(String(event.target.id));
+      callbacksRef.current.onSelect(nodeIdFromEvent(event));
     });
     graph.on(NodeEvent.DBLCLICK, (event) => {
-      callbacksRef.current.onOpen(String(event.target.id));
+      callbacksRef.current.onOpen(nodeIdFromEvent(event));
     });
     graph.on(CanvasEvent.CLICK, () => {
       callbacksRef.current.onSelect(null);
