@@ -3416,6 +3416,9 @@ html[data-motion-profile="off"] .home-scrollytelling [data-reveal] {
 }
 .project-final-inner > p {
   max-width: 720px;
+  margin-top: clamp(56px,7vh,92px);
+  position: relative;
+  z-index: 1;
 }
 .project-final-inner .home-actions {
   justify-content: center;
@@ -3573,6 +3576,9 @@ html[data-motion-profile="off"] [data-reveal] {
   .orb-night { right:0;bottom:5%; }
   .project-final-inner h2 {
     font-size: 66px;
+  }
+  .project-final-inner > p {
+    margin-top: 42px;
   }
 }
 
