@@ -43,12 +43,12 @@ export function HomePage({
                 opacity: 1,
                 filter: "blur(0px)",
                 stagger: profile === "full" ? 0.075 : 0.045,
+                duration: eco ? 0.45 : 0.68,
                 ease: "power3.out",
                 scrollTrigger: {
                   trigger: panel,
-                  start: "top 72%",
-                  end: "center 48%",
-                  scrub: profile === "full" ? 0.58 : 0.34,
+                  start: "top 78%",
+                  once: true,
                 },
               },
             );
@@ -68,18 +68,6 @@ export function HomePage({
               },
             });
           }
-        });
-
-        ScrollTrigger.create({
-          trigger: element,
-          start: "top top",
-          end: "bottom bottom",
-          snap: {
-            snapTo: 1 / Math.max(1, panels.length - 1),
-            duration: { min: 0.22, max: 0.68 },
-            delay: 0.08,
-            ease: "power2.inOut",
-          },
         });
       } else {
         panels.forEach((panel) => {
@@ -158,14 +146,14 @@ export function HomePage({
 
         <div className="home-panel-inner project-hero-inner">
           <div className="project-hero-copy">
-            <div className="eyebrow" data-reveal>FSOCIETYMATH / INTERACTIVE LEARNING ENVIRONMENT</div>
+            <div className="eyebrow" data-reveal>VISUALMATH / ИНТЕРАКТИВНАЯ МАТЕМАТИКА</div>
             <h1 data-reveal>
               Не страница.
               <br />
               <span>Целая среда.</span>
             </h1>
             <p data-reveal>
-              FsocietyMath соединяет контент, навигацию, интерактив, персонализацию,
+              VisualMath соединяет теорию, навигацию, интерактив, персонализацию,
               историю действий и визуальные инструменты в один живой интерфейс.
               Здесь хочется не просто открыть тему — хочется исследовать сам проект.
             </p>
@@ -191,7 +179,7 @@ export function HomePage({
             <div className="project-core-grid">
               <i /><i /><i /><i /><i /><i /><i /><i /><i />
             </div>
-            <span>FS</span>
+            <span>VM</span>
           </div>
 
           <div className="project-pulse" data-reveal>
@@ -220,18 +208,18 @@ export function HomePage({
             </p>
           </div>
 
-          <div className="project-window-stack" data-parallax>
-            <article className="project-window window-a" data-loop="float">
+          <div className="project-window-stack">
+            <article className="project-window window-a">
               <span>01</span>
               <strong>Контекст сохраняется</strong>
               <p>Можно уйти глубже, вернуться назад и продолжить с того же места.</p>
             </article>
-            <article className="project-window window-b" data-loop="float">
+            <article className="project-window window-b">
               <span>02</span>
               <strong>Интерфейс отвечает</strong>
               <p>Наведение, переходы, прокрутка и трансформации имеют собственный визуальный отклик.</p>
             </article>
-            <article className="project-window window-c" data-loop="float">
+            <article className="project-window window-c">
               <span>03</span>
               <strong>Всё персонализируется</strong>
               <p>Тема, курсор и интенсивность движения настраиваются под пользователя.</p>
@@ -246,19 +234,19 @@ export function HomePage({
             <div className="motion-orbit orbit-a" data-loop="drift" />
             <div className="motion-orbit orbit-b" data-loop="drift" />
             <div className="motion-orbit orbit-c" data-loop="drift" />
-            <div className="motion-chip chip-a" data-loop="float">GSAP</div>
-            <div className="motion-chip chip-b" data-loop="float">MOTION</div>
-            <div className="motion-chip chip-c" data-loop="float">THREE</div>
-            <div className="motion-center" data-loop="pulse">LIVE</div>
+            <div className="motion-chip chip-a" data-loop="float">ALGEBRA</div>
+            <div className="motion-chip chip-b" data-loop="float">ANALYSIS</div>
+            <div className="motion-chip chip-c" data-loop="float">GEOMETRY</div>
+            <div className="motion-center" data-loop="pulse">MATH</div>
           </div>
 
           <div className="project-feature-copy">
-            <div className="eyebrow" data-reveal>MOTION WITH A PURPOSE</div>
-            <h2 data-reveal>Движение встроено в характер проекта.</h2>
+            <div className="eyebrow" data-reveal>МАТЕМАТИКА В ДВИЖЕНИИ</div>
+            <h2 data-reveal>Формулы превращаются в объекты, которые можно исследовать.</h2>
             <p data-reveal>
-              Большая часть сцены живёт постоянно: панели слегка плавают, слои вращаются,
-              акценты пульсируют, а прокрутка захватывается в последовательность сцен.
-              На телефоне тяжёлые эффекты упрощаются, но визуальный язык сохраняется.
+              Векторы, матрицы, графики и геометрические преобразования показываются не как
+              статичные иллюстрации, а как связанные математические структуры. Можно менять
+              параметры и сразу видеть, что именно происходит с объектом.
             </p>
           </div>
         </div>
@@ -276,32 +264,32 @@ export function HomePage({
           </header>
 
           <div className="project-guide-grid">
-            <article data-reveal data-loop="float">
+            <article data-reveal>
               <span>01</span>
               <strong>Навигация</strong>
               <p>Разделы и темы находятся в боковой панели и раскрываются плавно.</p>
             </article>
-            <article data-reveal data-loop="float">
+            <article data-reveal>
               <span>02</span>
               <strong>Карта</strong>
               <p>Отдельная рабочая сцена с группами, связями, перемещением, вращением и масштабом.</p>
             </article>
-            <article data-reveal data-loop="float">
+            <article data-reveal>
               <span>03</span>
               <strong>История</strong>
               <p>Назад и вперёд работают как полноценная навигационная история с восстановлением позиции.</p>
             </article>
-            <article data-reveal data-loop="float">
+            <article data-reveal>
               <span>04</span>
               <strong>Настройки</strong>
               <p>Темы, курсоры, движение и сохранённые элементы собраны в одном месте.</p>
             </article>
-            <article data-reveal data-loop="float">
+            <article data-reveal>
               <span>05</span>
               <strong>Интерактив</strong>
               <p>Сложные вещи можно не только читать — ими можно управлять прямо в интерфейсе.</p>
             </article>
-            <article data-reveal data-loop="float">
+            <article data-reveal>
               <span>06</span>
               <strong>Адаптив</strong>
               <p>Desktop получает максимум пространства и движения, mobile — тот же характер без развала layout.</p>
@@ -343,7 +331,7 @@ export function HomePage({
             Исследуй.
           </h2>
           <p data-reveal>
-            FsocietyMath задуман как продукт, который хочется открыть ещё до того,
+            VisualMath задуман как пространство, которое хочется открыть ещё до того,
             как ты решил, что именно собираешься изучать.
           </p>
           <div className="home-actions" data-reveal>
