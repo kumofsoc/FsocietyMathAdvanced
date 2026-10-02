@@ -1,0 +1,129 @@
+html[data-theme-tone="light"]{
+  --light-shadow:rgba(23,23,26,.08);
+  --light-shadow-strong:rgba(23,23,26,.14);
+}
+
+html[data-theme-tone="light"],
+html[data-theme-tone="light"] body{
+  background:var(--bg);
+  color:var(--text);
+}
+
+html[data-theme-tone="light"] .app-shell{
+  background:
+    radial-gradient(circle at 70% -10%,color-mix(in srgb,var(--accent) 7%,transparent),transparent 34%),
+    var(--bg);
+}
+
+html[data-theme-tone="light"] .math-backdrop{
+  opacity:.34;
+  filter:saturate(.72) contrast(.9);
+}
+
+html[data-theme-tone="light"] .sidebar,
+html[data-theme-tone="light"] .topbar,
+html[data-theme-tone="light"] .settings-panel,
+html[data-theme-tone="light"] .command-palette{
+  background:color-mix(in srgb,var(--surface) 97%,transparent);
+  box-shadow:0 14px 48px var(--light-shadow);
+}
+
+html[data-theme-tone="light"] .topbar{
+  border-bottom-color:color-mix(in srgb,var(--border) 94%,var(--text) 6%);
+}
+
+html[data-theme-tone="light"] .search-shell input,
+html[data-theme-tone="light"] input,
+html[data-theme-tone="light"] textarea,
+html[data-theme-tone="light"] select{
+  background:color-mix(in srgb,var(--surface) 98%,var(--bg));
+  border-color:color-mix(in srgb,var(--border) 88%,var(--text) 12%);
+  color:var(--text);
+}
+
+html[data-theme-tone="light"] .content-block,
+html[data-theme-tone="light"] .practice-card,
+html[data-theme-tone="light"] .review-topic,
+html[data-theme-tone="light"] .academy-hub-chapter,
+html[data-theme-tone="light"] .identity-module,
+html[data-theme-tone="light"] .knowledge-map-inspector{
+  box-shadow:0 16px 44px var(--light-shadow);
+}
+
+html[data-theme-tone="light"] .future-home{
+  background:
+    radial-gradient(circle at 70% 0%,color-mix(in srgb,var(--accent) 6%,transparent),transparent 30%),
+    linear-gradient(180deg,var(--bg),color-mix(in srgb,var(--surface) 68%,var(--bg)) 48%,var(--bg));
+}
+
+html[data-theme-tone="light"] .future-home::before{
+  opacity:.32;
+  mix-blend-mode:multiply;
+}
+
+html[data-theme-tone="light"] .future-noise{
+  opacity:.045;
+  mix-blend-mode:multiply;
+}
+
+html[data-theme-tone="light"] .future-scanlines,
+html[data-theme-tone="light"] .g6-course-graph::after{
+  opacity:.045;
+}
+
+html[data-theme-tone="light"] .future-perspective-grid,
+html[data-theme-tone="light"] .portal-grid{
+  opacity:.22;
+}
+
+html[data-theme-tone="light"] .future-primary{
+  background:var(--text);
+  color:var(--surface);
+}
+
+html[data-theme-tone="light"] .future-secondary,
+html[data-theme-tone="light"] .future-telemetry-card,
+html[data-theme-tone="light"] .future-status-master,
+html[data-theme-tone="light"] .future-status-wave,
+html[data-theme-tone="light"] .future-growth-visual,
+html[data-theme-tone="light"] .dna-card,
+html[data-theme-tone="light"] .archive-sheet,
+html[data-theme-tone="light"] .personal-profile-frame{
+  background:color-mix(in srgb,var(--surface) 96%,var(--accent) 4%);
+  box-shadow:0 18px 50px var(--light-shadow);
+}
+
+html[data-theme-tone="light"] .identity-hero,
+html[data-theme-tone="light"] .knowledge-map-canvas,
+html[data-theme-tone="light"] .academy-hub-chapter,
+html[data-theme-tone="light"] .review-topic{
+  box-shadow:0 22px 62px var(--light-shadow);
+}
+
+html[data-theme-tone="light"] .g6-course-graph{
+  background:
+    radial-gradient(circle at 68% 16%,color-mix(in srgb,var(--accent) 7%,transparent),transparent 30%),
+    linear-gradient(180deg,var(--surface),var(--bg));
+}
+
+html[data-theme-tone="light"] .formula-box,
+html[data-theme-tone="light"] .property-panel-formula{
+  background:color-mix(in srgb,var(--formula) 5%,var(--surface));
+}
+
+html[data-theme-tone="light"] .topic-learning-status>div,
+html[data-theme-tone="light"] .theory-finish,
+html[data-theme-tone="light"] .practice-panel{
+  background:color-mix(in srgb,var(--surface) 97%,var(--accent) 3%);
+}
+
+html[data-theme-tone="light"] ::selection{
+  background:color-mix(in srgb,var(--accent) 24%,transparent);
+}
+
+@media(prefers-contrast:more){
+  html[data-theme-tone="light"]{
+    --muted:#505058;
+    --border:#c7c7c2;
+  }
+}
