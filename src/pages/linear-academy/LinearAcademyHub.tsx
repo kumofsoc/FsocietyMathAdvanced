@@ -69,7 +69,7 @@ export function LinearAcademyHub() {
     <section className="academy-hub">
       <header className="academy-hub-hero">
         <div>
-          <div className="eyebrow">LINEAR ACADEMY / PRO TRACK</div>
+          <div className="eyebrow">LINEAR LAB / PROTOCOL TRACK</div>
           <h1>Линейная математика как единая система.</h1>
           <p>
             От матриц и векторов до Jordan, SVD, аффинной геометрии, квадрик,
