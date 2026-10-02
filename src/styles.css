@@ -3005,14 +3005,23 @@ html[data-motion-profile="off"] .home-scrollytelling [data-reveal] {
 }
 .project-grid {
   position: absolute;
-  inset: 0;
+  inset: -3%;
   opacity: .24;
   pointer-events: none;
+  animation: visualmath-grid-drift 18s ease-in-out infinite alternate;
   background-image:
     linear-gradient(color-mix(in srgb,var(--border) 58%,transparent) 1px, transparent 1px),
     linear-gradient(90deg,color-mix(in srgb,var(--border) 58%,transparent) 1px, transparent 1px);
   background-size: 62px 62px;
   mask-image: radial-gradient(circle at 50% 48%, black 22%, transparent 78%);
+}
+@keyframes visualmath-grid-drift {
+  from { translate: -1.5% -1%; }
+  to { translate: 1.5% 1%; }
+}
+html[data-motion-profile="off"] .project-grid {
+  animation: none !important;
+  translate: none !important;
 }
 .project-ambient {
   position: absolute;
@@ -3229,6 +3238,63 @@ html[data-motion-profile="off"] .home-scrollytelling [data-reveal] {
 .window-a { left: 0; top: 3%; transform: rotate(-3deg); }
 .window-b { right: 0; top: 34%; transform: rotate(2.5deg); }
 .window-c { left: 8%; bottom: 0; transform: rotate(-1deg); }
+
+/* Stable ambient motion for cards.
+   Uses the individual translate property so it does not fight existing rotate/transform values. */
+[data-float-safe] {
+  will-change: translate;
+}
+[data-float-safe="a"] {
+  animation: visualmath-float-a 5.4s ease-in-out infinite alternate;
+}
+[data-float-safe="b"] {
+  animation: visualmath-float-b 6.1s ease-in-out infinite alternate;
+}
+[data-float-safe="c"] {
+  animation: visualmath-float-c 5.8s ease-in-out infinite alternate;
+}
+.project-guide-grid [data-float-safe="guide"] {
+  animation: visualmath-guide-float 6.4s ease-in-out infinite alternate;
+}
+.project-guide-grid [data-float-safe="guide"]:nth-child(2n) {
+  animation-delay: -2.2s;
+  animation-duration: 7.1s;
+}
+.project-guide-grid [data-float-safe="guide"]:nth-child(3n) {
+  animation-delay: -3.6s;
+  animation-duration: 5.9s;
+}
+@keyframes visualmath-float-a {
+  from { translate: 0 -4px; }
+  to { translate: 7px 10px; }
+}
+@keyframes visualmath-float-b {
+  from { translate: -5px 7px; }
+  to { translate: 6px -9px; }
+}
+@keyframes visualmath-float-c {
+  from { translate: 4px -8px; }
+  to { translate: -6px 7px; }
+}
+@keyframes visualmath-guide-float {
+  from { translate: 0 -3px; }
+  to { translate: 0 7px; }
+}
+
+html[data-motion-profile="eco"] [data-float-safe] {
+  animation-duration: 10s !important;
+}
+html[data-motion-profile="off"] [data-float-safe] {
+  animation: none !important;
+  translate: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-float-safe] {
+    animation: none !important;
+    translate: none !important;
+  }
+}
 
 .project-motion-panel {
   background:
@@ -3465,6 +3531,12 @@ html[data-motion-profile="off"] [data-reveal] {
 }
 
 @media (max-width: 820px) {
+  [data-float-safe] {
+    animation-duration: 9s !important;
+  }
+  .project-grid {
+    animation-duration: 28s;
+  }
   .project-hero,
   .project-feature-panel,
   .project-motion-panel,
