@@ -39,14 +39,6 @@ export interface RigorousStatement {
   withoutConditions?: string;
 }
 
-export interface PropertyClaim {
-  statement: string;
-  proof: string;
-  example?: string;
-  formula?: string;
-  conditions?: string;
-}
-
 export interface ContentBlock {
   kind: BlockKind;
   title: string;
@@ -54,7 +46,7 @@ export interface ContentBlock {
   formula?: string;
   items?: string[];
   proofs?: PropertyProof[];
-  claims?: PropertyClaim[];
+  workedExamples?: RigorousStatementExample[];
   corollaries?: PropertyCorollary[];
   statements?: RigorousStatement[];
   dependsOn?: string[];
