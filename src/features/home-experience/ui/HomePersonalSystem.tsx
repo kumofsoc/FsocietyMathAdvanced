@@ -19,7 +19,7 @@ export function HomePersonalSystem({
           <strong>YOUR SYSTEM</strong>
           <span>course mastery {progress}%</span>
         </div>
-        <div className="personal-ring" style={{ "--p": progress + "%" } as React.CSSProperties}><i/></div>
+        <div className="personal-ring" style={{ "--p": progress } as React.CSSProperties}><i/></div>
       </div>
 
       <div className="personal-main" data-reveal>
