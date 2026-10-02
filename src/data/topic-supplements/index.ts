@@ -1,6 +1,7 @@
 import type { Topic } from "@/entities/course/model/types";
 import { vectorFoundationSupplement } from "./vectors";
 import { linearSpacesSupplement } from "./linear-spaces";
+import { enrichRigorousTopic } from "@/data/topic-enrichments";
 
 const topicSupplements = {
   vectors: vectorFoundationSupplement,
@@ -12,11 +13,12 @@ export function getTopicSupplement(topicId: string) {
 }
 
 export function composeTopicWithSupplements(topic: Topic): Topic {
+  const enriched = enrichRigorousTopic(topic);
   const supplement = getTopicSupplement(topic.id);
-  if (!supplement.length) return topic;
+  if (!supplement.length) return enriched;
 
   return {
-    ...topic,
-    blocks: [...topic.blocks, ...supplement]
+    ...enriched,
+    blocks: [...enriched.blocks, ...supplement]
   };
 }
