@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CURSOR_EVENT, CURSOR_KEY, type CursorMode } from "./CustomCursor";
 import { LEARNING_EVENT, loadSavedTheorems, saveTheorems } from "../lib/learning";
 
@@ -103,6 +103,8 @@ export function SettingsPanel() {
   const [cursor, setCursor] = useState<CursorMode>(() => (localStorage.getItem(CURSOR_KEY) as CursorMode) || "halo");
   const [motion, setMotion] = useState<MotionProfile>(() => (localStorage.getItem(MOTION_KEY) as MotionProfile) || "balanced");
   const [saved, setSaved] = useState(loadSavedTheorems);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
 
   const activeTheme = useMemo(
     () => themeName === "Custom" ? custom : themes[themeName] ?? themes.Black,
@@ -131,8 +133,20 @@ export function SettingsPanel() {
       if (event.key === "Escape") setOpen(false);
     };
 
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      if (panelRef.current?.contains(target)) return;
+      if (triggerRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown, true);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown, true);
+    };
   }, [open]);
 
   const updateCustom = (token: string, value: string) => {
@@ -174,7 +188,7 @@ export function SettingsPanel() {
 
   return (
     <div className="settings-shell">
-      <button className="settings-trigger" onClick={() => setOpen((value) => !value)}>
+      <button ref={triggerRef} className="settings-trigger" onClick={() => setOpen((value) => !value)}>
         <span>⚙</span>
         Настройки
       </button>
@@ -182,6 +196,7 @@ export function SettingsPanel() {
       {open && (
         <div className="settings-backdrop" onPointerDown={() => setOpen(false)}>
           <aside
+            ref={panelRef}
             className="settings-panel"
             onPointerDown={(event) => event.stopPropagation()}
           >
