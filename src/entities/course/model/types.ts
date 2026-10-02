@@ -39,6 +39,14 @@ export interface RigorousStatement {
   withoutConditions?: string;
 }
 
+export interface PropertyClaim {
+  statement: string;
+  proof: string;
+  example?: string;
+  formula?: string;
+  conditions?: string;
+}
+
 export interface ContentBlock {
   kind: BlockKind;
   title: string;
@@ -46,6 +54,7 @@ export interface ContentBlock {
   formula?: string;
   items?: string[];
   proofs?: PropertyProof[];
+  claims?: PropertyClaim[];
   corollaries?: PropertyCorollary[];
   statements?: RigorousStatement[];
   dependsOn?: string[];
@@ -75,9 +84,25 @@ export interface Topic {
   hasLab?: boolean;
 }
 
+export interface KnowledgeDomain {
+  id: string;
+  title: string;
+  description: string;
+  disciplineIds: string[];
+}
+
+export interface Discipline {
+  id: string;
+  domainId: string;
+  title: string;
+  description: string;
+  chapterIds: string[];
+}
+
 export interface Chapter {
   id: string;
   number: string;
   title: string;
   topicIds: string[];
+  disciplineId?: string;
 }
