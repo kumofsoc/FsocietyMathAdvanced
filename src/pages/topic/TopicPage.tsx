@@ -609,6 +609,34 @@ export function TopicPage({ topicId }: { topicId: string }) {
         )}
       </header>
 
+      {tracksLearning && (
+        <nav className="topic-mastery-path" aria-label="Этапы освоения темы">
+          <div className={progressBreakdown.readingRatio > 0 ? "active" : ""}>
+            <span>01</span>
+            <strong>Изучение материала</strong>
+            <small>{Math.round(progressBreakdown.readingRatio * 100)}% блоков просмотрено</small>
+          </div>
+          <i aria-hidden="true" />
+          <div className={theoryRead ? "complete" : progressBreakdown.canCompleteTheory ? "active" : ""}>
+            <span>02</span>
+            <strong>Завершение теории</strong>
+            <small>{theoryRead ? "завершено" : progressBreakdown.canCompleteTheory ? "можно завершить" : "после основного материала"}</small>
+          </div>
+          <i aria-hidden="true" />
+          <div className={practiceRatio > 0 ? "active" : ""}>
+            <span>03</span>
+            <strong>Практика</strong>
+            <small>{taskIds.length ? solvedCount + " из " + taskIds.length + " задач" : "банк задач готовится"}</small>
+          </div>
+          <i aria-hidden="true" />
+          <div className={topicProgress >= 100 ? "complete" : ""}>
+            <span>04</span>
+            <strong>Освоение темы</strong>
+            <small>{topicProgress >= 100 ? "тема освоена" : topicProgress + "% общего прогресса"}</small>
+          </div>
+        </nav>
+      )}
+
       {academyEnabled && academyStartIndex >= 0 && (
         <section className="academy-track-banner">
           <div className="academy-track-copy">
