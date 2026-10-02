@@ -163,3 +163,74 @@ Wide screens should gain usable canvas/content area, not merely stretch paragrap
 - no forced migration of all topics;
 - no removal of keyboard history;
 - no disabling text selection on educational content.
+
+
+## Multi-discipline platform direction
+
+The architecture is intentionally not mathematics-only.
+
+Target hierarchy:
+
+```
+Discipline
+  Course
+    Chapter
+      Topic
+        LearningLayer
+          LearningUnit
+```
+
+Mathematics is the first active discipline. Physics is registered as planned, but no fake or empty user-facing physics course is exposed.
+
+Scientific disciplines can extend the canonical learning layers with:
+
+- model;
+- law;
+- derivation;
+- observation;
+- experiment;
+- measurement;
+- simulation.
+
+Practice skills can likewise extend beyond mathematical proof/computation into:
+
+- derive;
+- model;
+- estimate;
+- analyze-data;
+- design-experiment;
+- simulate.
+
+This keeps the same learning engine useful for mathematics, physics and later fundamental sciences.
+
+## Rigor contract
+
+New authored rigorous content follows a structural rule:
+
+- every theorem has an explicit proof;
+- every property is either a single proved statement or a set of independent statements;
+- every independent property statement contains:
+  - the claim;
+  - conditions when relevant;
+  - its own proof;
+  - its own example;
+  - optional failure mode when assumptions are removed.
+
+A content audit utility rejects new rigorous modules that omit the required proof/example structure.
+
+Existing legacy content remains compatible and can be migrated incrementally.
+
+## Vector and linear-space foundation expansion
+
+The first v2 supplemental content modules strengthen:
+
+- geometric vector spaces;
+- zero vector and zero-dimensional space;
+- subspaces;
+- uniqueness of decomposition;
+- geometric meaning of linear dependence;
+- basis and dimension;
+- elementary consequences of vector-space axioms;
+- span and finite-dimensional basis theory.
+
+These supplements live outside the legacy monolithic `course.ts` and are composed at runtime so existing deep links and block indexes remain stable.
