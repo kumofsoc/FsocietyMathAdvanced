@@ -1616,3 +1616,64 @@ html[data-motion-profile="off"] .visual-loading::after {
     --text-body:15px;
   }
 }
+
+
+/* ===== VisualMath OS / special sidebar modes ===== */
+.sidebar .map-entry.academy-entry,
+.sidebar .map-entry.review-entry{
+  position:relative;
+  min-height:52px;
+  overflow:hidden;
+  border-radius:0;
+  isolation:isolate;
+}
+.sidebar .map-entry.academy-entry::before,
+.sidebar .map-entry.review-entry::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  opacity:.7;
+  pointer-events:none;
+}
+.sidebar .map-entry.academy-entry::before{
+  background:
+    linear-gradient(90deg,color-mix(in srgb,var(--accent) 12%,transparent),transparent 58%),
+    repeating-linear-gradient(135deg,transparent 0 12px,color-mix(in srgb,var(--accent) 4%,transparent) 12px 13px);
+}
+.sidebar .map-entry.review-entry::before{
+  background:
+    linear-gradient(90deg,color-mix(in srgb,var(--formula) 10%,transparent),transparent 58%),
+    repeating-linear-gradient(0deg,transparent 0 8px,color-mix(in srgb,var(--formula) 3%,transparent) 8px 9px);
+}
+.sidebar .map-entry.academy-entry::after,
+.sidebar .map-entry.review-entry::after{
+  position:absolute;
+  right:7px;
+  top:5px;
+  color:color-mix(in srgb,var(--text) 18%,transparent);
+  font:700 7px ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.08em;
+}
+.sidebar .map-entry.academy-entry::after{content:"LAB/λ"}
+.sidebar .map-entry.review-entry::after{content:"ARC/Σ"}
+.sidebar .map-entry.academy-entry>span,
+.sidebar .map-entry.review-entry>span{
+  width:26px;
+  height:26px;
+  display:grid;
+  place-items:center;
+  border:1px solid currentColor;
+}
+.sidebar .map-entry.academy-entry>b,
+.sidebar .map-entry.review-entry>b{
+  padding:3px 5px;
+  border:1px solid currentColor;
+  background:color-mix(in srgb,var(--bg) 45%,transparent);
+}
+.sidebar .map-entry.academy-entry:hover{
+  box-shadow:inset 3px 0 0 var(--accent),0 0 24px color-mix(in srgb,var(--accent) 8%,transparent);
+}
+.sidebar .map-entry.review-entry:hover{
+  box-shadow:inset 3px 0 0 var(--formula),0 0 24px color-mix(in srgb,var(--formula) 7%,transparent);
+}
