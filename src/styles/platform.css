@@ -1505,3 +1505,114 @@ html[data-motion-profile="off"] .visual-loading::after {
 .map-entry.review-entry>span{color:var(--formula);font-weight:800}
 .map-entry.review-entry>b{color:var(--formula);font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.06em}
 .map-entry.review-entry.active{border-color:var(--formula);box-shadow:inset 2px 0 0 var(--formula)}
+
+
+/* ===== v2 readability floor =====
+   Educational text must remain readable at 100% browser zoom.
+   Decorative micro-labels can stay compact, but anything the learner must
+   actually read is promoted to an 11–16px floor. */
+:root{
+  --text-ui-xs:11px;
+  --text-ui-sm:12px;
+  --text-body-sm:13px;
+  --text-body:15px;
+}
+
+.eyebrow,
+.mini-kicker,
+.sidebar-section-label,
+.chapter-summary > span,
+.chapter-topics em,
+.chapter-topics button,
+.sidebar-progress-note,
+.sidebar-topic-progress,
+.sidebar-topic-copy em,
+.topic-learning-status span,
+.topic-learning-status small,
+.prerequisites > span,
+.prerequisites button,
+.topic-outline button,
+.block-rail span,
+.depends-row span,
+.depends-row b,
+.dependency-link,
+.neighbor-nav span,
+.neighbor-nav small,
+.settings-tabs button,
+.settings-theme-grid strong,
+.settings-custom-theme label,
+.settings-cursor-grid small,
+.motion-profile-grid small,
+.settings-saved-list span,
+.settings-saved-list strong,
+.command-trigger > strong,
+.command-trigger kbd,
+.command-search kbd,
+.command-meta,
+.command-meta small,
+.command-result-number,
+.command-result-copy small,
+.command-result-progress b,
+.command-footer button,
+.command-footer span,
+.topbar-course-progress > span,
+.topbar-course-progress > strong,
+.route-loading > strong,
+.visual-deferred > span,
+.visual-deferred > small,
+.visual-loading strong,
+.visual-loading small,
+.practice-filters button,
+.practice-toolbar-actions button,
+.practice-filter-empty button,
+.practice-bank-meta > span,
+.practice-options button > kbd,
+.practice-attempts,
+.practice-focus-head span,
+.practice-focus-head small,
+.practice-deferred > span,
+.practice-deferred > strong,
+.practice-self-check,
+.practice-proof-solution-head span,
+.practice-proof-solution-head strong,
+.academy-track-kicker,
+.academy-track-metrics span,
+.academy-track-actions button,
+.map-entry.academy-entry > b{
+  font-size:var(--text-ui-xs) !important;
+}
+
+.settings-section-copy p,
+.settings-empty,
+.practice-filter-empty p,
+.practice-proof-solution p,
+.practice-proof-solution li,
+.academy-track-copy p,
+.theory-finish p,
+.practice-hint,
+.practice-feedback,
+.practice-options button,
+.practice-input,
+.practice-proof-input{
+  font-size:var(--text-body-sm) !important;
+}
+
+.content-block > p,
+.content-block .block-body,
+.property-proof-panel p,
+.property-corollary-panel p,
+.topic-hero p,
+.topic-summary,
+.lesson-copy p{
+  font-size:var(--text-body) !important;
+  line-height:1.72;
+}
+
+@media(max-width:680px){
+  :root{
+    --text-ui-xs:11px;
+    --text-ui-sm:12px;
+    --text-body-sm:13px;
+    --text-body:15px;
+  }
+}
