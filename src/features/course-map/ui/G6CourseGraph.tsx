@@ -74,6 +74,55 @@ function nodeKind(datum: NodeData) {
   return datum.data?.kind === "chapter" ? "chapter" : "topic";
 }
 
+async function applySelectionState(
+  graph: Graph,
+  model: CourseMapGraphModel,
+  selectedId: string | null,
+) {
+  const nodeIds = model.nodes.map((node) => node.id);
+  const edgeIds = model.edges.map((edge) => edge.id);
+  const states: Record<string, string[]> = {};
+
+  if (!selectedId || !nodeIds.includes(selectedId)) {
+    nodeIds.forEach((id) => {
+      states[id] = [];
+    });
+    edgeIds.forEach((id) => {
+      states[id] = [];
+    });
+    await graph.setElementState(states, false);
+    return;
+  }
+
+  const neighbors = new Set<string>([selectedId]);
+  const activeEdges = new Set<string>();
+
+  model.edges.forEach((edge) => {
+    if (edge.source === selectedId) {
+      neighbors.add(edge.target);
+      activeEdges.add(edge.id);
+    }
+    if (edge.target === selectedId) {
+      neighbors.add(edge.source);
+      activeEdges.add(edge.id);
+    }
+  });
+
+  nodeIds.forEach((id) => {
+    states[id] =
+      id === selectedId
+        ? ["selected"]
+        : neighbors.has(id)
+          ? ["neighbor"]
+          : ["inactive"];
+  });
+  edgeIds.forEach((id) => {
+    states[id] = activeEdges.has(id) ? ["active"] : ["inactive"];
+  });
+
+  await graph.setElementState(states, false);
+}
+
 function graphNodeBadges(datum: NodeData, theme: GraphTheme) {
   const data = datum.data ?? {};
   return [
@@ -120,12 +169,21 @@ export function G6CourseGraph({
 }: G6CourseGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const graphRef = useRef<Graph | null>(null);
+  const graphReadyRef = useRef(false);
+  const selectedIdRef = useRef<string | null>(selectedId);
   const callbacksRef = useRef({ onSelect, onOpen });
   const [themeVersion, setThemeVersion] = useState(0);
 
   useEffect(() => {
     callbacksRef.current = { onSelect, onOpen };
   }, [onOpen, onSelect]);
+
+  useEffect(() => {
+    selectedIdRef.current = selectedId;
+    const graph = graphRef.current;
+    if (!graph || !graphReadyRef.current) return;
+    void applySelectionState(graph, model, selectedId);
+  }, [model, selectedId]);
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
@@ -253,6 +311,7 @@ export function G6CourseGraph({
       ],
     });
 
+    graphReadyRef.current = false;
     graphRef.current = graph;
 
     const nodeIdFromEvent = (event: unknown) =>
@@ -272,6 +331,9 @@ export function G6CourseGraph({
 
     void graph.render().then(async () => {
       if (destroyed) return;
+      graphReadyRef.current = true;
+      await applySelectionState(graph, model, selectedIdRef.current);
+      if (destroyed) return;
       await graph.fitView(
         { when: "always", direction: "both" },
         { duration: 260, easing: "ease-out" },
@@ -287,58 +349,11 @@ export function G6CourseGraph({
     return () => {
       destroyed = true;
       resizeObserver.disconnect();
+      graphReadyRef.current = false;
       graphRef.current = null;
       graph.destroy();
     };
   }, [model, themeVersion]);
-
-  useEffect(() => {
-    const graph = graphRef.current;
-    if (!graph) return;
-
-    const nodeIds = model.nodes.map((node) => node.id);
-    const edgeIds = model.edges.map((edge) => edge.id);
-    const states: Record<string, string[]> = {};
-
-    if (!selectedId || !nodeIds.includes(selectedId)) {
-      nodeIds.forEach((id) => {
-        states[id] = [];
-      });
-      edgeIds.forEach((id) => {
-        states[id] = [];
-      });
-      void graph.setElementState(states, false);
-      return;
-    }
-
-    const neighbors = new Set<string>([selectedId]);
-    const activeEdges = new Set<string>();
-
-    model.edges.forEach((edge) => {
-      if (edge.source === selectedId) {
-        neighbors.add(edge.target);
-        activeEdges.add(edge.id);
-      }
-      if (edge.target === selectedId) {
-        neighbors.add(edge.source);
-        activeEdges.add(edge.id);
-      }
-    });
-
-    nodeIds.forEach((id) => {
-      states[id] =
-        id === selectedId
-          ? ["selected"]
-          : neighbors.has(id)
-            ? ["neighbor"]
-            : ["inactive"];
-    });
-    edgeIds.forEach((id) => {
-      states[id] = activeEdges.has(id) ? ["active"] : ["inactive"];
-    });
-
-    void graph.setElementState(states, false);
-  }, [model, selectedId]);
 
   return (
     <div className="g6-course-graph">
