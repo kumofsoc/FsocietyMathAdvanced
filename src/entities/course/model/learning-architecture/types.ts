@@ -9,8 +9,16 @@ export type DisciplineKind =
   | "philosophy"
   | "custom";
 
+export interface KnowledgeDomainDefinition {
+  id: string;
+  title: string;
+  description: string;
+  disciplineIds: string[];
+}
+
 export interface DisciplineDefinition {
   id: string;
+  domainId: string;
   kind: DisciplineKind;
   title: string;
   description: string;
