@@ -37,3 +37,13 @@
 - TypeScript + Vite production build.
 - Diff audit.
 - Merge automatically to main after green CI.
+
+
+## 8. Academic rigor and science-ready platform
+- Add discipline/course catalog.
+- Keep mathematics active; register physics as planned without empty public content.
+- Extend layer kinds for scientific models, laws, derivations, experiments, measurements and simulations.
+- Add per-property proof/example schema and rigor audit.
+- Add vector-space and linear-space supplemental modules outside the legacy monolith.
+- Render rigorous statements and theorem proofs directly in topic UI.
+- Add practice filters by learning skill.
