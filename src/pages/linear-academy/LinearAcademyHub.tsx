@@ -22,7 +22,7 @@ function taskStats(topicId: string) {
   const academy = ids.filter((id) => id.startsWith("academy-"));
   return {
     academy: academy.length,
-    доказательств: academy.filter((id) => id.startsWith("academy-proof-")).length,
+    proof: academy.filter((id) => id.startsWith("academy-proof-")).length,
     capstone: academy.filter((id) => id.includes("capstone")).length,
   };
 }
@@ -54,13 +54,13 @@ export function LinearAcademyHub() {
   const stats = useMemo(() => {
     const topicProgress = topicIds.map((id) => getTopicProgress(id, snapshot));
     const academyTasks = topicIds.reduce((sum, id) => sum + taskStats(id).academy, 0);
-    const доказательствTasks = topicIds.reduce((sum, id) => sum + taskStats(id).proof, 0);
+    const proofTasks = topicIds.reduce((sum, id) => sum + taskStats(id).proof, 0);
     const capstones = topicIds.reduce((sum, id) => sum + taskStats(id).capstone, 0);
     const mastery = topicProgress.length
       ? Math.round(topicProgress.reduce((sum, value) => sum + value, 0) / topicProgress.length)
       : 0;
     const complete = topicProgress.filter((value) => value >= 100).length;
-    return { academyTasks, доказательствTasks, capstones, mastery, complete };
+    return { academyTasks, proofTasks, capstones, mastery, complete };
   }, [snapshot, topicIds]);
 
   const continueTopic = topicIds.find((id) => getTopicProgress(id, snapshot) < 100) ?? topicIds[0];
@@ -72,8 +72,8 @@ export function LinearAcademyHub() {
           <div className="eyebrow">УГЛУБЛЁННЫЙ КУРС / ЛИНЕЙНАЯ МАТЕМАТИКА</div>
           <h1>Линейная математика как единая система.</h1>
           <p>
-            От матриц и векторов до Jordan, SVD, аффинной геометрии, квадрик,
-            тензоров и exterior algebra. Здесь собран углублённый маршрут: доказательства, подробно разобранные примеры,
+            От матриц и векторов до жордановой формы, SVD, аффинной геометрии и квадрик,
+            тензоров и внешней алгебры. Здесь собран углублённый маршрут: доказательства, подробно разобранные примеры,
             визуальные лаборатории, типичные ошибки, сложные проверочные задачи
             и отдельные задачи на доказательство.
           </p>
@@ -95,7 +95,7 @@ export function LinearAcademyHub() {
       <div className="academy-hub-metrics">
         <div><span>РАЗДЕЛЫ</span><strong>{academyChapters.length}</strong><small>единая ветка</small></div>
         <div><span>ТЕМЫ</span><strong>{topicIds.length}</strong><small>{stats.complete} завершено</small></div>
-        <div><span>УГЛУБЛЁННЫЕ ЗАДАЧИ</span><strong>{stats.academyTasks}</strong><small>checkpoint + exam + доказательств</small></div>
+        <div><span>УГЛУБЛЁННЫЕ ЗАДАЧИ</span><strong>{stats.academyTasks}</strong><small>проверка + итоговая задача + доказательство</small></div>
         <div><span>ДОКАЗАТЕЛЬСТВА</span><strong>{stats.proofTasks}</strong><small>развёрнутый ответ</small></div>
         <div><span>ИТОГОВЫЕ ЗАДАЧИ</span><strong>{stats.capstones}</strong><small>межтематические задачи</small></div>
         <div className="academy-hub-mastery">
@@ -106,12 +106,12 @@ export function LinearAcademyHub() {
       </div>
 
       <div className="academy-hub-flow">
-        <span>01 MATRIX LANGUAGE</span><i>→</i>
-        <span>02 VECTOR GEOMETRY</span><i>→</i>
-        <span>03–05 ANALYTIC / AFFINE</span><i>→</i>
-        <span>06 ABSTRACT LINEAR</span><i>→</i>
-        <span>07 METRIC / SPECTRAL</span><i>→</i>
-        <span>08–09 AFFINE / TENSOR</span>
+        <span>01 МАТРИЦЫ</span><i>→</i>
+        <span>02 ВЕКТОРНАЯ ГЕОМЕТРИЯ</span><i>→</i>
+        <span>03–05 АНАЛИТИЧЕСКАЯ И АФФИННАЯ</span><i>→</i>
+        <span>06 ЛИНЕЙНЫЕ ПРОСТРАНСТВА</span><i>→</i>
+        <span>07 МЕТРИКА И СПЕКТР</span><i>→</i>
+        <span>08–09 АФФИННАЯ И ТЕНЗОРЫ</span>
       </div>
 
       <div className="academy-hub-chapters">
@@ -121,7 +121,7 @@ export function LinearAcademyHub() {
             ? Math.round(progresses.reduce((sum, value) => sum + value, 0) / progresses.length)
             : 0;
           const academyTasks = chapter.topicIds.reduce((sum, id) => sum + taskStats(id).academy, 0);
-          const доказательствTasks = chapter.topicIds.reduce((sum, id) => sum + taskStats(id).proof, 0);
+          const proofTasks = chapter.topicIds.reduce((sum, id) => sum + taskStats(id).proof, 0);
 
           return (
             <article className="academy-hub-chapter" key={chapter.id}>
