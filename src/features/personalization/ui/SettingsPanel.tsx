@@ -204,8 +204,8 @@ export function SettingsPanel() {
           >
             <header className="settings-head">
               <div>
-                <div className="mini-kicker">VISUALMATH / SYSTEM CONFIG / 3026</div>
-                <h2>Конфигурация системы</h2>
+                <div className="mini-kicker">VISUALMATH / НАСТРОЙКИ И ПЕРСОНАЛИЗАЦИЯ</div>
+                <h2>Настройки</h2>
               </div>
               <button onClick={() => setOpen(false)}>×</button>
             </header>
