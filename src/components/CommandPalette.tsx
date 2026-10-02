@@ -75,7 +75,7 @@ export function CommandPalette() {
         setDeepIndexReady(true);
       })
       .catch((error) => {
-        console.warn("[FsocietyMath] deep search index failed to load", error);
+        console.warn("[VisualMath] deep search index failed to load", error);
         if (!cancelled) setDeepIndexReady(true);
       });
 
