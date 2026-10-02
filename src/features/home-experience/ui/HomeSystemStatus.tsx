@@ -17,7 +17,7 @@ export function HomeSystemStatus({
     <section className="future-scene future-status" data-home-scene="status">
       <div className="future-scene-index" aria-hidden="true">01 / STATUS</div>
       <div className="future-status-head" data-reveal>
-        <div className="future-kicker"><span>SYSTEM STATUS</span><i>LIVE / LOCAL</i></div>
+        <div className="future-kicker"><span>SYSTEM STATUS</span><i>REAL + SIMULATED</i></div>
         <h2>Ты не читаешь курс.<br/><em>Ты находишься внутри него.</em></h2>
       </div>
 
@@ -32,7 +32,7 @@ export function HomeSystemStatus({
           <small>{resumeTopic ? "NEXT SIGNAL / § " + resumeTopic.number + " / " + resumeTopic.title : "NO RESUME POINT"}</small>
         </article>
 
-        <div className="future-telemetry-stack">
+        <div className="future-telemetry-stack" aria-label="Художественная симулированная телеметрия">
           {telemetry.map((item, index) => (
             <article key={item.label} data-reveal className="future-telemetry-card">
               <span>{String(index + 1).padStart(2, "0")}</span>
