@@ -53,6 +53,7 @@ export function AccountPage({
       .filter((chapter) => isTrackedChapter(chapter.id))
       .map((chapter) => ({
         id: chapter.id,
+        topicId: chapter.topicIds.find((topicId) => !topicId.startsWith("planned-")) ?? chapter.topicIds[0],
         number: chapter.number,
         title: chapter.title,
         progress: getChapterProgress(chapter.id, snapshot),
@@ -217,7 +218,7 @@ export function AccountPage({
         </header>
         <div className="account-course-list">
           {chapterRows.map((row) => (
-            <button key={row.id} onClick={() => (window.location.hash = row.id)}>
+            <button key={row.id} onClick={() => (window.location.hash = row.topicId)}>
               <span>{row.number}</span>
               <div>
                 <strong>{row.title}</strong>
