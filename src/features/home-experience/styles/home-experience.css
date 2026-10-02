@@ -269,10 +269,18 @@
   transform-style: preserve-3d;
 }
 
+.future-core-runtime,
+.math-field-runtime,
 .future-core-canvas,
 .math-field-canvas {
   position: absolute;
   inset: 0;
+}
+
+.future-core-runtime,
+.math-field-runtime {
+  min-width: 0;
+  min-height: 0;
 }
 
 .future-core-fallback,
