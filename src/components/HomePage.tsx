@@ -109,6 +109,27 @@ export function HomePage({
         });
       }
 
+      if (!mobile && panels.length > 1) {
+        ScrollTrigger.create({
+          trigger: element,
+          start: "top top",
+          end: "bottom bottom",
+          snap: {
+            snapTo: (progressValue) => {
+              const maxScroll = Math.max(1, element.scrollHeight - window.innerHeight);
+              const snapPoints = panels.map((panel) =>
+                Math.min(1, Math.max(0, panel.offsetTop / maxScroll)),
+              );
+              return gsap.utils.snap(snapPoints, progressValue);
+            },
+            duration: { min: 0.18, max: 0.48 },
+            delay: 0.06,
+            ease: "power2.out",
+            inertia: true,
+          },
+        });
+      }
+
       if (!eco) {
         gsap.utils.toArray<HTMLElement>("[data-loop='float']", element).forEach((node, index) => {
           gsap.to(node, {
@@ -196,6 +217,7 @@ export function HomePage({
 
           <div className="project-pulse" data-reveal>
             <span>{progress}%</span>
+            <small>освоение курса</small>
             <i><b /></i>
           </div>
         </div>
@@ -216,15 +238,19 @@ export function HomePage({
             <div className="project-activity-stats" data-reveal>
               <article>
                 <span>{mockUserGrowth[0].year}</span>
+                <small>старт проекта</small>
               </article>
               <article>
                 <span>{mockUserGrowth.at(-1)!.users.toLocaleString("ru-RU")}</span>
+                <small>пользователей сейчас</small>
               </article>
               <article>
                 <span>×{growthMultiple}</span>
+                <small>рост аудитории с запуска</small>
               </article>
               <article>
                 <span>{mockUserGrowth.length}</span>
+                <small>лет истории</small>
               </article>
             </div>
           </div>
@@ -302,14 +328,17 @@ export function HomePage({
             <article className="project-window window-a" data-float-safe="a">
               <span>01</span>
               <strong>Контекст сохраняется</strong>
+              <p>Возвращайся назад и продолжай ровно с того места, где остановился.</p>
             </article>
             <article className="project-window window-b" data-float-safe="b">
               <span>02</span>
               <strong>Интерфейс отвечает</strong>
+              <p>Наведение, переходы и прокрутка дают понятный визуальный отклик.</p>
             </article>
             <article className="project-window window-c" data-float-safe="c">
               <span>03</span>
               <strong>Всё персонализируется</strong>
+              <p>Темы, курсор и интенсивность движения настраиваются под тебя.</p>
             </article>
           </div>
         </div>
@@ -345,26 +374,32 @@ export function HomePage({
             <article data-reveal data-float-safe="guide">
               <span>01</span>
               <strong>Навигация</strong>
+              <p>Разделы и темы всегда доступны из боковой панели.</p>
             </article>
             <article data-reveal data-float-safe="guide">
               <span>02</span>
               <strong>Карта</strong>
+              <p>Темы связаны в единую карту зависимостей и переходов.</p>
             </article>
             <article data-reveal data-float-safe="guide">
               <span>03</span>
               <strong>История</strong>
+              <p>Переходы назад и вперёд сохраняют контекст обучения.</p>
             </article>
             <article data-reveal data-float-safe="guide">
               <span>04</span>
               <strong>Настройки</strong>
+              <p>Темы, музыка, курсор и движение собраны в одном месте.</p>
             </article>
             <article data-reveal data-float-safe="guide">
               <span>05</span>
               <strong>Интерактив</strong>
+              <p>Математические объекты можно менять и исследовать прямо на странице.</p>
             </article>
             <article data-reveal data-float-safe="guide">
               <span>06</span>
               <strong>Адаптив</strong>
+              <p>Интерфейс сохраняет структуру и на desktop, и на mobile.</p>
             </article>
           </div>
         </div>
