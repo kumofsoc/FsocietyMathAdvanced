@@ -7,10 +7,16 @@ export interface HomeMotionEnvironment {
   coarsePointer: boolean;
 }
 
-export function getHomeMotionMode(_env: HomeMotionEnvironment): HomeMotionTier {
-  return "static";
+export function getHomeMotionMode(env: HomeMotionEnvironment): HomeMotionTier {
+  if (env.profile === "off" || env.reducedMotion) return "static";
+  if (env.profile === "eco" || env.mobile) return "reduced";
+  return "cinematic";
 }
 
-export function shouldUsePointerDepth(_env: HomeMotionEnvironment): boolean {
-  return false;
+export function shouldUsePointerDepth(env: HomeMotionEnvironment): boolean {
+  return (
+    getHomeMotionMode(env) === "cinematic" &&
+    !env.mobile &&
+    !env.coarsePointer
+  );
 }
