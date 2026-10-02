@@ -1,29 +1,59 @@
 const DB_NAME = "fsocietymath-local-media";
-const STORE_NAME = "media";
-const TRACK_KEY = "background-track";
+const LEGACY_STORE_NAME = "media";
+const PLAYLIST_STORE_NAME = "playlist";
+const DB_VERSION = 2;
+const LEGACY_TRACK_KEY = "background-track";
+
+export const MUSIC_COMMAND_EVENT = "visualmath-music-command";
+export const MUSIC_STATE_EVENT = "visualmath-music-state";
 
 export interface StoredBackgroundTrack {
-  key: typeof TRACK_KEY;
+  id: string;
   name: string;
   type: string;
   blob: Blob;
   updatedAt: number;
 }
 
-export interface BackgroundTrackStorage {
-  load(): Promise<StoredBackgroundTrack | null>;
-  save(file: File): Promise<void>;
-  delete(): Promise<void>;
+export interface BackgroundMusicTrackSummary {
+  id: string;
+  name: string;
+  type: string;
+  updatedAt: number;
 }
+
+export interface BackgroundMusicState {
+  tracks: BackgroundMusicTrackSummary[];
+  currentTrackId: string | null;
+  playing: boolean;
+  volume: number;
+  loopPlaylist: boolean;
+  ready: boolean;
+}
+
+export type BackgroundMusicCommand =
+  | { type: "request-state" }
+  | { type: "refresh" }
+  | { type: "toggle" }
+  | { type: "play" }
+  | { type: "pause" }
+  | { type: "next" }
+  | { type: "previous" }
+  | { type: "select"; trackId: string }
+  | { type: "volume"; value: number }
+  | { type: "loop-playlist"; value: boolean };
 
 function openMediaDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
 
     request.onupgradeneeded = () => {
       const db = request.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: "key" });
+      if (!db.objectStoreNames.contains(LEGACY_STORE_NAME)) {
+        db.createObjectStore(LEGACY_STORE_NAME, { keyPath: "key" });
+      }
+      if (!db.objectStoreNames.contains(PLAYLIST_STORE_NAME)) {
+        db.createObjectStore(PLAYLIST_STORE_NAME, { keyPath: "id" });
       }
     };
 
@@ -32,136 +62,129 @@ function openMediaDb(): Promise<IDBDatabase> {
   });
 }
 
-export const localBackgroundTrackStorage: BackgroundTrackStorage = {
-  async load() {
-    if (!("indexedDB" in window)) return null;
-    const db = await openMediaDb();
-    try {
-      return await new Promise((resolve, reject) => {
-        const transaction = db.transaction(STORE_NAME, "readonly");
-        const request = transaction.objectStore(STORE_NAME).get(TRACK_KEY);
-        request.onsuccess = () =>
-          resolve((request.result as StoredBackgroundTrack | undefined) ?? null);
-        request.onerror = () => reject(request.error);
-      });
-    } finally {
-      db.close();
-    }
-  },
+function makeTrackId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `track-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
 
-  async save(file) {
-    if (!("indexedDB" in window)) return;
-    const db = await openMediaDb();
-    try {
-      await new Promise<void>((resolve, reject) => {
-        const transaction = db.transaction(STORE_NAME, "readwrite");
-        transaction.objectStore(STORE_NAME).put({
-          key: TRACK_KEY,
-          name: file.name,
-          type: file.type,
-          blob: file,
-          updatedAt: Date.now(),
-        } satisfies StoredBackgroundTrack);
-        transaction.oncomplete = () => resolve();
-        transaction.onerror = () => reject(transaction.error);
-        transaction.onabort = () => reject(transaction.error);
-      });
-    } finally {
-      db.close();
-    }
-  },
+async function migrateLegacyTrack(db: IDBDatabase) {
+  if (!db.objectStoreNames.contains(LEGACY_STORE_NAME)) return;
 
-  async delete() {
-    if (!("indexedDB" in window)) return;
-    const db = await openMediaDb();
-    try {
-      await new Promise<void>((resolve, reject) => {
-        const transaction = db.transaction(STORE_NAME, "readwrite");
-        transaction.objectStore(STORE_NAME).delete(TRACK_KEY);
-        transaction.oncomplete = () => resolve();
-        transaction.onerror = () => reject(transaction.error);
-        transaction.onabort = () => reject(transaction.error);
-      });
-    } finally {
-      db.close();
-    }
-  },
-};
+  const existing = await new Promise<number>((resolve, reject) => {
+    const transaction = db.transaction(PLAYLIST_STORE_NAME, "readonly");
+    const request = transaction.objectStore(PLAYLIST_STORE_NAME).count();
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+  if (existing > 0) return;
 
-export function createHttpBackgroundTrackStorage(
-  apiBaseUrl: string,
-  getAccessToken?: () => string | null,
-): BackgroundTrackStorage {
-  const endpoint = apiBaseUrl.replace(/\/$/, "") + "/v1/media/background-track";
+  const legacy = await new Promise<any>((resolve, reject) => {
+    const transaction = db.transaction(LEGACY_STORE_NAME, "readonly");
+    const request = transaction.objectStore(LEGACY_STORE_NAME).get(LEGACY_TRACK_KEY);
+    request.onsuccess = () => resolve(request.result ?? null);
+    request.onerror = () => reject(request.error);
+  });
+  if (!legacy?.blob) return;
 
-  const headers = (): Record<string, string> => {
-    const token = getAccessToken?.();
-    return token ? { Authorization: "Bearer " + token } : {};
-  };
+  await new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction(PLAYLIST_STORE_NAME, "readwrite");
+    transaction.objectStore(PLAYLIST_STORE_NAME).put({
+      id: "legacy-" + (legacy.updatedAt || Date.now()),
+      name: legacy.name || "background-track",
+      type: legacy.type || legacy.blob.type || "audio/mpeg",
+      blob: legacy.blob,
+      updatedAt: legacy.updatedAt || Date.now(),
+    } satisfies StoredBackgroundTrack);
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () => reject(transaction.error);
+  });
+}
 
-  return {
-    async load() {
-      const response = await fetch(endpoint, { headers: headers() });
-      if (response.status === 404) return null;
-      if (!response.ok) throw new Error("background-track-load:" + response.status);
-
-      const blob = await response.blob();
-      const name =
-        response.headers.get("X-Track-Name") ??
-        response.headers.get("Content-Disposition")?.match(/filename="?([^";]+)"?/)?.[1] ??
-        "background-track";
-
-      return {
-        key: TRACK_KEY,
-        name,
-        type: blob.type || response.headers.get("Content-Type") || "audio/mpeg",
-        blob,
-        updatedAt: Number(response.headers.get("X-Track-Updated-At")) || Date.now(),
+export async function loadBackgroundTracks(): Promise<StoredBackgroundTrack[]> {
+  if (!("indexedDB" in window)) return [];
+  const db = await openMediaDb();
+  try {
+    await migrateLegacyTrack(db);
+    return await new Promise((resolve, reject) => {
+      const transaction = db.transaction(PLAYLIST_STORE_NAME, "readonly");
+      const request = transaction.objectStore(PLAYLIST_STORE_NAME).getAll();
+      request.onsuccess = () => {
+        const tracks = (request.result as StoredBackgroundTrack[])
+          .slice()
+          .sort((a, b) => a.updatedAt - b.updatedAt);
+        resolve(tracks);
       };
-    },
-
-    async save(file) {
-      const form = new FormData();
-      form.append("file", file, file.name);
-      const response = await fetch(endpoint, {
-        method: "PUT",
-        headers: headers(),
-        body: form,
-      });
-      if (!response.ok) throw new Error("background-track-save:" + response.status);
-    },
-
-    async delete() {
-      const response = await fetch(endpoint, {
-        method: "DELETE",
-        headers: headers(),
-      });
-      if (!response.ok && response.status !== 404) {
-        throw new Error("background-track-delete:" + response.status);
-      }
-    },
-  };
+      request.onerror = () => reject(request.error);
+    });
+  } finally {
+    db.close();
+  }
 }
 
-/*
- * Frontend currently uses IndexedDB. When the Go backend media endpoint is
- * ready, the app can inject createHttpBackgroundTrackStorage(...) without
- * changing BackgroundMusicPlayer's UI or playback logic.
- */
-let activeStorage: BackgroundTrackStorage = localBackgroundTrackStorage;
+export async function saveBackgroundTracks(files: File[]): Promise<StoredBackgroundTrack[]> {
+  if (!files.length || !("indexedDB" in window)) return [];
+  const db = await openMediaDb();
+  try {
+    const tracks = files.map((file, index) => ({
+      id: makeTrackId(),
+      name: file.name,
+      type: file.type,
+      blob: file,
+      updatedAt: Date.now() + index,
+    } satisfies StoredBackgroundTrack));
 
-export function configureBackgroundTrackStorage(storage: BackgroundTrackStorage) {
-  activeStorage = storage;
+    await new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction(PLAYLIST_STORE_NAME, "readwrite");
+      const store = transaction.objectStore(PLAYLIST_STORE_NAME);
+      tracks.forEach((track) => store.put(track));
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
+    });
+
+    return tracks;
+  } finally {
+    db.close();
+  }
 }
 
-export function loadBackgroundTrack() {
-  return activeStorage.load();
+export async function deleteBackgroundTrack(trackId: string) {
+  if (!("indexedDB" in window)) return;
+  const db = await openMediaDb();
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction(PLAYLIST_STORE_NAME, "readwrite");
+      transaction.objectStore(PLAYLIST_STORE_NAME).delete(trackId);
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
+    });
+  } finally {
+    db.close();
+  }
 }
 
-export function saveBackgroundTrack(file: File) {
-  return activeStorage.save(file);
+export async function clearBackgroundTracks() {
+  if (!("indexedDB" in window)) return;
+  const db = await openMediaDb();
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction(PLAYLIST_STORE_NAME, "readwrite");
+      transaction.objectStore(PLAYLIST_STORE_NAME).clear();
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
+    });
+  } finally {
+    db.close();
+  }
 }
 
-export function deleteBackgroundTrack() {
-  return activeStorage.delete();
+export function musicCommand(command: BackgroundMusicCommand) {
+  window.dispatchEvent(new CustomEvent<BackgroundMusicCommand>(MUSIC_COMMAND_EVENT, {
+    detail: command,
+  }));
 }
