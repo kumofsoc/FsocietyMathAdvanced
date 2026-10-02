@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import "../styles/linear-academy.css";
+import "@/styles/linear-academy.css";
 
 type Props = { topicId: string; index: number };
 
