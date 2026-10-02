@@ -118,6 +118,29 @@ function positionsByDepth(
   return positions;
 }
 
+function positionsByStableGrid(
+  ids: string[],
+  columnGap = 390,
+  rowGap = 228,
+  rowsPerColumn = 3,
+) {
+  const positions = new Map<string, { x: number; y: number }>();
+  ids.forEach((id, index) => {
+    const column = Math.floor(index / rowsPerColumn);
+    const row = index % rowsPerColumn;
+    const rowsInColumn = Math.min(
+      rowsPerColumn,
+      Math.max(0, ids.length - column * rowsPerColumn),
+    );
+    const centeredRow = row - (rowsInColumn - 1) / 2;
+    positions.set(id, {
+      x: column * columnGap,
+      y: centeredRow * rowGap,
+    });
+  });
+  return positions;
+}
+
 function ChapterNode({ data, selected }: NodeProps) {
   const value = data as unknown as ChapterNodeData;
   return (
@@ -291,15 +314,17 @@ function CourseMapInner() {
     // left-to-right topology as the course overview without pretending the
     // fallback edges are mathematical prerequisites.
     const FLOW_BAND_SIZE = 3;
-    for (let index = 1; index < currentChapter.topicIds.length; index += 1) {
-      const sourceIndex = Math.max(0, index - FLOW_BAND_SIZE);
-      const source = currentChapter.topicIds[sourceIndex];
+    for (let index = FLOW_BAND_SIZE; index < currentChapter.topicIds.length; index += 1) {
+      const source = currentChapter.topicIds[index - FLOW_BAND_SIZE];
       const target = currentChapter.topicIds[index];
       const key = source + "->" + target;
       if (seen.has(key) || reaches(target, source)) continue;
       relations.push([source, target]);
       seen.add(key);
     }
+
+    // The first column is deliberately edge-light: it is the chapter entry
+    // band. Real prerequisite edges are still rendered independently.
 
     return relations;
   }, [currentChapter, topicRelations]);
@@ -363,7 +388,11 @@ function CourseMapInner() {
     const chapter = chapters.find((item) => item.id === mode.chapterId);
     if (!chapter) return { nodes: [] as Node[], edges: [] as Edge[] };
 
-    const positions = positionsByDepth(chapter.topicIds, topicLayoutRelations, 390, 220);
+    // Chapter sub-maps intentionally use a deterministic grid independent of
+    // prerequisite topology. Edges may explain learning relations, but they
+    // never get to distort card positions. This keeps every chapter as stable
+    // and readable as the whole-course overview.
+    const positions = positionsByStableGrid(chapter.topicIds);
     const nodes: Node[] = chapter.topicIds.map((topicId) => {
       const topic = topicMeta[topicId];
       return {
