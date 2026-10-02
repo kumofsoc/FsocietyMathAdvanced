@@ -92,7 +92,7 @@ export function createHttpBackgroundTrackStorage(
   apiBaseUrl: string,
   getAccessToken?: () => string | null,
 ): BackgroundTrackStorage {
-  const endpoint = apiBaseUrl.replace(/\/$/, "") + "/api/v1/me/media/background-track";
+  const endpoint = apiBaseUrl.replace(/\/$/, "") + "/v1/media/background-track";
 
   const headers = (): Record<string, string> => {
     const token = getAccessToken?.();
