@@ -1,5 +1,30 @@
 import type { ContentBlock, PracticeTask, Topic } from "@/entities/course/model/types";
 
+export type DisciplineKind =
+  | "mathematics"
+  | "physics"
+  | "computer-science"
+  | "chemistry"
+  | "biology"
+  | "philosophy"
+  | "custom";
+
+export interface DisciplineDefinition {
+  id: string;
+  kind: DisciplineKind;
+  title: string;
+  description: string;
+  icon?: string;
+}
+
+export interface CourseDefinition {
+  id: string;
+  disciplineId: string;
+  title: string;
+  description: string;
+  chapterIds: string[];
+}
+
 export type LearningLayerKind =
   | "intuition"
   | "notation"
@@ -7,6 +32,13 @@ export type LearningLayerKind =
   | "properties"
   | "theorem"
   | "proof"
+  | "derivation"
+  | "law"
+  | "model"
+  | "observation"
+  | "experiment"
+  | "measurement"
+  | "simulation"
   | "example"
   | "counterexample"
   | "visualization"
@@ -26,6 +58,12 @@ export type PracticeSkillKind =
   | "construct-counterexample"
   | "prove"
   | "repair-proof"
+  | "derive"
+  | "model"
+  | "estimate"
+  | "analyze-data"
+  | "design-experiment"
+  | "simulate"
   | "mixed"
   | "challenge"
   | "research";
@@ -57,6 +95,8 @@ export interface PracticeUnit {
 
 export interface LayeredTopicBlueprint {
   topicId: string;
+  disciplineId?: string;
+  courseId?: string;
   clarityGoal: string;
   learningGoals: string[];
   layerOrder?: LearningLayerKind[];
@@ -66,6 +106,8 @@ export interface LayeredTopicBlueprint {
 
 export interface LayeredTopic {
   topic: Topic;
+  disciplineId: string;
+  courseId: string;
   clarityGoal: string;
   learningGoals: string[];
   layers: LearningLayer[];
@@ -77,4 +119,6 @@ export interface LayeredTopicInput {
   topic: Topic;
   blueprint?: LayeredTopicBlueprint;
   practiceTasks?: PracticeTask[];
+  disciplineId?: string;
+  courseId?: string;
 }
