@@ -125,9 +125,9 @@ export function HomePage({
                 self.direction,
               );
             },
-            duration: { min: 0.1, max: 0.26 },
-            delay: 0.025,
-            ease: "power3.out",
+            duration: { min: 0.16, max: 0.38 },
+            delay: 0.03,
+            ease: "power2.out",
             inertia: false,
           },
         });
