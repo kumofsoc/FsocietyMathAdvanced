@@ -6,7 +6,23 @@ describe("rigor audit", () => {
     const issues = auditRigorousBlocks([
       { kind: "theorem", title: "T", body: "Statement" },
     ]);
-    expect(issues[0]?.reason).toContain("no explicit proof");
+    expect(issues.map((issue) => issue.reason)).toEqual([
+      "theorem has no explicit proof",
+      "theorem has no worked example",
+    ]);
+  });
+
+  it("accepts a theorem with proof and worked example", () => {
+    const issues = auditRigorousBlocks([
+      {
+        kind: "theorem",
+        title: "T",
+        body: "Statement",
+        proofs: [{ label: "Proof", body: "Reason." }],
+        workedExamples: [{ body: "Concrete example." }],
+      },
+    ]);
+    expect(issues).toEqual([]);
   });
 
   it("accepts a property whose statements each have proof and example", () => {
