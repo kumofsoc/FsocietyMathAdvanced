@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CURSOR_EVENT, CURSOR_KEY, type CursorMode } from "./CustomCursor";
-import { LEARNING_EVENT, loadSavedTheorems, saveTheorems } from "../lib/learning";
-import { MusicSettings } from "./MusicSettings";
+import { CURSOR_EVENT, CURSOR_KEY, type CursorMode } from "@/features/personalization/ui/CustomCursor";
+import { LEARNING_EVENT, loadSavedTheorems, saveTheorems } from "@/lib/learning";
+import { MusicSettings } from "@/features/background-music/ui/MusicSettings";
 
 type Theme = Record<string, string>;
 type MotionProfile = "full" | "balanced" | "eco" | "off";

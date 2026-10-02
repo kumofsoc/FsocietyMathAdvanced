@@ -6,9 +6,9 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
-import { chapters, topicListMeta, topicMeta } from "../data/courseMeta";
-import type { CourseSearchEntry } from "../data/courseSearchIndex";
-import { getLearningSnapshot, getTopicProgress } from "../lib/progress";
+import { chapters, topicListMeta, topicMeta } from "@/data/courseMeta";
+import type { CourseSearchEntry } from "@/data/courseSearchIndex";
+import { getLearningSnapshot, getTopicProgress } from "@/lib/progress";
 
 const BLOCK_TARGET_KEY = "fsociety-block-target-v1";
 
@@ -68,7 +68,7 @@ export function CommandPalette() {
     if (!open || deepIndexReady) return;
 
     let cancelled = false;
-    void import("../data/courseSearchIndex")
+    void import("@/data/courseSearchIndex")
       .then((module) => {
         if (cancelled) return;
         setDeepIndex(module.courseSearchIndex);
@@ -270,10 +270,10 @@ export function CommandPalette() {
                       }
                       onMouseEnter={() => {
                         setActiveIndex(index);
-                        if (!topic.isStub) void import("./TopicPage");
+                        if (!topic.isStub) void import("@/components/TopicPage");
                       }}
                       onFocus={() => {
-                        if (!topic.isStub) void import("./TopicPage");
+                        if (!topic.isStub) void import("@/components/TopicPage");
                       }}
                       onClick={() =>
                         openTopic(topic.id, isBlock ? result.blockIndex : undefined)

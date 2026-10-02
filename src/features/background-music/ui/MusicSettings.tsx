@@ -6,7 +6,7 @@ import {
   MUSIC_STATE_EVENT,
   saveBackgroundTracks,
   type BackgroundMusicState,
-} from "../lib/backgroundAudio";
+} from "@/lib/backgroundAudio";
 
 const MAX_LOCAL_TRACK_BYTES = 120 * 1024 * 1024;
 

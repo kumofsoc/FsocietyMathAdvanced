@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CURSOR_EVENT, CURSOR_KEY, type CursorMode } from "./CustomCursor";
+import { CURSOR_EVENT, CURSOR_KEY, type CursorMode } from "@/features/personalization/ui/CustomCursor";
 
 const modes: { id: CursorMode; title: string; copy: string }[] = [
   { id: "halo", title: "Halo", copy: "Точка + пружинящее кольцо. Основной режим." },

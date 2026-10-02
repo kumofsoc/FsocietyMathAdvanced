@@ -6,8 +6,8 @@ import {
   type BackgroundMusicCommand,
   type BackgroundMusicState,
   type StoredBackgroundTrack,
-} from "../lib/backgroundAudio";
-import "../styles/background-music.css";
+} from "@/lib/backgroundAudio";
+import "@/styles/background-music.css";
 
 const VOLUME_KEY = "fsociety-background-music-volume-v1";
 const LOOP_PLAYLIST_KEY = "visualmath-background-music-loop-playlist-v1";

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LEARNING_EVENT, loadSavedTheorems, saveTheorems } from "../lib/learning";
+import { LEARNING_EVENT, loadSavedTheorems, saveTheorems } from "@/lib/learning";
 
 export function SavedTheorems() {
   const [open, setOpen] = useState(false);

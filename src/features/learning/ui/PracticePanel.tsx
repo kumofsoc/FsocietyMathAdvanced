@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { practiceByTopic } from "../data/practice";
-import { loadSet, saveSet, SOLVED_KEY } from "../lib/learning";
-import type { PracticeTask } from "../types/course";
-import { RichMatrixText } from "./MatrixNotation";
+import { practiceByTopic } from "@/data/practice";
+import { loadSet, saveSet, SOLVED_KEY } from "@/lib/learning";
+import type { PracticeTask } from "@/types/course";
+import { RichMatrixText } from "@/visualizations/linear/MatrixNotation";
 
 type DifficultyFilter = "all" | "base" | "medium" | "hard";
 
