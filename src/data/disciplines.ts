@@ -2,6 +2,7 @@ import type {
   CourseDefinition,
   DisciplineDefinition,
 } from "@/entities/course/model/learning-architecture/types";
+import { chapters } from "@/data/courseMeta";
 
 export interface DisciplineCatalogEntry extends DisciplineDefinition {
   status: "active" | "planned";
@@ -35,7 +36,7 @@ export const scienceCourses: CourseDefinition[] = [
     title: "Высшая математика",
     description:
       "Текущий основной курс VisualMath с картой зависимостей, теорией, доказательствами, практикой и визуализациями.",
-    chapterIds: [],
+    chapterIds: chapters.map((chapter) => chapter.id),
   },
 ];
 
