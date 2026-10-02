@@ -16,7 +16,7 @@ export class AppErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("[FsocietyMath] render failure", error, info);
+    console.error("[VisualMath] render failure", error, info);
   }
 
   render() {
