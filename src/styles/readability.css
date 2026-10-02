@@ -1,0 +1,13 @@
+:root{--readable-xs:11px;--readable-sm:12px;--readable-body:14px}
+body{font-size:var(--readable-body)}
+:where(.eyebrow,.mini-kicker,kbd,small){font-size:var(--readable-xs)!important}
+:where(button,input,select,textarea){font-size:var(--readable-sm)}
+:where(.main-content p,.content-block p,.content-block li,.settings-content p,.command-result-copy small,.practice-card p,.practice-hint,.practice-result,.sidebar-progress-note){font-size:13px!important;line-height:1.65}
+:where(.sidebar button,.topbar button,.command-palette button,.settings-panel button,.practice-toolbar button){font-size:12px!important}
+:where(.chapter-topics button,.sidebar-progress-topics button){font-size:12px!important}
+:where(.chapter-topics em,.sidebar-topic-copy em,.sidebar-topic-progress,.sidebar-progress-number,.sidebar-section-label span,.sidebar-section-label small){font-size:11px!important}
+:where(.knowledge-node-kicker span,.knowledge-node-kicker small,.knowledge-node-stats,.knowledge-node-stats b,.knowledge-progress>b,.knowledge-map-summary span,.knowledge-map-tabs button,.knowledge-map-tabs button span,.knowledge-map-canvas-hint span,.knowledge-inspector-kicker,.knowledge-inspector-progress>span,.knowledge-inspector-section>span,.knowledge-inspector-links small,.knowledge-inspector-empty>span){font-size:11px!important}
+:where(.knowledge-topic-node>p,.knowledge-inspector-section>em,.knowledge-inspector-links strong,.knowledge-inspector-note,.knowledge-inspector-primary,.knowledge-inspector-empty>small){font-size:12px!important}
+:where(.academy-lab header p,.academy-controls label span,.academy-controls label b,.academy-equation small,.academy-stage-badges span,.academy-track-kicker,.academy-track-copy p,.academy-track-metrics span,.academy-track-actions button){font-size:11px!important}
+:where(.academy-equation strong){font-size:13px!important}
+@media(max-width:700px){:root{--readable-xs:11px;--readable-sm:12px;--readable-body:14px}}
