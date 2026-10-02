@@ -179,7 +179,7 @@ function ContentCard({
         id: theoremId,
         topicId: topic.id,
         topicTitle: topic.title,
-        title: block.title,
+        title: displayBlockTitle(block.title),
         body: block.body,
         formula: block.formula,
       },
