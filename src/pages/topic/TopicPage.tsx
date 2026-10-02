@@ -477,7 +477,17 @@ export function TopicPage({ topicId }: { topicId: string }) {
   useEffect(() => {
     if (!tracksLearning || theoryRead) return;
 
+    const dwellTimers = new Map<Element, number>();
     let observer: IntersectionObserver | null = null;
+
+    const cancelDwell = (target: Element) => {
+      const timer = dwellTimers.get(target);
+      if (timer !== undefined) {
+        window.clearTimeout(timer);
+        dwellTimers.delete(target);
+      }
+    };
+
     const frame = requestAnimationFrame(() => {
       const nodes = Array.from(
         document.querySelectorAll<HTMLElement>(
@@ -489,16 +499,32 @@ export function TopicPage({ topicId }: { topicId: string }) {
       observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
             const enoughVisible =
-              entry.intersectionRatio >= 0.35 ||
-              entry.intersectionRect.height >= Math.min(320, window.innerHeight * 0.4);
-            if (!enoughVisible) return;
+              entry.isIntersecting &&
+              (
+                entry.intersectionRatio >= 0.35 ||
+                entry.intersectionRect.height >= Math.min(320, window.innerHeight * 0.4)
+              );
 
-            const index = Number((entry.target as HTMLElement).dataset.blockIndex ?? "-1");
-            if (index < 0) return;
-            const ratio = markReadingBlock(topic.id, index, topic.blocks.length);
-            setReadingRatio((current) => Math.max(current, ratio));
+            if (!enoughVisible) {
+              cancelDwell(entry.target);
+              return;
+            }
+
+            if (dwellTimers.has(entry.target)) return;
+
+            const timer = window.setTimeout(() => {
+              dwellTimers.delete(entry.target);
+              if (document.visibilityState !== "visible") return;
+
+              const index = Number((entry.target as HTMLElement).dataset.blockIndex ?? "-1");
+              if (index < 0) return;
+
+              const ratio = markReadingBlock(topic.id, index, topic.blocks.length);
+              setReadingRatio((current) => Math.max(current, ratio));
+            }, 1200);
+
+            dwellTimers.set(entry.target, timer);
           });
         },
         { threshold: [0.15, 0.35, 0.6] },
@@ -510,6 +536,8 @@ export function TopicPage({ topicId }: { topicId: string }) {
     return () => {
       cancelAnimationFrame(frame);
       observer?.disconnect();
+      dwellTimers.forEach((timer) => window.clearTimeout(timer));
+      dwellTimers.clear();
     };
   }, [topic.id, topic.blocks.length, theoryRead, tracksLearning]);
 
@@ -732,7 +760,7 @@ export function TopicPage({ topicId }: { topicId: string }) {
               ? "Следующий этап — практика. Прогресс темы будет расти по мере самостоятельного решения задач."
               : progressBreakdown.canCompleteTheory && reachedTheoryEnd
                 ? "Если определения, свойства и основные методы понятны, заверши теоретическую часть и переходи к задачам."
-                : "Прогресс учитывает просмотр смысловых блоков, а не сам факт прокрутки страницы. Для завершения теории нужно изучить не менее " + Math.round(THEORY_CHECKPOINT_THRESHOLD * 100) + "% материала и дойти до конца раздела."}
+                : "Прогресс учитывает только блоки, которые действительно задержались в зоне чтения, а не быстрый скролл страницы. Для завершения теории нужно изучить не менее " + Math.round(THEORY_CHECKPOINT_THRESHOLD * 100) + "% материала и дойти до конца раздела."}
           </p>
           {!theoryRead && (
             <button
