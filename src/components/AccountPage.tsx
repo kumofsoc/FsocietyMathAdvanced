@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { chapters } from "../data/courseMeta";
-import { getChapterProgress, isTrackedChapter, type LearningSnapshot } from "../lib/progress";
+import { getChapterProgress, isTrackedChapter, isTrackedTopic, type LearningSnapshot } from "../lib/progress";
 import { loadSavedTheorems } from "../lib/learning";
 
 const PROFILE_KEY = "visualmath-local-profile-v1";
@@ -53,7 +53,7 @@ export function AccountPage({
       .filter((chapter) => isTrackedChapter(chapter.id))
       .map((chapter) => ({
         id: chapter.id,
-        topicId: chapter.topicIds.find((topicId) => !topicId.startsWith("planned-")) ?? chapter.topicIds[0],
+        topicId: chapter.topicIds.find(isTrackedTopic) ?? chapter.topicIds[0],
         number: chapter.number,
         title: chapter.title,
         progress: getChapterProgress(chapter.id, snapshot),
