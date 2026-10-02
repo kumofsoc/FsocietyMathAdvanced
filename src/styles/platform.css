@@ -1655,8 +1655,8 @@ html[data-motion-profile="off"] .visual-loading::after {
   font:700 7px ui-monospace,SFMono-Regular,Menlo,monospace;
   letter-spacing:.08em;
 }
-.sidebar .map-entry.academy-entry::after{content:"LAB/λ"}
-.sidebar .map-entry.review-entry::after{content:"ARC/Σ"}
+.sidebar .map-entry.academy-entry::after{content:"λ / КУРС"}
+.sidebar .map-entry.review-entry::after{content:"Σ / ОБЗОР"}
 .sidebar .map-entry.academy-entry>span,
 .sidebar .map-entry.review-entry>span{
   width:26px;
