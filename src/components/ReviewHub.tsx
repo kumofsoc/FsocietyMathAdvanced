@@ -50,6 +50,7 @@ export function ReviewHub() {
   const [query, setQuery] = useState("");
   const [chapterId, setChapterId] = useState("all");
   const [formulaOnly, setFormulaOnly] = useState(false);
+  const [strictBookMode, setStrictBookMode] = useState(true);
 
   const visibleTopics = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase("ru-RU").replace(/ё/g, "е");
@@ -92,6 +93,12 @@ export function ReviewHub() {
           ))}
         </select>
         <button
+          className={strictBookMode ? "active" : ""}
+          onClick={() => setStrictBookMode((value) => !value)}
+        >
+          {strictBookMode ? "Сухой режим ✓" : "Сухой режим"}
+        </button>
+        <button
           className={formulaOnly ? "active" : ""}
           onClick={() => setFormulaOnly((value) => !value)}
         >
@@ -119,9 +126,16 @@ export function ReviewHub() {
 
               {!formulaOnly && (
                 <>
-                  <p className="review-topic-summary">{meta.summary}</p>
+                  {!strictBookMode && (
+                    <p className="review-topic-summary">{meta.summary}</p>
+                  )}
                   <div className="review-statements">
-                    {statements.map((block, index) => (
+                    {statements
+                      .filter((block) =>
+                        !strictBookMode ||
+                        ["definition", "property", "theorem", "corollary", "algorithm"].includes(block.kind),
+                      )
+                      .map((block, index) => (
                       <div key={block.title + index}>
                         <span>{kindLabel[block.kind] ?? block.kind.toUpperCase()}</span>
                         <strong>{block.title.replace(/^\d+(?:\.\d+)*\s*·\s*/, "")}</strong>
