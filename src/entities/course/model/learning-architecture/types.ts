@@ -104,6 +104,13 @@ export interface LayeredTopicBlueprint {
   practice?: PracticeUnit[];
 }
 
+export interface KnowledgePathRef {
+  domainId: string;
+  disciplineId: string;
+  chapterId: string;
+  topicId: string;
+}
+
 export interface LayeredTopic {
   topic: Topic;
   disciplineId: string;
