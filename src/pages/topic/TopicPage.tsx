@@ -295,6 +295,40 @@ function ContentCard({
           </div>
         ) : null}
 
+        {block.claims?.length ? (
+          <div className="rigorous-statements">
+            {block.claims.map((claim, claimIndex) => (
+              <article key={claim.statement + claimIndex} className="rigorous-statement">
+                <div className="rigorous-statement-head">
+                  <span>СВОЙСТВО {String(claimIndex + 1).padStart(2, "0")}</span>
+                  <strong><RichMatrixText text={claim.statement} /></strong>
+                </div>
+                {claim.conditions && (
+                  <div className="rigorous-conditions">
+                    <b>УСЛОВИЯ</b>
+                    <p><RichMatrixText text={claim.conditions} /></p>
+                  </div>
+                )}
+                <div className="rigorous-proof">
+                  <b>ДОКАЗАТЕЛЬСТВО</b>
+                  <p><RichMatrixText text={claim.proof} /></p>
+                  {claim.formula && (
+                    <div className="property-panel-formula">
+                      <BlockMath math={claim.formula} />
+                    </div>
+                  )}
+                </div>
+                {claim.example && (
+                  <div className="rigorous-example">
+                    <b>ПРИМЕР</b>
+                    <p><RichMatrixText text={claim.example} /></p>
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+        ) : null}
+
         {(block.kind === "property" || block.kind === "theorem") && !block.statements?.length && (block.proofs?.length || block.corollaries?.length) && (
           <div className="property-disclosures">
             <div className="property-disclosure-actions">
