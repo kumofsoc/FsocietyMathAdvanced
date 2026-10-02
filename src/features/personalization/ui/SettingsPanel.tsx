@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { CURSOR_EVENT, CURSOR_KEY, type CursorMode } from "@/features/personalization/ui/CustomCursor";
 import { LEARNING_EVENT, loadSavedTheorems, saveTheorems } from "@/lib/learning";
 import { MusicSettings } from "@/features/background-music/ui/MusicSettings";
+import "@/features/personalization/styles/system-config.css";
 
 type Theme = Record<string, string>;
 type MotionProfile = "full" | "balanced" | "eco" | "off";
@@ -203,8 +204,8 @@ export function SettingsPanel() {
           >
             <header className="settings-head">
               <div>
-                <div className="mini-kicker">VISUALMATH / ПЕРСОНАЛИЗАЦИЯ</div>
-                <h2>Настройки</h2>
+                <div className="mini-kicker">VISUALMATH / SYSTEM CONFIG / 3026</div>
+                <h2>Конфигурация системы</h2>
               </div>
               <button onClick={() => setOpen(false)}>×</button>
             </header>

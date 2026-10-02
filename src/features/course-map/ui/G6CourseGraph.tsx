@@ -222,18 +222,20 @@ export function G6CourseGraph({
         style: {
           size: (datum) =>
             nodeKind(datum) === "chapter" ? [322, 154] : [286, 164],
-          radius: 18,
+          radius: 4,
           fill: theme.surface,
           stroke: theme.border,
-          lineWidth: 1,
+          lineWidth: 1.2,
           cursor: "pointer",
-          shadowColor: "rgba(0, 0, 0, 0.2)",
-          shadowBlur: 18,
+          shadowColor: theme.accent,
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowOffsetY: 7,
           labelText: (datum) => String(datum.data?.title ?? datum.id),
           labelPlacement: "center",
           labelFill: theme.text,
-          labelFontSize: (datum) => (nodeKind(datum) === "chapter" ? 17 : 14),
-          labelFontWeight: 650,
+          labelFontSize: (datum) => (nodeKind(datum) === "chapter" ? 18 : 14),
+          labelFontWeight: 700,
           labelLineHeight: 20,
           labelWordWrap: true,
           labelMaxWidth: (datum) => (nodeKind(datum) === "chapter" ? 248 : 218),
@@ -243,16 +245,16 @@ export function G6CourseGraph({
         state: {
           selected: {
             stroke: theme.accent,
-            lineWidth: 2.2,
+            lineWidth: 2.6,
             shadowColor: theme.accent,
-            shadowBlur: 22,
+            shadowBlur: 26,
           },
           neighbor: {
             stroke: theme.accent2,
-            lineWidth: 1.7,
+            lineWidth: 2,
           },
           inactive: {
-            opacity: 0.22,
+            opacity: 0.16,
           },
         },
       },
@@ -262,9 +264,9 @@ export function G6CourseGraph({
           stroke: (datum) =>
             datum.data?.kind === "study-flow" ? theme.muted : theme.accent2,
           strokeOpacity: (datum) =>
-            datum.data?.kind === "study-flow" ? 0.34 : 0.52,
+            datum.data?.kind === "study-flow" ? 0.28 : 0.68,
           lineWidth: (datum) =>
-            datum.data?.kind === "study-flow" ? 1.1 : 1.45,
+            datum.data?.kind === "study-flow" ? 1.05 : 1.65,
           lineDash: (datum) =>
             datum.data?.kind === "study-flow" ? [7, 7] : [],
           router: {

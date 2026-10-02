@@ -144,7 +144,7 @@ function CourseMapInner() {
       <header className="knowledge-map-header">
         <div>
           <div className="eyebrow">
-            KNOWLEDGE MAP /{" "}
+            NAVIGATION CORE /{" "}
             {mode.kind === "overview"
               ? chapters.length + " CHAPTERS"
               : "CHAPTER " + currentChapter?.number}
@@ -152,8 +152,8 @@ function CourseMapInner() {
           <h1>{currentChapter?.title ?? "Карта высшей математики"}</h1>
           <p>
             {mode.kind === "overview"
-              ? "Разделы автоматически выстраиваются по реальным зависимостям курса."
-              : "Темы автоматически выстраиваются слева направо: сплошные связи — prerequisites, пунктир — учебный маршрут."}
+              ? "Пространственная навигация по реальным зависимостям курса. G6 рассчитывает геометрию, VisualMath показывает структуру."
+              : "Сектор тем: сплошные связи — prerequisites, пунктир — учебный маршрут. Двойной клик открывает материал."}
           </p>
         </div>
 
