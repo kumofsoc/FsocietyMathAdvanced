@@ -581,8 +581,8 @@ function CourseMapInner() {
             }}
             onPaneClick={() => setSelectedId(null)}
             fitView
-            fitViewOptions={{ padding: 0.2, maxZoom: 0.95 }}
-            minZoom={0.12}
+            fitViewOptions={{ padding: 0.18, maxZoom: 0.95 }}
+            minZoom={mode.kind === "chapter" ? 0.48 : 0.12}
             maxZoom={1.65}
             nodesDraggable={false}
             nodesConnectable={false}
