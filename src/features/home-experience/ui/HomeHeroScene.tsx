@@ -28,7 +28,7 @@ export function HomeHeroScene({
       <div className="future-arrival-copy">
         <div className="future-kicker" data-reveal>
           <span>VISUALMATH</span>
-          <i>INTERFACE / 3026</i>
+          <i>ИНТЕРАКТИВНЫЙ КУРС</i>
         </div>
 
         <div className="future-title-wrap" data-reveal>
@@ -41,19 +41,19 @@ export function HomeHeroScene({
 
         <div className="future-arrival-actions" data-reveal>
           <button className="future-primary" onClick={onPrimary}>
-            <span>{resumeTopic ? "CONTINUE" : "ENTER"}</span>
-            <strong>{resumeTopic ? "§ " + resumeTopic.number : "START"}</strong>
+            <span>{resumeTopic ? "ПРОДОЛЖИТЬ" : "НАЧАТЬ"}</span>
+            <strong>{resumeTopic ? "§ " + resumeTopic.number : "НАЧАТЬ"}</strong>
           </button>
           <button className="future-secondary" onClick={onMap}>
-            <span>COURSE UNIVERSE</span>
-            <strong>OPEN MAP ↗</strong>
+            <span>КАРТА КУРСА</span>
+            <strong>ОТКРЫТЬ ↗</strong>
           </button>
         </div>
 
         <div className="future-system-line" data-reveal>
-          <span>SYSTEM ONLINE</span>
-          <span>KNOWLEDGE CORE / STABLE</span>
-          <span>LOCAL TIME / ∞</span>
+          <span>КУРС ГОТОВ</span>
+          <span>ПРОГРЕСС СОХРАНЯЕТСЯ</span>
+          <span>ТЕОРИЯ + ПРАКТИКА + ВИЗУАЛИЗАЦИИ</span>
         </div>
       </div>
 
@@ -66,15 +66,15 @@ export function HomeHeroScene({
 
       <div className="future-mastery-card" data-reveal>
         <div>
-          <span>COURSE MASTERY</span>
+          <span>ОСВОЕНИЕ КУРСА</span>
           <strong>{progress}%</strong>
         </div>
         <i><b style={{ width: progress + "%" }} /></i>
-        <small>{resumeTopic ? "RESUME / " + resumeTopic.title : "READY FOR ENTRY"}</small>
+        <small>{resumeTopic ? "ПРОДОЛЖИТЬ: " + resumeTopic.title : "МОЖНО НАЧИНАТЬ"}</small>
       </div>
 
       <div className="future-scroll-mark" aria-hidden="true">
-        <span>DESCEND</span>
+        <span>ДАЛЬШЕ</span>
         <i />
       </div>
 
