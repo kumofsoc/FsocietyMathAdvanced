@@ -4,11 +4,10 @@ import { useLayoutEffect, useRef } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const mockVisits = [
-  2, 4, 3, 6, 8, 5, 9,
-  11, 7, 12, 10, 14, 9, 16,
-  18, 13, 17, 21, 15, 19, 23,
-  20, 26, 22, 28, 25, 31, 29,
+const mockUserGrowth = [
+  { year: "2024", users: 120 },
+  { year: "2025", users: 1480 },
+  { year: "2026", users: 6840 },
 ];
 
 export function HomePage({
@@ -19,17 +18,16 @@ export function HomePage({
   resumeTopic?: { id: string; number: string; title: string };
 }) {
   const root = useRef<HTMLDivElement>(null);
-  const maxVisits = Math.max(...mockVisits);
-  const totalVisits = mockVisits.reduce((sum, value) => sum + value, 0);
-  const activeDays = mockVisits.filter((value) => value > 0).length;
-  const chartPoints = mockVisits
-    .map((value, index) => {
-      const x = 22 + (index / (mockVisits.length - 1)) * 676;
-      const y = 220 - (value / maxVisits) * 176;
+  const maxUsers = Math.max(...mockUserGrowth.map((item) => item.users));
+  const chartPoints = mockUserGrowth
+    .map((item, index) => {
+      const x = 46 + (index / (mockUserGrowth.length - 1)) * 628;
+      const y = 220 - (item.users / maxUsers) * 176;
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     })
     .join(" ");
-  const chartAreaPoints = `22,220 ${chartPoints} 698,220`;
+  const chartAreaPoints = `46,220 ${chartPoints} 674,220`;
+  const growthMultiple = Math.round((mockUserGrowth.at(-1)!.users / mockUserGrowth[0].users) * 10) / 10;
 
   useLayoutEffect(() => {
     const element = root.current;
@@ -219,29 +217,29 @@ export function HomePage({
       <section className="home-panel project-activity-panel">
         <div className="home-panel-inner project-activity-layout">
           <div className="project-activity-copy">
-            <div className="eyebrow" data-reveal>LEARNING ACTIVITY / DEMO DATA</div>
-            <h2 data-reveal>Посещения становятся частью прогресса.</h2>
+            <div className="eyebrow" data-reveal>VISUALMATH GROWTH / DEMO DATA</div>
+            <h2 data-reveal>Проект растёт вместе с сообществом.</h2>
             <p data-reveal>
-              Пока здесь стоят мок-данные за последние 28 дней. Позже этот график можно
-              напрямую подключить к профилю и показывать реальные сессии, streak и время обучения.
+              Здесь будет публичная динамика аудитории VisualMath: сколько пользователей
+              присоединялось к платформе с запуска и как менялся масштаб проекта.
             </p>
 
             <div className="project-activity-stats" data-reveal>
               <article>
-                <span>28 дней</span>
-                <small>период</small>
+                <span>{mockUserGrowth[0].year}</span>
+                <small>точка отсчёта</small>
               </article>
               <article>
-                <span>{totalVisits}</span>
-                <small>посещений</small>
+                <span>{mockUserGrowth.at(-1)!.users.toLocaleString("ru-RU")}</span>
+                <small>пользователей сейчас</small>
               </article>
               <article>
-                <span>{activeDays}</span>
-                <small>активных дней</small>
+                <span>×{growthMultiple}</span>
+                <small>рост аудитории</small>
               </article>
               <article>
-                <span>{maxVisits}</span>
-                <small>пик за день</small>
+                <span>{mockUserGrowth.length}</span>
+                <small>лет на графике</small>
               </article>
             </div>
           </div>
@@ -249,20 +247,20 @@ export function HomePage({
           <div className="project-activity-chart" data-parallax data-reveal>
             <div className="activity-chart-head">
               <div>
-                <span>ПОСЕЩЕНИЯ</span>
-                <strong>Последние 28 дней</strong>
+                <span>ПОЛЬЗОВАТЕЛИ</span>
+                <strong>Рост VisualMath по годам</strong>
               </div>
               <b>DEMO DATA</b>
             </div>
 
             <div className="activity-chart-plot">
-              <svg viewBox="0 0 720 260" role="img" aria-label="Мок-график посещений за 28 дней">
+              <svg viewBox="0 0 720 260" role="img" aria-label="Мок-график роста пользователей VisualMath">
                 <defs>
-                  <linearGradient id="visitArea" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.26" />
+                  <linearGradient id="userGrowthArea" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.28" />
                     <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
                   </linearGradient>
-                  <filter id="visitGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <filter id="userGrowthGlow" x="-20%" y="-20%" width="140%" height="140%">
                     <feGaussianBlur stdDeviation="4" result="blur" />
                     <feMerge>
                       <feMergeNode in="blur" />
@@ -272,42 +270,37 @@ export function HomePage({
                 </defs>
 
                 <g className="activity-chart-grid">
-                  <line x1="22" y1="44" x2="698" y2="44" />
-                  <line x1="22" y1="88" x2="698" y2="88" />
-                  <line x1="22" y1="132" x2="698" y2="132" />
-                  <line x1="22" y1="176" x2="698" y2="176" />
-                  <line x1="22" y1="220" x2="698" y2="220" />
+                  <line x1="46" y1="44" x2="674" y2="44" />
+                  <line x1="46" y1="88" x2="674" y2="88" />
+                  <line x1="46" y1="132" x2="674" y2="132" />
+                  <line x1="46" y1="176" x2="674" y2="176" />
+                  <line x1="46" y1="220" x2="674" y2="220" />
                 </g>
 
-                <polygon className="activity-chart-area" points={chartAreaPoints} fill="url(#visitArea)" />
+                <polygon className="activity-chart-area" points={chartAreaPoints} fill="url(#userGrowthArea)" />
                 <polyline
                   className="activity-chart-line"
                   points={chartPoints}
-                  filter="url(#visitGlow)"
+                  filter="url(#userGrowthGlow)"
                 />
 
-                {mockVisits.map((value, index) => {
-                  const x = 22 + (index / (mockVisits.length - 1)) * 676;
-                  const y = 220 - (value / maxVisits) * 176;
+                {mockUserGrowth.map((item, index) => {
+                  const x = 46 + (index / (mockUserGrowth.length - 1)) * 628;
+                  const y = 220 - (item.users / maxUsers) * 176;
                   return (
-                    <circle
-                      key={index}
-                      className="activity-chart-point"
-                      cx={x}
-                      cy={y}
-                      r="3.2"
-                    />
+                    <g key={item.year} className="activity-growth-point">
+                      <circle className="activity-chart-point" cx={x} cy={y} r="5" />
+                      <text x={x} y={Math.max(24, y - 15)} textAnchor="middle">
+                        {item.users.toLocaleString("ru-RU")}
+                      </text>
+                    </g>
                   );
                 })}
               </svg>
             </div>
 
             <div className="activity-chart-axis">
-              <span>4 нед. назад</span>
-              <span>3 нед.</span>
-              <span>2 нед.</span>
-              <span>1 нед.</span>
-              <span>сегодня</span>
+              {mockUserGrowth.map((item) => <span key={item.year}>{item.year}</span>)}
             </div>
           </div>
         </div>
