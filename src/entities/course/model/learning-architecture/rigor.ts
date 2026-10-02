@@ -63,3 +63,58 @@ export function assertRigorousBlocks(blocks: ContentBlock[]) {
       .join("\n"),
   );
 }
+
+
+export function promoteLegacyRigor(blocks: ContentBlock[]): ContentBlock[] {
+  return blocks.map((block, index) => {
+    if (block.kind !== "theorem") return block;
+
+    let proof = block.proofs?.[0];
+    let workedExample = block.workedExamples?.[0];
+
+    for (let cursor = index + 1; cursor < blocks.length; cursor += 1) {
+      const candidate = blocks[cursor];
+
+      if (
+        candidate.kind === "theorem" ||
+        candidate.kind === "property" ||
+        candidate.kind === "definition" ||
+        candidate.kind === "concepts"
+      ) {
+        break;
+      }
+
+      if (!proof && candidate.kind === "proof") {
+        proof = {
+          label: candidate.title,
+          body: candidate.body,
+          formula: candidate.formula,
+        };
+      }
+
+      if (
+        !workedExample &&
+        (candidate.kind === "example" || candidate.kind === "solution")
+      ) {
+        workedExample = {
+          body: candidate.body,
+          formula: candidate.formula,
+        };
+      }
+
+      if (proof && workedExample) break;
+    }
+
+    if (proof === block.proofs?.[0] && workedExample === block.workedExamples?.[0]) {
+      return block;
+    }
+
+    return {
+      ...block,
+      proofs: proof ? [proof, ...(block.proofs?.slice(1) ?? [])] : block.proofs,
+      workedExamples: workedExample
+        ? [workedExample, ...(block.workedExamples?.slice(1) ?? [])]
+        : block.workedExamples,
+    };
+  });
+}
