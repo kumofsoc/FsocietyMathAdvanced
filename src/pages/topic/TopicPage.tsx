@@ -24,6 +24,8 @@ import {
 } from "@/features/learning/model/progress";
 import type { BlockKind, ContentBlock, Topic } from "@/entities/course/model/types";
 import { RichMatrixText } from "@/visualizations/linear/MatrixNotation";
+import { toLayeredTopic } from "@/entities/course/model/learning-architecture/adapter";
+import { linearFoundationBlueprints } from "@/data/learning-architecture/linear-foundations";
 import { TopicLabInsert, TopicVisualInsert } from "@/visualizations/registry/TopicVisualRegistry";
 
 const PracticePanel = lazy(() =>
@@ -581,6 +583,15 @@ export function TopicPage({ topicId }: { topicId: string }) {
   const academyProofCount = academyTaskIds.filter((id) => id.startsWith("academy-proof-")).length;
   const academyCapstoneCount = academyTaskIds.filter((id) => id.includes("capstone")).length;
 
+  const learningArchitecture = useMemo(
+    () =>
+      toLayeredTopic({
+        topic,
+        blueprint: linearFoundationBlueprints[topic.id],
+      }),
+    [topic],
+  );
+
   const completeTheory = () => {
     if (!tracksLearning || theoryRead) return;
     if (!reachedTheoryEnd || !progressBreakdown.canCompleteTheory) return;
@@ -674,6 +685,50 @@ export function TopicPage({ topicId }: { topicId: string }) {
           </div>
         </nav>
       )}
+
+      <section className="topic-clarity-map" aria-label="Как устроено изучение темы">
+        <header>
+          <div>
+            <span>КАК ПОНЯТЬ ЭТУ ТЕМУ</span>
+            <h2>{learningArchitecture.clarityGoal}</h2>
+          </div>
+          <b>{learningArchitecture.source === "native-v2" ? "СТРУКТУРА V2" : "АДАПТИРОВАНО ИЗ ТЕКУЩЕГО КУРСА"}</b>
+        </header>
+
+        <div className="topic-clarity-goals">
+          {learningArchitecture.learningGoals.map((goal, index) => (
+            <div key={goal}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <p>{goal}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="topic-layer-rail" aria-label="Слои темы">
+          {learningArchitecture.layers.map((layer, index) => {
+            const firstBlock = layer.units.find(
+              (unit) => unit.legacyBlockIndex !== undefined,
+            );
+            return (
+              <button
+                key={layer.id}
+                type="button"
+                onClick={() => {
+                  if (firstBlock?.legacyBlockIndex !== undefined) {
+                    jumpToBlock(firstBlock.legacyBlockIndex);
+                  }
+                }}
+                disabled={firstBlock?.legacyBlockIndex === undefined}
+                title={layer.purpose}
+              >
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <strong>{layer.title}</strong>
+                <small>{layer.units.length} {layer.units.length === 1 ? "блок" : "блоков"}</small>
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
       {academyEnabled && academyStartIndex >= 0 && (
         <section className="academy-track-banner">
