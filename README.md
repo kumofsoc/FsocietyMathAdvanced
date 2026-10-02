@@ -50,7 +50,8 @@
 - play / pause / volume / loop;
 - файл сохраняется в IndexedDB браузера и переживает перезапуск;
 - музыка работает поверх переходов между страницами;
-- локальный трек не отправляется на backend.
+- локальный трек не отправляется на backend по умолчанию;
+- media storage изолирован интерфейсом `BackgroundTrackStorage`; готов отдельный HTTP-adapter под Go backend.
 
 ## Backend-ready frontend
 
