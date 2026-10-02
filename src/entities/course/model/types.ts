@@ -25,6 +25,20 @@ export interface PropertyCorollary {
   formula?: string;
 }
 
+export interface RigorousStatementExample {
+  body: string;
+  formula?: string;
+}
+
+export interface RigorousStatement {
+  id: string;
+  claim: string;
+  conditions?: string;
+  proof: PropertyProof;
+  example: RigorousStatementExample;
+  withoutConditions?: string;
+}
+
 export interface ContentBlock {
   kind: BlockKind;
   title: string;
@@ -33,6 +47,7 @@ export interface ContentBlock {
   items?: string[];
   proofs?: PropertyProof[];
   corollaries?: PropertyCorollary[];
+  statements?: RigorousStatement[];
   dependsOn?: string[];
 }
 
