@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { getThemeTone } from "@/features/personalization/model/themeTone";
 
 type Theme = Record<string, string>;
 
@@ -60,9 +61,14 @@ const tokenLabels: Record<string, string> = {
   formula: "Formula",
 };
 
-function applyTheme(theme: Theme) {
+function applyTheme(theme: Theme, name: string) {
   const root = document.documentElement;
   Object.entries(theme).forEach(([key, value]) => root.style.setProperty(`--${key}`, value));
+
+  const tone = getThemeTone(theme.bg);
+  root.dataset.theme = name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  root.dataset.themeTone = tone;
+  root.style.colorScheme = tone;
 }
 
 export function ThemeStudio() {
@@ -76,7 +82,7 @@ export function ThemeStudio() {
   const current = useMemo(() => name === "Custom" ? custom : themes[name] ?? themes.Black, [name, custom]);
 
   useEffect(() => {
-    applyTheme(current);
+    applyTheme(current, name);
     localStorage.setItem("math-theme-name", name);
     if (name === "Custom") localStorage.setItem("math-theme-custom", JSON.stringify(custom));
   }, [current, name, custom]);
