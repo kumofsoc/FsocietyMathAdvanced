@@ -7,6 +7,8 @@ import {
   Position,
   ReactFlow,
   ReactFlowProvider,
+  useNodesInitialized,
+  useReactFlow,
   type Edge,
   type Node,
   type NodeProps,
@@ -118,29 +120,6 @@ function positionsByDepth(
   return positions;
 }
 
-function positionsByStableGrid(
-  ids: string[],
-  columnGap = 390,
-  rowGap = 228,
-  rowsPerColumn = 3,
-) {
-  const positions = new Map<string, { x: number; y: number }>();
-  ids.forEach((id, index) => {
-    const column = Math.floor(index / rowsPerColumn);
-    const row = index % rowsPerColumn;
-    const rowsInColumn = Math.min(
-      rowsPerColumn,
-      Math.max(0, ids.length - column * rowsPerColumn),
-    );
-    const centeredRow = row - (rowsInColumn - 1) / 2;
-    positions.set(id, {
-      x: column * columnGap,
-      y: centeredRow * rowGap,
-    });
-  });
-  return positions;
-}
-
 function ChapterNode({ data, selected }: NodeProps) {
   const value = data as unknown as ChapterNodeData;
   return (
@@ -207,6 +186,8 @@ const nodeTypes = {
 };
 
 function CourseMapInner() {
+  const { fitView } = useReactFlow();
+  const nodesInitialized = useNodesInitialized();
   const [mode, setMode] = useState<GraphMode>({ kind: "overview" });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
@@ -388,11 +369,15 @@ function CourseMapInner() {
     const chapter = chapters.find((item) => item.id === mode.chapterId);
     if (!chapter) return { nodes: [] as Node[], edges: [] as Edge[] };
 
-    // Chapter sub-maps intentionally use a deterministic grid independent of
-    // prerequisite topology. Edges may explain learning relations, but they
-    // never get to distort card positions. This keeps every chapter as stable
-    // and readable as the whole-course overview.
-    const positions = positionsByStableGrid(chapter.topicIds);
+    // Sub-maps use the same topology-driven layout as the whole-course view.
+    // The layout and the rendered edges now share one relation graph, so nodes
+    // and connections cannot drift into two unrelated coordinate systems.
+    const positions = positionsByDepth(
+      chapter.topicIds,
+      topicLayoutRelations,
+      410,
+      228,
+    );
     const nodes: Node[] = chapter.topicIds.map((topicId) => {
       const topic = topicMeta[topicId];
       return {
@@ -474,6 +459,32 @@ function CourseMapInner() {
       })),
     [graph.nodes, focusedNodeIds],
   );
+
+  useEffect(() => {
+    if (!nodesInitialized || graph.nodes.length === 0) return;
+
+    let secondFrame = 0;
+    const firstFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(() => {
+        void fitView({
+          padding: mode.kind === "chapter" ? 0.16 : 0.18,
+          maxZoom: 0.95,
+          duration: 260,
+        });
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(firstFrame);
+      if (secondFrame) cancelAnimationFrame(secondFrame);
+    };
+  }, [
+    fitView,
+    nodesInitialized,
+    graph.nodes.length,
+    mode.kind,
+    mode.kind === "chapter" ? mode.chapterId : "",
+  ]);
 
   const selectedTopic =
     mode.kind === "chapter" && selectedId ? topicMeta[selectedId] : undefined;
@@ -580,8 +591,6 @@ function CourseMapInner() {
               }
             }}
             onPaneClick={() => setSelectedId(null)}
-            fitView
-            fitViewOptions={{ padding: 0.18, maxZoom: 0.95 }}
             minZoom={mode.kind === "chapter" ? 0.48 : 0.12}
             maxZoom={1.65}
             nodesDraggable={false}
