@@ -42,7 +42,7 @@
   border-radius: 10px;
   background: var(--surface);
   color: var(--muted);
-  font-size: 8px;
+  font-size: 11px;
   cursor: pointer;
 }
 
@@ -71,7 +71,7 @@
 
 .knowledge-map-summary span {
   color: var(--muted);
-  font: 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
   letter-spacing: .12em;
 }
 
@@ -103,7 +103,7 @@
   border-radius: 9px;
   background: transparent;
   color: var(--muted);
-  font-size: 8px;
+  font-size: 11px;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -121,7 +121,7 @@
 
 .knowledge-map-tabs button span {
   color: var(--accent);
-  font: 700 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 700 11px ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 .knowledge-map-workspace {
@@ -263,13 +263,13 @@
 
 .knowledge-node-kicker span {
   color: var(--accent);
-  font: 700 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 700 11px ui-monospace, SFMono-Regular, Menlo, monospace;
   letter-spacing: .11em;
 }
 
 .knowledge-node-kicker small {
   color: var(--muted);
-  font: 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 .knowledge-chapter-node > strong,
@@ -289,7 +289,7 @@
   margin: 0;
   overflow: hidden;
   color: var(--muted);
-  font-size: 8px;
+  font-size: 11px;
   line-height: 1.55;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -302,12 +302,12 @@
   justify-content: space-between;
   gap: 8px;
   color: var(--muted);
-  font-size: 8px;
+  font-size: 11px;
 }
 
 .knowledge-node-stats b {
   color: var(--text);
-  font: 700 8px ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 700 11px ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 .knowledge-progress {
@@ -330,7 +330,7 @@
   right: 0;
   top: 8px;
   color: var(--muted);
-  font: 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 .knowledge-chapter-node > button,
@@ -343,7 +343,7 @@
   border-radius: 8px;
   background: var(--elevated);
   color: var(--muted);
-  font-size: 8px;
+  font-size: 11px;
   cursor: pointer;
 }
 
@@ -400,7 +400,7 @@
   border-radius: 999px;
   background: color-mix(in srgb, var(--surface) 91%, transparent);
   color: var(--muted);
-  font: 6px ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
   letter-spacing: .04em;
 }
 
@@ -418,7 +418,7 @@
 
 .knowledge-inspector-kicker {
   color: var(--accent2);
-  font: 700 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 700 11px ui-monospace, SFMono-Regular, Menlo, monospace;
   letter-spacing: .14em;
 }
 
@@ -433,7 +433,7 @@
 .knowledge-map-inspector > p {
   margin: 0;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.7;
 }
 
@@ -451,7 +451,7 @@
 
 .knowledge-inspector-progress > span {
   color: var(--muted);
-  font: 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
   letter-spacing: .1em;
 }
 
@@ -483,13 +483,13 @@
 
 .knowledge-inspector-section > span {
   color: var(--muted);
-  font: 700 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 700 11px ui-monospace, SFMono-Regular, Menlo, monospace;
   letter-spacing: .12em;
 }
 
 .knowledge-inspector-section > em {
   color: var(--muted);
-  font-size: 8px;
+  font-size: 11px;
   font-style: normal;
   line-height: 1.5;
 }
@@ -520,13 +520,13 @@
 
 .knowledge-inspector-links small {
   color: var(--accent);
-  font: 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 .knowledge-inspector-links strong {
   min-width: 0;
   overflow: hidden;
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 560;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -538,7 +538,7 @@
   border: 1px dashed color-mix(in srgb, var(--accent2) 32%, var(--border));
   border-radius: 9px;
   color: var(--muted);
-  font-size: 8px;
+  font-size: 11px;
   line-height: 1.6;
 }
 
@@ -550,7 +550,7 @@
   border-radius: 10px;
   background: color-mix(in srgb, var(--accent) 8%, var(--elevated));
   color: var(--text);
-  font-size: 8px;
+  font-size: 11px;
   cursor: pointer;
 }
 
@@ -568,17 +568,17 @@
 
 .knowledge-inspector-empty > span {
   color: var(--accent);
-  font: 700 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 700 11px ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 .knowledge-inspector-empty > strong {
   color: var(--text);
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .knowledge-inspector-empty > small {
   color: var(--muted);
-  font-size: 8px;
+  font-size: 11px;
 }
 
 .knowledge-map-fullscreen {
