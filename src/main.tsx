@@ -4,6 +4,7 @@ import "@xyflow/react/dist/style.css";
 import "katex/dist/katex.min.css";
 import "./styles.css";
 import "./styles/platform.css";
+import "./styles/readability.css";
 import App from "./App";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 
