@@ -2,6 +2,7 @@ import type { Topic } from "@/entities/course/model/types";
 import { vectorFoundationSupplement } from "./vectors";
 import { linearSpacesSupplement } from "./linear-spaces";
 import { enrichRigorousTopic } from "@/data/topic-enrichments";
+import { promoteLegacyRigor } from "@/entities/course/model/learning-architecture/rigor";
 
 const topicSupplements = {
   vectors: vectorFoundationSupplement,
@@ -15,10 +16,12 @@ export function getTopicSupplement(topicId: string) {
 export function composeTopicWithSupplements(topic: Topic): Topic {
   const enriched = enrichRigorousTopic(topic);
   const supplement = getTopicSupplement(topic.id);
-  if (!supplement.length) return enriched;
+  const blocks = promoteLegacyRigor(
+    supplement.length ? [...enriched.blocks, ...supplement] : enriched.blocks,
+  );
 
   return {
     ...enriched,
-    blocks: [...enriched.blocks, ...supplement]
+    blocks,
   };
 }
