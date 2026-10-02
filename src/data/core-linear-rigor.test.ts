@@ -16,6 +16,7 @@ const coreTopics = [
   "eigenproblem",
   "linear-functionals",
   "quadratic-forms",
+  "jordan-form",
 ] as const;
 
 describe("core linear mathematics rigor", () => {
