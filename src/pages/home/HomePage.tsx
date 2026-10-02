@@ -122,7 +122,7 @@ export function HomePage({
               );
               return ScrollTrigger.snapDirectional(snapPoints)(
                 progressValue,
-                self.direction,
+                self?.direction ?? 1,
               );
             },
             duration: { min: 0.16, max: 0.38 },

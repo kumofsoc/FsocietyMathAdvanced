@@ -22,7 +22,7 @@ export default defineConfig({
           ) {
             return "three";
           }
-          if (id.includes("@xyflow")) return "graph";
+          if (id.includes("@antv/")) return "graph";
           if (id.includes("katex") || id.includes("react-katex")) return "math";
           if (id.includes("framer-motion") || id.includes("/gsap/")) return "motion";
           if (id.includes("/react/") || id.includes("react-dom")) return "react";
