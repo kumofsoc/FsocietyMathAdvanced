@@ -115,17 +115,20 @@ export function HomePage({
           start: "top top",
           end: "bottom bottom",
           snap: {
-            snapTo: (progressValue) => {
+            snapTo: (progressValue, self) => {
               const maxScroll = Math.max(1, element.scrollHeight - window.innerHeight);
               const snapPoints = panels.map((panel) =>
                 Math.min(1, Math.max(0, panel.offsetTop / maxScroll)),
               );
-              return gsap.utils.snap(snapPoints, progressValue);
+              return ScrollTrigger.snapDirectional(snapPoints)(
+                progressValue,
+                self.direction,
+              );
             },
-            duration: { min: 0.18, max: 0.48 },
-            delay: 0.06,
-            ease: "power2.out",
-            inertia: true,
+            duration: { min: 0.1, max: 0.26 },
+            delay: 0.025,
+            ease: "power3.out",
+            inertia: false,
           },
         });
       }
