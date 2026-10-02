@@ -27,3 +27,11 @@
 - Run tests and production build.
 - Inspect diff for unrelated changes.
 - Merge only when CI is green.
+
+
+### Task 6 - Sidebar modes + settings
+- Upgrade Linear Academy styling into LINEAR LAB.
+- Upgrade Review styling into REVIEW ARCHIVE.
+- Upgrade Settings overlay into SYSTEM CONFIG.
+- Distinguish Academy and Review entries in the sidebar.
+- Preserve all existing behavior and storage keys.
