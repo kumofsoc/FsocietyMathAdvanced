@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { BlockMath } from "react-katex";
 import { chapters, topicMeta } from "../data/courseMeta";
 import { topics } from "../data/course";
 import type { ContentBlock } from "../types/course";
@@ -135,7 +136,7 @@ export function ReviewHub() {
                 {formulas.length ? formulas.map((block, index) => (
                   <div key={(block.formula ?? "") + index}>
                     <span>{block.title}</span>
-                    <code>{block.formula}</code>
+                    <div className="review-formula-math"><BlockMath math={block.formula ?? ""} /></div>
                   </div>
                 )) : (
                   <small>В этой теме нет отдельной формулы в метаданных блока.</small>
