@@ -390,8 +390,14 @@ export const linearAcademyBlocks: Record<string, ContentBlock[]> = Object.fromEn
         formula: spec.theoremFormula,
         proofs: [
           {
-            label: "Доказательство / академический скелет",
+            label: "Доказательство",
             body: spec.proof,
+          },
+        ],
+        workedExamples: [
+          {
+            body: spec.exampleBody,
+            formula: spec.exampleFormula,
           },
         ],
       },
