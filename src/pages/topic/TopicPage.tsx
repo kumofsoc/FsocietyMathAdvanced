@@ -251,6 +251,22 @@ function ContentCard({
           </ul>
         )}
 
+        {block.kind === "theorem" && block.workedExamples?.length ? (
+          <div className="theorem-worked-examples">
+            {block.workedExamples.map((example, exampleIndex) => (
+              <article key={example.body + exampleIndex}>
+                <div className="property-panel-label">ПРИМЕР К ТЕОРЕМЕ {exampleIndex + 1}</div>
+                <p><RichMatrixText text={example.body} /></p>
+                {example.formula && (
+                  <div className="property-panel-formula">
+                    <BlockMath math={example.formula} />
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+        ) : null}
+
         {block.statements?.length ? (
           <div className="rigorous-statements">
             {block.statements.map((statement, statementIndex) => (
