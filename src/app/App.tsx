@@ -5,6 +5,7 @@ import { BackgroundMusicPlayer } from "@/features/background-music/ui/Background
 import { CommandPalette } from "@/features/navigation/ui/CommandPalette";
 import { CustomCursor } from "@/features/personalization/ui/CustomCursor";
 import { HistoryDock } from "@/features/navigation/ui/HistoryDock";
+import { getHistoryHotkeyDirection } from "@/features/navigation/model/historyHotkeys";
 import { MathBackdrop } from "@/shared/ui/MathBackdrop";
 import { ScrollProgress } from "@/features/navigation/ui/ScrollProgress";
 import { SettingsPanel } from "@/features/personalization/ui/SettingsPanel";
@@ -66,96 +67,6 @@ const preloadLinearAcademy = () => {
 const preloadReviewHub = () => {
   void import("@/pages/review/ReviewHub");
 };
-
-function ChapterAccordion({
-  chapter,
-  route,
-  snapshot,
-}: {
-  chapter: Chapter;
-  route: string;
-  snapshot: ReturnType<typeof getLearningSnapshot>;
-}) {
-  const containsRoute = chapter.topicIds.includes(route);
-  const [open, setOpen] = useState(chapter.id === "linear" || containsRoute);
-
-  useEffect(() => {
-    if (containsRoute) setOpen(true);
-  }, [containsRoute]);
-
-  return (
-    <section className={"chapter-accordion " + (open ? "open" : "")}>
-      <button className="chapter-summary" onClick={() => setOpen((value) => !value)}>
-        <span>{chapter.number}</span>
-        <strong>{chapter.title}</strong>
-        <i>{open ? "−" : "+"}</i>
-      </button>
-
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            className="chapter-topics-clip"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <motion.div
-              className="chapter-topics"
-              initial="closed"
-              animate="open"
-              variants={{
-                closed: {},
-                open: { transition: { staggerChildren: 0.025 } },
-              }}
-            >
-              {chapter.topicIds.map((id) => {
-                const item = topicMeta[id];
-                if (!item) return null;
-                const tracked = isTrackedTopic(id);
-                const progress = tracked ? getTopicProgress(id, snapshot) : 0;
-                return (
-                  <motion.button
-                    key={id}
-                    className={(route === id ? "active " : "") + (item.isStub ? "planned" : "")}
-                    onMouseEnter={() => !item.isStub && preloadTopicPage()}
-                    onFocus={() => !item.isStub && preloadTopicPage()}
-                    onClick={() => (window.location.hash = id)}
-                    title={
-                      item.isStub
-                        ? "Раздел запланирован"
-                        : tracked
-                          ? "Освоение: " + progress + "%"
-                          : undefined
-                    }
-                    variants={{
-                      closed: { opacity: 0, x: -8 },
-                      open: { opacity: 1, x: 0 },
-                    }}
-                  >
-                    <span>
-                      {item.isStub
-                        ? "◇"
-                        : tracked
-                          ? progress >= 100
-                            ? "●"
-                            : progress > 0
-                              ? "◐"
-                              : "○"
-                          : "·"}
-                    </span>
-                    <em>§ {item.number}</em>
-                    {item.title}
-                  </motion.button>
-                );
-              })}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </section>
-  );
-}
 
 function SidebarProgressItem({
   chapter,
@@ -232,7 +143,7 @@ function SidebarProgressItem({
               })}
             </div>
             <small className="sidebar-progress-note">
-              50% теория + 50% практика по каждой теме
+              Материал → завершение теории → практика → освоение темы
             </small>
           </motion.div>
         )}
@@ -257,6 +168,24 @@ export default function App() {
     }
   });
   const routeRef = useRef(route);
+
+  const openHomeAtTop = () => {
+    try {
+      const key = "fsociety-route-scroll-v1";
+      const positions = JSON.parse(sessionStorage.getItem(key) || "{}") as Record<string, number>;
+      positions.home = 0;
+      sessionStorage.setItem(key, JSON.stringify(positions));
+    } catch {
+      // Scroll restoration is optional.
+    }
+
+    if (routeRef.current === "home") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    window.location.hash = "home";
+  };
 
   useEffect(() => {
     if (!import.meta.env.DEV) return;
@@ -321,6 +250,19 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const direction = getHistoryHotkeyDirection(event);
+      if (!direction) return;
+      event.preventDefault();
+      if (direction < 0) window.history.back();
+      else window.history.forward();
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   const learningSnapshot = useMemo(
     () => getLearningSnapshot(),
     [learningVersion],
@@ -349,7 +291,7 @@ export default function App() {
       <ScrollProgress />
       <MathBackdrop />
       <CustomCursor />
-      <HistoryDock />
+      {route === "home" && <HistoryDock />}
       <BackgroundMusicPlayer />
 
       <aside className={"sidebar " + (sidebarOpen ? "open " : "") + (sidebarCollapsed ? "collapsed" : "")}>
@@ -364,7 +306,7 @@ export default function App() {
         >
           ←
         </button>
-        <button className="brand" onClick={() => (window.location.hash = "home")}>
+        <button className="brand" onClick={openHomeAtTop}>
           <span className="brand-mark">∑</span>
           <span>
             <strong>VisualMath</strong>
@@ -422,21 +364,6 @@ export default function App() {
           ))}
         </div>
 
-        <div className="sidebar-section-label sidebar-section-label-all">
-          <span>Все разделы</span>
-          <small>{chapters.length}</small>
-        </div>
-
-        <div className="chapter-list">
-          {chapters.map((chapter) => (
-            <ChapterAccordion
-              key={chapter.id}
-              chapter={chapter}
-              route={route}
-              snapshot={learningSnapshot}
-            />
-          ))}
-        </div>
       </aside>
 
       {sidebarCollapsed && (
