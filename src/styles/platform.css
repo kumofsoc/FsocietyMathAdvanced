@@ -1498,3 +1498,10 @@ html[data-motion-profile="off"] .visual-loading::after {
   border-color:var(--accent);
   box-shadow:inset 2px 0 0 var(--accent);
 }
+
+.map-entry.review-entry{
+  border-color:color-mix(in srgb,var(--formula) 24%,var(--border));
+}
+.map-entry.review-entry>span{color:var(--formula);font-weight:800}
+.map-entry.review-entry>b{color:var(--formula);font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.06em}
+.map-entry.review-entry.active{border-color:var(--formula);box-shadow:inset 2px 0 0 var(--formula)}
