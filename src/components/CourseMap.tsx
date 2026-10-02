@@ -271,6 +271,21 @@ function CourseMapInner() {
     const relations = [...topicRelations];
     const seen = new Set(relations.map(([source, target]) => source + "->" + target));
 
+    const reaches = (start: string, goal: string) => {
+      const visited = new Set<string>();
+      const stack = [start];
+      while (stack.length) {
+        const node = stack.pop()!;
+        if (node === goal) return true;
+        if (visited.has(node)) continue;
+        visited.add(node);
+        relations.forEach(([source, target]) => {
+          if (source === node && !visited.has(target)) stack.push(target);
+        });
+      }
+      return false;
+    };
+
     // Inside a chapter, metadata can intentionally omit strict prerequisites.
     // Add a separate study-flow spine so every sub-map gets the same stable,
     // left-to-right topology as the course overview without pretending the
@@ -281,7 +296,7 @@ function CourseMapInner() {
       const source = currentChapter.topicIds[sourceIndex];
       const target = currentChapter.topicIds[index];
       const key = source + "->" + target;
-      if (seen.has(key)) continue;
+      if (seen.has(key) || reaches(target, source)) continue;
       relations.push([source, target]);
       seen.add(key);
     }
@@ -563,6 +578,7 @@ function CourseMapInner() {
             <span>wheel / pinch = zoom</span>
             <span>click = inspect</span>
             <span>double click = open</span>
+            {mode.kind === "chapter" && <span>solid = prerequisite · dashed = study flow</span>}
           </div>
         </div>
 
