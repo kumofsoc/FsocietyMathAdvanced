@@ -125,6 +125,8 @@ function buildOverviewGraph(input: BuildCourseMapGraphInput): CourseMapGraphMode
 }
 
 function buildChapterGraph(input: BuildCourseMapGraphInput): CourseMapGraphModel {
+  if (input.mode.kind !== "chapter") return { nodes: [], edges: [] };
+
   const chapter = input.chapters.find((item) => item.id === input.mode.chapterId);
   if (!chapter) return { nodes: [], edges: [] };
 
