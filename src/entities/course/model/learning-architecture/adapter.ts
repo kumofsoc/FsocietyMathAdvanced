@@ -17,6 +17,13 @@ export const DEFAULT_LAYER_ORDER: LearningLayerKind[] = [
   "properties",
   "theorem",
   "proof",
+  "derivation",
+  "law",
+  "model",
+  "observation",
+  "experiment",
+  "measurement",
+  "simulation",
   "example",
   "counterexample",
   "visualization",
@@ -50,7 +57,35 @@ const layerMeta: Record<LearningLayerKind, { title: string; purpose: string }> =
   },
   proof: {
     title: "Почему это верно",
-    purpose: "Доказательства и идеи доказательств.",
+    purpose: "Полные доказательства: шаг за шагом, без пропусков.",
+  },
+  derivation: {
+    title: "Как это выводится",
+    purpose: "Пошаговый вывод формулы или закона из исходных принципов.",
+  },
+  law: {
+    title: "Законы",
+    purpose: "Фундаментальные зависимости и условия их применимости.",
+  },
+  model: {
+    title: "Модель",
+    purpose: "Как реальный объект или процесс переводится в формальную модель.",
+  },
+  observation: {
+    title: "Наблюдение",
+    purpose: "Что именно наблюдается и как это интерпретируется.",
+  },
+  experiment: {
+    title: "Эксперимент",
+    purpose: "Как проверить гипотезу или зависимость экспериментально.",
+  },
+  measurement: {
+    title: "Измерение",
+    purpose: "Величины, единицы, погрешности и процедура измерения.",
+  },
+  simulation: {
+    title: "Симуляция",
+    purpose: "Численное или интерактивное моделирование поведения системы.",
   },
   example: {
     title: "Разобранные примеры",
@@ -198,6 +233,8 @@ function practiceFromInput(
 
 export function toLayeredTopic(input: LayeredTopicInput): LayeredTopic {
   const { topic, blueprint } = input;
+  const disciplineId = blueprint?.disciplineId ?? input.disciplineId ?? "mathematics";
+  const courseId = blueprint?.courseId ?? input.courseId ?? "higher-mathematics";
   const units = blueprint
     ? makeBlueprintUnits(input, blueprint)
     : makeLegacyUnits(input);
@@ -206,6 +243,8 @@ export function toLayeredTopic(input: LayeredTopicInput): LayeredTopic {
 
   return {
     topic,
+    disciplineId,
+    courseId,
     clarityGoal:
       blueprint?.clarityGoal ??
       "Сначала понять смысл темы простым языком, затем перейти к строгой математической записи.",
