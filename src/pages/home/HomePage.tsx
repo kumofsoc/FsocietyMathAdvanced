@@ -1,14 +1,10 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLayoutEffect, useRef } from "react";
+import { mockUserGrowth } from "./home.data";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const mockUserGrowth = [
-  { year: "2024", users: 120 },
-  { year: "2025", users: 1480 },
-  { year: "2026", users: 6840 },
-];
 
 export function HomePage({
   progress,
