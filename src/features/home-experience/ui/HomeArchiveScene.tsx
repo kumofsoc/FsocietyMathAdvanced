@@ -1,7 +1,7 @@
 const fragments = [
-  ["ARC-7A", "Topology of impossible surfaces", "3026.184"],
-  ["ARC-11", "Synthetic eigenmemory", "3026.201"],
-  ["ARC-19", "Continuum without observer", "3026.244"],
+  ["ARC-7A", "Topology of impossible surfaces", "VM.ARCH"],
+  ["ARC-11", "Synthetic eigenmemory", "VM.ARCH"],
+  ["ARC-19", "Continuum without observer", "VM.ARCH"],
   ["ARC-∞", "Unresolved object", "UNKNOWN"],
 ];
 
@@ -10,7 +10,7 @@ export function HomeArchiveScene() {
     <section className="future-scene future-archive" data-home-scene="archive">
       <div className="archive-vertical" aria-hidden="true">ARCHIVE / 3026 / FICTIONAL FUTURE INTERFACE</div>
       <div className="archive-head" data-reveal>
-        <div className="future-kicker"><span>ARCHIVE 3026</span><i>ARTISTIC / FICTIONAL</i></div>
+        <div className="future-kicker"><span>АРХИВ ИДЕЙ</span><i>ЭКСПЕРИМЕНТАЛЬНЫЙ РАЗДЕЛ</i></div>
         <h2>Документы из<br/><em>будущего, которого нет.</em></h2>
       </div>
       <div className="archive-catalog">
@@ -25,10 +25,10 @@ export function HomeArchiveScene() {
         ))}
       </div>
       <div className="archive-tape" data-ambient="ticker" aria-hidden="true">
-        <span>THIS SECTION IS AN ARTISTIC FUTURE ARCHIVE</span>
-        <span>NOT HISTORICAL DATA</span>
-        <span>VISUALMATH / 3026</span>
-        <span>THIS SECTION IS AN ARTISTIC FUTURE ARCHIVE</span>
+        <span>ЭКСПЕРИМЕНТАЛЬНЫЙ АРХИВ МАТЕМАТИЧЕСКИХ ИДЕЙ</span>
+        <span>НЕ УЧЕБНАЯ СТАТИСТИКА</span>
+        <span>VISUALMATH / ARCHIVE</span>
+        <span>ЭКСПЕРИМЕНТАЛЬНЫЙ АРХИВ МАТЕМАТИЧЕСКИХ ИДЕЙ</span>
       </div>
     </section>
   );
