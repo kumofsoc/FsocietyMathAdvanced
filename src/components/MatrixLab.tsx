@@ -291,7 +291,7 @@ export function MatrixLab() {
       </button>
 
       <div className="lab-copy">
-        <div className="eyebrow">ЛАБОРАТОРИЯ / THREE.JS</div>
+        <div className="eyebrow">ЛАБОРАТОРИЯ / ЛИНЕЙНЫЕ ПРЕОБРАЗОВАНИЯ</div>
         <h2>Матрица как преобразование ℝ³ → ℝ³</h2>
 
         <div className="lab-explainer">
