@@ -21,9 +21,13 @@ const EMPTY_STATE: BackgroundMusicState = {
 
 export function MusicSettings() {
   const inputRef = useRef<HTMLInputElement>(null);
+  const clearTriggerRef = useRef<HTMLButtonElement>(null);
+  const clearConfirmRef = useRef<HTMLButtonElement>(null);
   const [state, setState] = useState<BackgroundMusicState>(EMPTY_STATE);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [clearModalOpen, setClearModalOpen] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   useEffect(() => {
     const onState = (event: Event) => {
@@ -33,6 +37,27 @@ export function MusicSettings() {
     musicCommand({ type: "request-state" });
     return () => window.removeEventListener(MUSIC_STATE_EVENT, onState);
   }, []);
+
+  useEffect(() => {
+    if (!clearModalOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.requestAnimationFrame(() => clearConfirmRef.current?.focus());
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      setClearModalOpen(false);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+      window.requestAnimationFrame(() => clearTriggerRef.current?.focus());
+    };
+  }, [clearModalOpen]);
 
   const addFiles = async (files: FileList | null) => {
     if (!files?.length) return;
@@ -65,11 +90,29 @@ export function MusicSettings() {
   };
 
   const clearPlaylist = async () => {
-    await clearBackgroundTracks().catch(() => undefined);
-    musicCommand({ type: "refresh" });
+    if (clearing) return;
+    setClearing(true);
+    try {
+      await clearBackgroundTracks();
+      musicCommand({ type: "refresh" });
+      setClearModalOpen(false);
+      setError(null);
+    } catch {
+      setError("Не удалось очистить локальный плейлист.");
+    } finally {
+      setClearing(false);
+    }
   };
 
   const current = state.tracks.find((track) => track.id === state.currentTrackId);
+  const trackWord =
+    state.tracks.length % 10 === 1 && state.tracks.length % 100 !== 11
+      ? "песню"
+      : state.tracks.length % 10 >= 2 &&
+          state.tracks.length % 10 <= 4 &&
+          (state.tracks.length % 100 < 10 || state.tracks.length % 100 >= 20)
+        ? "песни"
+        : "песен";
 
   return (
     <section className="music-settings">
@@ -99,14 +142,15 @@ export function MusicSettings() {
           <strong>{current?.name ?? (state.ready ? "Плейлист пуст" : "Загружаю…")}</strong>
         </div>
         <div className="music-player-controls">
-          <button onClick={() => musicCommand({ type: "previous" })} disabled={!state.tracks.length}>←</button>
+          <button onClick={() => musicCommand({ type: "previous" })} disabled={!state.tracks.length} aria-label="Предыдущая песня">←</button>
           <button
             className="music-main-play"
             onClick={() => state.tracks.length ? musicCommand({ type: "toggle" }) : inputRef.current?.click()}
+            aria-label={state.tracks.length ? (state.playing ? "Пауза" : "Воспроизвести") : "Добавить музыку"}
           >
             {state.tracks.length ? (state.playing ? "❚❚" : "▶") : "+"}
           </button>
-          <button onClick={() => musicCommand({ type: "next" })} disabled={!state.tracks.length}>→</button>
+          <button onClick={() => musicCommand({ type: "next" })} disabled={!state.tracks.length} aria-label="Следующая песня">→</button>
         </div>
       </div>
 
@@ -160,12 +204,13 @@ export function MusicSettings() {
             >
               <span>{String(index + 1).padStart(2, "0")}</span>
               <strong>{track.name}</strong>
-              <small>{track.id === state.currentTrackId && state.playing ? "PLAYING" : "LOCAL"}</small>
+              <small>{track.id === state.currentTrackId && state.playing ? "ИГРАЕТ" : "ЛОКАЛЬНО"}</small>
             </button>
             <button
               className="music-track-remove"
               onClick={() => void removeTrack(track.id)}
               title="Удалить трек"
+              aria-label={"Удалить " + track.name}
             >
               ×
             </button>
@@ -174,12 +219,59 @@ export function MusicSettings() {
       </div>
 
       {state.tracks.length > 0 && (
-        <button className="music-clear-playlist" onClick={() => void clearPlaylist()}>
+        <button
+          ref={clearTriggerRef}
+          className="music-clear-playlist"
+          onClick={() => setClearModalOpen(true)}
+        >
           Очистить весь плейлист
         </button>
       )}
 
       {error && <div className="background-music-error">{error}</div>}
+
+      {clearModalOpen && (
+        <div
+          className="music-clear-modal-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setClearModalOpen(false);
+          }}
+        >
+          <section
+            className="music-clear-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="music-clear-title"
+            aria-describedby="music-clear-description"
+          >
+            <div className="music-clear-modal-icon" aria-hidden="true">!</div>
+            <div>
+              <span>ОЧИСТКА ПЛЕЙЛИСТА</span>
+              <h4 id="music-clear-title">
+                Удалить {state.tracks.length} {trackWord}?
+              </h4>
+              <p id="music-clear-description">
+                Эти файлы хранятся только в этом браузере. После очистки их нужно
+                будет выбрать заново, если захочешь вернуть музыку.
+              </p>
+            </div>
+            <div className="music-clear-modal-actions">
+              <button onClick={() => setClearModalOpen(false)} disabled={clearing}>
+                Отмена
+              </button>
+              <button
+                ref={clearConfirmRef}
+                className="danger"
+                onClick={() => void clearPlaylist()}
+                disabled={clearing}
+              >
+                {clearing ? "Удаляю…" : "Удалить все песни"}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </section>
   );
 }
