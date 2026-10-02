@@ -11,7 +11,7 @@ import { HomePortalScene } from "@/features/home-experience/ui/HomePortalScene";
 import { HomeSectionRail } from "@/features/home-experience/ui/HomeSectionRail";
 import { HomeSystemStatus } from "@/features/home-experience/ui/HomeSystemStatus";
 import "@/features/home-experience/styles/home-experience.css";
-import { decorativeTelemetry, mockUserGrowth } from "./home.data";
+import { mockUserGrowth } from "./home.data";
 
 export function HomePage({
   progress,
@@ -50,7 +50,6 @@ export function HomePage({
       <HomeSystemStatus
         progress={progress}
         resumeTopic={resumeTopic}
-        telemetry={decorativeTelemetry}
       />
 
       <HomeCourseUniverse onOpenMap={openMap} />
