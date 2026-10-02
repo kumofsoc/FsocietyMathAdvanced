@@ -11,6 +11,7 @@ const LOOP_KEY = "fsociety-background-music-loop-v1";
 const MAX_LOCAL_TRACK_BYTES = 120 * 1024 * 1024;
 
 export function BackgroundMusicPlayer() {
+  const shellRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const objectUrlRef = useRef<string | null>(null);
@@ -54,6 +55,27 @@ export function BackgroundMusicPlayer() {
       if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      if (!target || shellRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+
+    document.addEventListener("pointerdown", onPointerDown, true);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown, true);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -122,7 +144,7 @@ export function BackgroundMusicPlayer() {
   };
 
   return (
-    <div className={"background-music " + (open ? "open" : "")}>
+    <div ref={shellRef} className={"background-music " + (open ? "open" : "")}>
       <audio
         ref={audioRef}
         src={trackUrl ?? undefined}
