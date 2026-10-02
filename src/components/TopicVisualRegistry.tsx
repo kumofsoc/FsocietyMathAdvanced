@@ -282,7 +282,7 @@ class VisualErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("[FsocietyMath] visual failed", this.props.identity, error, info);
+    console.error("[VisualMath] visual failed", this.props.identity, error, info);
   }
 
   componentDidUpdate(previous: { children: ReactNode; identity: string }) {
