@@ -2987,6 +2987,7 @@ html[data-motion-profile="off"] .home-scrollytelling [data-reveal] {
   background: var(--bg);
 }
 .project-hero,
+.project-activity-panel,
 .project-feature-panel,
 .project-motion-panel,
 .project-guide-panel,
@@ -3165,6 +3166,161 @@ html[data-motion-profile="off"] .project-grid {
 @keyframes project-pulse-line {
   from { transform: translateX(-35%); width: 34%; }
   to { transform: translateX(145%); width: 58%; }
+}
+
+.project-activity-panel {
+  background:
+    radial-gradient(circle at 78% 48%, color-mix(in srgb,var(--accent) 10%,transparent), transparent 30%),
+    radial-gradient(circle at 18% 18%, color-mix(in srgb,var(--accent2) 7%,transparent), transparent 26%),
+    var(--bg);
+}
+.project-activity-layout {
+  grid-template-columns: minmax(0,.72fr) minmax(460px,1.28fr);
+  align-items: center;
+  gap: clamp(42px,6vw,96px);
+}
+.project-activity-copy {
+  position: relative;
+  z-index: 2;
+  max-width: 650px;
+}
+.project-activity-copy h2 {
+  margin: 15px 0 0;
+  font-size: clamp(46px,5.8vw,86px);
+  line-height: .96;
+  letter-spacing: -.062em;
+}
+.project-activity-copy > p {
+  max-width: 590px;
+  margin: 26px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.82;
+}
+.project-activity-stats {
+  margin-top: 30px;
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 8px;
+}
+.project-activity-stats article {
+  padding: 16px 17px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb,var(--surface) 80%,transparent);
+  backdrop-filter: blur(16px);
+}
+.project-activity-stats span {
+  display: block;
+  font-size: 23px;
+  font-weight: 720;
+  letter-spacing: -.045em;
+}
+.project-activity-stats small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.project-activity-chart {
+  min-width: 0;
+  padding: clamp(18px,2.4vw,28px);
+  border: 1px solid color-mix(in srgb,var(--accent) 20%,var(--border));
+  border-radius: 22px;
+  background:
+    linear-gradient(145deg,color-mix(in srgb,var(--surface) 90%,transparent),color-mix(in srgb,var(--elevated) 86%,transparent));
+  box-shadow: 0 32px 110px rgba(0,0,0,.18);
+  backdrop-filter: blur(22px);
+}
+.activity-chart-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.activity-chart-head > div > span {
+  display: block;
+  color: var(--accent);
+  font: 10px ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing: .16em;
+}
+.activity-chart-head > div > strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 18px;
+  letter-spacing: -.03em;
+}
+.activity-chart-head > b {
+  padding: 7px 9px;
+  border: 1px solid color-mix(in srgb,var(--accent) 35%,var(--border));
+  border-radius: 999px;
+  color: var(--accent);
+  background: color-mix(in srgb,var(--accent) 7%,transparent);
+  font: 9px ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing: .12em;
+}
+.activity-chart-plot {
+  margin-top: 24px;
+  width: 100%;
+  aspect-ratio: 720 / 260;
+}
+.activity-chart-plot svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.activity-chart-grid line {
+  stroke: color-mix(in srgb,var(--border) 78%,transparent);
+  stroke-width: 1;
+}
+.activity-chart-area {
+  opacity: .9;
+}
+.activity-chart-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1100;
+  stroke-dashoffset: 1100;
+  animation: visualmath-chart-draw 2.2s cubic-bezier(.2,.7,.2,1) forwards;
+}
+.activity-chart-point {
+  fill: var(--bg);
+  stroke: var(--accent);
+  stroke-width: 2;
+  opacity: 0;
+  animation: visualmath-chart-point .5s ease forwards;
+}
+.activity-chart-point:nth-of-type(4n) { animation-delay: .35s; }
+.activity-chart-point:nth-of-type(4n+1) { animation-delay: .55s; }
+.activity-chart-point:nth-of-type(4n+2) { animation-delay: .75s; }
+.activity-chart-point:nth-of-type(4n+3) { animation-delay: .95s; }
+@keyframes visualmath-chart-draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes visualmath-chart-point {
+  to { opacity: 1; }
+}
+.activity-chart-axis {
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: .06em;
+}
+html[data-motion-profile="off"] .activity-chart-line {
+  animation: none !important;
+  stroke-dashoffset: 0 !important;
+}
+html[data-motion-profile="off"] .activity-chart-point {
+  animation: none !important;
+  opacity: 1 !important;
 }
 
 .project-feature-panel {
@@ -3538,6 +3694,7 @@ html[data-motion-profile="off"] [data-reveal] {
     animation-duration: 28s;
   }
   .project-hero,
+  .project-activity-panel,
   .project-feature-panel,
   .project-motion-panel,
   .project-guide-panel,
@@ -3546,6 +3703,7 @@ html[data-motion-profile="off"] [data-reveal] {
     min-height: auto;
   }
   .project-hero-inner,
+  .project-activity-layout,
   .project-split,
   .project-motion-layout,
   .project-personal-layout {
@@ -3559,6 +3717,18 @@ html[data-motion-profile="off"] [data-reveal] {
   .project-hero-copy > p {
     margin-top: 25px;
     font-size: 12px;
+  }
+  .project-activity-layout {
+    gap: 38px;
+  }
+  .project-activity-copy h2 {
+    font-size: clamp(42px,11.5vw,64px);
+  }
+  .project-activity-chart {
+    padding: 16px;
+  }
+  .activity-chart-axis {
+    font-size: 8px;
   }
   .project-core {
     width: min(76vw,390px);
@@ -3621,8 +3791,19 @@ html[data-motion-profile="off"] [data-reveal] {
     font-size: 50px;
   }
   .project-feature-copy h2,
-  .project-guide-head h2 {
+  .project-guide-head h2,
+  .project-activity-copy h2 {
     font-size: 39px;
+  }
+  .project-activity-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  .activity-chart-head > div > strong {
+    font-size: 16px;
+  }
+  .activity-chart-axis span:nth-child(2),
+  .activity-chart-axis span:nth-child(4) {
+    display: none;
   }
   .project-window-stack {
     min-height: 520px;
