@@ -124,6 +124,17 @@ export function SettingsPanel() {
     return () => window.removeEventListener(LEARNING_EVENT, refresh);
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open]);
+
   const updateCustom = (token: string, value: string) => {
     setCustom((state) => ({ ...state, [token]: value }));
     setCustomDirty(true);
@@ -169,8 +180,11 @@ export function SettingsPanel() {
       </button>
 
       {open && (
-        <div className="settings-backdrop" onMouseDown={() => setOpen(false)}>
-          <aside className="settings-panel" onMouseDown={(event) => event.stopPropagation()}>
+        <div className="settings-backdrop" onPointerDown={() => setOpen(false)}>
+          <aside
+            className="settings-panel"
+            onPointerDown={(event) => event.stopPropagation()}
+          >
             <header className="settings-head">
               <div>
                 <div className="mini-kicker">FSOCIETYMATH / PERSONALIZATION</div>
