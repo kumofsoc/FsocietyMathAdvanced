@@ -993,7 +993,8 @@
 .portal-footer { position:absolute;left:24px;right:24px;bottom:18px;display:flex;justify-content:space-between;color:var(--muted);font:8px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em; }
 
 /* Motion tiers */
-.future-home[data-motion-tier="reduced"] .future-home::before { display:none; }
+.future-home[data-motion-tier="reduced"]::before,
+.future-home[data-motion-tier="static"]::before { display:none; }
 .future-home[data-motion-tier="static"] [data-parallax],
 .future-home[data-motion-tier="static"] [data-ambient] { transform:none !important; }
 
