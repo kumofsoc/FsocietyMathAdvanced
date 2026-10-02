@@ -81,6 +81,12 @@ function CourseMapInner() {
     setMode({ kind: "chapter", chapterId });
   }, []);
 
+  useEffect(() => {
+    if (mode.kind === "overview" && edgeMode === "study-flow") {
+      setEdgeMode("all");
+    }
+  }, [mode.kind, edgeMode]);
+
   const focusTopic = useCallback((topicId: string) => {
     const topic = topicMeta[topicId];
     if (!topic) return;
@@ -389,7 +395,14 @@ function CourseMapInner() {
           <button onClick={() => setFullscreen((value) => !value)}>
             {fullscreen ? "× Обычный вид" : "⛶ Развернуть интерфейс"}
           </button>
-          <button className="map-focus-entry" onClick={() => setMapFocus(true)}>
+          <button
+            className="map-focus-entry"
+            onClick={() => {
+              setFullscreen(false);
+              setInspectorOpen(true);
+              setMapFocus(true);
+            }}
+          >
             ◎ Только карта
           </button>
         </div>
@@ -433,6 +446,8 @@ function CourseMapInner() {
             <button
               key={value}
               className={edgeMode === value ? "active" : ""}
+              disabled={mode.kind === "overview" && value === "study-flow"}
+              title={mode.kind === "overview" && value === "study-flow" ? "Учебный маршрут доступен внутри раздела" : undefined}
               onClick={() => setEdgeMode(value)}
             >
               {label}
