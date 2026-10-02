@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { chapters, topicListMeta, topicMeta } from "./data/courseMeta";
+import { BackgroundMusicPlayer } from "./components/BackgroundMusicPlayer";
 import { CommandPalette } from "./components/CommandPalette";
 import { CustomCursor } from "./components/CustomCursor";
 import { HistoryDock } from "./components/HistoryDock";
@@ -37,6 +38,11 @@ const LinearAcademyHub = lazy(() =>
     default: module.LinearAcademyHub,
   })),
 );
+const ReviewHub = lazy(() =>
+  import("./components/ReviewHub").then((module) => ({
+    default: module.ReviewHub,
+  })),
+);
 const TopicPage = lazy(() =>
   import("./components/TopicPage").then((module) => ({ default: module.TopicPage })),
 );
@@ -49,6 +55,9 @@ const preloadCourseMap = () => {
 };
 const preloadLinearAcademy = () => {
   void import("./components/LinearAcademyHub");
+};
+const preloadReviewHub = () => {
+  void import("./components/ReviewHub");
 };
 
 function ChapterAccordion({
@@ -349,6 +358,7 @@ export default function App() {
       <MathBackdrop />
       <CustomCursor />
       <HistoryDock />
+      <BackgroundMusicPlayer />
 
       <aside className={"sidebar " + (sidebarOpen ? "open " : "") + (sidebarCollapsed ? "collapsed" : "")}>
         <button
@@ -390,6 +400,17 @@ export default function App() {
           <span>λ</span>
           Linear Academy
           <b>PRO</b>
+        </button>
+
+        <button
+          className={"map-entry review-entry " + (route === "review" ? "active" : "")}
+          onMouseEnter={preloadReviewHub}
+          onFocus={preloadReviewHub}
+          onClick={() => (window.location.hash = "review")}
+        >
+          <span>≡</span>
+          Краткий конспект
+          <b>REVIEW</b>
         </button>
 
         <div className="sidebar-section-label">
@@ -496,6 +517,8 @@ export default function App() {
                   <CourseMap />
                 ) : route === "academy" ? (
                   <LinearAcademyHub />
+                ) : route === "review" ? (
+                  <ReviewHub />
                 ) : topic?.isStub ? (
                   <StubTopicPage topicId={topic.id} />
                 ) : topic ? (
