@@ -51,6 +51,18 @@ The server should return the canonical merged progress object with its own `upda
 
 This keeps current localStorage/IndexedDB UX fast and makes backend sync additive instead of invasive.
 
-## Background music
+## Background music / media
 
-User-uploaded background audio is deliberately stored in browser IndexedDB and is **not** part of the backend sync contract. If cloud music is added later, expose it as a separate media API instead of mixing large blobs with progress sync.
+Current default is still browser IndexedDB, but the frontend already exposes a separate `BackgroundTrackStorage` transport contract in `src/lib/backgroundAudio.ts`.
+
+Future cloud media endpoint:
+
+```text
+GET    /v1/media/background-track
+PUT    /v1/media/background-track
+DELETE /v1/media/background-track
+```
+
+`PUT` accepts `multipart/form-data` with a `file` part. `GET` returns the audio blob and may send `X-Track-Name` / `X-Track-Updated-At` headers.
+
+Large media blobs deliberately stay outside `/v1/progress`; connecting the Go backend only requires injecting `createHttpBackgroundTrackStorage(...)` into the player storage boundary.
