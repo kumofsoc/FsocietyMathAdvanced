@@ -202,7 +202,7 @@ export function SettingsPanel() {
           >
             <header className="settings-head">
               <div>
-                <div className="mini-kicker">FSOCIETYMATH / PERSONALIZATION</div>
+                <div className="mini-kicker">VISUALMATH / ПЕРСОНАЛИЗАЦИЯ</div>
                 <h2>Настройки</h2>
               </div>
               <button onClick={() => setOpen(false)}>×</button>
@@ -320,10 +320,10 @@ export function SettingsPanel() {
                   </div>
                   <div className="motion-profile-grid">
                     {[
-                      ["full", "Full", "Максимум GSAP / Three.js. Для мощного desktop."],
-                      ["balanced", "Balanced", "Полный визуальный язык, но меньше GPU-нагрузка. По умолчанию."],
-                      ["eco", "Eco", "Сохраняет переходы и scroll-story, но снижает частицы и тяжёлые эффекты."],
-                      ["off", "Off", "0 анимаций: без GSAP, motion-переходов, автодвижения Three.js и декоративных трансформаций."],
+                      ["full", "Полный", "Максимум визуальной динамики и интерактивных сцен."],
+                      ["balanced", "Сбалансированный", "Плавные переходы и визуализации с умеренной нагрузкой. По умолчанию."],
+                      ["eco", "Лёгкий", "Сохраняет основные переходы, но уменьшает декоративное движение."],
+                      ["off", "Статичный", "Без автоматического движения и декоративных трансформаций."],
                     ].map(([id, title, copy]) => (
                       <button
                         key={id}
