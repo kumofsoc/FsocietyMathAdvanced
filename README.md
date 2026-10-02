@@ -1,12 +1,12 @@
-# FsocietyMathAdvanced
+# VisualMath
 
 Интерактивная среда для изучения высшей математики на React + TypeScript.
 
 ## Стек
 
 - React 19 + TypeScript + Vite
-- Framer Motion + GSAP
-- Three.js / React Three Fiber
+- Плавная навигация и адаптивные переходы
+- Интерактивная 3D-геометрия и математические сцены
 - XYFlow для интерактивной карты курса
 - KaTeX для формул
 - localStorage для локального прогресса и персонализации
