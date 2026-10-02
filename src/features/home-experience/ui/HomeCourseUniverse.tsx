@@ -1,10 +1,10 @@
 const nodes = [
-  ["SETS", "08", "12%"],
-  ["LINEAR", "21", "32%"],
-  ["ANALYSIS", "34", "54%"],
-  ["GEOMETRY", "19", "67%"],
-  ["ODE", "16", "79%"],
-  ["FOURIER", "09", "91%"],
+  ["SETS", "08", "DEPTH 01"],
+  ["LINEAR", "21", "DEPTH 02"],
+  ["ANALYSIS", "34", "DEPTH 03"],
+  ["GEOMETRY", "19", "DEPTH 04"],
+  ["ODE", "16", "DEPTH 05"],
+  ["FOURIER", "09", "DEPTH 06"],
 ];
 
 export function HomeCourseUniverse({ onOpenMap }: { onOpenMap: () => void }) {
