@@ -11,3 +11,7 @@ body{font-size:var(--readable-body)}
 :where(.academy-lab header p,.academy-controls label span,.academy-controls label b,.academy-equation small,.academy-stage-badges span,.academy-track-kicker,.academy-track-copy p,.academy-track-metrics span,.academy-track-actions button){font-size:11px!important}
 :where(.academy-equation strong){font-size:13px!important}
 @media(max-width:700px){:root{--readable-xs:11px;--readable-sm:12px;--readable-body:14px}}
+
+:where([class*="kicker"],[class*="label"],[class*="badge"],[class*="hint"],[class*="meta"]){font-size:11px!important}
+:where([class*="controls"] label span,[class*="controls"] label b){font-size:11px!important}
+:where([class*="card"] p,[class*="panel"] p,[class*="copy"] small){font-size:12px!important;line-height:1.6}
