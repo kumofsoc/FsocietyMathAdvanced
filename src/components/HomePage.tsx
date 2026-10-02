@@ -35,20 +35,21 @@ export function HomePage({
               reveal,
               {
                 y: eco ? 24 : 64,
-                opacity: 0,
-                filter: eco ? "blur(0px)" : "blur(10px)",
+                opacity: 1,
+                filter: eco ? "blur(0px)" : "blur(8px)",
               },
               {
                 y: 0,
                 opacity: 1,
                 filter: "blur(0px)",
                 stagger: profile === "full" ? 0.075 : 0.045,
-                duration: eco ? 0.45 : 0.68,
                 ease: "power3.out",
                 scrollTrigger: {
                   trigger: panel,
-                  start: "top 78%",
-                  once: true,
+                  start: "top 88%",
+                  end: "top 42%",
+                  scrub: profile === "full" ? 0.48 : 0.32,
+                  invalidateOnRefresh: false,
                 },
               },
             );
@@ -145,7 +146,7 @@ export function HomePage({
         <div className="project-ambient ambient-c" data-loop="pulse" aria-hidden="true" />
 
         <div className="home-panel-inner project-hero-inner">
-          <div className="project-hero-copy">
+          <div className="project-hero-copy" data-parallax>
             <div className="eyebrow" data-reveal>VISUALMATH / ИНТЕРАКТИВНАЯ МАТЕМАТИКА</div>
             <h1 data-reveal>
               Не страница.
@@ -200,7 +201,7 @@ export function HomePage({
         <div className="home-panel-inner project-split">
           <div className="project-feature-copy">
             <div className="eyebrow" data-reveal>DESIGNED AS A SYSTEM</div>
-            <h2 data-reveal>Интерфейс не разваливается на отдельные страницы.</h2>
+            <h2 data-reveal data-parallax>Интерфейс не разваливается на отдельные страницы.</h2>
             <p data-reveal>
               Карта, история переходов, сохранённые элементы, настройки, прогресс,
               интерактивные лаборатории и контент работают как части одного продукта.
@@ -208,18 +209,18 @@ export function HomePage({
             </p>
           </div>
 
-          <div className="project-window-stack">
-            <article className="project-window window-a">
+          <div className="project-window-stack" data-parallax>
+            <article className="project-window window-a" data-float-safe="a">
               <span>01</span>
               <strong>Контекст сохраняется</strong>
               <p>Можно уйти глубже, вернуться назад и продолжить с того же места.</p>
             </article>
-            <article className="project-window window-b">
+            <article className="project-window window-b" data-float-safe="b">
               <span>02</span>
               <strong>Интерфейс отвечает</strong>
               <p>Наведение, переходы, прокрутка и трансформации имеют собственный визуальный отклик.</p>
             </article>
-            <article className="project-window window-c">
+            <article className="project-window window-c" data-float-safe="c">
               <span>03</span>
               <strong>Всё персонализируется</strong>
               <p>Тема, курсор и интенсивность движения настраиваются под пользователя.</p>
@@ -264,32 +265,32 @@ export function HomePage({
           </header>
 
           <div className="project-guide-grid">
-            <article data-reveal>
+            <article data-reveal data-float-safe="guide">
               <span>01</span>
               <strong>Навигация</strong>
               <p>Разделы и темы находятся в боковой панели и раскрываются плавно.</p>
             </article>
-            <article data-reveal>
+            <article data-reveal data-float-safe="guide">
               <span>02</span>
               <strong>Карта</strong>
               <p>Отдельная рабочая сцена с группами, связями, перемещением, вращением и масштабом.</p>
             </article>
-            <article data-reveal>
+            <article data-reveal data-float-safe="guide">
               <span>03</span>
               <strong>История</strong>
               <p>Назад и вперёд работают как полноценная навигационная история с восстановлением позиции.</p>
             </article>
-            <article data-reveal>
+            <article data-reveal data-float-safe="guide">
               <span>04</span>
               <strong>Настройки</strong>
               <p>Темы, курсоры, движение и сохранённые элементы собраны в одном месте.</p>
             </article>
-            <article data-reveal>
+            <article data-reveal data-float-safe="guide">
               <span>05</span>
               <strong>Интерактив</strong>
               <p>Сложные вещи можно не только читать — ими можно управлять прямо в интерфейсе.</p>
             </article>
-            <article data-reveal>
+            <article data-reveal data-float-safe="guide">
               <span>06</span>
               <strong>Адаптив</strong>
               <p>Desktop получает максимум пространства и движения, mobile — тот же характер без развала layout.</p>
