@@ -8,7 +8,7 @@ const fragments = [
 export function HomeArchiveScene() {
   return (
     <section className="future-scene future-archive" data-home-scene="archive">
-      <div className="archive-vertical" aria-hidden="true">ARCHIVE / 3026 / FICTIONAL FUTURE INTERFACE</div>
+      <div className="archive-vertical" aria-hidden="true">АРХИВ ИДЕЙ / ЭКСПЕРИМЕНТАЛЬНЫЙ РАЗДЕЛ</div>
       <div className="archive-head" data-reveal>
         <div className="future-kicker"><span>АРХИВ ИДЕЙ</span><i>ЭКСПЕРИМЕНТАЛЬНЫЙ РАЗДЕЛ</i></div>
         <h2>Документы из<br/><em>будущего, которого нет.</em></h2>
