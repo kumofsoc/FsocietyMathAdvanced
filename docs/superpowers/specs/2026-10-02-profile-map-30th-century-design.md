@@ -49,3 +49,20 @@ Bring Account and Course Map to the same visual quality and design language as t
 - G6 layout logic is not changed unless required for style compatibility.
 - CSS animations are low-cost and disabled under motion=off / reduced motion.
 - Existing build/test contracts remain green.
+
+
+## Added scope: Academy, Review and System Config
+
+The same redesign pass also covers the two special sidebar modes and personalization overlay.
+
+### LINEAR LAB
+Linear Academy is treated as a professional mathematical laboratory: dense metrics, protocol flow, chapter modules and proof/capstone tags.
+
+### REVIEW ARCHIVE
+The concise review mode is treated as a future reference archive: sticky filter bus, document-like topic sheets and formula-focused surfaces.
+
+### SYSTEM CONFIG
+Settings becomes the VisualMath operating-system configuration console. Existing theme, cursor, motion, music and saved-theorem behavior remains unchanged.
+
+### Sidebar entrances
+Linear Academy and Review receive distinct visual identities directly in the sidebar while preserving the existing navigation behavior.
