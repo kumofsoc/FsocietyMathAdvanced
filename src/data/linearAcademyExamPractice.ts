@@ -4,7 +4,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "matrices": [
     {
       "id": "academy-exam-matrices-01",
-      "title": "ACADEMY EXAM · Неcommutativity",
+      "title": "Итоговая проверка · Неcommutativity",
       "prompt": "Пусть A=[[1,1],[0,1]], B=[[1,0],[1,1]]. Чему равен элемент (1,1) матрицы AB−BA?",
       "type": "number",
       "answer": "1",
@@ -15,7 +15,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "determinants": [
     {
       "id": "academy-exam-determinants-01",
-      "title": "ACADEMY EXAM · Объём композиции",
+      "title": "Итоговая проверка · Объём композиции",
       "prompt": "Линейное преобразование A имеет det A=−2, B имеет det B=3. Чему равен det(B A)?",
       "type": "number",
       "answer": "-6",
@@ -26,7 +26,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "inverse-rank": [
     {
       "id": "academy-exam-inverse-rank-01",
-      "title": "ACADEMY EXAM · Rank under composition",
+      "title": "Итоговая проверка · Ранг композиции",
       "prompt": "A:ℝ⁴→ℝ³ имеет rank 2. Каков максимально возможный rank(B∘A) для любого B:ℝ³→ℝ⁵?",
       "type": "number",
       "answer": "2",
@@ -37,7 +37,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "linear-systems": [
     {
       "id": "academy-exam-linear-systems-01",
-      "title": "ACADEMY EXAM · Geometry of solutions",
+      "title": "Итоговая проверка · Геометрия решений",
       "prompt": "Совместная система из 6 неизвестных имеет rank A=4. Какова размерность направляющего подпространства множества решений?",
       "type": "number",
       "answer": "2",
@@ -64,7 +64,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "vectors": [
     {
       "id": "academy-exam-vectors-01",
-      "title": "ACADEMY EXAM · Coordinates",
+      "title": "Итоговая проверка · Координаты",
       "prompt": "В базисе e'₁=e₁+e₂, e'₂=e₂ вектор v=2e₁+3e₂. Какие координаты v в базисе e'?",
       "type": "choice",
       "answer": "(2,1)",
@@ -81,7 +81,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "dot-product": [
     {
       "id": "academy-exam-dot-product-01",
-      "title": "ACADEMY EXAM · Projection",
+      "title": "Итоговая проверка · Проекция",
       "prompt": "Для x=(3,4), a=(1,0) чему равна длина ортогонального остатка x−projₐx?",
       "type": "number",
       "answer": "4",
@@ -91,7 +91,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "cross-product": [
     {
       "id": "academy-exam-cross-product-01",
-      "title": "ACADEMY EXAM · Area",
+      "title": "Итоговая проверка · Площадь",
       "prompt": "a=(1,0,0), b=(1,2,0). Чему равна площадь параллелограмма на a,b?",
       "type": "number",
       "answer": "2",
@@ -102,7 +102,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "mixed-product": [
     {
       "id": "academy-exam-mixed-product-01",
-      "title": "ACADEMY EXAM · Oriented volume",
+      "title": "Итоговая проверка · Ориентированный объём",
       "prompt": "a=(1,0,0), b=(0,2,0), c=(0,0,3). Чему равно [a,b,c]?",
       "type": "number",
       "answer": "6",
@@ -128,7 +128,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "plane-coordinates": [
     {
       "id": "academy-exam-plane-coordinates-01",
-      "title": "ACADEMY EXAM · Tangent to level set",
+      "title": "Итоговая проверка · Касательная к линии уровня",
       "prompt": "Для F=x²+4y², в точке (2,1) какой вектор является нормалью к уровню?",
       "type": "choice",
       "answer": "(4,8)",
@@ -145,7 +145,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "plane-lines": [
     {
       "id": "academy-exam-plane-lines-01",
-      "title": "ACADEMY EXAM · Distance",
+      "title": "Итоговая проверка · Расстояние",
       "prompt": "Расстояние от точки (1,2) до прямой 3x+4y−1=0 равно:",
       "type": "number",
       "answer": "2",
@@ -156,7 +156,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "conics": [
     {
       "id": "academy-exam-conics-01",
-      "title": "ACADEMY EXAM · Ellipse geometry",
+      "title": "Итоговая проверка · Геометрия эллипса",
       "prompt": "Эллипс x²/25+y²/9=1. Чему равен эксцентриситет?",
       "type": "choice",
       "answer": "4/5",
@@ -189,7 +189,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "space-lines-planes": [
     {
       "id": "academy-exam-space-lines-planes-01",
-      "title": "ACADEMY EXAM · Line-plane angle",
+      "title": "Итоговая проверка · Угол между прямой и плоскостью",
       "prompt": "Направление прямой s=(0,0,1), нормаль плоскости n=(0,0,1). Каков угол между прямой и плоскостью в градусах?",
       "type": "number",
       "answer": "90",
@@ -199,7 +199,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "quadrics": [
     {
       "id": "academy-exam-quadrics-01",
-      "title": "ACADEMY EXAM · Signature",
+      "title": "Итоговая проверка · Сигнатура",
       "prompt": "Квадратичная часть имеет собственные значения 3,2,−1. Какой характер у формы?",
       "type": "choice",
       "answer": "Неопределённый",
@@ -231,7 +231,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "mappings-transformations": [
     {
       "id": "academy-exam-mappings-transformations-01",
-      "title": "ACADEMY EXAM · Inverse order",
+      "title": "Итоговая проверка · Порядок обратных преобразований",
       "prompt": "Если h=g∘f, то какой оператор нужно применить первым при вычислении h⁻¹(y)?",
       "type": "choice",
       "answer": "g⁻¹",
@@ -247,7 +247,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "linear-transformations": [
     {
       "id": "academy-exam-linear-transformations-01",
-      "title": "ACADEMY EXAM · Images of basis",
+      "title": "Итоговая проверка · Образы базиса",
       "prompt": "T(e₁)=(1,2), T(e₂)=(3,4). Чему равен T(2e₁−e₂)?",
       "type": "choice",
       "answer": "(-1,0)",
@@ -263,7 +263,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "affine-transformations": [
     {
       "id": "academy-exam-affine-transformations-01",
-      "title": "ACADEMY EXAM · Barycentric invariance",
+      "title": "Итоговая проверка · Инвариантность барицентрических координат",
       "prompt": "M=(A+B)/2 — середина AB. Что верно после любого аффинного преобразования f?",
       "type": "choice",
       "answer": "f(M)=(f(A)+f(B))/2",
@@ -294,7 +294,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "linear-spaces": [
     {
       "id": "academy-exam-linear-spaces-01",
-      "title": "ACADEMY EXAM · Dimension",
+      "title": "Итоговая проверка · Размерность",
       "prompt": "Какова размерность пространства всех вещественных матриц 2×3?",
       "type": "number",
       "answer": "6",
@@ -304,7 +304,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "subspaces": [
     {
       "id": "academy-exam-subspaces-01",
-      "title": "ACADEMY EXAM · Grassmann",
+      "title": "Итоговая проверка · Формула Грассмана",
       "prompt": "dim U=5, dim W=4, dim(U+W)=7. Чему равна dim(U∩W)?",
       "type": "number",
       "answer": "2",
@@ -314,7 +314,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "linear-maps": [
     {
       "id": "academy-exam-linear-maps-01",
-      "title": "ACADEMY EXAM · Rank-nullity",
+      "title": "Итоговая проверка · Ранг и дефект",
       "prompt": "T:ℝ⁷→ℝ⁵ имеет ker T размерности 3. Чему равен rank T?",
       "type": "number",
       "answer": "4",
@@ -324,7 +324,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "eigenproblem": [
     {
       "id": "academy-exam-eigenproblem-01",
-      "title": "ACADEMY EXAM · Powers",
+      "title": "Итоговая проверка · Степени оператора",
       "prompt": "A диагонализуема и имеет собственные значения 2 и 1/2. Какое направление доминирует в Aⁿx при n→∞ для общего x?",
       "type": "choice",
       "answer": "Собственное направление λ=2",
@@ -340,7 +340,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "linear-functionals": [
     {
       "id": "academy-exam-linear-functionals-01",
-      "title": "ACADEMY EXAM · Kernel dimension",
+      "title": "Итоговая проверка · Размерность ядра",
       "prompt": "Ненулевой функционал φ:ℝ⁶→ℝ. Какова dim ker φ?",
       "type": "number",
       "answer": "5",
@@ -350,7 +350,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "quadratic-forms": [
     {
       "id": "academy-exam-quadratic-forms-01",
-      "title": "ACADEMY EXAM · Definiteness",
+      "title": "Итоговая проверка · Знакоопределённость",
       "prompt": "Симметричная матрица формы имеет собственные значения 5,1,0. Как лучше классифицировать форму?",
       "type": "choice",
       "answer": "Положительно полуопределённая",
@@ -366,7 +366,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "jordan-form": [
     {
       "id": "academy-exam-jordan-form-01",
-      "title": "ACADEMY EXAM · Nilpotent contribution",
+      "title": "Итоговая проверка · Нильпотентная часть",
       "prompt": "Для J=[[1,1],[0,1]] чему равен верхний правый элемент J^10?",
       "type": "number",
       "answer": "10",
@@ -392,7 +392,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "euclidean-spaces": [
     {
       "id": "academy-exam-euclidean-spaces-01",
-      "title": "ACADEMY EXAM · Least squares",
+      "title": "Итоговая проверка · Метод наименьших квадратов",
       "prompt": "Какое ортогональное условие выполняет остаток r=b−Ax̂ в задаче наименьших квадратов?",
       "type": "choice",
       "answer": "Aᵀr=0",
@@ -408,7 +408,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "euclidean-operators": [
     {
       "id": "academy-exam-euclidean-operators-01",
-      "title": "ACADEMY EXAM · SVD rank",
+      "title": "Итоговая проверка · Ранг и SVD",
       "prompt": "У матрицы сингулярные числа 5,2,0,0. Чему равен её rank?",
       "type": "number",
       "answer": "2",
@@ -418,7 +418,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "euclidean-functions": [
     {
       "id": "academy-exam-euclidean-functions-01",
-      "title": "ACADEMY EXAM · Riesz vector",
+      "title": "Итоговая проверка · Вектор Рисса",
       "prompt": "В стандартном ℝ³ функционал φ(x)=2x₁−x₂+4x₃. Каков представляющий вектор?",
       "type": "choice",
       "answer": "(2,-1,4)",
@@ -434,7 +434,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "unitary-spaces": [
     {
       "id": "academy-exam-unitary-spaces-01",
-      "title": "ACADEMY EXAM · Hermitian spectrum",
+      "title": "Итоговая проверка · Спектр эрмитова оператора",
       "prompt": "Может ли эрмитова матрица иметь собственное значение 2+i?",
       "type": "choice",
       "answer": "Нет",
@@ -459,14 +459,14 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
         "Корректно описан SVD/singular values.",
         "Образ окружности связан с эллипсом.",
         "Найден condition number.",
-        "Least squares решён и объяснён нулевой residual."
+        "Метод наименьших квадратов решён и объяснён нулевой residual."
       ]
     }
   ],
   "affine-spaces": [
     {
       "id": "academy-exam-affine-spaces-01",
-      "title": "ACADEMY EXAM · Solution plane",
+      "title": "Итоговая проверка · Плоскость решений",
       "prompt": "Совместная система Ax=b в ℝ⁵ имеет rank A=2. Какова размерность аффинного множества решений?",
       "type": "number",
       "answer": "3",
@@ -476,7 +476,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "quadric-invariants": [
     {
       "id": "academy-exam-quadric-invariants-01",
-      "title": "ACADEMY EXAM · Congruence",
+      "title": "Итоговая проверка · Конгруэнтность",
       "prompt": "A'=SᵀAS, S обратима. Какой инвариант точно сохраняется?",
       "type": "choice",
       "answer": "Ранг A",
@@ -508,7 +508,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "tensor-linear": [
     {
       "id": "academy-exam-tensor-linear-01",
-      "title": "ACADEMY EXAM · Tensor dimension",
+      "title": "Итоговая проверка · Размерность тензорного произведения",
       "prompt": "В 3-мерном пространстве какова размерность пространства тензоров типа (1,2)?",
       "type": "number",
       "answer": "27",
@@ -519,7 +519,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "tensor-euclidean": [
     {
       "id": "academy-exam-tensor-euclidean-01",
-      "title": "ACADEMY EXAM · Metric inverse",
+      "title": "Итоговая проверка · Обратная метрика",
       "prompt": "Что выражает равенство g^{ik}g_{kj}=δ^i_j?",
       "type": "choice",
       "answer": "Контрвариантная метрика является обратной к ковариантной",
@@ -535,7 +535,7 @@ export const linearAcademyExamPracticeByTopic: Record<string, PracticeTask[]> = 
   "exterior-algebra": [
     {
       "id": "academy-exam-exterior-algebra-01",
-      "title": "ACADEMY EXAM · Wedge dependence",
+      "title": "Итоговая проверка · Линейная зависимость и wedge",
       "prompt": "u и v ненулевые. Если u∧v=0, что следует?",
       "type": "choice",
       "answer": "u и v линейно зависимы",
