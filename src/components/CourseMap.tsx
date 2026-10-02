@@ -275,8 +275,10 @@ function CourseMapInner() {
     // Add a separate study-flow spine so every sub-map gets the same stable,
     // left-to-right topology as the course overview without pretending the
     // fallback edges are mathematical prerequisites.
+    const FLOW_BAND_SIZE = 3;
     for (let index = 1; index < currentChapter.topicIds.length; index += 1) {
-      const source = currentChapter.topicIds[index - 1];
+      const sourceIndex = Math.max(0, index - FLOW_BAND_SIZE);
+      const source = currentChapter.topicIds[sourceIndex];
       const target = currentChapter.topicIds[index];
       const key = source + "->" + target;
       if (seen.has(key)) continue;
@@ -346,7 +348,7 @@ function CourseMapInner() {
     const chapter = chapters.find((item) => item.id === mode.chapterId);
     if (!chapter) return { nodes: [] as Node[], edges: [] as Edge[] };
 
-    const positions = positionsByDepth(chapter.topicIds, topicLayoutRelations, 380, 205);
+    const positions = positionsByDepth(chapter.topicIds, topicLayoutRelations, 390, 220);
     const nodes: Node[] = chapter.topicIds.map((topicId) => {
       const topic = topicMeta[topicId];
       return {
