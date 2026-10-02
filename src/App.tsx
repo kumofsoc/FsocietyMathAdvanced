@@ -30,6 +30,9 @@ function routeFromHash() {
 const HomePage = lazy(() =>
   import("./components/HomePage").then((module) => ({ default: module.HomePage })),
 );
+const AccountPage = lazy(() =>
+  import("./components/AccountPage").then((module) => ({ default: module.AccountPage })),
+);
 const CourseMap = lazy(() =>
   import("./components/CourseMap").then((module) => ({ default: module.CourseMap })),
 );
@@ -47,6 +50,9 @@ const TopicPage = lazy(() =>
   import("./components/TopicPage").then((module) => ({ default: module.TopicPage })),
 );
 
+const preloadAccountPage = () => {
+  void import("./components/AccountPage");
+};
 const preloadTopicPage = () => {
   void import("./components/TopicPage");
 };
@@ -480,6 +486,15 @@ export default function App() {
             <i><b style={{ width: courseProgress + "%" }} /></i>
             <strong>{courseProgress}%</strong>
           </div>
+          <button
+            className={"topbar-account " + (route === "account" ? "active" : "")}
+            onMouseEnter={preloadAccountPage}
+            onFocus={preloadAccountPage}
+            onClick={() => (window.location.hash = "account")}
+          >
+            <span>VM</span>
+            <strong>Профиль</strong>
+          </button>
           <SettingsPanel />
         </header>
 
@@ -513,6 +528,8 @@ export default function App() {
                         : undefined
                     }
                   />
+                ) : route === "account" ? (
+                  <AccountPage progress={courseProgress} snapshot={learningSnapshot} />
                 ) : route === "map" ? (
                   <CourseMap />
                 ) : route === "academy" ? (
