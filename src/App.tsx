@@ -375,7 +375,7 @@ export default function App() {
         <button className="brand" onClick={() => (window.location.hash = "home")}>
           <span className="brand-mark">∑</span>
           <span>
-            <strong>FsocietyMath</strong>
+            <strong>VisualMath</strong>
             <small>ADVANCED</small>
           </span>
         </button>
