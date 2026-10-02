@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CURSOR_EVENT, CURSOR_KEY, type CursorMode } from "./CustomCursor";
 import { LEARNING_EVENT, loadSavedTheorems, saveTheorems } from "../lib/learning";
+import { MusicSettings } from "./MusicSettings";
 
 type Theme = Record<string, string>;
 type MotionProfile = "full" | "balanced" | "eco" | "off";
@@ -89,7 +90,7 @@ function applyMotion(profile: MotionProfile) {
 
 export function SettingsPanel() {
   const [open, setOpen] = useState(false);
-  const [tab, setTab] = useState<"theme" | "cursor" | "motion" | "saved">("theme");
+  const [tab, setTab] = useState<"theme" | "cursor" | "motion" | "music" | "saved">("theme");
   const [themeName, setThemeName] = useState(() => localStorage.getItem(THEME_NAME_KEY) || "Black");
   const [custom, setCustom] = useState<Theme>(() => {
     try {
@@ -213,6 +214,7 @@ export function SettingsPanel() {
                 ["theme", "Темы"],
                 ["cursor", "Курсор"],
                 ["motion", "Анимации"],
+                ["music", "Музыка"],
                 ["saved", "Сохранённое"],
               ].map(([id, label]) => (
                 <button
@@ -337,6 +339,8 @@ export function SettingsPanel() {
                   </div>
                 </section>
               )}
+
+              {tab === "music" && <MusicSettings />}
 
               {tab === "saved" && (
                 <section>
