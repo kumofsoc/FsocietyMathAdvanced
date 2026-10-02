@@ -1,232 +1,191 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  deleteBackgroundTrack,
-  loadBackgroundTrack,
-  saveBackgroundTrack,
+  loadBackgroundTracks,
+  MUSIC_COMMAND_EVENT,
+  MUSIC_STATE_EVENT,
+  type BackgroundMusicCommand,
+  type BackgroundMusicState,
+  type StoredBackgroundTrack,
 } from "../lib/backgroundAudio";
 import "../styles/background-music.css";
 
 const VOLUME_KEY = "fsociety-background-music-volume-v1";
-const LOOP_KEY = "fsociety-background-music-loop-v1";
-const MAX_LOCAL_TRACK_BYTES = 120 * 1024 * 1024;
+const LOOP_PLAYLIST_KEY = "visualmath-background-music-loop-playlist-v1";
+const CURRENT_TRACK_KEY = "visualmath-background-music-current-v1";
 
 export function BackgroundMusicPlayer() {
-  const shellRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
   const objectUrlRef = useRef<string | null>(null);
-  const [open, setOpen] = useState(false);
-  const [trackName, setTrackName] = useState<string | null>(null);
+  const autoPlayRef = useRef(false);
+  const [tracks, setTracks] = useState<StoredBackgroundTrack[]>([]);
+  const [currentTrackId, setCurrentTrackId] = useState<string | null>(() =>
+    localStorage.getItem(CURRENT_TRACK_KEY),
+  );
   const [trackUrl, setTrackUrl] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
   const [volume, setVolume] = useState(() => {
     const value = Number(localStorage.getItem(VOLUME_KEY) ?? ".35");
     return Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : .35;
   });
-  const [loop, setLoop] = useState(() => localStorage.getItem(LOOP_KEY) !== "0");
-  const autoPlayAfterLoad = useRef(false);
+  const [loopPlaylist, setLoopPlaylist] = useState(
+    () => localStorage.getItem(LOOP_PLAYLIST_KEY) !== "0",
+  );
 
-  const setObjectUrl = (blob: Blob, name: string) => {
-    if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
-    const url = URL.createObjectURL(blob);
-    objectUrlRef.current = url;
-    setTrackName(name);
-    setTrackUrl(url);
-  };
+  const currentIndex = useMemo(
+    () => tracks.findIndex((track) => track.id === currentTrackId),
+    [tracks, currentTrackId],
+  );
 
-  useEffect(() => {
-    let cancelled = false;
-    void loadBackgroundTrack()
-      .then((track) => {
-        if (cancelled || !track) return;
-        setObjectUrl(track.blob, track.name);
-      })
-      .catch(() => {
-        if (!cancelled) setError("Не удалось восстановить локальный трек.");
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+  const emitState = useCallback(() => {
+    const state: BackgroundMusicState = {
+      tracks: tracks.map(({ id, name, type, updatedAt }) => ({ id, name, type, updatedAt })),
+      currentTrackId,
+      playing,
+      volume,
+      loopPlaylist,
+      ready,
     };
+    window.dispatchEvent(new CustomEvent<BackgroundMusicState>(MUSIC_STATE_EVENT, {
+      detail: state,
+    }));
+  }, [tracks, currentTrackId, playing, volume, loopPlaylist, ready]);
+
+  const refreshTracks = useCallback(async () => {
+    const loaded = await loadBackgroundTracks().catch(() => []);
+    setTracks(loaded);
+    setCurrentTrackId((current) => {
+      if (current && loaded.some((track) => track.id === current)) return current;
+      return loaded[0]?.id ?? null;
+    });
+    setReady(true);
   }, []);
 
   useEffect(() => {
-    if (!open) return;
+    void refreshTracks();
+  }, [refreshTracks]);
 
-    const onPointerDown = (event: PointerEvent) => {
-      const target = event.target as Node | null;
-      if (!target || shellRef.current?.contains(target)) return;
-      setOpen(false);
-    };
+  useEffect(() => {
+    if (!ready) return;
+    const frame = requestAnimationFrame(emitState);
+    return () => cancelAnimationFrame(frame);
+  }, [emitState, ready]);
 
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
+  useEffect(() => {
+    const track = tracks.find((item) => item.id === currentTrackId) ?? null;
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+    if (!track) {
+      setTrackUrl(null);
+      setPlaying(false);
+      localStorage.removeItem(CURRENT_TRACK_KEY);
+      return;
+    }
 
-    document.addEventListener("pointerdown", onPointerDown, true);
-    window.addEventListener("keydown", onKeyDown);
+    const url = URL.createObjectURL(track.blob);
+    objectUrlRef.current = url;
+    setTrackUrl(url);
+    localStorage.setItem(CURRENT_TRACK_KEY, track.id);
+
     return () => {
-      document.removeEventListener("pointerdown", onPointerDown, true);
-      window.removeEventListener("keydown", onKeyDown);
+      if (objectUrlRef.current === url) {
+        URL.revokeObjectURL(url);
+        objectUrlRef.current = null;
+      }
     };
-  }, [open]);
+  }, [tracks, currentTrackId]);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
     audio.volume = volume;
-    audio.loop = loop;
     localStorage.setItem(VOLUME_KEY, String(volume));
-    localStorage.setItem(LOOP_KEY, loop ? "1" : "0");
-  }, [volume, loop]);
+    localStorage.setItem(LOOP_PLAYLIST_KEY, loopPlaylist ? "1" : "0");
+  }, [volume, loopPlaylist]);
 
   useEffect(() => {
-    if (!trackUrl || !autoPlayAfterLoad.current) return;
-    autoPlayAfterLoad.current = false;
+    if (!trackUrl || !autoPlayRef.current) return;
+    autoPlayRef.current = false;
     const frame = requestAnimationFrame(() => {
-      void audioRef.current?.play().catch(() => {
-        setError("Браузер заблокировал autoplay — нажми Play.");
-      });
+      void audioRef.current?.play().catch(() => undefined);
     });
     return () => cancelAnimationFrame(frame);
   }, [trackUrl]);
 
-  const chooseFile = async (file: File | undefined) => {
-    if (!file) return;
-    if (!file.type.startsWith("audio/")) {
-      setError("Нужен аудиофайл.");
-      return;
-    }
-    if (file.size > MAX_LOCAL_TRACK_BYTES) {
-      setError("Локальный трек ограничен 120 MB.");
-      return;
-    }
+  const selectByIndex = useCallback((index: number, autoplay = true) => {
+    if (!tracks.length) return;
+    const normalized = (index + tracks.length) % tracks.length;
+    autoPlayRef.current = autoplay;
+    setCurrentTrackId(tracks[normalized].id);
+  }, [tracks]);
 
-    setError(null);
-    autoPlayAfterLoad.current = true;
-    setObjectUrl(file, file.name);
-    try {
-      await saveBackgroundTrack(file);
-    } catch {
-      setError("Трек играет, но браузер не смог сохранить его между перезапусками.");
-    }
-  };
+  const next = useCallback((autoplay = true) => {
+    if (!tracks.length) return;
+    selectByIndex(currentIndex >= 0 ? currentIndex + 1 : 0, autoplay);
+  }, [currentIndex, selectByIndex, tracks.length]);
 
-  const togglePlayback = async () => {
-    const audio = audioRef.current;
-    if (!audio || !trackUrl) {
-      fileRef.current?.click();
-      return;
-    }
-    if (audio.paused) {
-      setError(null);
-      await audio.play().catch(() => setError("Не удалось запустить аудио."));
-    } else {
-      audio.pause();
-    }
-  };
+  const previous = useCallback(() => {
+    if (!tracks.length) return;
+    selectByIndex(currentIndex > 0 ? currentIndex - 1 : tracks.length - 1, true);
+  }, [currentIndex, selectByIndex, tracks.length]);
 
-  const clearTrack = async () => {
-    audioRef.current?.pause();
-    if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
-    objectUrlRef.current = null;
-    setTrackUrl(null);
-    setTrackName(null);
-    setPlaying(false);
-    setError(null);
-    await deleteBackgroundTrack().catch(() => undefined);
-  };
+  useEffect(() => {
+    const onCommand = (event: Event) => {
+      const command = (event as CustomEvent<BackgroundMusicCommand>).detail;
+      if (!command) return;
+
+      if (command.type === "request-state") {
+        emitState();
+      } else if (command.type === "refresh") {
+        void refreshTracks();
+      } else if (command.type === "toggle") {
+        const audio = audioRef.current;
+        if (!audio) return;
+        if (audio.paused) void audio.play().catch(() => undefined);
+        else audio.pause();
+      } else if (command.type === "play") {
+        void audioRef.current?.play().catch(() => undefined);
+      } else if (command.type === "pause") {
+        audioRef.current?.pause();
+      } else if (command.type === "next") {
+        next(true);
+      } else if (command.type === "previous") {
+        previous();
+      } else if (command.type === "select") {
+        if (tracks.some((track) => track.id === command.trackId)) {
+          autoPlayRef.current = true;
+          setCurrentTrackId(command.trackId);
+        }
+      } else if (command.type === "volume") {
+        setVolume(Math.min(1, Math.max(0, command.value)));
+      } else if (command.type === "loop-playlist") {
+        setLoopPlaylist(command.value);
+      }
+    };
+
+    window.addEventListener(MUSIC_COMMAND_EVENT, onCommand);
+    return () => window.removeEventListener(MUSIC_COMMAND_EVENT, onCommand);
+  }, [emitState, next, previous, refreshTracks, tracks]);
 
   return (
-    <div ref={shellRef} className={"background-music " + (open ? "open" : "")}>
-      <audio
-        ref={audioRef}
-        src={trackUrl ?? undefined}
-        preload="metadata"
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-        onEnded={() => setPlaying(false)}
-      />
-
-      <input
-        ref={fileRef}
-        className="background-music-file"
-        type="file"
-        accept="audio/*"
-        onChange={(event) => {
-          void chooseFile(event.target.files?.[0]);
-          event.currentTarget.value = "";
-        }}
-      />
-
-      <button
-        className="background-music-orb"
-        onClick={() => setOpen((value) => !value)}
-        title="Фоновая музыка"
-        aria-label="Фоновая музыка"
-      >
-        <span>{playing ? "♫" : "♪"}</span>
-        {playing && <i />}
-      </button>
-
-      {open && (
-        <section className="background-music-panel">
-          <header>
-            <div>
-              <span>BACKGROUND AUDIO / LOCAL</span>
-              <strong>{trackName ?? (loading ? "Загружаю…" : "Трек не выбран")}</strong>
-            </div>
-            <button onClick={() => setOpen(false)}>×</button>
-          </header>
-
-          <div className="background-music-controls">
-            <button className="music-play" onClick={() => void togglePlayback()}>
-              {trackUrl ? (playing ? "❚❚ Pause" : "▶ Play") : "+ Загрузить песню"}
-            </button>
-            <button onClick={() => fileRef.current?.click()}>Заменить</button>
-          </div>
-
-          <label className="background-music-volume">
-            <span>VOLUME</span>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step=".01"
-              value={volume}
-              onChange={(event) => setVolume(Number(event.target.value))}
-            />
-            <b>{Math.round(volume * 100)}%</b>
-          </label>
-
-          <label className="background-music-loop">
-            <input
-              type="checkbox"
-              checked={loop}
-              onChange={(event) => setLoop(event.target.checked)}
-            />
-            <span>Loop</span>
-          </label>
-
-          {trackName && (
-            <button className="background-music-remove" onClick={() => void clearTrack()}>
-              Удалить локальный трек
-            </button>
-          )}
-
-          <p>
-            Файл хранится только в браузере через IndexedDB и не отправляется на сервер.
-            После подключения backend этот player уже изолирован от transport-слоя.
-          </p>
-          {error && <div className="background-music-error">{error}</div>}
-        </section>
-      )}
-    </div>
+    <audio
+      ref={audioRef}
+      className="background-music-engine"
+      src={trackUrl ?? undefined}
+      preload="metadata"
+      onPlay={() => setPlaying(true)}
+      onPause={() => setPlaying(false)}
+      onEnded={() => {
+        if (!tracks.length) {
+          setPlaying(false);
+          return;
+        }
+        const isLast = currentIndex === tracks.length - 1;
+        if (!isLast || loopPlaylist) next(true);
+        else setPlaying(false);
+      }}
+    />
   );
 }
