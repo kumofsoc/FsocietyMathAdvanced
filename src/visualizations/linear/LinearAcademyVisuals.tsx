@@ -68,7 +68,7 @@ function MatrixOperatorLab({ topicId }: { topicId: string }) {
   return (
     <section className="academy-lab">
       <header>
-        <div className="eyebrow">ACADEMY LAB / LINEAR OPERATOR</div>
+        <div className="eyebrow">ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / ЛИНЕЙНЫЙ ОПЕРАТОР</div>
         <h2>Матрица действует на всю геометрию сразу.</h2>
         <p>
           Меняй коэффициенты A. Сетка, базис и единичный квадрат показывают
@@ -164,7 +164,7 @@ function VectorProjectionLab({ topicId }: { topicId: string }) {
   return (
     <section className="academy-lab">
       <header>
-        <div className="eyebrow">ACADEMY LAB / VECTOR GEOMETRY</div>
+        <div className="eyebrow">ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / ВЕКТОРНАЯ ГЕОМЕТРИЯ</div>
         <h2>Dot, projection и oriented area на одной сцене.</h2>
         <p>
           Вектор v раскладывается на компоненту вдоль a и ортогональный остаток.
@@ -213,7 +213,7 @@ function VectorProjectionLab({ topicId }: { topicId: string }) {
             </label>
           ))}
           <div className="academy-equation">
-            <span>PROJECTION</span>
+            <span>ПРОЕКЦИЯ</span>
             <strong>projₐv = ({px.toFixed(2)}, {py.toFixed(2)})</strong>
             <small>v = projₐv + r, где r ⟂ a</small>
           </div>
@@ -245,7 +245,7 @@ function SubspaceLab({ topicId }: { topicId: string }) {
   return (
     <section className="academy-lab">
       <header>
-        <div className="eyebrow">ACADEMY LAB / SUBSPACE + PROJECTION</div>
+        <div className="eyebrow">ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / ПОДПРОСТРАНСТВО И ПРОЕКЦИЯ</div>
         <h2>{topicId === "affine-spaces" ? "Линейное подпространство и его аффинный сдвиг." : "Подпространство как геометрия допустимых направлений."}</h2>
         <p>
           Меняй направление. Точка раскладывается на проекцию и ортогональный остаток;
@@ -318,7 +318,7 @@ function ConicLab({ topicId }: { topicId: string }) {
   return (
     <section className="academy-lab">
       <header>
-        <div className="eyebrow">ACADEMY LAB / QUADRATIC GEOMETRY</div>
+        <div className="eyebrow">ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / КВАДРАТИЧНАЯ ГЕОМЕТРИЯ</div>
         <h2>Коэффициенты формы превращаются в геометрию.</h2>
         <p>
           Полуоси и знаки квадратичных членов определяют фокусы, эксцентриситет
@@ -376,7 +376,7 @@ function AffineTransformLab({ topicId }: { topicId: string }) {
   return (
     <section className="academy-lab">
       <header>
-        <div className="eyebrow">ACADEMY LAB / AFFINE PIPELINE</div>
+        <div className="eyebrow">ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / АФФИННЫЕ ПРЕОБРАЗОВАНИЯ</div>
         <h2>Прямые остаются прямыми, углы — не обязаны.</h2>
         <p>
           Shear + translation деформируют треугольник, но центроид остаётся
@@ -421,7 +421,7 @@ function SpacePlaneLab() {
   return (
     <section className="academy-lab">
       <header>
-        <div className="eyebrow">ACADEMY LAB / ℝ³ INCIDENCE</div>
+        <div className="eyebrow">ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / ГЕОМЕТРИЯ В ℝ³</div>
         <h2>Прямая, плоскость и общая нормаль.</h2>
         <p>Сцена связывает параметрическое направление прямой, нормаль плоскости и формулы углов/расстояний.</p>
       </header>
@@ -455,7 +455,7 @@ function TensorLab({ topicId }: { topicId: string }) {
   return (
     <section className="academy-lab">
       <header>
-        <div className="eyebrow">ACADEMY LAB / TENSOR + BASIS</div>
+        <div className="eyebrow">ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / ТЕНЗОРЫ И БАЗИС</div>
         <h2>Объект остаётся, компоненты меняются.</h2>
         <p>
           Поворачивай базис. Вектор, ковектор и tensor-компоненты трансформируются
@@ -507,7 +507,7 @@ function LinearSystemGeometryLab() {
   return (
     <section className="academy-lab">
       <header>
-        <div className="eyebrow">ACADEMY LAB / LINEAR SYSTEM GEOMETRY</div>
+        <div className="eyebrow">ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / ГЕОМЕТРИЯ СИСТЕМ</div>
         <h2>Rank видно как геометрию пересечения ограничений.</h2>
         <p>
           Две строки системы задают две прямые. Независимые ограничения пересекаются
@@ -560,7 +560,7 @@ function LevelSetLab() {
 
   return (
     <section className="academy-lab">
-      <header><div className="eyebrow">ACADEMY LAB / LEVEL SET + GRADIENT</div><h2>Неявное уравнение превращается в кривую, а ∇F — в её нормаль.</h2><p>Для F=(x−cₓ)²+(y−cᵧ)²−R²=0 выбери точку на уровне и наблюдай: касательная всегда ортогональна градиенту.</p></header>
+      <header><div className="eyebrow">ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / УРОВЕНЬ И ГРАДИЕНТ</div><h2>Неявное уравнение превращается в кривую, а ∇F — в её нормаль.</h2><p>Для F=(x−cₓ)²+(y−cᵧ)²−R²=0 выбери точку на уровне и наблюдай: касательная всегда ортогональна градиенту.</p></header>
       <div className="academy-layout">
         <div className="academy-stage">
           <svg viewBox={`0 0 ${W} ${H}`}>
@@ -606,7 +606,7 @@ function LineDistanceLab() {
 
   return (
     <section className="academy-lab">
-      <header><div className="eyebrow">ACADEMY LAB / POINT–LINE DISTANCE</div><h2>Кратчайший путь к прямой всегда идёт по нормали.</h2><p>Меняй коэффициенты Ax+By+C=0 и точку P. Проекция P на прямую напрямую визуализирует формулу расстояния.</p></header>
+      <header><div className="eyebrow">ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / РАССТОЯНИЕ ДО ПРЯМОЙ</div><h2>Кратчайший путь к прямой всегда идёт по нормали.</h2><p>Меняй коэффициенты Ax+By+C=0 и точку P. Проекция P на прямую напрямую визуализирует формулу расстояния.</p></header>
       <div className="academy-layout">
         <div className="academy-stage">
           <svg viewBox={`0 0 ${W} ${H}`}>
@@ -645,7 +645,7 @@ function CrossProductLab({ volume = false }: { volume?: boolean }) {
 
   return (
     <section className="academy-lab">
-      <header><div className="eyebrow">{volume?"ACADEMY LAB / MIXED PRODUCT":"ACADEMY LAB / CROSS PRODUCT"}</div><h2>{volume?"Площадь основания × высота = ориентированный объём.":"a×b кодирует площадь и ориентацию одновременно."}</h2><p>{volume?"Смешанное произведение измеряет проекцию третьего направления на нормаль к основанию.":"Угол между a и b меняет площадь параллелограмма; перестановка векторов меняет знак ориентации."}</p></header>
+      <header><div className="eyebrow">{volume?"ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / СМЕШАННОЕ ПРОИЗВЕДЕНИЕ":"ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / ВЕКТОРНОЕ ПРОИЗВЕДЕНИЕ"}</div><h2>{volume?"Площадь основания × высота = ориентированный объём.":"a×b кодирует площадь и ориентацию одновременно."}</h2><p>{volume?"Смешанное произведение измеряет проекцию третьего направления на нормаль к основанию.":"Угол между a и b меняет площадь параллелограмма; перестановка векторов меняет знак ориентации."}</p></header>
       <div className="academy-layout">
         <div className="academy-stage">
           <svg viewBox={`0 0 ${W} ${H}`}>
@@ -664,7 +664,7 @@ function CrossProductLab({ volume = false }: { volume?: boolean }) {
         <aside className="academy-controls">
           <label><span>angle</span><input type="range" min="-170" max="170" step="1" value={angle} onChange={e=>setAngle(Number(e.target.value))}/><b>{angle}°</b></label>
           {volume&&<label><span>height</span><input type="range" min=".1" max="2.2" step=".05" value={height} onChange={e=>setHeight(Number(e.target.value))}/><b>{height.toFixed(2)}</b></label>}
-          <div className="academy-equation"><span>{volume?"TRIPLE PRODUCT":"CROSS PRODUCT"}</span><strong>{volume?"V=|a·(b×c)|":"||a×b||=||a||||b||sinθ"}</strong><small>ноль означает вырождение соответствующего ориентированного объёма</small></div>
+          <div className="academy-equation"><span>{volume?"СМЕШАННОЕ ПРОИЗВЕДЕНИЕ":"ВЕКТОРНОЕ ПРОИЗВЕДЕНИЕ"}</span><strong>{volume?"V=|a·(b×c)|":"||a×b||=||a||||b||sinθ"}</strong><small>ноль означает вырождение соответствующего ориентированного объёма</small></div>
         </aside>
       </div>
     </section>
@@ -694,7 +694,7 @@ function RankNullityLab() {
   return (
     <section className="academy-lab">
       <header>
-        <div className="eyebrow">ACADEMY LAB / RANK–NULLITY</div>
+        <div className="eyebrow">ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / РАНГ И ЯДРО</div>
         <h2>Смотри, как оператор физически теряет размерность.</h2>
         <p>
           Единичная окружность превращается в эллипс, отрезок или точку.
@@ -749,7 +749,7 @@ function EigenDynamicsLab({ jordan = false }: { jordan?: boolean }) {
   return (
     <section className="academy-lab">
       <header>
-        <div className="eyebrow">{jordan ? "ACADEMY LAB / JORDAN DYNAMICS" : "ACADEMY LAB / EIGEN DYNAMICS"}</div>
+        <div className="eyebrow">{jordan ? "ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / ЖОРДАНОВА ФОРМА" : "ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / СОБСТВЕННЫЕ НАПРАВЛЕНИЯ"}</div>
         <h2>{jordan ? "Одно λ, но нильпотентная часть создаёт drift." : "Собственные направления переживают действие оператора без поворота."}</h2>
         <p>
           {jordan
@@ -799,7 +799,7 @@ function GramSchmidtLab() {
 
   return (
     <section className="academy-lab">
-      <header><div className="eyebrow">ACADEMY LAB / GRAM–SCHMIDT</div><h2>Ортогональный базис строится вычитанием уже объяснённых направлений.</h2><p>b раскладывается на проекцию вдоль a и новый компонент u₂⊥a. Нормирование превращает их в ортонормированный базис и напрямую ведёт к QR.</p></header>
+      <header><div className="eyebrow">ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / ГРАМ — ШМИДТ</div><h2>Ортогональный базис строится вычитанием уже объяснённых направлений.</h2><p>b раскладывается на проекцию вдоль a и новый компонент u₂⊥a. Нормирование превращает их в ортонормированный базис и напрямую ведёт к QR.</p></header>
       <div className="academy-layout">
         <div className="academy-stage">
           <svg viewBox={`0 0 ${W} ${H}`}>
@@ -836,7 +836,7 @@ function SVDLab() {
   const d=circle.map((q,i)=>(i?"L":"M")+q.x+" "+q.y).join(" ");
   return (
     <section className="academy-lab">
-      <header><div className="eyebrow">ACADEMY LAB / SVD</div><h2>Любой оператор = rotate → stretch → rotate.</h2><p>Сингулярные значения — полуоси эллипса-образа единичной окружности. Они устойчивее собственных значений для анализа общего прямоугольного оператора.</p></header>
+      <header><div className="eyebrow">ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / SVD</div><h2>Любой оператор = rotate → stretch → rotate.</h2><p>Сингулярные значения — полуоси эллипса-образа единичной окружности. Они устойчивее собственных значений для анализа общего прямоугольного оператора.</p></header>
       <div className="academy-layout">
         <div className="academy-stage">
           <svg viewBox={`0 0 ${W} ${H}`}>
@@ -872,7 +872,7 @@ function FunctionalLevelLab() {
 
   return (
     <section className="academy-lab">
-      <header><div className="eyebrow">ACADEMY LAB / COVECTOR</div><h2>Функционал режет пространство параллельными уровнями.</h2><p>φ(x)=ax+by. Все уровни φ=c параллельны ker φ, а представляющий вектор (a,b) перпендикулярен им в евклидовой метрике.</p></header>
+      <header><div className="eyebrow">ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / КОВЕКТОР</div><h2>Функционал режет пространство параллельными уровнями.</h2><p>φ(x)=ax+by. Все уровни φ=c параллельны ker φ, а представляющий вектор (a,b) перпендикулярен им в евклидовой метрике.</p></header>
       <div className="academy-layout">
         <div className="academy-stage">
           <svg viewBox={`0 0 ${W} ${H}`}>
@@ -900,7 +900,7 @@ function UnitaryPhaseLab() {
   const q=p(r*Math.cos(a),r*Math.sin(a));
   return (
     <section className="academy-lab">
-      <header><div className="eyebrow">ACADEMY LAB / UNITARY PHASE</div><h2>Фаза меняется, норма остаётся.</h2><p>Умножение на exp(iθ) — простейший унитарный оператор: это чистый поворот комплексной плоскости без изменения внутреннего произведения.</p></header>
+      <header><div className="eyebrow">ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / УНИТАРНАЯ ФАЗА</div><h2>Фаза меняется, норма остаётся.</h2><p>Умножение на exp(iθ) — простейший унитарный оператор: это чистый поворот комплексной плоскости без изменения внутреннего произведения.</p></header>
       <div className="academy-layout">
         <div className="academy-stage">
           <svg viewBox={`0 0 ${W} ${H}`}>
@@ -932,7 +932,7 @@ function WedgeLab() {
   const pts=[p(0,0),p(u.x,u.y),p(u.x+v.x,u.y+v.y),p(v.x,v.y)];
   return (
     <section className="academy-lab">
-      <header><div className="eyebrow">ACADEMY LAB / EXTERIOR ALGEBRA</div><h2>u∧v — ориентированная площадь, не “ещё один вектор”.</h2><p>При совпадении направлений площадь схлопывается в ноль; перестановка u и v меняет ориентацию и знак wedge-product.</p></header>
+      <header><div className="eyebrow">ИНТЕРАКТИВНАЯ ЛАБОРАТОРИЯ / ВНЕШНЯЯ АЛГЕБРА</div><h2>u∧v — ориентированная площадь, не “ещё один вектор”.</h2><p>При совпадении направлений площадь схлопывается в ноль; перестановка u и v меняет ориентацию и знак wedge-product.</p></header>
       <div className="academy-layout">
         <div className="academy-stage">
           <svg viewBox={`0 0 ${W} ${H}`}>
