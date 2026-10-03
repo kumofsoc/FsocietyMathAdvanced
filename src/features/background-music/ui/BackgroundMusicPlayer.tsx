@@ -160,7 +160,9 @@ export function BackgroundMusicPlayer() {
           setCurrentTrackId(command.trackId);
         }
       } else if (command.type === "volume") {
-        setVolume(Math.min(1, Math.max(0, command.value)));
+        if (Number.isFinite(command.value)) {
+          setVolume(Math.min(1, Math.max(0, command.value)));
+        }
       } else if (command.type === "loop-playlist") {
         setLoopPlaylist(command.value);
       }
