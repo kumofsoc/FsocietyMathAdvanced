@@ -39,6 +39,7 @@ import { buildBlockDeepLink, parseVisualMathHash } from "@/shared/lib/blockDeepL
 import { ReadingWidthControl } from "@/features/reading-width/ui/ReadingWidthControl";
 import { useAppShellStore } from "@/app/store/useAppShellStore";
 import { loadReadingWidth, saveReadingWidth, type ReadingWidth } from "@/features/reading-width/model/readingWidth";
+import { BLOCK_NOTES_EVENT, BLOCK_NOTES_KEY, deleteBlockNote, loadBlockNote, saveBlockNote } from "@/features/block-notes/model/blockNotes";
 
 const PracticePanel = lazy(() =>
   import("@/features/learning/ui/PracticePanel").then((module) => ({ default: module.PracticePanel })),
@@ -324,6 +325,9 @@ function ContentCard({
   const theoremId = topic.id + "::" + index;
   const academyBlock = isAdvancedLearningBlock(topic.id, block);
   const [saved, setSaved] = useState(() => loadSavedTheorems().some((item) => item.id === theoremId));
+  const [noteOpen, setNoteOpen] = useState(false);
+  const [noteText, setNoteText] = useState(() => loadBlockNote(topic.id, index)?.text ?? "");
+  const [noteSaveState, setNoteSaveState] = useState<"idle" | "saved" | "failed">("idle");
   const [propertyPanel, setPropertyPanel] = useState<"proof" | "corollary" | null>(
     () => topic.id === "matrices" && block.proofs?.length ? "proof" : null,
   );
@@ -339,6 +343,39 @@ function ContentCard({
       else next.add(statementId);
       return next;
     });
+  };
+
+  useEffect(() => {
+    const syncNote = () => {
+      setNoteText(loadBlockNote(topic.id, index)?.text ?? "");
+    };
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === BLOCK_NOTES_KEY) syncNote();
+    };
+
+    window.addEventListener(BLOCK_NOTES_EVENT, syncNote);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener(BLOCK_NOTES_EVENT, syncNote);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [topic.id, index]);
+
+  const updateNote = (value: string) => {
+    setNoteText(value);
+    const savedNote = saveBlockNote(topic.id, index, value);
+    setNoteSaveState(savedNote ? "saved" : "failed");
+  };
+
+  const removeNote = () => {
+    const deleted = deleteBlockNote(topic.id, index);
+    if (!deleted) {
+      setNoteSaveState("failed");
+      return;
+    }
+    setNoteText("");
+    setNoteSaveState("idle");
+    setNoteOpen(false);
   };
 
   const toggleSaved = () => {
@@ -386,6 +423,16 @@ function ContentCard({
         <div className="block-title-row">
           <h3>{displayBlockTitle(block.title)}</h3>
           <div className="block-title-actions">
+            <button
+              type="button"
+              className={"block-note-button " + (noteText.trim() ? "has-note " : "") + (noteOpen ? "active" : "")}
+              onClick={() => setNoteOpen((value) => !value)}
+              aria-expanded={noteOpen}
+              title={noteText.trim() ? "Открыть заметку к этому блоку" : "Добавить заметку к этому блоку"}
+            >
+              <span aria-hidden="true">{noteText.trim() ? "●" : "✎"}</span>
+              <strong>{noteText.trim() ? "Заметка" : "Заметка"}</strong>
+            </button>
             <CopyBlockLinkButton topicId={topic.id} blockIndex={index} />
             {block.kind === "theorem" && (
               <>
@@ -412,6 +459,53 @@ function ContentCard({
             )}
           </div>
         </div>
+
+        <AnimatePresence initial={false}>
+          {noteOpen && (
+            <motion.section
+              className={"block-note-panel " + (noteText.trim() ? "has-note" : "")}
+              initial={{ height: 0, opacity: 0, y: -4 }}
+              animate={{ height: "auto", opacity: 1, y: 0 }}
+              exit={{ height: 0, opacity: 0, y: -4 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              aria-label={"Заметка к блоку «" + displayBlockTitle(block.title) + "»"}
+            >
+              <header>
+                <div>
+                  <span>МОЯ ЗАМЕТКА</span>
+                  <strong>{labels[block.kind]} · блок {String(index + 1).padStart(2, "0")}</strong>
+                </div>
+                <small>
+                  {noteSaveState === "failed"
+                    ? "Не удалось сохранить"
+                    : noteText.trim()
+                      ? "Сохраняется автоматически"
+                      : "Привязана к этому блоку"}
+                </small>
+              </header>
+
+              <textarea
+                value={noteText}
+                onChange={(event) => updateNote(event.target.value)}
+                placeholder="Запиши свою мысль, непонятный момент, вопрос или связь с другой темой…"
+                rows={4}
+                spellCheck
+              />
+
+              <footer>
+                <span>
+                  {noteText.length ? noteText.length + " симв." : "Пустая заметка не сохраняется"}
+                </span>
+                {noteText.trim() && (
+                  <button type="button" onClick={removeNote}>
+                    Удалить заметку
+                  </button>
+                )}
+              </footer>
+            </motion.section>
+          )}
+        </AnimatePresence>
+
         {!block.matrixOperation && block.kind === "proof" ? (
           <CollapsibleProof body={block.body} formula={block.formula}>
             <p><RichMatrixText text={block.body} /></p>
