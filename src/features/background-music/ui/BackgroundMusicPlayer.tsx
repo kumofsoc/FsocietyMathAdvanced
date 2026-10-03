@@ -7,6 +7,7 @@ import {
   type BackgroundMusicState,
   type StoredBackgroundTrack,
 } from "@/lib/backgroundAudio";
+import { readLocalStorage, removeLocalStorage, writeLocalStorage } from "@/shared/lib/browserStorage";
 import "@/styles/background-music.css";
 
 const VOLUME_KEY = "fsociety-background-music-volume-v1";
@@ -19,17 +20,17 @@ export function BackgroundMusicPlayer() {
   const autoPlayRef = useRef(false);
   const [tracks, setTracks] = useState<StoredBackgroundTrack[]>([]);
   const [currentTrackId, setCurrentTrackId] = useState<string | null>(() =>
-    localStorage.getItem(CURRENT_TRACK_KEY),
+    readLocalStorage(CURRENT_TRACK_KEY),
   );
   const [trackUrl, setTrackUrl] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [ready, setReady] = useState(false);
   const [volume, setVolume] = useState(() => {
-    const value = Number(localStorage.getItem(VOLUME_KEY) ?? ".35");
+    const value = Number(readLocalStorage(VOLUME_KEY) ?? ".35");
     return Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : .35;
   });
   const [loopPlaylist, setLoopPlaylist] = useState(
-    () => localStorage.getItem(LOOP_PLAYLIST_KEY) !== "0",
+    () => readLocalStorage(LOOP_PLAYLIST_KEY) !== "0",
   );
 
   const currentIndex = useMemo(
@@ -80,14 +81,14 @@ export function BackgroundMusicPlayer() {
     if (!track) {
       setTrackUrl(null);
       setPlaying(false);
-      localStorage.removeItem(CURRENT_TRACK_KEY);
+      removeLocalStorage(CURRENT_TRACK_KEY);
       return;
     }
 
     const url = URL.createObjectURL(track.blob);
     objectUrlRef.current = url;
     setTrackUrl(url);
-    localStorage.setItem(CURRENT_TRACK_KEY, track.id);
+    writeLocalStorage(CURRENT_TRACK_KEY, track.id);
 
     return () => {
       if (objectUrlRef.current === url) {
@@ -101,8 +102,8 @@ export function BackgroundMusicPlayer() {
     const audio = audioRef.current;
     if (!audio) return;
     audio.volume = volume;
-    localStorage.setItem(VOLUME_KEY, String(volume));
-    localStorage.setItem(LOOP_PLAYLIST_KEY, loopPlaylist ? "1" : "0");
+    writeLocalStorage(VOLUME_KEY, String(volume));
+    writeLocalStorage(LOOP_PLAYLIST_KEY, loopPlaylist ? "1" : "0");
   }, [volume, loopPlaylist]);
 
   useEffect(() => {
