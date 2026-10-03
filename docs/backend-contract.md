@@ -8,9 +8,10 @@ VITE_API_BASE_URL=http://localhost:8080
 
 ## Existing frontend boundary
 
-- `src/types/api.ts` — transport DTOs.
-- `src/lib/api.ts` — one fetch client, auth header, errors, credentials.
-- `src/lib/progressSync.ts` — converts current local learning state into the future server payload.
+- `src/shared/api/types.ts` — transport DTOs.
+- `src/shared/api/client.ts` — one fetch client, auth header, errors, credentials.
+- `src/features/learning/model/progressSync.ts` — converts current local learning state into the future server payload.
+- `src/types/api.ts`, `src/lib/api.ts` and `src/lib/progressSync.ts` remain thin compatibility facades during migration.
 - No React component calls raw `fetch`.
 - No backend URL is hard-coded in UI components.
 - The course remains usable when `VITE_API_BASE_URL` is absent.
@@ -53,16 +54,10 @@ This keeps current localStorage/IndexedDB UX fast and makes backend sync additiv
 
 ## Background music / media
 
-Current default is still browser IndexedDB, but the frontend already exposes a separate `BackgroundTrackStorage` transport contract in `src/lib/backgroundAudio.ts`.
+Background music is currently browser-local and stored directly in IndexedDB by
+`src/features/background-music/model/backgroundAudio.ts`. No media HTTP transport is
+implemented in the current frontend.
 
-Future cloud media endpoint:
-
-```text
-GET    /v1/media/background-track
-PUT    /v1/media/background-track
-DELETE /v1/media/background-track
-```
-
-`PUT` accepts `multipart/form-data` with a `file` part. `GET` returns the audio blob and may send `X-Track-Name` / `X-Track-Updated-At` headers.
-
-Large media blobs deliberately stay outside `/v1/progress`; connecting the Go backend only requires injecting `createHttpBackgroundTrackStorage(...)` into the player storage boundary.
+If cloud media is added later, introduce an explicit storage/transport boundary first.
+Large audio blobs should remain separate from `/v1/progress`; do not couple progress
+sync to media uploads.
