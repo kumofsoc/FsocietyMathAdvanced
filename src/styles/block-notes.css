@@ -121,7 +121,10 @@
   outline:0;
   background:transparent;
   color:var(--text);
-  font:500 var(--font-body)/1.68 inherit;
+  font-size:var(--font-body);
+  font-family:inherit;
+  font-weight:500;
+  line-height:1.68;
 }
 
 .block-note-panel textarea::placeholder{
