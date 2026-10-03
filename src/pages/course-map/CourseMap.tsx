@@ -488,7 +488,14 @@ function CourseMapInner() {
       </nav>
 
       <div className="knowledge-map-breadcrumb">
-        <button onClick={() => setMode({ kind: "overview" })}>Вся математика</button>
+        <button
+          onClick={() => {
+            setSelectedId(null);
+            setMode({ kind: "overview" });
+          }}
+        >
+          Вся математика
+        </button>
         {currentChapter && <><span>›</span><strong>{currentChapter.title}</strong></>}
         {selectedTopic && <><span>›</span><em>§ {selectedTopic.number} {selectedTopic.title}</em></>}
       </div>
