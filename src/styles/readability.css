@@ -229,3 +229,38 @@ body{
 ){
   font-size:var(--readable-xs)!important;
 }
+
+
+/* Component floors for nested labels that previously overrode the global scale. */
+.sidebar-progress-title-row strong,
+.sidebar-progress-title-row b,
+.sidebar-topic-copy strong,
+.sidebar-topic-progress{
+  font-size:14px!important;
+}
+.topbar-account>strong,
+.topbar-course-progress span,
+.topbar-course-progress strong{
+  font-size:14px!important;
+}
+.settings-theme-grid strong,
+.settings-saved-list span,
+.settings-saved-list strong,
+.settings-content label,
+.settings-content button{
+  font-size:15px!important;
+}
+.practice-score span,
+.practice-card-head span,
+.practice-feedback,
+.practice-hint{
+  font-size:14px!important;
+}
+.practice-card-head h3{
+  font-size:18px!important;
+}
+.practice-options button,
+.practice-input,
+.practice-actions button{
+  font-size:15px!important;
+}
