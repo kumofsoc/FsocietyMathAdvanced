@@ -23,6 +23,7 @@ import {
 } from "@/features/learning/model/progress";
 import type { Chapter } from "@/entities/course/model/types";
 import { useAppShellStore } from "@/app/store/useAppShellStore";
+import { loadSavedTopicIds, SAVED_TOPICS_EVENT, SAVED_TOPICS_KEY, setTopicSaved } from "@/features/saved-topics/model/savedTopics";
 
 const LAST_TOPIC_KEY = "fsociety-last-topic-v1";
 
@@ -161,6 +162,7 @@ export default function App() {
   const setSidebarOpen = useAppShellStore((state) => state.setSidebarOpen);
   const setSidebarCollapsed = useAppShellStore((state) => state.setSidebarCollapsed);
   const [learningVersion, setLearningVersion] = useState(0);
+  const [savedTopicIds, setSavedTopicIds] = useState(loadSavedTopicIds);
   const [lastTopicId, setLastTopicId] = useState<string | null>(() => {
     try {
       const stored = localStorage.getItem(LAST_TOPIC_KEY);
@@ -276,6 +278,20 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const syncSavedTopics = () => setSavedTopicIds(loadSavedTopicIds());
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === SAVED_TOPICS_KEY) syncSavedTopics();
+    };
+
+    window.addEventListener(SAVED_TOPICS_EVENT, syncSavedTopics);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener(SAVED_TOPICS_EVENT, syncSavedTopics);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, []);
+
+  useEffect(() => {
     lastScrollY.current = window.scrollY;
 
     const onScroll = () => {
@@ -340,6 +356,14 @@ export default function App() {
   const courseProgress = useMemo(
     () => getCourseProgress(learningSnapshot),
     [learningSnapshot],
+  );
+
+  const savedTopics = useMemo(
+    () =>
+      savedTopicIds
+        .map((id) => topicMeta[id])
+        .filter((item): item is NonNullable<typeof item> => Boolean(item && !item.isStub)),
+    [savedTopicIds],
   );
 
   const topic = topicMeta[route];
@@ -439,6 +463,49 @@ export default function App() {
           Краткий конспект
           <b>REVIEW</b>
         </button>
+
+        <section className={"sidebar-saved-topics " + (savedTopics.length ? "has-items" : "")}>
+          <div className="sidebar-saved-head">
+            <span>★ Сохранённые темы</span>
+            <small>{savedTopics.length}</small>
+          </div>
+
+          {savedTopics.length ? (
+            <div className="sidebar-saved-list">
+              {savedTopics.map((item) => (
+                <div
+                  key={item.id}
+                  className={"sidebar-saved-row " + (route === item.id ? "active" : "")}
+                >
+                  <button
+                    type="button"
+                    className="sidebar-saved-open"
+                    onMouseEnter={preloadTopicPage}
+                    onFocus={preloadTopicPage}
+                    onClick={() => (window.location.hash = item.id)}
+                    title={"Открыть: " + item.title}
+                  >
+                    <span>§ {item.number}</span>
+                    <strong>{item.title}</strong>
+                  </button>
+                  <button
+                    type="button"
+                    className="sidebar-saved-remove"
+                    onClick={() => setTopicSaved(item.id, false)}
+                    aria-label={"Убрать из сохранённых: " + item.title}
+                    title="Убрать из сохранённых"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="sidebar-saved-empty">
+              Сохраняй темы через ☆ на странице материала.
+            </p>
+          )}
+        </section>
 
         <div className="sidebar-section-label">
           <span>Прогресс по курсу</span>
