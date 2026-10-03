@@ -34,6 +34,7 @@ import { loadTopicResume, saveTopicResume } from "@/features/learning/model/topi
 import { loadSavedTopicIds, SAVED_TOPICS_EVENT, SAVED_TOPICS_KEY, toggleSavedTopic } from "@/features/saved-topics/model/savedTopics";
 import { TopicLocalSearch } from "@/features/topic-search/ui/TopicLocalSearch";
 import { copyTextToClipboard } from "@/shared/lib/clipboard";
+import { CollapsibleProof } from "@/features/proof-collapse/ui/CollapsibleProof";
 import { buildBlockDeepLink, parseVisualMathHash } from "@/shared/lib/blockDeepLink";
 
 const PracticePanel = lazy(() =>
@@ -408,7 +409,16 @@ function ContentCard({
             )}
           </div>
         </div>
-        {!block.matrixOperation && <p><RichMatrixText text={block.body} /></p>}
+        {!block.matrixOperation && block.kind === "proof" ? (
+          <CollapsibleProof body={block.body} formula={block.formula}>
+            <p><RichMatrixText text={block.body} /></p>
+            {block.formula && (
+              <CopyableMath math={block.formula} className="formula-box" />
+            )}
+          </CollapsibleProof>
+        ) : !block.matrixOperation ? (
+          <p><RichMatrixText text={block.body} /></p>
+        ) : null}
 
         {topic.id === "matrices" &&
           !block.matrixOperation &&
@@ -418,7 +428,7 @@ function ContentCard({
 
         {block.matrixOperation && <MatrixOperationScene visual={block.matrixOperation} />}
 
-        {block.formula && (
+        {block.formula && block.kind !== "proof" && (
           <CopyableMath math={block.formula} className="formula-box" />
         )}
 
@@ -482,10 +492,15 @@ function ContentCard({
                         <div className="rigorous-proof">
                           <b>ДОКАЗАТЕЛЬСТВО</b>
                           <h4>{statement.proof.label}</h4>
-                          <p><RichMatrixText text={statement.proof.body} /></p>
-                          {statement.proof.formula && (
-                            <CopyableMath math={statement.proof.formula} className="property-panel-formula" />
-                          )}
+                          <CollapsibleProof
+                            body={statement.proof.body}
+                            formula={statement.proof.formula}
+                          >
+                            <p><RichMatrixText text={statement.proof.body} /></p>
+                            {statement.proof.formula && (
+                              <CopyableMath math={statement.proof.formula} className="property-panel-formula" />
+                            )}
+                          </CollapsibleProof>
                         </div>
                         <div className="rigorous-example">
                           <b>ПРИМЕР</b>
@@ -548,10 +563,12 @@ function ContentCard({
                     <article key={proof.label + proofIndex}>
                       <div className="property-panel-label">ДОКАЗАТЕЛЬСТВО</div>
                       <h4>{proof.label}</h4>
-                      <p><RichMatrixText text={proof.body} /></p>
-                      {proof.formula && (
-                        <CopyableMath math={proof.formula} className="property-panel-formula" />
-                      )}
+                      <CollapsibleProof body={proof.body} formula={proof.formula}>
+                        <p><RichMatrixText text={proof.body} /></p>
+                        {proof.formula && (
+                          <CopyableMath math={proof.formula} className="property-panel-formula" />
+                        )}
+                      </CollapsibleProof>
                     </article>
                   ))}
 
