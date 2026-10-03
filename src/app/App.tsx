@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { getLocalStorageItem, getSessionStorageItem, setLocalStorageItem, setSessionStorageItem } from "@/shared/lib/browserStorage";
 import { chapters, topicListMeta, topicMeta } from "@/data/courseMeta";
 import { BackgroundMusicPlayer } from "@/features/background-music/ui/BackgroundMusicPlayer";
 import { CommandPalette } from "@/features/navigation/ui/CommandPalette";
@@ -161,7 +162,7 @@ export default function App() {
   const [learningVersion, setLearningVersion] = useState(0);
   const [lastTopicId, setLastTopicId] = useState<string | null>(() => {
     try {
-      const stored = localStorage.getItem(LAST_TOPIC_KEY);
+      const stored = getLocalStorageItem(LAST_TOPIC_KEY);
       return stored && topicMeta[stored] && !topicMeta[stored].isStub ? stored : null;
     } catch {
       return null;
@@ -172,9 +173,9 @@ export default function App() {
   const openHomeAtTop = () => {
     try {
       const key = "fsociety-route-scroll-v1";
-      const positions = JSON.parse(sessionStorage.getItem(key) || "{}") as Record<string, number>;
+      const positions = JSON.parse(getSessionStorageItem(key) || "{}") as Record<string, number>;
       positions.home = 0;
-      sessionStorage.setItem(key, JSON.stringify(positions));
+      setSessionStorageItem(key, JSON.stringify(positions));
     } catch {
       // Scroll restoration is optional.
     }
@@ -199,7 +200,7 @@ export default function App() {
 
     const readPositions = (): Record<string, number> => {
       try {
-        return JSON.parse(sessionStorage.getItem(key) || "{}");
+        return JSON.parse(getSessionStorageItem(key) || "{}");
       } catch {
         return {};
       }
@@ -209,7 +210,7 @@ export default function App() {
       const positions = readPositions();
       positions[routeRef.current] = window.scrollY;
       try {
-        sessionStorage.setItem(key, JSON.stringify(positions));
+        setSessionStorageItem(key, JSON.stringify(positions));
       } catch {
         // Scroll restoration is optional.
       }
@@ -233,7 +234,7 @@ export default function App() {
     const current = topicMeta[route];
     if (!current || current.isStub) return;
     try {
-      localStorage.setItem(LAST_TOPIC_KEY, route);
+      setLocalStorageItem(LAST_TOPIC_KEY, route);
       setLastTopicId(route);
     } catch {
       // Resume state is optional.
