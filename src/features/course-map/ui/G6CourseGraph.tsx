@@ -168,6 +168,7 @@ export function G6CourseGraph({
   onOpen,
 }: G6CourseGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const minimapContainerRef = useRef<HTMLDivElement>(null);
   const graphRef = useRef<Graph | null>(null);
   const graphReadyRef = useRef(false);
   const selectedIdRef = useRef<string | null>(selectedId);
@@ -198,7 +199,8 @@ export function G6CourseGraph({
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    const minimapContainer = minimapContainerRef.current;
+    if (!container || !minimapContainer) return;
 
     const theme = readGraphTheme();
     const data = toG6Data(model);
@@ -308,19 +310,9 @@ export function G6CourseGraph({
         {
           type: "minimap",
           key: "minimap",
-          className: "visualmath-minimap",
-          position: "right-bottom",
+          container: minimapContainer,
           size: [168, 106],
           padding: 8,
-          containerStyle: {
-            margin: "16px",
-            border: "1px solid color-mix(in srgb, var(--accent) 32%, var(--border))",
-            borderRadius: "10px",
-            background: "color-mix(in srgb, var(--surface) 94%, transparent)",
-            boxShadow: "0 14px 42px rgba(0,0,0,.24)",
-            overflow: "hidden",
-            zIndex: "30",
-          },
           maskStyle: {
             border: "1px solid var(--accent)",
             background: "color-mix(in srgb, var(--accent) 12%, transparent)",
@@ -376,6 +368,11 @@ export function G6CourseGraph({
   return (
     <div className="g6-course-graph">
       <div ref={containerRef} className="g6-course-graph-canvas" />
+      <div
+        ref={minimapContainerRef}
+        className="g6-course-minimap"
+        aria-hidden="true"
+      />
       <div className="g6-course-graph-hint" aria-hidden="true">
         <span>drag = двигать карту</span>
         <span>колесо = масштаб</span>
