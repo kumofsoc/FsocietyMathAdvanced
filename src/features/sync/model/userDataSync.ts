@@ -17,6 +17,14 @@ import {
   loadReadingWidth,
   saveReadingWidth,
 } from "@/features/reading-width/model/readingWidth";
+import {
+  PREFERENCES_EVENT,
+  hydrateLocalPreferences,
+  isDefaultPreferences,
+  loadLocalPreferences,
+  localPreferencesAreDirty,
+} from "@/features/personalization/model/preferencesStorage";
+import { useAppShellStore } from "@/app/store/useAppShellStore";
 
 type SyncStatus = "idle" | "syncing" | "synced" | "error";
 
@@ -75,6 +83,28 @@ async function syncWorkspace() {
   }
 }
 
+async function syncPreferences() {
+  const local = loadLocalPreferences();
+  let remote = await api.preferences.get();
+
+  if (
+    localPreferencesAreDirty() ||
+    (isDefaultPreferences(remote) && !isDefaultPreferences(local))
+  ) {
+    remote = await api.preferences.replace(local);
+  }
+
+  hydrating = true;
+  try {
+    hydrateLocalPreferences(remote);
+    useAppShellStore.setState({
+      sidebarCollapsed: remote.sidebarCollapsed,
+    });
+  } finally {
+    hydrating = false;
+  }
+}
+
 async function runSync() {
   if (!isBackendConfigured() || !authenticated()) return;
 
@@ -88,6 +118,7 @@ async function runSync() {
     }
 
     await syncWorkspace();
+    await syncPreferences();
     useUserDataSyncStore.setState({
       status: "synced",
       lastSyncedAt: Date.now(),
@@ -145,4 +176,5 @@ export function installUserDataSyncListeners() {
   window.addEventListener(SAVED_TOPICS_EVENT, onChange);
   window.addEventListener(TOPIC_RESUME_EVENT, onChange);
   window.addEventListener(READING_WIDTH_EVENT, onChange);
+  window.addEventListener(PREFERENCES_EVENT, onChange);
 }
