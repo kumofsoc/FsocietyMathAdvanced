@@ -6,6 +6,7 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
+import { setSessionStorageItem } from "@/shared/lib/browserStorage";
 import { chapters, topicListMeta, topicMeta } from "@/data/courseMeta";
 import type { CourseSearchEntry } from "@/data/courseSearchIndex";
 import { getLearningSnapshot, getTopicProgress } from "@/lib/progress";
@@ -171,7 +172,7 @@ export function CommandPalette() {
 
     if (typeof blockIndex === "number") {
       try {
-        sessionStorage.setItem(BLOCK_TARGET_KEY, id + "::" + blockIndex);
+        setSessionStorageItem(BLOCK_TARGET_KEY, id + "::" + blockIndex);
       } catch {
         // Deep-linking still works without persisted block state.
       }
