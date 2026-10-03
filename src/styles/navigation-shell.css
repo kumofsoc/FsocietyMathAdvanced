@@ -73,3 +73,33 @@
   .topbar-reveal-zone{left:0;height:12px}
   .history-dock kbd{display:none}
 }
+
+
+/* Shared history navigation lives inside the global header on every route. */
+.history-dock.history-dock-topbar{
+  position:relative!important;
+  left:auto!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:auto!important;
+  z-index:auto;
+  flex:0 0 auto;
+  margin:0;
+  padding:3px;
+  border-radius:10px;
+  box-shadow:none;
+  background:color-mix(in srgb,var(--surface) 90%,transparent);
+}
+.history-dock.history-dock-topbar button{
+  min-width:58px;
+  height:36px;
+  padding:0 8px;
+}
+.history-dock.history-dock-topbar small{
+  display:inline;
+  font-size:13px;
+}
+@media(max-width:820px){
+  .history-dock.history-dock-topbar button{min-width:40px;padding:0 6px}
+  .history-dock.history-dock-topbar small{display:none}
+}
