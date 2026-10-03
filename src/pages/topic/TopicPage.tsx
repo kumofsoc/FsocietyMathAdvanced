@@ -580,11 +580,62 @@ export function TopicPage({ topicId }: { topicId: string }) {
   return <TopicPageContent key={baseTopic.id} baseTopic={baseTopic} />;
 }
 
+type TopicOutlineKey =
+  | "definition"
+  | "properties"
+  | "theorems"
+  | "methods"
+  | "examples"
+  | "geometry"
+  | "academy"
+  | "summary";
+
+const topicOutlineLabels: Record<TopicOutlineKey, string> = {
+  definition: "Определение",
+  properties: "Свойства",
+  theorems: "Теоремы",
+  methods: "Формулы и методы",
+  examples: "Примеры",
+  geometry: "Геометрия",
+  academy: "Углублённо",
+  summary: "Итог",
+};
+
+function topicOutlineKey(block: ContentBlock): TopicOutlineKey {
+  if (block.source === "academy") return "academy";
+
+  switch (block.kind) {
+    case "definition":
+    case "concepts":
+      return "definition";
+    case "property":
+      return "properties";
+    case "theorem":
+    case "proof":
+    case "corollary":
+      return "theorems";
+    case "formula":
+    case "algorithm":
+    case "note":
+      return "methods";
+    case "example":
+    case "solution":
+      return "examples";
+    case "geometry":
+      return "geometry";
+    case "summary":
+      return "summary";
+    default:
+      return "methods";
+  }
+}
+
 function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   const topic = baseTopic;
   const chapter = chapters.find((item) => item.id === topic.chapterId);
   const tracksLearning = isTrackedTopic(topic.id);
   const theorySentinel = useRef<HTMLDivElement>(null);
+  const outlineRef = useRef<HTMLDivElement>(null);
   const [activeBlock, setActiveBlock] = useState(0);
   const [theoryRead, setTheoryRead] = useState(() => loadSet(THEORY_KEY).has(topic.id));
   const [readingRatio, setReadingRatio] = useState(() =>
@@ -771,6 +822,32 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   const academyProofCount = academyTaskIds.filter((id) => id.startsWith("academy-proof-")).length;
   const academyCapstoneCount = academyTaskIds.filter((id) => id.includes("capstone")).length;
 
+  const outlineItems = useMemo(() => {
+    const seen = new Set<TopicOutlineKey>();
+    return topic.blocks.flatMap((block, index) => {
+      const key = topicOutlineKey(block);
+      if (seen.has(key)) return [];
+      seen.add(key);
+      return [{ key, label: topicOutlineLabels[key], index }];
+    });
+  }, [topic.blocks]);
+
+  const activeOutlineKey = topic.blocks[activeBlock]
+    ? topicOutlineKey(topic.blocks[activeBlock])
+    : outlineItems[0]?.key;
+
+  useEffect(() => {
+    if (!activeOutlineKey) return;
+    const active = outlineRef.current?.querySelector<HTMLElement>(
+      '[data-outline-key="' + activeOutlineKey + '"]',
+    );
+    active?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [activeOutlineKey]);
+
   const learningArchitecture = useMemo(
     () =>
       toLayeredTopic({
@@ -953,19 +1030,36 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
         </section>
       )}
 
-      <div className="topic-outline">
-        {topic.blocks.map((block, index) => (
+      <nav className="topic-outline" ref={outlineRef} aria-label="Навигация по теме">
+        <span className="topic-outline-label">ПО ТЕМЕ</span>
+        {outlineItems.map((item) => (
           <button
             type="button"
-            key={block.title + "-outline"}
-            className={activeBlock === index ? "active" : ""}
-            aria-current={activeBlock === index ? "step" : undefined}
-            onClick={() => document.getElementById("block-" + topic.id + "-" + index)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            key={item.key}
+            data-outline-key={item.key}
+            className={activeOutlineKey === item.key ? "active" : ""}
+            aria-current={activeOutlineKey === item.key ? "location" : undefined}
+            onClick={() => jumpToBlock(item.index)}
           >
-            {String(index + 1).padStart(2, "0")} · {displayBlockTitle(block.title)}
+            <span>{String(item.index + 1).padStart(2, "0")}</span>
+            {item.label}
           </button>
         ))}
-      </div>
+        {tracksLearning && (
+          <button
+            type="button"
+            className="topic-outline-practice"
+            onClick={() =>
+              document
+                .getElementById("practice-" + topic.id)
+                ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+          >
+            <span>→</span>
+            Практика
+          </button>
+        )}
+      </nav>
 
       <section className="lesson-content">
         {topic.blocks.map((block, index) => (
