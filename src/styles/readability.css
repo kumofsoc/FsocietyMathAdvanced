@@ -1,8 +1,9 @@
 :root{
-  --readable-xs:14px;
-  --readable-sm:15px;
-  --readable-body:17px;
-  --readable-copy:18px;
+  /* Compatibility aliases. Prefer --font-* in new CSS. */
+  --readable-xs:var(--font-xs);
+  --readable-sm:var(--font-sm);
+  --readable-body:var(--font-body);
+  --readable-copy:var(--font-copy);
 }
 
 body{
@@ -114,7 +115,7 @@ body{
 }
 
 :where(.academy-equation strong){
-  font-size:14px!important;
+  font-size:var(--font-xs)!important;
 }
 
 :where([class*="kicker"],[class*="label"],[class*="badge"],[class*="hint"],[class*="meta"]){
@@ -148,12 +149,6 @@ body{
 }
 
 @media(min-width:1600px){
-  :root{
-    --readable-xs:14px;
-    --readable-sm:15px;
-    --readable-body:17px;
-    --readable-copy:18px;
-  }
 
   .topic-page{
     max-width:1440px;
@@ -189,13 +184,6 @@ body{
 }
 
 @media(max-width:700px){
-  :root{
-    --readable-xs:14px;
-    --readable-sm:15px;
-    --readable-body:16px;
-    --readable-copy:17px;
-  }
-
   .content-block p,
   .content-block li,
   .topic-hero p,
@@ -236,31 +224,31 @@ body{
 .sidebar-progress-title-row b,
 .sidebar-topic-copy strong,
 .sidebar-topic-progress{
-  font-size:14px!important;
+  font-size:var(--font-xs)!important;
 }
 .topbar-account>strong,
 .topbar-course-progress span,
 .topbar-course-progress strong{
-  font-size:14px!important;
+  font-size:var(--font-xs)!important;
 }
 .settings-theme-grid strong,
 .settings-saved-list span,
 .settings-saved-list strong,
 .settings-content label,
 .settings-content button{
-  font-size:15px!important;
+  font-size:var(--font-sm)!important;
 }
 .practice-score span,
 .practice-card-head span,
 .practice-feedback,
 .practice-hint{
-  font-size:14px!important;
+  font-size:var(--font-xs)!important;
 }
 .practice-card-head h3{
-  font-size:18px!important;
+  font-size:var(--font-copy)!important;
 }
 .practice-options button,
 .practice-input,
 .practice-actions button{
-  font-size:15px!important;
+  font-size:var(--font-sm)!important;
 }

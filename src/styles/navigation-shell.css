@@ -53,7 +53,7 @@
   border:0;
   background:transparent;
   color:var(--muted);
-  font:700 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  font:700 var(--font-xs)/1 var(--font-mono);
   transition:
     max-width .22s ease,
     opacity .16s ease,
@@ -97,7 +97,7 @@
 }
 .history-dock.history-dock-topbar small{
   display:inline;
-  font-size:13px;
+  font-size:var(--font-xs);
 }
 @media(max-width:820px){
   .history-dock.history-dock-topbar button{min-width:40px;padding:0 6px}
@@ -125,7 +125,7 @@
   border:0;
   background:transparent;
   color:var(--accent);
-  font-size:13px;
+  font-size:var(--font-xs);
   font-weight:700;
   text-overflow:ellipsis;
   white-space:nowrap;
@@ -137,13 +137,13 @@
 .topbar-context>span{
   flex:0 0 auto;
   color:color-mix(in srgb,var(--muted) 55%,transparent);
-  font-size:13px;
+  font-size:var(--font-xs);
 }
 .topbar-context>strong{
   min-width:0;
   overflow:hidden;
   color:var(--text);
-  font-size:14px;
+  font-size:var(--font-xs);
   font-weight:650;
   text-overflow:ellipsis;
   white-space:nowrap;
@@ -182,7 +182,7 @@
   }
   .topbar-context>button{display:none}
   .topbar-context>span{display:none}
-  .topbar-context>strong{font-size:13px}
+  .topbar-context>strong{font-size:var(--font-xs)}
 }
 @media(max-width:680px){
   .topbar-context{display:none}
@@ -239,7 +239,7 @@
   max-width:0;
   overflow:hidden;
   opacity:0;
-  font-size:14px;
+  font-size:var(--font-xs);
   font-weight:700;
   white-space:nowrap;
   transition:

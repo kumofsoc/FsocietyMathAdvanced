@@ -1,0 +1,24 @@
+/* VisualMath typography system.
+   New UI should use these tokens instead of raw pixel font sizes. */
+:root{
+  --font-xs:14px;
+  --font-sm:15px;
+  --font-md:16px;
+  --font-body:17px;
+  --font-copy:18px;
+  --font-title-sm:20px;
+  --font-title-md:28px;
+
+  --line-ui:1.35;
+  --line-body:1.7;
+  --line-copy:1.72;
+
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+}
+
+@media(max-width:700px){
+  :root{
+    --font-body:16px;
+    --font-copy:17px;
+  }
+}
