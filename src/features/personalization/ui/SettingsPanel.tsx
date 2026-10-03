@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { getLocalStorageItem, setLocalStorageItem } from "@/shared/lib/browserStorage";
-import { CURSOR_EVENT, CURSOR_KEY, parseCursorMode, type CursorMode } from "@/features/personalization/ui/CustomCursor";
+import { CURSOR_EVENT, CURSOR_KEY, parseCursorMode, type CursorMode } from "@/features/personalization/model/cursor";
 import { getThemeTone } from "@/features/personalization/model/themeTone";
 import { MOTION_CHANGE_EVENT, MOTION_PROFILE_KEY, parseMotionProfile, type MotionProfile } from "@/features/home-experience/model/homeExperience";
 import { LEARNING_EVENT, loadSavedTheorems, saveTheorems } from "@/lib/learning";
