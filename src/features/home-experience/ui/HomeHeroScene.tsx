@@ -1,6 +1,23 @@
+import { lazy, Suspense } from "react";
 import type { HomeMotionTier } from "../model/homeExperience";
-import { HomeCore3D } from "../visual/HomeCore3D";
 import { HomeFormulaTicker } from "./HomeFormulaTicker";
+
+const HomeCore3D = lazy(() =>
+  import("../visual/HomeCore3D").then((module) => ({ default: module.HomeCore3D })),
+);
+
+function CoreFallback() {
+  return (
+    <div className="future-core-runtime" aria-hidden="true">
+      <div className="future-core-fallback">
+        <i className="future-core-shell shell-a" />
+        <i className="future-core-shell shell-b" />
+        <i className="future-core-shell shell-c" />
+        <b>VM</b>
+      </div>
+    </div>
+  );
+}
 
 interface HeroProps {
   progress: number;
@@ -61,7 +78,13 @@ export function HomeHeroScene({
         <div className="future-core-orbit-label label-a" data-ambient="orbit">ALGEBRA</div>
         <div className="future-core-orbit-label label-b" data-ambient="orbit">ANALYSIS</div>
         <div className="future-core-orbit-label label-c" data-ambient="orbit">GEOMETRY</div>
-        <HomeCore3D tier={motionTier} />
+        {motionTier === "cinematic" ? (
+          <Suspense fallback={<CoreFallback />}>
+            <HomeCore3D tier={motionTier} />
+          </Suspense>
+        ) : (
+          <CoreFallback />
+        )}
       </div>
 
       <div className="future-mastery-card" data-reveal>
