@@ -150,6 +150,10 @@ export function hydrateLocalPreferences(value: PreferencesDto) {
     ),
   ];
 
-  if (writes.every(Boolean)) emitPreferencesChange();
+  if (writes.every(Boolean) && typeof window !== "undefined") {
+    emitPreferencesChange();
+    window.dispatchEvent(new CustomEvent("fsociety-cursor-change"));
+    window.dispatchEvent(new CustomEvent("fsociety-motion-change"));
+  }
   return writes.every(Boolean);
 }
