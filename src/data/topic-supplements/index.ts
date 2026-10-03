@@ -5,8 +5,8 @@ import { enrichRigorousTopic } from "@/data/topic-enrichments";
 import { promoteLegacyRigor } from "@/entities/course/model/learning-architecture/rigor";
 
 const topicSupplements = {
-  vectors: vectorFoundationSupplement,
-  "linear-spaces": linearSpacesSupplement
+  vectors: vectorFoundationSupplement.map((block) => ({ ...block, source: "supplement" as const })),
+  "linear-spaces": linearSpacesSupplement.map((block) => ({ ...block, source: "supplement" as const })),
 } as const;
 
 export function getTopicSupplement(topicId: string) {

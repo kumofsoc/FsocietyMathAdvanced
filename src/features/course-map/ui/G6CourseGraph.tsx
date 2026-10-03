@@ -132,7 +132,7 @@ function graphNodeBadges(datum: NodeData, theme: GraphTheme) {
       backgroundFill: theme.elevated,
       backgroundStroke: theme.border,
       fill: theme.accent,
-      fontSize: 9,
+      fontSize: 11,
       fontWeight: 700,
       padding: [4, 7],
       backgroundRadius: 7,
@@ -143,7 +143,7 @@ function graphNodeBadges(datum: NodeData, theme: GraphTheme) {
       backgroundFill: theme.elevated,
       backgroundStroke: theme.border,
       fill: theme.text,
-      fontSize: 9,
+      fontSize: 11,
       fontWeight: 700,
       padding: [4, 7],
       backgroundRadius: 7,
@@ -154,7 +154,7 @@ function graphNodeBadges(datum: NodeData, theme: GraphTheme) {
       backgroundFill: theme.elevated,
       backgroundStroke: theme.border,
       fill: theme.muted,
-      fontSize: 9,
+      fontSize: 11,
       padding: [4, 7],
       backgroundRadius: 7,
     },
@@ -168,6 +168,7 @@ export function G6CourseGraph({
   onOpen,
 }: G6CourseGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const minimapContainerRef = useRef<HTMLDivElement>(null);
   const graphRef = useRef<Graph | null>(null);
   const graphReadyRef = useRef(false);
   const selectedIdRef = useRef<string | null>(selectedId);
@@ -198,7 +199,8 @@ export function G6CourseGraph({
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    const minimapContainer = minimapContainerRef.current;
+    if (!container || !minimapContainer) return;
 
     const theme = readGraphTheme();
     const data = toG6Data(model);
@@ -234,9 +236,9 @@ export function G6CourseGraph({
           labelText: (datum) => String(datum.data?.title ?? datum.id),
           labelPlacement: "center",
           labelFill: theme.text,
-          labelFontSize: (datum) => (nodeKind(datum) === "chapter" ? 18 : 14),
+          labelFontSize: (datum) => (nodeKind(datum) === "chapter" ? 20 : 16),
           labelFontWeight: 700,
-          labelLineHeight: 20,
+          labelLineHeight: 23,
           labelWordWrap: true,
           labelMaxWidth: (datum) => (nodeKind(datum) === "chapter" ? 248 : 218),
           labelMaxLines: 3,
@@ -308,7 +310,13 @@ export function G6CourseGraph({
         {
           type: "minimap",
           key: "minimap",
-          size: [184, 116],
+          container: minimapContainer,
+          size: [168, 106],
+          padding: 8,
+          maskStyle: {
+            border: "1px solid var(--accent)",
+            background: "color-mix(in srgb, var(--accent) 12%, transparent)",
+          },
         },
       ],
     });
@@ -360,6 +368,11 @@ export function G6CourseGraph({
   return (
     <div className="g6-course-graph">
       <div ref={containerRef} className="g6-course-graph-canvas" />
+      <div
+        ref={minimapContainerRef}
+        className="g6-course-minimap"
+        aria-hidden="true"
+      />
       <div className="g6-course-graph-hint" aria-hidden="true">
         <span>drag = двигать карту</span>
         <span>колесо = масштаб</span>

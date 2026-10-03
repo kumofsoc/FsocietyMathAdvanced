@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { CURSOR_EVENT, CURSOR_KEY, type CursorMode } from "@/features/personalization/ui/CustomCursor";
 import { LEARNING_EVENT, loadSavedTheorems, saveTheorems } from "@/lib/learning";
 import { MusicSettings } from "@/features/background-music/ui/MusicSettings";
+import { readLocalStorage, readLocalStorageJson, writeLocalStorage } from "@/shared/lib/browserStorage";
 import "@/features/personalization/styles/system-config.css";
 
 type Theme = Record<string, string>;
@@ -85,25 +86,21 @@ function applyTheme(theme: Theme) {
 
 function applyMotion(profile: MotionProfile) {
   document.documentElement.dataset.motionProfile = profile;
-  localStorage.setItem(MOTION_KEY, profile);
+  writeLocalStorage(MOTION_KEY, profile);
   window.dispatchEvent(new CustomEvent("fsociety-motion-change"));
 }
 
 export function SettingsPanel() {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"theme" | "cursor" | "motion" | "music" | "saved">("theme");
-  const [themeName, setThemeName] = useState(() => localStorage.getItem(THEME_NAME_KEY) || "Black");
-  const [custom, setCustom] = useState<Theme>(() => {
-    try {
-      return JSON.parse(localStorage.getItem(THEME_CUSTOM_KEY) || "null") || { ...themes.Black };
-    } catch {
-      return { ...themes.Black };
-    }
-  });
+  const [themeName, setThemeName] = useState(() => readLocalStorage(THEME_NAME_KEY) || "Black");
+  const [custom, setCustom] = useState<Theme>(() =>
+    readLocalStorageJson<Theme | null>(THEME_CUSTOM_KEY, null) || { ...themes.Black },
+  );
   const [customDirty, setCustomDirty] = useState(false);
   const [customSaved, setCustomSaved] = useState(false);
-  const [cursor, setCursor] = useState<CursorMode>(() => (localStorage.getItem(CURSOR_KEY) as CursorMode) || "halo");
-  const [motion, setMotion] = useState<MotionProfile>(() => (localStorage.getItem(MOTION_KEY) as MotionProfile) || "balanced");
+  const [cursor, setCursor] = useState<CursorMode>(() => (readLocalStorage(CURSOR_KEY) as CursorMode) || "halo");
+  const [motion, setMotion] = useState<MotionProfile>(() => (readLocalStorage(MOTION_KEY) as MotionProfile) || "balanced");
   const [saved, setSaved] = useState(loadSavedTheorems);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
@@ -115,7 +112,7 @@ export function SettingsPanel() {
 
   useEffect(() => {
     applyTheme(activeTheme);
-    localStorage.setItem(THEME_NAME_KEY, themeName);
+    writeLocalStorage(THEME_NAME_KEY, themeName);
   }, [activeTheme, themeName]);
 
   useEffect(() => {
@@ -130,6 +127,9 @@ export function SettingsPanel() {
 
   useEffect(() => {
     if (!open) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
@@ -146,8 +146,10 @@ export function SettingsPanel() {
     window.addEventListener("keydown", onKeyDown);
     document.addEventListener("pointerdown", onPointerDown, true);
     return () => {
+      document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("pointerdown", onPointerDown, true);
+      window.requestAnimationFrame(() => triggerRef.current?.focus());
     };
   }, [open]);
 
@@ -158,26 +160,22 @@ export function SettingsPanel() {
   };
 
   const saveCustomTheme = () => {
-    localStorage.setItem(THEME_CUSTOM_KEY, JSON.stringify(custom));
-    localStorage.setItem(THEME_NAME_KEY, "Custom");
+    writeLocalStorage(THEME_CUSTOM_KEY, JSON.stringify(custom));
+    writeLocalStorage(THEME_NAME_KEY, "Custom");
     setThemeName("Custom");
     setCustomDirty(false);
     setCustomSaved(true);
   };
 
   const restoreCustomTheme = () => {
-    try {
-      const stored = JSON.parse(localStorage.getItem(THEME_CUSTOM_KEY) || "null");
-      setCustom(stored || { ...themes.Black });
-    } catch {
-      setCustom({ ...themes.Black });
-    }
+    const stored = readLocalStorageJson<Theme | null>(THEME_CUSTOM_KEY, null);
+    setCustom(stored || { ...themes.Black });
     setCustomDirty(false);
     setCustomSaved(false);
   };
 
   const chooseCursor = (next: CursorMode) => {
-    localStorage.setItem(CURSOR_KEY, next);
+    writeLocalStorage(CURSOR_KEY, next);
     setCursor(next);
     window.dispatchEvent(new CustomEvent(CURSOR_EVENT));
   };
@@ -190,7 +188,14 @@ export function SettingsPanel() {
 
   return (
     <div className="settings-shell">
-      <button ref={triggerRef} className="settings-trigger" onClick={() => setOpen((value) => !value)}>
+      <button
+        ref={triggerRef}
+        className="settings-trigger"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-controls="visualmath-settings-panel"
+        onClick={() => setOpen((value) => !value)}
+      >
         <span>⚙</span>
         Настройки
       </button>
@@ -199,15 +204,19 @@ export function SettingsPanel() {
         <div className="settings-backdrop" onPointerDown={() => setOpen(false)}>
           <aside
             ref={panelRef}
+            id="visualmath-settings-panel"
             className="settings-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="visualmath-settings-title"
             onPointerDown={(event) => event.stopPropagation()}
           >
             <header className="settings-head">
               <div>
                 <div className="mini-kicker">VISUALMATH / НАСТРОЙКИ И ПЕРСОНАЛИЗАЦИЯ</div>
-                <h2>Настройки</h2>
+                <h2 id="visualmath-settings-title">Настройки</h2>
               </div>
-              <button onClick={() => setOpen(false)}>×</button>
+              <button onClick={() => setOpen(false)} aria-label="Закрыть настройки">×</button>
             </header>
 
             <nav className="settings-tabs">

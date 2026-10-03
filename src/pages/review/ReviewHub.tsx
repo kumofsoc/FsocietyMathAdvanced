@@ -68,7 +68,7 @@ export function ReviewHub() {
   }, [query, chapterId]);
 
   return (
-    <section className="review-hub">
+    <section className={"review-hub " + (formulaOnly ? "formula-only" : "")}>
       <header className="review-hero">
         <div className="eyebrow">REVIEW ARCHIVE / СУХОЙ КОНСПЕКТ</div>
         <h1>Повторение без лишних слов.</h1>

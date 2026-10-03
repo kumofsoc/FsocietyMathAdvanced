@@ -1,0 +1,27 @@
+import type { Chapter } from "@/entities/course/model/types";
+
+export const chapters: Chapter[] = [
+  { id: "linear", number: "01", title: "Линейная алгебра", topicIds: ["matrices", "determinants", "inverse-rank", "linear-systems"] },
+  { id: "vectors", number: "02", title: "Векторная алгебра", topicIds: ["vectors", "dot-product", "cross-product", "mixed-product"] },
+  { id: "plane-geometry", number: "03", title: "Геометрия на плоскости", topicIds: ["plane-coordinates", "plane-lines", "conics"] },
+  { id: "space-geometry", number: "04", title: "Геометрия в пространстве", topicIds: ["space-lines-planes", "quadrics"] },
+  { id: "plane-transformations", number: "05", title: "Преобразования плоскости", topicIds: ["mappings-transformations", "linear-transformations", "affine-transformations"] },
+  { id: "abstract-linear", number: "06", title: "Линейные пространства", topicIds: ["linear-spaces", "subspaces", "linear-maps", "eigenproblem", "linear-functionals", "quadratic-forms", "jordan-form"] },
+  { id: "euclidean", number: "07", title: "Евклидовы и унитарные пространства", topicIds: ["euclidean-spaces", "euclidean-operators", "euclidean-functions", "unitary-spaces"] },
+  { id: "affine-general", number: "08", title: "Аффинные пространства", topicIds: ["affine-spaces", "quadric-invariants"] },
+  { id: "tensor-algebra", number: "09", title: "Основы тензорной алгебры", topicIds: ["tensor-linear", "tensor-euclidean", "exterior-algebra"] },
+  { id: "analysis-intro", number: "10", title: "Введение в анализ", topicIds: ["sets-reals", "functions", "sequences", "limits", "infinitesimals", "continuity", "derivative", "differential", "function-study", "taylor"] },
+  { id: "complex", number: "11", title: "Комплексные числа", topicIds: ["complex-numbers", "complex-operations"] },
+  { id: "indef-integral", number: "12", title: "Неопределённый интеграл", topicIds: ["antiderivative", "integration-methods", "rational-integration", "trig-integration", "irrational-integration"] },
+  { id: "def-integral", number: "13", title: "Определённый интеграл", topicIds: ["riemann-integral", "newton-leibniz", "improper-integrals", "integral-applications"] },
+  { id: "multivariable", number: "14", title: "Функции нескольких переменных", topicIds: ["multivariable-functions", "partial-derivatives", "tangent-plane", "multivariable-extrema"] },
+  { id: "ode", number: "15", title: "Дифференциальные уравнения", topicIds: ["ode-basics", "first-order-ode", "higher-order-ode", "linear-ode", "ode-systems"] },
+  { id: "multiple-integrals", number: "16", title: "Двойные и тройные интегралы", topicIds: ["double-integral", "triple-integral"] },
+  { id: "line-surface-integrals", number: "17", title: "Криволинейные и поверхностные интегралы", topicIds: ["line-integrals", "surface-integrals"] },
+  { id: "series", number: "18", title: "Числовые ряды", topicIds: ["numeric-series", "positive-series", "alternating-series"] },
+  { id: "power-series", number: "19", title: "Степенные ряды", topicIds: ["functional-series", "power-convergence", "taylor-series", "series-applications"] },
+  { id: "fourier", number: "20", title: "Ряды Фурье", topicIds: ["fourier-series", "fourier-expansion", "fourier-integral"] },
+  { id: "field-theory", number: "21", title: "Теория поля", topicIds: ["field-basics", "scalar-field", "vector-field", "hamilton-operator"] },
+  { id: "complex-analysis", number: "22", title: "Комплексный анализ", topicIds: ["complex-functions", "complex-integration", "laurent-series", "residues"] },
+  { id: "operational", number: "23", title: "Операционное исчисление", topicIds: ["laplace", "inverse-laplace", "laplace-ode"] },
+];
