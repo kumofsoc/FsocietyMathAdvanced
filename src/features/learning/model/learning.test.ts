@@ -13,14 +13,23 @@ describe("reading coverage", () => {
     expect(getReadingCoverageFromBlocks("matrices", 4, seen)).toBe(0.5);
   });
 
-  it("clamps coverage and handles topics without blocks", () => {
-    expect(getReadingCoverageFromBlocks("matrices", 0, new Set())).toBe(0);
+  it("ignores stale or malformed block indexes", () => {
     expect(
       getReadingCoverageFromBlocks(
         "matrices",
         2,
-        new Set(["matrices::0", "matrices::1", "matrices::2"]),
+        new Set([
+          "matrices::0",
+          "matrices::1",
+          "matrices::2",
+          "matrices::-1",
+          "matrices::oops",
+        ]),
       ),
     ).toBe(1);
+  });
+
+  it("handles topics without blocks", () => {
+    expect(getReadingCoverageFromBlocks("matrices", 0, new Set())).toBe(0);
   });
 });
