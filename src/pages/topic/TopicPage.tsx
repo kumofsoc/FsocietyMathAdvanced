@@ -29,6 +29,7 @@ import { toLayeredTopic } from "@/entities/course/model/learning-architecture/ad
 import { linearFoundationBlueprints } from "@/data/learning-architecture/linear-foundations";
 import { TopicLabInsert, TopicVisualInsert } from "@/visualizations/registry/TopicVisualRegistry";
 import { RouteSkeleton } from "@/shared/ui/RouteSkeleton";
+import { readLocalStorageJson, writeLocalStorage } from "@/shared/lib/browserStorage";
 
 const PracticePanel = lazy(() =>
   import("@/features/learning/ui/PracticePanel").then((module) => ({ default: module.PracticePanel })),
@@ -63,7 +64,11 @@ function DeferredPracticePanel({ topicId }: { topicId: string }) {
 
   if (!active) {
     return (
-      <div ref={anchor} className="practice-deferred">
+      <div
+        id={"practice-" + topicId}
+        ref={anchor}
+        className="practice-deferred"
+      >
         <span>PRACTICE BANK</span>
         <strong>Практика подключится при приближении к концу теории.</strong>
       </div>
@@ -71,7 +76,7 @@ function DeferredPracticePanel({ topicId }: { topicId: string }) {
   }
 
   return (
-    <div id={"practice-" + topicId}>
+    <div id={"practice-" + topicId} ref={anchor}>
       <Suspense
         fallback={
           <div className="practice-deferred loading">
@@ -112,6 +117,7 @@ function displayBlockTitle(title: string) {
 }
 
 const BLOCK_TARGET_KEY = "fsociety-block-target-v1";
+const SAVED_TOPICS_KEY = "visualmath-saved-topics-v1";
 function isAdvancedLearningBlock(_topicId: string, block: ContentBlock) {
   return block.source === "academy";
 }
@@ -639,6 +645,9 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   );
   const [reachedTheoryEnd, setReachedTheoryEnd] = useState(theoryRead);
   const [solved, setSolved] = useState(() => loadSet(SOLVED_KEY));
+  const [topicSaved, setTopicSaved] = useState(() =>
+    readLocalStorageJson<string[]>(SAVED_TOPICS_KEY, []).includes(topic.id),
+  );
 
   useEffect(() => {
     const target = sessionStorage.getItem(BLOCK_TARGET_KEY);
@@ -871,6 +880,23 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const jumpToPractice = () => {
+    document
+      .getElementById("practice-" + topic.id)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const toggleTopicSaved = () => {
+    const current = readLocalStorageJson<string[]>(SAVED_TOPICS_KEY, []);
+    const next = current.includes(topic.id)
+      ? current.filter((id) => id !== topic.id)
+      : [...current, topic.id];
+
+    if (writeLocalStorage(SAVED_TOPICS_KEY, JSON.stringify(next))) {
+      setTopicSaved(next.includes(topic.id));
+    }
+  };
+
   return (
     <div className="topic-page">
       <header className="topic-hero">
@@ -918,6 +944,68 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
           </div>
         )}
       </header>
+
+      <nav className="topic-quick-actions" aria-label="Быстрые действия по теме">
+        <button
+          type="button"
+          className={topicSaved ? "saved" : ""}
+          onClick={toggleTopicSaved}
+          aria-pressed={topicSaved}
+          title={topicSaved ? "Убрать тему из сохранённых" : "Сохранить тему"}
+        >
+          <span aria-hidden="true">{topicSaved ? "★" : "☆"}</span>
+          <strong>{topicSaved ? "Сохранено" : "Сохранить"}</strong>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => (window.location.hash = "review")}
+          title="Открыть краткий конспект"
+        >
+          <span aria-hidden="true">≡</span>
+          <strong>Конспект</strong>
+        </button>
+
+        {tracksLearning && (
+          <button
+            type="button"
+            className="practice"
+            onClick={jumpToPractice}
+            title="Перейти к практике этой темы"
+          >
+            <span aria-hidden="true">→</span>
+            <strong>Практика</strong>
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={() => (window.location.hash = "map")}
+          title="Открыть карту курса"
+        >
+          <span aria-hidden="true">◌</span>
+          <strong>Карта</strong>
+        </button>
+
+        {tracksLearning && (
+          <button
+            type="button"
+            className={"complete " + (theoryRead ? "done" : "")}
+            onClick={completeTheory}
+            disabled={theoryRead || !reachedTheoryEnd || !progressBreakdown.canCompleteTheory}
+            title={
+              theoryRead
+                ? "Теория уже завершена"
+                : progressBreakdown.canCompleteTheory && reachedTheoryEnd
+                  ? "Завершить теоретическую часть"
+                  : "Сначала изучи основную часть материала"
+            }
+          >
+            <span aria-hidden="true">{theoryRead ? "✓" : "○"}</span>
+            <strong>{theoryRead ? "Теория ✓" : "Завершить теорию"}</strong>
+          </button>
+        )}
+      </nav>
 
       {tracksLearning && (
         <nav className="topic-mastery-path" aria-label="Этапы освоения темы">
@@ -1014,11 +1102,7 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
               ↓ К углублённой теории
             </button>
             <button
-              onClick={() =>
-                document
-                  .getElementById("practice-" + topic.id)
-                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
-              }
+              onClick={jumpToPractice}
             >
               ↓ К углублённым задачам
             </button>
