@@ -685,6 +685,27 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   useEffect(() => {
     setActiveBlock(0);
     let observer: IntersectionObserver | null = null;
+    let resumeTimer: number | null = null;
+    let resumeCandidate = -1;
+
+    const scheduleResumePersist = (index: number) => {
+      if (index === resumeCandidate) return;
+      resumeCandidate = index;
+
+      if (resumeTimer !== null) {
+        window.clearTimeout(resumeTimer);
+      }
+
+      resumeTimer = window.setTimeout(() => {
+        resumeTimer = null;
+        if (document.visibilityState !== "visible") return;
+        if (resumeCandidate < 0 || resumeCandidate >= topic.blocks.length) return;
+
+        if (saveTopicResume(topic.id, resumeCandidate)) {
+          setResumeBlockIndex(resumeCandidate);
+        }
+      }, 1000);
+    };
 
     const frame = requestAnimationFrame(() => {
       const nodes = Array.from(
@@ -709,11 +730,7 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
             (visible.target as HTMLElement).dataset.blockIndex ?? "0",
           );
           setActiveBlock(index);
-
-          if (index > 0 && index < topic.blocks.length) {
-            saveTopicResume(topic.id, index);
-            setResumeBlockIndex(index);
-          }
+          scheduleResumePersist(index);
         },
         {
           rootMargin: "-18% 0px -64% 0px",
@@ -727,6 +744,9 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
     return () => {
       cancelAnimationFrame(frame);
       observer?.disconnect();
+      if (resumeTimer !== null) {
+        window.clearTimeout(resumeTimer);
+      }
     };
   }, [topic.id, topic.blocks.length]);
 
