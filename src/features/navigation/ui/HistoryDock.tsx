@@ -14,7 +14,7 @@ export function HistoryDock() {
   }, []);
 
   return (
-    <div className="history-dock" aria-label="История навигации">
+    <nav className="history-dock history-dock-topbar" aria-label="История навигации">
       <button onClick={() => window.history.back()} title="Назад по истории · Ctrl+Z">
         <span>←</span>
         <small>Назад</small>
@@ -25,6 +25,6 @@ export function HistoryDock() {
         <small>Вперёд</small>
         <span>→</span>
       </button>
-    </div>
+    </nav>
   );
 }
