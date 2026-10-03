@@ -7,6 +7,7 @@ import { loadCourseTopic } from "@/data/course/topicLoaders";
 import { practiceTaskIdsByTopic } from "@/data/practiceMeta";
 import {
   LEARNING_EVENT,
+  loadReadingBlocks,
   loadReadingProgress,
   loadSavedTheorems,
   loadSet,
@@ -648,6 +649,7 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   const [readingRatio, setReadingRatio] = useState(() =>
     theoryRead ? 1 : (loadReadingProgress()[topic.id] ?? 0),
   );
+  const [readingBlocks, setReadingBlocks] = useState(loadReadingBlocks);
   const [reachedTheoryEnd, setReachedTheoryEnd] = useState(theoryRead);
   const [solved, setSolved] = useState(() => loadSet(SOLVED_KEY));
   const [topicSaved, setTopicSavedState] = useState(() =>
@@ -755,6 +757,7 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
       const complete = loadSet(THEORY_KEY).has(topic.id);
       setTheoryRead(complete);
       setReadingRatio(complete ? 1 : (loadReadingProgress()[topic.id] ?? 0));
+      setReadingBlocks(loadReadingBlocks());
       setSolved(loadSet(SOLVED_KEY));
     };
     sync();
@@ -765,7 +768,7 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   }, [topic.id]);
 
   useEffect(() => {
-    if (!tracksLearning || theoryRead) return;
+    if (!tracksLearning) return;
 
     const dwellTimers = new Map<Element, number>();
     let observer: IntersectionObserver | null = null;
@@ -829,7 +832,7 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
       dwellTimers.forEach((timer) => window.clearTimeout(timer));
       dwellTimers.clear();
     };
-  }, [topic.id, topic.blocks.length, theoryRead, tracksLearning]);
+  }, [topic.id, topic.blocks.length, tracksLearning]);
 
   useEffect(() => {
     const target = theorySentinel.current;
@@ -872,14 +875,47 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   const academyCapstoneCount = academyTaskIds.filter((id) => id.includes("capstone")).length;
 
   const outlineItems = useMemo(() => {
-    const seen = new Set<TopicOutlineKey>();
-    return topic.blocks.flatMap((block, index) => {
+    const groups = new Map<
+      TopicOutlineKey,
+      { key: TopicOutlineKey; label: string; index: number; blockIndices: number[] }
+    >();
+
+    topic.blocks.forEach((block, index) => {
       const key = topicOutlineKey(block);
-      if (seen.has(key)) return [];
-      seen.add(key);
-      return [{ key, label: topicOutlineLabels[key], index }];
+      const existing = groups.get(key);
+
+      if (existing) {
+        existing.blockIndices.push(index);
+        return;
+      }
+
+      groups.set(key, {
+        key,
+        label: topicOutlineLabels[key],
+        index,
+        blockIndices: [index],
+      });
     });
-  }, [topic.blocks]);
+
+    return [...groups.values()].map((item) => {
+      const seenCount = item.blockIndices.filter((index) =>
+        readingBlocks.has(topic.id + "::" + index),
+      ).length;
+
+      const status =
+        seenCount === 0
+          ? "unread"
+          : seenCount === item.blockIndices.length
+            ? "complete"
+            : "partial";
+
+      return {
+        ...item,
+        seenCount,
+        status,
+      };
+    });
+  }, [topic.blocks, topic.id, readingBlocks]);
 
   const activeOutlineKey = topic.blocks[activeBlock]
     ? topicOutlineKey(topic.blocks[activeBlock])
@@ -1174,7 +1210,27 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
             aria-current={activeOutlineKey === item.key ? "location" : undefined}
             onClick={() => jumpToBlock(item.index)}
           >
-            <span>{String(item.index + 1).padStart(2, "0")}</span>
+            <span className="topic-outline-index">{String(item.index + 1).padStart(2, "0")}</span>
+            {tracksLearning && (
+              <span
+                className={"topic-outline-state " + item.status}
+                aria-label={
+                  item.status === "complete"
+                    ? "раздел просмотрен"
+                    : item.status === "partial"
+                      ? "раздел просмотрен частично"
+                      : "раздел ещё не просмотрен"
+                }
+                title={
+                  item.seenCount +
+                  " из " +
+                  item.blockIndices.length +
+                  " блоков просмотрено"
+                }
+              >
+                {item.status === "complete" ? "✓" : item.status === "partial" ? "◐" : "○"}
+              </span>
+            )}
             {item.label}
           </button>
         ))}
