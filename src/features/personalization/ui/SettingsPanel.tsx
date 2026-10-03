@@ -138,7 +138,7 @@ export function SettingsPanel() {
     const refreshPreferences = () => {
       const next = loadLocalPreferences();
       setThemeName(next.themeName);
-      setCustom(next.customTheme);
+      setCustom({ ...next.customTheme } as Theme);
       setCursor(next.cursorMode);
       setMotion(next.motionProfile);
     };
