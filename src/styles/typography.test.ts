@@ -17,6 +17,7 @@ const guardedStyleFiles = [
   "./reading-focus.css",
   "./sidebar-topic-toc.css",
   "./block-notes.css",
+  "./important-blocks.css",
 ];
 
 function rawPixelFontSizes(css: string) {

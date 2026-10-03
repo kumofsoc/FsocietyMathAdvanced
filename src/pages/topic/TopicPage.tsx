@@ -40,6 +40,7 @@ import { ReadingWidthControl } from "@/features/reading-width/ui/ReadingWidthCon
 import { useAppShellStore } from "@/app/store/useAppShellStore";
 import { loadReadingWidth, saveReadingWidth, type ReadingWidth } from "@/features/reading-width/model/readingWidth";
 import { BLOCK_NOTES_EVENT, BLOCK_NOTES_KEY, deleteBlockNote, loadBlockNote, saveBlockNote } from "@/features/block-notes/model/blockNotes";
+import { IMPORTANT_BLOCKS_EVENT, IMPORTANT_BLOCKS_KEY, isBlockImportant, toggleImportantBlock } from "@/features/important-blocks/model/importantBlocks";
 
 const PracticePanel = lazy(() =>
   import("@/features/learning/ui/PracticePanel").then((module) => ({ default: module.PracticePanel })),
@@ -325,6 +326,7 @@ function ContentCard({
   const theoremId = topic.id + "::" + index;
   const academyBlock = isAdvancedLearningBlock(topic.id, block);
   const [saved, setSaved] = useState(() => loadSavedTheorems().some((item) => item.id === theoremId));
+  const [important, setImportant] = useState(() => isBlockImportant(topic.id, index));
   const [noteOpen, setNoteOpen] = useState(false);
   const [noteText, setNoteText] = useState(() => loadBlockNote(topic.id, index)?.text ?? "");
   const [noteSaveState, setNoteSaveState] = useState<"idle" | "saved" | "failed">("idle");
@@ -360,6 +362,35 @@ function ContentCard({
       window.removeEventListener("storage", onStorage);
     };
   }, [topic.id, index]);
+
+  useEffect(() => {
+    const syncImportant = () => {
+      setImportant(isBlockImportant(topic.id, index));
+    };
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === IMPORTANT_BLOCKS_KEY) syncImportant();
+    };
+
+    window.addEventListener(IMPORTANT_BLOCKS_EVENT, syncImportant);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener(IMPORTANT_BLOCKS_EVENT, syncImportant);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [topic.id, index]);
+
+  const toggleImportant = () => {
+    const next = toggleImportantBlock({
+      topicId: topic.id,
+      blockIndex: index,
+      topicTitle: topic.title,
+      blockTitle: displayBlockTitle(block.title),
+      kind: block.kind,
+    });
+    if (next.saved) {
+      setImportant(next.important);
+    }
+  };
 
   const updateNote = (value: string) => {
     setNoteText(value);
@@ -406,6 +437,7 @@ function ContentCard({
         "content-block kind-" +
         block.kind +
         (academyBlock ? " academy-content-block" : "") +
+        (important ? " important-content-block" : "") +
         ((block.kind === "example" || block.kind === "solution") ? " example-showcase-block" : "") +
         (topic.id === "matrices" && (block.kind === "example" || block.kind === "solution") ? " matrix-example-block" : "")
       }
@@ -423,6 +455,16 @@ function ContentCard({
         <div className="block-title-row">
           <h3>{displayBlockTitle(block.title)}</h3>
           <div className="block-title-actions">
+            <button
+              type="button"
+              className={"block-important-button " + (important ? "active" : "")}
+              onClick={toggleImportant}
+              aria-pressed={important}
+              title={important ? "Убрать блок из важных" : "Отметить блок как важный"}
+            >
+              <span aria-hidden="true">{important ? "◆" : "◇"}</span>
+              <strong>{important ? "Важно" : "Важно"}</strong>
+            </button>
             <button
               type="button"
               className={"block-note-button " + (noteText.trim() ? "has-note " : "") + (noteOpen ? "active" : "")}
