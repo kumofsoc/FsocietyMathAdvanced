@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
+import { getSessionStorageItem, removeSessionStorageItem, setSessionStorageItem } from "@/shared/lib/browserStorage";
 import { BlockMath } from "react-katex";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { chapters, topicList, topics } from "@/data/course";
@@ -161,7 +162,7 @@ function openBlock(topicId: string, index: number) {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
     return;
   }
-  sessionStorage.setItem(BLOCK_TARGET_KEY, topicId + "::" + index);
+  setSessionStorageItem(BLOCK_TARGET_KEY, topicId + "::" + index);
   window.location.hash = topicId;
 }
 
@@ -536,11 +537,11 @@ export function TopicPage({ topicId }: { topicId: string }) {
   const [solved, setSolved] = useState(() => loadSet(SOLVED_KEY));
 
   useEffect(() => {
-    const target = sessionStorage.getItem(BLOCK_TARGET_KEY);
+    const target = getSessionStorageItem(BLOCK_TARGET_KEY);
     if (!target) return;
     const [targetTopic, rawIndex] = target.split("::");
     if (targetTopic !== topic.id) return;
-    sessionStorage.removeItem(BLOCK_TARGET_KEY);
+    removeSessionStorageItem(BLOCK_TARGET_KEY);
     const timer = window.setTimeout(() => {
       document
         .getElementById("block-" + topic.id + "-" + rawIndex)
