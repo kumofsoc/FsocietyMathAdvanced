@@ -2602,3 +2602,50 @@ html[data-motion-profile="off"] .visual-loading::after {
   .matrix-operation-matrix{min-height:210px}
   .property-proof-example-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+
+.example-showcase-block .block-rail{
+  border-color:color-mix(in srgb,var(--accent2) 26%,var(--border));
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent2) 6%,var(--elevated)),var(--elevated));
+}
+.example-showcase-block .block-rail>span{
+  color:var(--accent2);
+}
+.example-showcase-block .block-title-row h3{
+  max-width:900px;
+}
+.example-showcase-block .block-body>p:first-of-type{
+  max-width:84ch;
+  font-size:15px;
+  line-height:1.72;
+}
+.matrix-example-block .formula-box{
+  border-color:color-mix(in srgb,var(--accent2) 24%,var(--border));
+  background:color-mix(in srgb,var(--accent2) 4%,var(--surface));
+}
+.property-proof-panel{
+  scroll-margin-top:110px;
+}
+.property-disclosure-actions button{
+  min-height:42px;
+}
+.property-disclosure-actions button.active{
+  border-color:color-mix(in srgb,var(--accent) 50%,var(--border));
+  background:color-mix(in srgb,var(--accent) 7%,var(--elevated));
+}
+.property-proof-panel>article+article{
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid var(--border);
+}
+
+html[data-theme-tone="light"] .matrix-operation-scene,
+html[data-theme-tone="light"] .matrix-example-strip-item,
+html[data-theme-tone="light"] .property-proof-example,
+html[data-theme-tone="light"] .rigorous-statement,
+html[data-theme-tone="light"] .theorem-worked-examples>article{
+  box-shadow:0 12px 34px rgba(23,23,26,.07);
+}
+html[data-theme-tone="light"] .matrix-operation-arrow code{
+  background:color-mix(in srgb,var(--accent2) 5%,var(--surface));
+}
