@@ -7,6 +7,7 @@ import { CustomCursor } from "@/features/personalization/ui/CustomCursor";
 import { HistoryDock } from "@/features/navigation/ui/HistoryDock";
 import { getHistoryHotkeyDirection } from "@/features/navigation/model/historyHotkeys";
 import { MathBackdrop } from "@/shared/ui/MathBackdrop";
+import { RouteSkeleton } from "@/shared/ui/RouteSkeleton";
 import { ScrollProgress } from "@/features/navigation/ui/ScrollProgress";
 import { BackToTop } from "@/features/navigation/ui/BackToTop";
 import { SettingsPanel } from "@/features/personalization/ui/SettingsPanel";
@@ -365,6 +366,19 @@ export default function App() {
                   }
                 : { section: "VisualMath", current: "Страница" };
 
+  const routeSkeletonVariant =
+    topic
+      ? "topic"
+      : route === "map"
+        ? "map"
+        : route === "review"
+          ? "review"
+          : route === "account"
+            ? "account"
+            : route === "academy"
+              ? "academy"
+              : "home";
+
   return (
     <div className={"app-shell " + (sidebarCollapsed ? "sidebar-collapsed" : "")}>
       <ScrollProgress />
@@ -528,10 +542,10 @@ export default function App() {
             >
               <Suspense
                 fallback={
-                  <div className="route-loading" role="status">
-                    <span />
-                    <strong>Загружаю модуль…</strong>
-                  </div>
+                  <RouteSkeleton
+                    variant={routeSkeletonVariant}
+                    label={"Загружаю: " + routeContext.current}
+                  />
                 }
               >
                 {route === "home" ? (
