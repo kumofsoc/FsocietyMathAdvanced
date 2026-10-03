@@ -1,18 +1,29 @@
 import type { ReactNode } from "react";
 
-function parseMatrix(raw: string) {
+export function parseMatrix(raw: string) {
   const inner = raw.slice(2, -2);
   return inner
     .split(/\]\s*,\s*\[/)
     .map((row) => row.split(",").map((value) => value.trim()));
 }
 
-export function InlineMatrix({ raw }: { raw: string }) {
+export function InlineMatrix({
+  raw,
+  highlightRows = [],
+  size = "inline",
+}: {
+  raw: string;
+  highlightRows?: number[];
+  size?: "inline" | "large";
+}) {
   const rows = parseMatrix(raw);
   const columns = Math.max(1, rows[0]?.length ?? 1);
 
   return (
-    <span className="inline-matrix" aria-label={"Матрица " + raw}>
+    <span
+      className={"inline-matrix " + (size === "large" ? "inline-matrix-large" : "")}
+      aria-label={"Матрица " + raw}
+    >
       <i className="inline-matrix-bracket left" />
       <span
         className="inline-matrix-grid"
@@ -20,7 +31,12 @@ export function InlineMatrix({ raw }: { raw: string }) {
       >
         {rows.flatMap((row, rowIndex) =>
           row.map((value, columnIndex) => (
-            <span key={rowIndex + "-" + columnIndex}>{value}</span>
+            <span
+              key={rowIndex + "-" + columnIndex}
+              className={highlightRows.includes(rowIndex) ? "matrix-cell-highlight" : ""}
+            >
+              {value}
+            </span>
           )),
         )}
       </span>
