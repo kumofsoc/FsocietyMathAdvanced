@@ -48,6 +48,26 @@ const kindLabels: Partial<Record<BlockKind, string>> = {
   summary: "ИТОГ",
 };
 
+const blockKinds = new Set<BlockKind>([
+  "definition",
+  "concepts",
+  "property",
+  "theorem",
+  "proof",
+  "corollary",
+  "formula",
+  "example",
+  "solution",
+  "note",
+  "algorithm",
+  "geometry",
+  "summary",
+]);
+
+function toBlockKind(value: string | undefined): BlockKind | null {
+  return value && blockKinds.has(value as BlockKind) ? (value as BlockKind) : null;
+}
+
 function normalize(value: string) {
   return value.toLocaleLowerCase("ru-RU").replace(/ё/g, "е");
 }
@@ -96,7 +116,7 @@ function buildMarksItems(): MarksItem[] {
       topicNumber: meta?.number ?? "—",
       chapterTitle: chapter?.title ?? "",
       blockTitle: mark?.blockTitle ?? searchEntry?.title ?? "Блок " + (blockIndex + 1),
-      kind: mark?.kind ?? searchEntry?.kind ?? null,
+      kind: mark?.kind ?? toBlockKind(searchEntry?.kind),
       note: note?.text ?? null,
       important: Boolean(mark),
       updatedAt: Math.max(mark?.updatedAt ?? 0, note?.updatedAt ?? 0),
