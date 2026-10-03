@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { getLocalStorageItem, setLocalStorageItem } from "@/shared/lib/browserStorage";
 import { CURSOR_EVENT, CURSOR_KEY, parseCursorMode, type CursorMode } from "@/features/personalization/ui/CustomCursor";
 import { getThemeTone } from "@/features/personalization/model/themeTone";
-import { parseMotionProfile, type MotionProfile } from "@/features/home-experience/model/homeExperience";
+import { MOTION_CHANGE_EVENT, MOTION_PROFILE_KEY, parseMotionProfile, type MotionProfile } from "@/features/home-experience/model/homeExperience";
 import { LEARNING_EVENT, loadSavedTheorems, saveTheorems } from "@/lib/learning";
 import { MusicSettings } from "@/features/background-music/ui/MusicSettings";
 import "@/features/personalization/styles/system-config.css";
@@ -10,7 +10,6 @@ import "@/features/personalization/styles/system-config.css";
 type Theme = Record<string, string>;
 const THEME_NAME_KEY = "math-theme-name";
 const THEME_CUSTOM_KEY = "math-theme-custom";
-const MOTION_KEY = "fsociety-motion-profile-v1";
 
 const themes: Record<string, Theme> = {
   Black: {
@@ -116,8 +115,8 @@ function applyTheme(theme: Theme, name: string) {
 
 function applyMotion(profile: MotionProfile) {
   document.documentElement.dataset.motionProfile = profile;
-  setLocalStorageItem(MOTION_KEY, profile);
-  window.dispatchEvent(new CustomEvent("fsociety-motion-change"));
+  setLocalStorageItem(MOTION_PROFILE_KEY, profile);
+  window.dispatchEvent(new CustomEvent(MOTION_CHANGE_EVENT));
 }
 
 export function SettingsPanel() {
@@ -128,7 +127,7 @@ export function SettingsPanel() {
   const [customDirty, setCustomDirty] = useState(false);
   const [customSaved, setCustomSaved] = useState(false);
   const [cursor, setCursor] = useState<CursorMode>(() => parseCursorMode(getLocalStorageItem(CURSOR_KEY)));
-  const [motion, setMotion] = useState<MotionProfile>(() => parseMotionProfile(getLocalStorageItem(MOTION_KEY)));
+  const [motion, setMotion] = useState<MotionProfile>(() => parseMotionProfile(getLocalStorageItem(MOTION_PROFILE_KEY)));
   const [saved, setSaved] = useState(loadSavedTheorems);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
