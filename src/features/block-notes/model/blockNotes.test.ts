@@ -4,6 +4,7 @@ import {
   BLOCK_NOTES_KEY,
   deleteBlockNote,
   loadBlockNote,
+  loadBlockNoteEntries,
   saveBlockNote,
 } from "./blockNotes";
 
@@ -40,5 +41,15 @@ describe("block notes", () => {
   it("normalizes windows line endings", () => {
     saveBlockNote("rank", 1, "a\r\nb");
     expect(loadBlockNote("rank", 1)?.text).toBe("a\nb");
+  });
+
+  it("enumerates notes as stable block entries", () => {
+    saveBlockNote("rank", 4, "Связать с базисом");
+    expect(loadBlockNoteEntries()[0]).toMatchObject({
+      id: "rank::4",
+      topicId: "rank",
+      blockIndex: 4,
+      text: "Связать с базисом",
+    });
   });
 });

@@ -10,6 +10,12 @@ export type BlockNote = {
 
 type BlockNotesState = Record<string, BlockNote>;
 
+export type BlockNoteEntry = BlockNote & {
+  id: string;
+  topicId: string;
+  blockIndex: number;
+};
+
 export function blockNoteId(topicId: string, blockIndex: number) {
   return topicId + "::" + Math.max(0, Math.trunc(blockIndex));
 }
@@ -22,6 +28,26 @@ export function loadBlockNote(topicId: string, blockIndex: number): BlockNote | 
   const note = loadBlockNotes()[blockNoteId(topicId, blockIndex)];
   if (!note || typeof note.text !== "string" || !note.text.trim()) return null;
   return note;
+}
+
+export function loadBlockNoteEntries(): BlockNoteEntry[] {
+  return Object.entries(loadBlockNotes()).flatMap(([id, note]) => {
+    if (!note || typeof note.text !== "string" || !note.text.trim()) return [];
+    const separator = id.lastIndexOf("::");
+    if (separator <= 0) return [];
+
+    const topicId = id.slice(0, separator);
+    const blockIndex = Number(id.slice(separator + 2));
+    if (!topicId || !Number.isInteger(blockIndex) || blockIndex < 0) return [];
+
+    return [{
+      id,
+      topicId,
+      blockIndex,
+      text: note.text,
+      updatedAt: Number.isFinite(note.updatedAt) ? note.updatedAt : 0,
+    }];
+  });
 }
 
 function persistBlockNotes(state: BlockNotesState) {

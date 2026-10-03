@@ -52,6 +52,11 @@ const ReviewHub = lazy(() =>
     default: module.ReviewHub,
   })),
 );
+const MyMarksPage = lazy(() =>
+  import("@/pages/marks/MyMarksPage").then((module) => ({
+    default: module.MyMarksPage,
+  })),
+);
 const TopicPage = lazy(() =>
   import("@/pages/topic/TopicPage").then((module) => ({ default: module.TopicPage })),
 );
@@ -70,6 +75,9 @@ const preloadLinearAcademy = () => {
 };
 const preloadReviewHub = () => {
   void import("@/pages/review/ReviewHub");
+};
+const preloadMyMarks = () => {
+  void import("@/pages/marks/MyMarksPage");
 };
 
 function SidebarProgressItem({
@@ -401,7 +409,9 @@ export default function App() {
           ? { section: "Курс", current: "Линейная математика" }
           : route === "review"
             ? { section: "Повторение", current: "Краткий конспект" }
-            : route === "account"
+            : route === "marks"
+              ? { section: "Личное", current: "Мои отметки" }
+              : route === "account"
               ? { section: "Аккаунт", current: "Профиль" }
               : topic
                 ? {
@@ -415,7 +425,7 @@ export default function App() {
       ? "topic"
       : route === "map"
         ? "map"
-        : route === "review"
+        : route === "review" || route === "marks"
           ? "review"
           : route === "account"
             ? "account"
@@ -500,6 +510,17 @@ export default function App() {
           <span>≡</span>
           Краткий конспект
           <b>REVIEW</b>
+        </button>
+
+        <button
+          className={"map-entry marks-entry " + (route === "marks" ? "active" : "")}
+          onMouseEnter={preloadMyMarks}
+          onFocus={preloadMyMarks}
+          onClick={() => (window.location.hash = "marks")}
+        >
+          <span>◆</span>
+          Мои отметки
+          <b>MY</b>
         </button>
 
         {topic &&
@@ -686,6 +707,8 @@ export default function App() {
                   <LinearAcademyHub />
                 ) : route === "review" ? (
                   <ReviewHub />
+                ) : route === "marks" ? (
+                  <MyMarksPage />
                 ) : topic?.isStub ? (
                   <StubTopicPage topicId={topic.id} />
                 ) : topic ? (
