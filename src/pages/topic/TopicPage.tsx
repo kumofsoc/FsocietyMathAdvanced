@@ -28,6 +28,7 @@ import { MatrixOperationScene } from "@/visualizations/linear/MatrixOperationSce
 import { toLayeredTopic } from "@/entities/course/model/learning-architecture/adapter";
 import { linearFoundationBlueprints } from "@/data/learning-architecture/linear-foundations";
 import { TopicLabInsert, TopicVisualInsert } from "@/visualizations/registry/TopicVisualRegistry";
+import { RouteSkeleton } from "@/shared/ui/RouteSkeleton";
 
 const PracticePanel = lazy(() =>
   import("@/features/learning/ui/PracticePanel").then((module) => ({ default: module.PracticePanel })),
@@ -569,12 +570,7 @@ export function TopicPage({ topicId }: { topicId: string }) {
   }
 
   if (!baseTopic) {
-    return (
-      <div className="route-loading" role="status">
-        <span />
-        <strong>Загружаю теорию…</strong>
-      </div>
-    );
+    return <RouteSkeleton variant="topic" label="Загружаю теорию" />;
   }
 
   return <TopicPageContent key={baseTopic.id} baseTopic={baseTopic} />;
