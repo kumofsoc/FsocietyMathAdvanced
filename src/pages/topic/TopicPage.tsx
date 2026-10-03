@@ -33,6 +33,7 @@ import { RouteSkeleton } from "@/shared/ui/RouteSkeleton";
 import { loadTopicResume, saveTopicResume } from "@/features/learning/model/topicResume";
 import { loadSavedTopicIds, SAVED_TOPICS_EVENT, SAVED_TOPICS_KEY, toggleSavedTopic } from "@/features/saved-topics/model/savedTopics";
 import { TopicLocalSearch } from "@/features/topic-search/ui/TopicLocalSearch";
+import { copyTextToClipboard } from "@/shared/lib/clipboard";
 
 const PracticePanel = lazy(() =>
   import("@/features/learning/ui/PracticePanel").then((module) => ({ default: module.PracticePanel })),
@@ -117,6 +118,76 @@ function displayBlockTitle(title: string) {
     .replace(/^ACADEMY\s+PRO\s*\/\s*/i, "Углублённое изучение · ")
     .replace(/^ACADEMY\s*\/\s*/i, "")
     .replace(/^ACADEMY\s+/i, "");
+}
+
+function CopyContentButton({
+  value,
+  label,
+  className = "",
+  title,
+}: {
+  value: string;
+  label: string;
+  className?: string;
+  title: string;
+}) {
+  const [state, setState] = useState<"idle" | "copied" | "failed">("idle");
+  const resetTimer = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (resetTimer.current !== null) {
+        window.clearTimeout(resetTimer.current);
+      }
+    },
+    [],
+  );
+
+  const copy = async () => {
+    const copied = await copyTextToClipboard(value);
+    setState(copied ? "copied" : "failed");
+
+    if (resetTimer.current !== null) {
+      window.clearTimeout(resetTimer.current);
+    }
+    resetTimer.current = window.setTimeout(() => {
+      setState("idle");
+      resetTimer.current = null;
+    }, 1400);
+  };
+
+  return (
+    <button
+      type="button"
+      className={"content-copy-button " + className + " " + state}
+      onClick={() => void copy()}
+      title={title}
+      aria-live="polite"
+    >
+      <span aria-hidden="true">{state === "copied" ? "✓" : state === "failed" ? "!" : "⧉"}</span>
+      <strong>{state === "copied" ? "Скопировано" : state === "failed" ? "Не удалось" : label}</strong>
+    </button>
+  );
+}
+
+function CopyableMath({
+  math,
+  className,
+}: {
+  math: string;
+  className: string;
+}) {
+  return (
+    <div className={className + " copyable-math"}>
+      <CopyContentButton
+        value={math}
+        label="LaTeX"
+        className="latex"
+        title="Скопировать LaTeX"
+      />
+      <BlockMath math={math} />
+    </div>
+  );
 }
 
 const BLOCK_TARGET_KEY = "fsociety-block-target-v1";
@@ -263,13 +334,27 @@ function ContentCard({
         <div className="block-title-row">
           <h3>{displayBlockTitle(block.title)}</h3>
           {block.kind === "theorem" && (
-            <button
-              className={"save-theorem-button " + (saved ? "saved" : "")}
-              onClick={toggleSaved}
-              title={saved ? "Убрать из сохранённых" : "Сохранить теорему"}
-            >
-              {saved ? "★" : "☆"}
-            </button>
+            <div className="block-title-actions">
+              <CopyContentButton
+                value={
+                  displayBlockTitle(block.title) +
+                  "\n\n" +
+                  block.body +
+                  (block.formula ? "\n\n" + block.formula : "")
+                }
+                label="Текст"
+                className="theorem-text"
+                title="Скопировать текст теоремы"
+              />
+              <button
+                className={"save-theorem-button " + (saved ? "saved" : "")}
+                onClick={toggleSaved}
+                title={saved ? "Убрать из сохранённых" : "Сохранить теорему"}
+                aria-label={saved ? "Убрать теорему из сохранённых" : "Сохранить теорему"}
+              >
+                {saved ? "★" : "☆"}
+              </button>
+            </div>
           )}
         </div>
         {!block.matrixOperation && <p><RichMatrixText text={block.body} /></p>}
@@ -283,9 +368,7 @@ function ContentCard({
         {block.matrixOperation && <MatrixOperationScene visual={block.matrixOperation} />}
 
         {block.formula && (
-          <div className="formula-box">
-            <BlockMath math={block.formula} />
-          </div>
+          <CopyableMath math={block.formula} className="formula-box" />
         )}
 
         {block.items && (
@@ -306,9 +389,7 @@ function ContentCard({
                 <div className="property-panel-label">ПРИМЕР К ТЕОРЕМЕ {exampleIndex + 1}</div>
                 <p><RichMatrixText text={example.body} /></p>
                 {example.formula && (
-                  <div className="property-panel-formula">
-                    <BlockMath math={example.formula} />
-                  </div>
+                  <CopyableMath math={example.formula} className="property-panel-formula" />
                 )}
               </article>
             ))}
@@ -352,18 +433,14 @@ function ContentCard({
                           <h4>{statement.proof.label}</h4>
                           <p><RichMatrixText text={statement.proof.body} /></p>
                           {statement.proof.formula && (
-                            <div className="property-panel-formula">
-                              <BlockMath math={statement.proof.formula} />
-                            </div>
+                            <CopyableMath math={statement.proof.formula} className="property-panel-formula" />
                           )}
                         </div>
                         <div className="rigorous-example">
                           <b>ПРИМЕР</b>
                           <p><RichMatrixText text={statement.example.body} /></p>
                           {statement.example.formula && (
-                            <div className="property-panel-formula">
-                              <BlockMath math={statement.example.formula} />
-                            </div>
+                            <CopyableMath math={statement.example.formula} className="property-panel-formula" />
                           )}
                         </div>
                         {statement.withoutConditions && (
@@ -422,9 +499,7 @@ function ContentCard({
                       <h4>{proof.label}</h4>
                       <p><RichMatrixText text={proof.body} /></p>
                       {proof.formula && (
-                        <div className="property-panel-formula">
-                          <BlockMath math={proof.formula} />
-                        </div>
+                        <CopyableMath math={proof.formula} className="property-panel-formula" />
                       )}
                     </article>
                   ))}
@@ -439,9 +514,7 @@ function ContentCard({
                             {example.title ? <strong>{example.title}</strong> : null}
                             <p><RichMatrixText text={example.body} /></p>
                             {example.formula && (
-                              <div className="property-panel-formula">
-                                <BlockMath math={example.formula} />
-                              </div>
+                              <CopyableMath math={example.formula} className="property-panel-formula" />
                             )}
                           </article>
                         ))}
@@ -466,9 +539,7 @@ function ContentCard({
                       <h4>{corollary.label}</h4>
                       <p><RichMatrixText text={corollary.body} /></p>
                       {corollary.formula && (
-                        <div className="property-panel-formula">
-                          <BlockMath math={corollary.formula} />
-                        </div>
+                        <CopyableMath math={corollary.formula} className="property-panel-formula" />
                       )}
                     </article>
                   ))}
