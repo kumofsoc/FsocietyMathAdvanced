@@ -1,0 +1,136 @@
+/* Copy controls for theorem text and LaTeX formulas. */
+
+.block-title-actions{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.content-copy-button{
+  min-height:32px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:0 9px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:color-mix(in srgb,var(--surface) 92%,transparent);
+  color:var(--muted);
+  font-size:var(--font-xs);
+  font-weight:700;
+  cursor:pointer;
+  transition:
+    color .16s ease,
+    border-color .16s ease,
+    background .16s ease,
+    transform .16s ease,
+    opacity .16s ease;
+}
+
+.content-copy-button>span{
+  color:var(--accent);
+  font:800 var(--font-xs)/1 var(--font-mono);
+}
+
+.content-copy-button>strong{
+  font-size:var(--font-xs);
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.content-copy-button:hover,
+.content-copy-button:focus-visible{
+  color:var(--text);
+  border-color:color-mix(in srgb,var(--accent) 52%,var(--border));
+  background:color-mix(in srgb,var(--accent) 7%,var(--surface));
+  transform:translateY(-1px);
+}
+
+.content-copy-button.copied{
+  color:var(--accent2);
+  border-color:color-mix(in srgb,var(--accent2) 56%,var(--border));
+  background:color-mix(in srgb,var(--accent2) 7%,var(--surface));
+}
+
+.content-copy-button.copied>span{
+  color:var(--accent2);
+}
+
+.content-copy-button.failed{
+  color:#ff7a83;
+  border-color:color-mix(in srgb,#ff7a83 58%,var(--border));
+}
+
+.content-copy-button.failed>span{
+  color:#ff7a83;
+}
+
+.copyable-math{
+  position:relative;
+  padding-top:42px;
+}
+
+.copyable-math>.content-copy-button{
+  position:absolute;
+  top:8px;
+  right:8px;
+  z-index:2;
+  min-height:28px;
+  padding-inline:8px;
+  background:color-mix(in srgb,var(--elevated) 94%,transparent);
+  backdrop-filter:blur(10px);
+}
+
+.copyable-math>.content-copy-button>strong{
+  font-size:var(--font-xs);
+}
+
+.formula-box.copyable-math{
+  padding-top:44px;
+}
+
+.property-panel-formula.copyable-math{
+  padding-top:40px;
+}
+
+.property-panel-formula.copyable-math>.content-copy-button{
+  top:6px;
+  right:6px;
+}
+
+@media(max-width:620px){
+  .block-title-row{
+    align-items:flex-start;
+  }
+
+  .block-title-actions{
+    flex-direction:column-reverse;
+    align-items:flex-end;
+  }
+
+  .content-copy-button.theorem-text>strong{
+    display:none;
+  }
+
+  .content-copy-button.theorem-text{
+    width:32px;
+    padding:0;
+  }
+
+  .copyable-math{
+    padding-top:40px;
+  }
+
+  .copyable-math>.content-copy-button{
+    top:6px;
+    right:6px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .content-copy-button{
+    transition:none;
+  }
+}
