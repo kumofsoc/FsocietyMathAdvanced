@@ -88,7 +88,11 @@ export function getReadingCoverageFromBlocks(
 ) {
   if (totalBlocks <= 0) return 0;
   const prefix = topicId + "::";
-  const count = [...seenBlocks].filter((key) => key.startsWith(prefix)).length;
+  const count = [...seenBlocks].filter((key) => {
+    if (!key.startsWith(prefix)) return false;
+    const index = Number(key.slice(prefix.length));
+    return Number.isInteger(index) && index >= 0 && index < totalBlocks;
+  }).length;
   return Math.min(1, count / totalBlocks);
 }
 
