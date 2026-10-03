@@ -87,7 +87,7 @@ function SidebarProgressItem({
   }, [containsRoute]);
 
   return (
-    <section className={"sidebar-progress-item " + (open ? "open" : "")}>
+    <section className={"sidebar-progress-item " + (open ? "open " : "") + (containsRoute ? "current" : "")}>
       <button
         className="sidebar-progress-trigger"
         onClick={() => setOpen((value) => !value)}
@@ -342,6 +342,27 @@ export default function App() {
 
   const topic = topicMeta[route];
   const resumeTopic = lastTopicId ? topicMeta[lastTopicId] : undefined;
+  const currentChapter = topic
+    ? chapters.find((chapter) => chapter.id === topic.chapterId)
+    : undefined;
+
+  const routeContext =
+    route === "home"
+      ? { section: "VisualMath", current: "Главная" }
+      : route === "map"
+        ? { section: "Навигация", current: "Карта курса" }
+        : route === "academy"
+          ? { section: "Курс", current: "Линейная математика" }
+          : route === "review"
+            ? { section: "Повторение", current: "Краткий конспект" }
+            : route === "account"
+              ? { section: "Аккаунт", current: "Профиль" }
+              : topic
+                ? {
+                    section: currentChapter?.title ?? "Курс",
+                    current: "§ " + topic.number + " " + topic.title,
+                  }
+                : { section: "VisualMath", current: "Страница" };
 
   return (
     <div className={"app-shell " + (sidebarCollapsed ? "sidebar-collapsed" : "")}>
@@ -371,7 +392,7 @@ export default function App() {
         </button>
 
         <button
-          className="map-entry"
+          className={"map-entry " + (route === "map" ? "active" : "")}
           onMouseEnter={preloadCourseMap}
           onFocus={preloadCourseMap}
           onClick={() => (window.location.hash = "map")}
@@ -458,6 +479,23 @@ export default function App() {
             ☰
           </button>
           <HistoryDock />
+          <nav className="topbar-context" aria-label="Текущее положение в курсе">
+            <button
+              type="button"
+              onClick={() => {
+                if (topic) {
+                  window.location.hash = "map";
+                } else {
+                  openHomeAtTop();
+                }
+              }}
+              title={topic ? "Открыть карту курса" : "На главную"}
+            >
+              {routeContext.section}
+            </button>
+            <span aria-hidden="true">/</span>
+            <strong title={routeContext.current}>{routeContext.current}</strong>
+          </nav>
           <CommandPalette />
           <div className="topbar-spacer" />
           <div className="topbar-course-progress" title="Общий прогресс по отслеживаемым разделам">
