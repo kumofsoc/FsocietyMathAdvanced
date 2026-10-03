@@ -83,6 +83,7 @@ export function TopicLocalSearch({
           ref={inputRef}
           value={query}
           onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           onChange={(event) => {
             setQuery(event.target.value);
             setActiveIndex(0);
