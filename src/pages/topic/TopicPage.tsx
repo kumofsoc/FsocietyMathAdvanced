@@ -32,6 +32,7 @@ import { TopicLabInsert, TopicVisualInsert } from "@/visualizations/registry/Top
 import { RouteSkeleton } from "@/shared/ui/RouteSkeleton";
 import { loadTopicResume, saveTopicResume } from "@/features/learning/model/topicResume";
 import { loadSavedTopicIds, SAVED_TOPICS_EVENT, SAVED_TOPICS_KEY, toggleSavedTopic } from "@/features/saved-topics/model/savedTopics";
+import { TopicLocalSearch } from "@/features/topic-search/ui/TopicLocalSearch";
 
 const PracticePanel = lazy(() =>
   import("@/features/learning/ui/PracticePanel").then((module) => ({ default: module.PracticePanel })),
@@ -1095,6 +1096,8 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
           </button>
         )}
       </nav>
+
+      <TopicLocalSearch topic={topic} onJump={jumpToBlock} />
 
       {tracksLearning && (
         <nav className="topic-mastery-path" aria-label="Этапы освоения темы">
