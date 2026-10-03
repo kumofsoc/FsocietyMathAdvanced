@@ -7,7 +7,6 @@ import { CommandPalette } from "@/features/navigation/ui/CommandPalette";
 import { CustomCursor } from "@/features/personalization/ui/CustomCursor";
 import { HistoryDock } from "@/features/navigation/ui/HistoryDock";
 import { getHistoryHotkeyDirection } from "@/features/navigation/model/historyHotkeys";
-import { MathBackdrop } from "@/shared/ui/MathBackdrop";
 import { ScrollProgress } from "@/features/navigation/ui/ScrollProgress";
 import { SettingsPanel } from "@/features/personalization/ui/SettingsPanel";
 import { StubTopicPage } from "@/pages/topic/StubTopicPage";
@@ -66,6 +65,9 @@ function routeFromHash() {
 
 const HomePage = lazy(() =>
   import("@/pages/home/HomePage").then((module) => ({ default: module.HomePage })),
+);
+const MathBackdrop = lazy(() =>
+  import("@/shared/ui/MathBackdrop").then((module) => ({ default: module.MathBackdrop })),
 );
 const AccountPage = lazy(() =>
   import("@/pages/account/AccountPage").then((module) => ({ default: module.AccountPage })),
@@ -296,7 +298,9 @@ export default function App() {
   return (
     <div className={"app-shell " + (sidebarCollapsed ? "sidebar-collapsed" : "")}>
       <ScrollProgress />
-      <MathBackdrop />
+      <Suspense fallback={null}>
+        <MathBackdrop />
+      </Suspense>
       <CustomCursor />
       {route === "home" && <HistoryDock />}
       <BackgroundMusicPlayer />
