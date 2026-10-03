@@ -5,6 +5,7 @@ import { BackgroundMusicPlayer } from "@/features/background-music/ui/Background
 import { CommandPalette } from "@/features/navigation/ui/CommandPalette";
 import { CustomCursor } from "@/features/personalization/ui/CustomCursor";
 import { HistoryDock } from "@/features/navigation/ui/HistoryDock";
+import { SidebarTopicToc } from "@/features/navigation/ui/SidebarTopicToc";
 import { getHistoryHotkeyDirection } from "@/features/navigation/model/historyHotkeys";
 import { MathBackdrop } from "@/shared/ui/MathBackdrop";
 import { RouteSkeleton } from "@/shared/ui/RouteSkeleton";
@@ -160,6 +161,8 @@ export default function App() {
   const sidebarOpen = useAppShellStore((state) => state.sidebarOpen);
   const sidebarCollapsed = useAppShellStore((state) => state.sidebarCollapsed);
   const readingFocusMode = useAppShellStore((state) => state.readingFocusMode);
+  const sidebarTopicToc = useAppShellStore((state) => state.sidebarTopicToc);
+  const activeSidebarTopicTocKey = useAppShellStore((state) => state.activeSidebarTopicTocKey);
   const setSidebarOpen = useAppShellStore((state) => state.setSidebarOpen);
   const setSidebarCollapsed = useAppShellStore((state) => state.setSidebarCollapsed);
   const setReadingFocusMode = useAppShellStore((state) => state.setReadingFocusMode);
@@ -498,6 +501,18 @@ export default function App() {
           Краткий конспект
           <b>REVIEW</b>
         </button>
+
+        {topic &&
+          !topic.isStub &&
+          sidebarTopicToc?.topicId === topic.id && (
+            <SidebarTopicToc
+              topicId={topic.id}
+              topicNumber={topic.number}
+              topicTitle={topic.title}
+              items={sidebarTopicToc.items}
+              activeKey={activeSidebarTopicTocKey}
+            />
+          )}
 
         <section className={"sidebar-saved-topics " + (savedTopics.length ? "has-items" : "")}>
           <div className="sidebar-saved-head">

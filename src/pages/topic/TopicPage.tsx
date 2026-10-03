@@ -800,6 +800,9 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   );
   const readingFocusMode = useAppShellStore((state) => state.readingFocusMode);
   const setReadingFocusMode = useAppShellStore((state) => state.setReadingFocusMode);
+  const setSidebarTopicToc = useAppShellStore((state) => state.setSidebarTopicToc);
+  const setActiveSidebarTopicTocKey = useAppShellStore((state) => state.setActiveSidebarTopicTocKey);
+  const clearSidebarTopicToc = useAppShellStore((state) => state.clearSidebarTopicToc);
   const [readingWidth, setReadingWidth] = useState<ReadingWidth>(loadReadingWidth);
 
   useEffect(() => {
@@ -1073,7 +1076,7 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
         readingBlocks.has(topic.id + "::" + index),
       ).length;
 
-      const status =
+      const status: "unread" | "partial" | "complete" =
         seenCount === 0
           ? "unread"
           : seenCount === item.blockIndices.length
@@ -1091,6 +1094,29 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   const activeOutlineKey = topic.blocks[activeBlock]
     ? topicOutlineKey(topic.blocks[activeBlock])
     : outlineItems[0]?.key;
+
+  useEffect(() => {
+    setSidebarTopicToc(
+      topic.id,
+      outlineItems.map((item) => ({
+        key: item.key,
+        label: item.label,
+        blockIndex: item.index,
+        status: tracksLearning ? item.status : null,
+      })),
+    );
+  }, [topic.id, outlineItems, tracksLearning, setSidebarTopicToc]);
+
+  useEffect(
+    () => () => {
+      clearSidebarTopicToc(topic.id);
+    },
+    [topic.id, clearSidebarTopicToc],
+  );
+
+  useEffect(() => {
+    setActiveSidebarTopicTocKey(activeOutlineKey ?? null);
+  }, [activeOutlineKey, setActiveSidebarTopicTocKey]);
 
   useEffect(() => {
     if (!activeOutlineKey) return;
