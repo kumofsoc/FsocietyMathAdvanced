@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { readLocalStorage } from "@/shared/lib/browserStorage";
 
 export const CURSOR_KEY = "fsociety-cursor-style-v1";
 export const CURSOR_EVENT = "fsociety-cursor-change";
@@ -6,7 +7,7 @@ export const CURSOR_EVENT = "fsociety-cursor-change";
 export type CursorMode = "native" | "halo" | "minimal" | "crosshair" | "comet";
 
 export function CustomCursor() {
-  const [mode, setMode] = useState<CursorMode>(() => (localStorage.getItem(CURSOR_KEY) as CursorMode) || "halo");
+  const [mode, setMode] = useState<CursorMode>(() => (readLocalStorage(CURSOR_KEY) as CursorMode) || "halo");
   const [point, setPoint] = useState({ x: -100, y: -100 });
   const [lagPoint, setLagPoint] = useState({ x: -100, y: -100 });
   const [active, setActive] = useState(false);
@@ -15,7 +16,7 @@ export function CustomCursor() {
   const lag = useRef({ x: -100, y: -100 });
 
   useEffect(() => {
-    const refresh = () => setMode((localStorage.getItem(CURSOR_KEY) as CursorMode) || "halo");
+    const refresh = () => setMode((readLocalStorage(CURSOR_KEY) as CursorMode) || "halo");
     window.addEventListener(CURSOR_EVENT, refresh);
     window.addEventListener("storage", refresh);
     return () => {
