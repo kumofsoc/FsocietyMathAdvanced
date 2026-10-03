@@ -24,6 +24,7 @@ import {
 } from "@/features/learning/model/progress";
 import type { BlockKind, ContentBlock, Topic } from "@/entities/course/model/types";
 import { RichMatrixText } from "@/visualizations/linear/MatrixNotation";
+import { MatrixOperationScene } from "@/visualizations/linear/MatrixOperationScene";
 import { toLayeredTopic } from "@/entities/course/model/learning-architecture/adapter";
 import { linearFoundationBlueprints } from "@/data/learning-architecture/linear-foundations";
 import { composeTopicWithSupplements } from "@/data/topic-supplements";
@@ -177,7 +178,7 @@ function ContentCard({
   const academyBlock = isAdvancedLearningBlock(topic.id, block);
   const [saved, setSaved] = useState(() => loadSavedTheorems().some((item) => item.id === theoremId));
   const [propertyPanel, setPropertyPanel] = useState<"proof" | "corollary" | null>(
-    () => block.proofs?.length ? "proof" : null,
+    () => topic.id === "determinants" ? null : block.proofs?.length ? "proof" : null,
   );
 
   const toggleSaved = () => {
@@ -207,7 +208,9 @@ function ContentCard({
       className={
         "content-block kind-" +
         block.kind +
-        (academyBlock ? " academy-content-block" : "")
+        (academyBlock ? " academy-content-block" : "") +
+        ((block.kind === "example" || block.kind === "solution") ? " example-showcase-block" : "") +
+        (topic.id === "matrices" && (block.kind === "example" || block.kind === "solution") ? " matrix-example-block" : "")
       }
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -233,6 +236,8 @@ function ContentCard({
           )}
         </div>
         <p><RichMatrixText text={block.body} /></p>
+
+        {block.matrixOperation && <MatrixOperationScene visual={block.matrixOperation} />}
 
         {block.formula && (
           <div className="formula-box">
@@ -348,7 +353,7 @@ function ContentCard({
                 >
                   {block.proofs.map((proof, proofIndex) => (
                     <article key={proof.label + proofIndex}>
-                      <div className="property-panel-label">ДОКАЗАТЕЛЬСТВО {proofIndex + 1}</div>
+                      <div className="property-panel-label">ДОКАЗАТЕЛЬСТВО</div>
                       <h4>{proof.label}</h4>
                       <p><RichMatrixText text={proof.body} /></p>
                       {proof.formula && (
@@ -358,6 +363,26 @@ function ContentCard({
                       )}
                     </article>
                   ))}
+
+                  {block.workedExamples?.length ? (
+                    <div className="property-proof-examples">
+                      <div className="property-panel-label">ПРИМЕРЫ</div>
+                      <div className="property-proof-example-grid">
+                        {block.workedExamples.map((example, exampleIndex) => (
+                          <article className="property-proof-example" key={example.body + exampleIndex}>
+                            <span>ПРИМЕР {String(exampleIndex + 1).padStart(2, "0")}</span>
+                            {example.title ? <strong>{example.title}</strong> : null}
+                            <p><RichMatrixText text={example.body} /></p>
+                            {example.formula && (
+                              <div className="property-panel-formula">
+                                <BlockMath math={example.formula} />
+                              </div>
+                            )}
+                          </article>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
                 </motion.div>
               ) : null}
 
