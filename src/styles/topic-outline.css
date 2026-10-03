@@ -31,7 +31,7 @@
   padding:8px 10px 8px 0;
   color:var(--muted);
   background:linear-gradient(90deg,var(--bg) 72%,transparent);
-  font:700 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  font:700 var(--font-xs)/1 var(--font-mono);
   letter-spacing:.11em;
 }
 
@@ -47,7 +47,7 @@
   border-radius:10px;
   background:color-mix(in srgb,var(--surface) 92%,transparent);
   color:var(--muted);
-  font-size:14px;
+  font-size:var(--font-sm);
   font-weight:650;
   white-space:nowrap;
   cursor:pointer;
@@ -61,7 +61,7 @@
 
 .topic-outline button>span{
   color:var(--accent);
-  font:700 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  font:700 var(--font-xs)/1 var(--font-mono);
 }
 
 .topic-outline button:hover{
@@ -108,7 +108,7 @@
   .topic-outline button{
     min-height:36px;
     padding-inline:10px;
-    font-size:13px;
+    font-size:var(--font-xs);
   }
 
   .lesson-block-anchor{
