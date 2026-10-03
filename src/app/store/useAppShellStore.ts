@@ -7,8 +7,10 @@ type BooleanSetter = boolean | ((current: boolean) => boolean);
 interface AppShellState {
   sidebarOpen: boolean;
   sidebarCollapsed: boolean;
+  readingFocusMode: boolean;
   setSidebarOpen: (next: BooleanSetter) => void;
   setSidebarCollapsed: (next: BooleanSetter) => void;
+  setReadingFocusMode: (next: BooleanSetter) => void;
 }
 
 function readSidebarCollapsed() {
@@ -30,6 +32,7 @@ function persistSidebarCollapsed(value: boolean) {
 export const useAppShellStore = create<AppShellState>((set) => ({
   sidebarOpen: false,
   sidebarCollapsed: readSidebarCollapsed(),
+  readingFocusMode: false,
   setSidebarOpen: (next) =>
     set((state) => ({
       sidebarOpen: typeof next === "function" ? next(state.sidebarOpen) : next,
@@ -41,4 +44,9 @@ export const useAppShellStore = create<AppShellState>((set) => ({
       persistSidebarCollapsed(sidebarCollapsed);
       return { sidebarCollapsed };
     }),
+  setReadingFocusMode: (next) =>
+    set((state) => ({
+      readingFocusMode:
+        typeof next === "function" ? next(state.readingFocusMode) : next,
+    })),
 }));

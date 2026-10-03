@@ -159,8 +159,10 @@ export default function App() {
   const [route, setRoute] = useState(routeFromHash);
   const sidebarOpen = useAppShellStore((state) => state.sidebarOpen);
   const sidebarCollapsed = useAppShellStore((state) => state.sidebarCollapsed);
+  const readingFocusMode = useAppShellStore((state) => state.readingFocusMode);
   const setSidebarOpen = useAppShellStore((state) => state.setSidebarOpen);
   const setSidebarCollapsed = useAppShellStore((state) => state.setSidebarCollapsed);
+  const setReadingFocusMode = useAppShellStore((state) => state.setReadingFocusMode);
   const [learningVersion, setLearningVersion] = useState(0);
   const [savedTopicIds, setSavedTopicIds] = useState(loadSavedTopicIds);
   const [lastTopicId, setLastTopicId] = useState<string | null>(() => {
@@ -242,9 +244,13 @@ export default function App() {
       }
 
       const next = routeFromHash();
+      const routeChanged = next !== routeRef.current;
       setRoute(next);
       routeRef.current = next;
       setSidebarOpen(false);
+      if (routeChanged) {
+        setReadingFocusMode(false);
+      }
 
       window.requestAnimationFrame(() => {
         const y = positions[next] ?? 0;
@@ -324,6 +330,17 @@ export default function App() {
       scheduleTopbarHide(1200);
     }
   }, [route]);
+  useEffect(() => {
+    if (readingFocusMode) {
+      setSidebarOpen(false);
+      clearTopbarHideTimer();
+      setTopbarVisible(false);
+      return;
+    }
+
+    revealTopbar();
+  }, [readingFocusMode, setSidebarOpen]);
+
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -404,12 +421,30 @@ export default function App() {
               : "home";
 
   return (
-    <div className={"app-shell " + (sidebarCollapsed ? "sidebar-collapsed" : "")}>
+    <div
+      className={
+        "app-shell " +
+        (sidebarCollapsed ? "sidebar-collapsed " : "") +
+        (readingFocusMode && topic && !topic.isStub ? "reading-focus-mode" : "")
+      }
+    >
       <ScrollProgress />
       <BackToTop />
       <MathBackdrop />
       <CustomCursor />
       <BackgroundMusicPlayer />
+
+      {readingFocusMode && topic && !topic.isStub && (
+        <button
+          type="button"
+          className="reading-focus-exit"
+          onClick={() => setReadingFocusMode(false)}
+          title="Вернуть обычный интерфейс"
+        >
+          <span aria-hidden="true">×</span>
+          <strong>Выйти из фокуса</strong>
+        </button>
+      )}
 
       <aside className={"sidebar " + (sidebarOpen ? "open " : "") + (sidebarCollapsed ? "collapsed" : "")}>
         <button
