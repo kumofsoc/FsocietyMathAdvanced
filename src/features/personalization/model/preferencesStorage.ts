@@ -16,6 +16,7 @@ export const MOTION_KEY = "fsociety-motion-profile-v1";
 export const CURSOR_KEY = "fsociety-cursor-style-v1";
 export const SIDEBAR_COLLAPSED_KEY = "fsociety-sidebar-collapsed-v1";
 export const PREFERENCES_EVENT = "visualmath:preferences-change";
+export const PREFERENCES_DIRTY_KEY = "visualmath-preferences-dirty-v1";
 
 export const DEFAULT_THEME_TOKENS: ThemeTokensDto = {
   bg: "#050507",
@@ -127,10 +128,15 @@ export function isDefaultPreferences(value: PreferencesDto) {
   return preferencesEqual(value, DEFAULT_PREFERENCES);
 }
 
-export function emitPreferencesChange() {
+export function emitPreferencesChange(markDirty = true) {
+  if (markDirty) writeLocalStorage(PREFERENCES_DIRTY_KEY, "1");
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent(PREFERENCES_EVENT));
   }
+}
+
+export function localPreferencesAreDirty() {
+  return readLocalStorage(PREFERENCES_DIRTY_KEY) === "1";
 }
 
 export function hydrateLocalPreferences(value: PreferencesDto) {
@@ -151,7 +157,8 @@ export function hydrateLocalPreferences(value: PreferencesDto) {
   ];
 
   if (writes.every(Boolean) && typeof window !== "undefined") {
-    emitPreferencesChange();
+    writeLocalStorage(PREFERENCES_DIRTY_KEY, "0");
+    emitPreferencesChange(false);
     window.dispatchEvent(new CustomEvent("fsociety-cursor-change"));
     window.dispatchEvent(new CustomEvent("fsociety-motion-change"));
   }
