@@ -1,8 +1,8 @@
 :root{
-  --readable-xs:13px;
-  --readable-sm:14px;
-  --readable-body:16px;
-  --readable-copy:17px;
+  --readable-xs:14px;
+  --readable-sm:15px;
+  --readable-body:17px;
+  --readable-copy:18px;
 }
 
 body{
@@ -149,10 +149,10 @@ body{
 
 @media(min-width:1600px){
   :root{
-    --readable-xs:13px;
-    --readable-sm:14px;
-    --readable-body:16px;
-    --readable-copy:17px;
+    --readable-xs:14px;
+    --readable-sm:15px;
+    --readable-body:17px;
+    --readable-copy:18px;
   }
 
   .topic-page{
@@ -190,10 +190,10 @@ body{
 
 @media(max-width:700px){
   :root{
-    --readable-xs:13px;
-    --readable-sm:14px;
+    --readable-xs:14px;
+    --readable-sm:15px;
     --readable-body:16px;
-    --readable-copy:16px;
+    --readable-copy:17px;
   }
 
   .content-block p,
@@ -202,4 +202,30 @@ body{
   .practice-card p{
     max-width:none;
   }
+}
+
+
+/* Explicit floor for places that historically used 7–11px labels. */
+:where(
+  .review-toolbar,
+  .review-topic,
+  .knowledge-map-page,
+  .history-dock,
+  .topbar,
+  .sidebar
+) :where(span,small,em,kbd,button,label){
+  text-rendering:optimizeLegibility;
+}
+
+:where(
+  .review-topic>header span,
+  .review-statements span,
+  .review-formulas span,
+  .knowledge-map-breadcrumb,
+  .knowledge-map-search label,
+  .knowledge-edge-modes>span,
+  .knowledge-map-legend span,
+  .map-focus-toolbar span
+){
+  font-size:var(--readable-xs)!important;
 }
