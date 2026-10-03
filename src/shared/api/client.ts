@@ -1,3 +1,4 @@
+import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from "@/shared/lib/browserStorage";
 import type {
   ApiEnvelope,
   ApiErrorPayload,
@@ -29,12 +30,12 @@ export function isBackendConfigured() {
 }
 
 export function setAccessToken(token: string | null) {
-  if (token) localStorage.setItem(TOKEN_KEY, token);
-  else localStorage.removeItem(TOKEN_KEY);
+  if (token) setLocalStorageItem(TOKEN_KEY, token);
+  else removeLocalStorageItem(TOKEN_KEY);
 }
 
 function getAccessToken() {
-  return localStorage.getItem(TOKEN_KEY);
+  return getLocalStorageItem(TOKEN_KEY);
 }
 
 async function request<T>(
