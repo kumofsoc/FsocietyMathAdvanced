@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   loadReadingWidth,
   READING_WIDTH_KEY,
@@ -6,6 +6,8 @@ import {
 } from "./readingWidth";
 
 describe("reading width preference", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
   beforeEach(() => {
     const store = new Map<string, string>();
     vi.stubGlobal("localStorage", {
