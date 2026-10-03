@@ -319,6 +319,9 @@ export function CommandPalette() {
                 <button onClick={() => { window.location.hash = "review"; setOpen(false); }}>
                   ≡ Краткий конспект
                 </button>
+                <button onClick={() => { window.location.hash = "marks"; setOpen(false); }}>
+                  ◆ Мои отметки
+                </button>
                 <button onClick={() => { window.location.hash = "home"; setOpen(false); }}>
                   ∑ Главная
                 </button>
