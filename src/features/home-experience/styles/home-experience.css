@@ -813,6 +813,7 @@
     color-mix(in srgb,var(--surface) 65%,transparent);
   background-size:38px 38px;
 }
+.math-field-deferred-anchor{position:absolute;inset:0;min-width:0;min-height:0}
 .math-field-fallback i { position:absolute;border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:50%; }
 .math-field-fallback i:nth-child(1){inset:10%;}
 .math-field-fallback i:nth-child(2){inset:24%;transform:rotate(54deg);border-color:color-mix(in srgb,var(--accent2) 52%,transparent);}
