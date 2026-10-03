@@ -23,7 +23,7 @@ import {
   THEORY_CHECKPOINT_THRESHOLD,
 } from "@/features/learning/model/progress";
 import type { BlockKind, ContentBlock, Topic } from "@/entities/course/model/types";
-import { RichMatrixText } from "@/visualizations/linear/MatrixNotation";
+import { MatrixExampleStrip, RichMatrixText } from "@/visualizations/linear/MatrixNotation";
 import { MatrixOperationScene } from "@/visualizations/linear/MatrixOperationScene";
 import { toLayeredTopic } from "@/entities/course/model/learning-architecture/adapter";
 import { linearFoundationBlueprints } from "@/data/learning-architecture/linear-foundations";
@@ -236,6 +236,12 @@ function ContentCard({
           )}
         </div>
         {!block.matrixOperation && <p><RichMatrixText text={block.body} /></p>}
+
+        {topic.id === "matrices" &&
+          !block.matrixOperation &&
+          (block.kind === "example" || block.kind === "solution") && (
+            <MatrixExampleStrip text={block.body} />
+          )}
 
         {block.matrixOperation && <MatrixOperationScene visual={block.matrixOperation} />}
 
