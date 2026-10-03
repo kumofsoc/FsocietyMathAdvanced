@@ -94,15 +94,16 @@ async function migrateLegacyTrack(db: IDBDatabase) {
     request.onsuccess = () => resolve((request.result as LegacyBackgroundTrackRecord | undefined) ?? null);
     request.onerror = () => reject(request.error);
   });
-  if (!legacy?.blob) return;
+  const legacyBlob = legacy?.blob;
+  if (!legacyBlob) return;
 
   await new Promise<void>((resolve, reject) => {
     const transaction = db.transaction(PLAYLIST_STORE_NAME, "readwrite");
     transaction.objectStore(PLAYLIST_STORE_NAME).put({
       id: "legacy-" + (legacy.updatedAt || Date.now()),
       name: legacy.name || "background-track",
-      type: legacy.type || legacy.blob.type || "audio/mpeg",
-      blob: legacy.blob,
+      type: legacy.type || legacyBlob.type || "audio/mpeg",
+      blob: legacyBlob,
       updatedAt: legacy.updatedAt || Date.now(),
     } satisfies StoredBackgroundTrack);
     transaction.oncomplete = () => resolve();
