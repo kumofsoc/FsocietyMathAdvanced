@@ -5101,7 +5101,7 @@ export const topics: Record<string, Topic> = {
         kind: "geometry",
         title: "Физический смысл",
         body: "Если v(t) — скорость, то интеграл скорости по времени даёт изменение координаты. Если F(x) — переменная сила вдоль оси, интеграл силы по пути даёт работу.",
-        formula: String.raw`\Delta s=\int_{t_1}^{t_2}v(t)dt,qquad A=\int_a^bF(x)dx`,
+        formula: String.raw`\Delta s=\int_{t_1}^{t_2}v(t)dt,\\qquad A=\int_a^bF(x)dx`,
       },
       {
         kind: "property",
