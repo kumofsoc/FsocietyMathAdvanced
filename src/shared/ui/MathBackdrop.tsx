@@ -1,12 +1,18 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import type { Mesh } from "three";
-import { MOTION_CHANGE_EVENT } from "@/features/home-experience/model/homeExperience";
+import { MOTION_CHANGE_EVENT, parseMotionProfile } from "@/features/home-experience/model/homeExperience";
 
 function backdropMotionEnabled() {
   if (typeof window === "undefined") return false;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
-  return document.documentElement.dataset.motionProfile !== "off";
+  if (window.matchMedia("(max-width: 820px)").matches) return false;
+  if (window.matchMedia("(pointer: coarse)").matches) return false;
+
+  const profile = parseMotionProfile(
+    document.documentElement.dataset.motionProfile ?? null,
+  );
+  return profile === "full" || profile === "balanced";
 }
 
 function ScrollGeometry() {
