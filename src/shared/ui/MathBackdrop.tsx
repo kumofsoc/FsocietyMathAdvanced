@@ -1,6 +1,7 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import type { Mesh } from "three";
+import { MOTION_CHANGE_EVENT } from "@/features/home-experience/model/homeExperience";
 
 function backdropMotionEnabled() {
   if (typeof window === "undefined") return false;
@@ -51,11 +52,11 @@ export function MathBackdrop() {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     const refresh = () => setEnabled(backdropMotionEnabled());
 
-    window.addEventListener("fsociety-motion-change", refresh);
+    window.addEventListener(MOTION_CHANGE_EVENT, refresh);
     media.addEventListener("change", refresh);
 
     return () => {
-      window.removeEventListener("fsociety-motion-change", refresh);
+      window.removeEventListener(MOTION_CHANGE_EVENT, refresh);
       media.removeEventListener("change", refresh);
     };
   }, []);
