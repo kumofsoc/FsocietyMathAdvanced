@@ -28,7 +28,7 @@ export function saveSet(key: string, value: Set<string>) {
   try {
     setLocalStorageItem(key, JSON.stringify([...value]));
   } catch (error) {
-    console.warn("[FsocietyMath] could not persist learning set", error);
+    console.warn("[VisualMath] could not persist learning set", error);
   }
   window.dispatchEvent(new CustomEvent(LEARNING_EVENT));
 }
@@ -45,7 +45,7 @@ export function saveTheorems(value: SavedTheorem[]) {
   try {
     setLocalStorageItem(SAVED_THEOREMS_KEY, JSON.stringify(value));
   } catch (error) {
-    console.warn("[FsocietyMath] could not persist saved theorems", error);
+    console.warn("[VisualMath] could not persist saved theorems", error);
   }
   window.dispatchEvent(new CustomEvent(LEARNING_EVENT));
 }
