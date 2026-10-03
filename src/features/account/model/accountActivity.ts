@@ -10,12 +10,17 @@ export type AccountActivity = {
 };
 
 export async function loadAccountActivity(year: number): Promise<AccountActivity> {
-  const [heatmap, stats] = await Promise.all([
+  const [current, previous, stats] = await Promise.all([
     api.activity.heatmap(year),
+    api.activity.heatmap(year - 1),
     api.activity.stats(28),
   ]);
+
+  const byDate = new Map<string, ActivityHeatmapDayDto>();
+  [...previous.days, ...current.days].forEach((day) => byDate.set(day.date, day));
+
   return {
-    days: heatmap.days,
+    days: [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date)),
     stats,
   };
 }
