@@ -1,11 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { practiceByTopic } from "@/data/practice";
 
-function normalized(value: string) {
+function normalizedChoice(value: string) {
   return value
     .trim()
-    .toLowerCase()
-    .replace(/,/g, ".")
     .replace(/[−–—]/g, "-")
     .replace(/\s+/g, " ");
 }
@@ -29,12 +27,12 @@ describe("practice bank integrity", () => {
             issues.push(prefix + ": choice task needs at least two options");
           }
 
-          const normalizedOptions = options.map(normalized);
+          const normalizedOptions = options.map(normalizedChoice);
           if (new Set(normalizedOptions).size !== normalizedOptions.length) {
             issues.push(prefix + ": duplicate choice options");
           }
 
-          if (!normalizedOptions.includes(normalized(task.answer))) {
+          if (!normalizedOptions.includes(normalizedChoice(task.answer))) {
             issues.push(prefix + ": correct answer is missing from options");
           }
         }
