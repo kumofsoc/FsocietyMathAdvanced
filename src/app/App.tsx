@@ -348,7 +348,6 @@ export default function App() {
       <ScrollProgress />
       <MathBackdrop />
       <CustomCursor />
-      <HistoryDock />
       <BackgroundMusicPlayer />
 
       <aside className={"sidebar " + (sidebarOpen ? "open " : "") + (sidebarCollapsed ? "collapsed" : "")}>
@@ -458,6 +457,7 @@ export default function App() {
           >
             ☰
           </button>
+          <HistoryDock />
           <CommandPalette />
           <div className="topbar-spacer" />
           <div className="topbar-course-progress" title="Общий прогресс по отслеживаемым разделам">
