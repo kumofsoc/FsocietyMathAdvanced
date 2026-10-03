@@ -6262,7 +6262,7 @@ export const topics: Record<string, Topic> = {
     "summary": "Ортогональное разложение периодической функции по синусам и косинусам, коэффициенты Фурье, энергия и смысл гармоник.",
     "prerequisites": [
       "euclidean-functions",
-      "def-integral",
+      "newton-leibniz",
       "numeric-series"
     ],
     "blocks": [
