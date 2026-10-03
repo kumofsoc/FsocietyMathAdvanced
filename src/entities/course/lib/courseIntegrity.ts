@@ -15,16 +15,33 @@ export interface CourseIntegrityIssue {
     | "practice-meta"
     | "planned-prerequisite"
     | "practice-missing"
-    | "search-index";
+    | "search-index"
+    | "topic-orphan"
+    | "chapter-duplicate-topic"
+    | "prerequisite-cycle"
+    | "practice-meta-orphan"
+    | "search-index-extra";
   message: string;
 }
 
 export function validateCourseIntegrity(): CourseIntegrityIssue[] {
   const issues: CourseIntegrityIssue[] = [];
   const topicIds = new Set(Object.keys(topics));
+  const chapterOwners = new Map<string, string>();
 
   for (const chapter of chapters) {
     for (const topicId of chapter.topicIds) {
+      const previousOwner = chapterOwners.get(topicId);
+      if (previousOwner) {
+        issues.push({
+          kind: "chapter-duplicate-topic",
+          message:
+            `Тема ${topicId} одновременно указана в главах ${previousOwner} и ${chapter.id}.`,
+        });
+      } else {
+        chapterOwners.set(topicId, chapter.id);
+      }
+
       const topic = topics[topicId];
       if (!topic) {
         issues.push({
@@ -44,6 +61,45 @@ export function validateCourseIntegrity(): CourseIntegrityIssue[] {
       }
     }
   }
+
+
+  for (const topicId of topicIds) {
+    if (!chapterOwners.has(topicId)) {
+      issues.push({
+        kind: "topic-orphan",
+        message: `Тема ${topicId} существует в course.ts, но не включена ни в одну главу.`,
+      });
+    }
+  }
+
+  const visitState = new Map<string, 0 | 1 | 2>();
+  const stack: string[] = [];
+
+  const visitPrerequisites = (topicId: string) => {
+    const state = visitState.get(topicId) ?? 0;
+    if (state === 2) return;
+    if (state === 1) {
+      const cycleStart = stack.lastIndexOf(topicId);
+      const cycle = [...stack.slice(Math.max(0, cycleStart)), topicId];
+      issues.push({
+        kind: "prerequisite-cycle",
+        message: `Цикл prerequisite: ${cycle.join(" → ")}.`,
+      });
+      return;
+    }
+
+    visitState.set(topicId, 1);
+    stack.push(topicId);
+
+    for (const prerequisite of topics[topicId]?.prerequisites ?? []) {
+      if (topicIds.has(prerequisite)) visitPrerequisites(prerequisite);
+    }
+
+    stack.pop();
+    visitState.set(topicId, 2);
+  };
+
+  for (const topicId of topicIds) visitPrerequisites(topicId);
 
   for (const topic of Object.values(topics)) {
     const meta = topicMeta[topic.id];
@@ -117,6 +173,23 @@ export function validateCourseIntegrity(): CourseIntegrityIssue[] {
     });
   }
 
+  chapters.forEach((chapter, index) => {
+    const metaChapter = metaChapters[index];
+    if (
+      !metaChapter ||
+      metaChapter.id !== chapter.id ||
+      metaChapter.number !== chapter.number ||
+      metaChapter.title !== chapter.title ||
+      metaChapter.disciplineId !== chapter.disciplineId ||
+      JSON.stringify(metaChapter.topicIds) !== JSON.stringify(chapter.topicIds)
+    ) {
+      issues.push({
+        kind: "course-meta",
+        message: `Metadata главы ${chapter.id} устарела относительно course.ts.`,
+      });
+    }
+  });
+
   for (const topic of Object.values(topics)) {
     const meta = topicMeta[topic.id];
     if (!meta) continue;
@@ -142,6 +215,37 @@ export function validateCourseIntegrity(): CourseIntegrityIssue[] {
         kind: "practice-meta",
         message: `practiceMeta.ts устарел для темы ${topicId}.`,
       });
+    }
+  }
+
+  for (const topicId of Object.keys(practiceTaskIdsByTopic)) {
+    if (!(topicId in practiceByTopic)) {
+      issues.push({
+        kind: "practice-meta-orphan",
+        message: `practiceMeta.ts содержит лишнюю запись для темы ${topicId}.`,
+      });
+    }
+  }
+
+  const searchKeys = new Set<string>();
+  for (const entry of courseSearchIndex) {
+    const topic = topics[entry.topicId];
+    const key = entry.topicId + "::" + entry.index;
+
+    if (!topic || topicMeta[entry.topicId]?.isStub || !topic.blocks[entry.index]) {
+      issues.push({
+        kind: "search-index-extra",
+        message: `Deep search index содержит лишнюю запись ${key}.`,
+      });
+    }
+
+    if (searchKeys.has(key)) {
+      issues.push({
+        kind: "search-index-extra",
+        message: `Deep search index содержит дубликат ${key}.`,
+      });
+    } else {
+      searchKeys.add(key);
     }
   }
 
