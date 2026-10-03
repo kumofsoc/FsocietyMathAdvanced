@@ -8,7 +8,7 @@ export type SidebarTopicTocItem = {
   key: string;
   label: string;
   blockIndex: number;
-  status: "unread" | "partial" | "complete";
+  status: "unread" | "partial" | "complete" | null;
 };
 
 type SidebarTopicTocState = {
