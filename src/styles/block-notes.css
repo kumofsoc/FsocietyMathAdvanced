@@ -1,0 +1,213 @@
+/* Personal notes attached to exact topic blocks. */
+
+.block-note-button{
+  min-height:32px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:0 9px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:color-mix(in srgb,var(--surface) 92%,transparent);
+  color:var(--muted);
+  font-size:var(--font-xs);
+  font-weight:700;
+  cursor:pointer;
+  transition:
+    color .16s ease,
+    border-color .16s ease,
+    background .16s ease,
+    transform .16s ease;
+}
+
+.block-note-button>span{
+  color:var(--accent);
+  font:800 var(--font-xs)/1 var(--font-mono);
+}
+
+.block-note-button>strong{
+  font-size:var(--font-xs);
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.block-note-button:hover,
+.block-note-button:focus-visible,
+.block-note-button.active{
+  color:var(--text);
+  border-color:color-mix(in srgb,var(--accent) 52%,var(--border));
+  background:color-mix(in srgb,var(--accent) 7%,var(--surface));
+  transform:translateY(-1px);
+}
+
+.block-note-button.has-note{
+  color:var(--text);
+  border-color:color-mix(in srgb,var(--formula) 52%,var(--border));
+  background:color-mix(in srgb,var(--formula) 7%,var(--surface));
+}
+
+.block-note-button.has-note>span{
+  color:var(--formula);
+  font-size:10px;
+}
+
+.block-note-panel{
+  overflow:hidden;
+  margin:10px 0 18px;
+  border:1px solid color-mix(in srgb,var(--accent) 30%,var(--border));
+  border-radius:12px;
+  background:
+    linear-gradient(
+      120deg,
+      color-mix(in srgb,var(--accent) 5%,transparent),
+      transparent 56%
+    ),
+    color-mix(in srgb,var(--elevated) 88%,transparent);
+}
+
+.block-note-panel.has-note{
+  border-color:color-mix(in srgb,var(--formula) 30%,var(--border));
+}
+
+.block-note-panel>header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:10px 12px;
+  border-bottom:1px solid var(--border);
+}
+
+.block-note-panel>header>div{
+  min-width:0;
+  display:grid;
+  gap:4px;
+}
+
+.block-note-panel>header span{
+  color:var(--accent);
+  font:750 var(--font-xs)/1 var(--font-mono);
+  letter-spacing:.1em;
+}
+
+.block-note-panel.has-note>header span{
+  color:var(--formula);
+}
+
+.block-note-panel>header strong{
+  min-width:0;
+  overflow:hidden;
+  color:var(--text);
+  font-size:var(--font-sm);
+  font-weight:700;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.block-note-panel>header small{
+  flex:0 0 auto;
+  color:var(--muted);
+  font-size:var(--font-xs);
+}
+
+.block-note-panel textarea{
+  width:100%;
+  min-height:116px;
+  display:block;
+  resize:vertical;
+  padding:13px 14px;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:var(--text);
+  font:500 var(--font-body)/1.68 inherit;
+}
+
+.block-note-panel textarea::placeholder{
+  color:color-mix(in srgb,var(--muted) 78%,transparent);
+}
+
+.block-note-panel textarea:focus{
+  background:color-mix(in srgb,var(--accent) 3%,transparent);
+}
+
+.block-note-panel>footer{
+  min-height:40px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:7px 10px 7px 12px;
+  border-top:1px solid var(--border);
+}
+
+.block-note-panel>footer>span{
+  color:var(--muted);
+  font-size:var(--font-xs);
+}
+
+.block-note-panel>footer>button{
+  min-height:30px;
+  padding:0 9px;
+  border:1px solid color-mix(in srgb,#ff7a83 28%,var(--border));
+  border-radius:8px;
+  background:transparent;
+  color:color-mix(in srgb,#ff7a83 82%,var(--text));
+  font-size:var(--font-xs);
+  font-weight:700;
+  cursor:pointer;
+}
+
+.block-note-panel>footer>button:hover,
+.block-note-panel>footer>button:focus-visible{
+  border-color:#ff7a83;
+  background:color-mix(in srgb,#ff7a83 7%,transparent);
+}
+
+@media(max-width:620px){
+  .block-note-button{
+    width:32px;
+    min-width:32px;
+    padding:0;
+  }
+
+  .block-note-button>strong{
+    display:none;
+  }
+
+  .block-note-panel>header{
+    align-items:flex-start;
+  }
+
+  .block-note-panel>header small{
+    max-width:132px;
+    text-align:right;
+  }
+
+  .block-note-panel textarea{
+    min-height:132px;
+  }
+}
+
+@media(max-width:460px){
+  .block-note-panel>header{
+    display:grid;
+  }
+
+  .block-note-panel>header small{
+    max-width:none;
+    text-align:left;
+  }
+
+  .block-note-panel>footer{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .block-note-button{
+    transition:none;
+  }
+}
