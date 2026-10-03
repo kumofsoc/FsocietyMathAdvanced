@@ -9,6 +9,11 @@ import {
 } from "@/lib/backgroundAudio";
 
 const MAX_LOCAL_TRACK_BYTES = 120 * 1024 * 1024;
+const AUDIO_FILE_EXTENSION = /\.(?:mp3|wav|ogg|oga|m4a|aac|flac|webm|opus)$/i;
+
+function isAudioFile(file: File) {
+  return file.type.startsWith("audio/") || AUDIO_FILE_EXTENSION.test(file.name);
+}
 
 const EMPTY_STATE: BackgroundMusicState = {
   tracks: [],
@@ -61,14 +66,14 @@ export function MusicSettings() {
 
   const addFiles = async (files: FileList | null) => {
     if (!files?.length) return;
-    const accepted = [...files].filter((file) => file.type.startsWith("audio/"));
+    const accepted = [...files].filter(isAudioFile);
     const oversized = accepted.find((file) => file.size > MAX_LOCAL_TRACK_BYTES);
     if (oversized) {
       setError(`${oversized.name}: максимум 120 MB на трек.`);
       return;
     }
     if (accepted.length !== files.length) {
-      setError("Часть файлов пропущена: поддерживаются только аудиофайлы.");
+      setError("Часть файлов пропущена: поддерживаются аудиофайлы MP3, WAV, OGG, M4A/AAC, FLAC, WebM и Opus.");
     } else {
       setError(null);
     }
