@@ -45,11 +45,11 @@ function DeferredMathField({ tier }: { tier: HomeMotionTier }) {
   }, [nearViewport, tier]);
 
   if (tier !== "cinematic" || !nearViewport) {
-    return <div ref={anchor}><FieldFallback /></div>;
+    return <div ref={anchor} className="math-field-deferred-anchor"><FieldFallback /></div>;
   }
 
   return (
-    <div ref={anchor}>
+    <div ref={anchor} className="math-field-deferred-anchor">
       <Suspense fallback={<FieldFallback />}>
         <HomeMathField3D tier={tier} />
       </Suspense>
