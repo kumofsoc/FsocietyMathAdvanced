@@ -355,3 +355,63 @@
   .map-focus-toolbar button{min-height:38px;font-size:13px}
   .map-focus-exit kbd{display:none}
 }
+
+
+/* ===== Map typography floor ===== */
+.knowledge-map-header .eyebrow,
+.knowledge-map-summary span,
+.knowledge-map-tabs:before,
+.knowledge-map-tabs button span,
+.knowledge-map-search>label,
+.knowledge-edge-modes>span,
+.knowledge-inspector-kicker,
+.knowledge-inspector-progress>span,
+.knowledge-inspector-section>span,
+.knowledge-inspector-empty>span{
+  font-size:13px;
+  line-height:1.35;
+}
+.knowledge-map-header p,
+.knowledge-map-inspector>p{
+  font-size:16px;
+  line-height:1.7;
+}
+.knowledge-map-header-actions button,
+.knowledge-map-tabs button,
+.knowledge-edge-modes button,
+.knowledge-map-breadcrumb button{
+  font-size:14px;
+}
+.knowledge-map-search input{
+  min-height:44px;
+  font-size:15px;
+}
+.knowledge-map-search-results small,
+.knowledge-map-search-results em{
+  font-size:13px;
+}
+.knowledge-map-search-results strong{
+  font-size:15px;
+}
+.knowledge-map-legend span,
+.knowledge-map-breadcrumb strong,
+.knowledge-map-breadcrumb em,
+.knowledge-inspector-section>em,
+.knowledge-inspector-note,
+.knowledge-inspector-empty>small{
+  font-size:14px;
+}
+.knowledge-inspector-links small{
+  font-size:13px;
+}
+.knowledge-inspector-links strong,
+.knowledge-inspector-empty>strong{
+  font-size:15px;
+}
+.knowledge-inspector-primary{
+  min-height:52px;
+  font-size:14px;
+}
+.legend-progress:after{
+  font-size:11px;
+}
