@@ -1,0 +1,76 @@
+import type { PracticeTask } from "@/entities/course/model/types";
+
+const tasks: PracticeTask[] = [
+    {
+      id: "der-001",
+      title: "По определению",
+      prompt: "Для f(x)=x² чему равна f′(3)?",
+      type: "number",
+      answer: "6",
+      difficulty: "base",
+    },
+    {
+      id: "der-002",
+      title: "Касательная",
+      prompt: "f(x)=x², x₀=1. Выбери уравнение касательной.",
+      type: "choice",
+      answer: "y−1=2(x−1)",
+      options: ["y−1=2(x−1)", "y−1=x−1", "y=2", "y−1=−2(x−1)"],
+      difficulty: "base",
+    },
+    {
+      id: "der-003",
+      title: "Произведение",
+      prompt: "Найди производную x²·sin x.",
+      type: "choice",
+      answer: "2x sin x+x² cos x",
+      options: ["2x sin x+x² cos x", "2x cos x", "x² cos x", "2x sin x−x² cos x"],
+      difficulty: "base",
+    },
+    {
+      id: "der-004",
+      title: "Сложная функция",
+      prompt: "Найди производную cos(3x).",
+      type: "choice",
+      answer: "−3 sin(3x)",
+      options: ["−3 sin(3x)", "−sin(3x)", "3 cos(3x)", "sin(3x)"],
+      difficulty: "base",
+    },
+    {
+      id: "der-005",
+      title: "Неявное дифференцирование",
+      prompt: "Для x²+y²=1 выбери y′.",
+      type: "choice",
+      answer: "−x/y",
+      options: ["−x/y", "x/y", "−y/x", "2x+2y"],
+      difficulty: "medium",
+    },
+    {
+      id: "der-006",
+      title: "Параметрическая функция",
+      prompt: "x=t³, y=t². Чему равно dy/dx при t≠0?",
+      type: "choice",
+      answer: "2/(3t)",
+      options: ["2/(3t)", "3t/2", "2t", "3t²"],
+      difficulty: "medium",
+    },
+    {
+      id: "der-007",
+      title: "Логарифмическое дифференцирование",
+      prompt: "Как выглядит производная y=u(x)^v(x)?",
+      type: "choice",
+      answer: "u^v(v′ln u+v·u′/u)",
+      options: ["u^v(v′ln u+v·u′/u)", "vu^(v−1)", "u′v′", "u^v ln v"],
+      difficulty: "medium",
+    },
+    {
+      id: "der-008",
+      title: "Вторая производная",
+      prompt: "Если S(t)=t³−2t, чему равно ускорение S″(2)?",
+      type: "number",
+      answer: "12",
+      difficulty: "medium",
+    },
+  ];
+
+export default tasks;

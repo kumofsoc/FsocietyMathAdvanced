@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { practiceByTopic } from "@/data/practice";
+import { useEffect, useMemo, useState } from "react";
+import { loadPracticeForTopic } from "@/data/practice/loaders";
 import { loadSet, saveSet, SOLVED_KEY } from "@/lib/learning";
 import type { PracticeTask } from "@/types/course";
 import { RichMatrixText } from "@/visualizations/linear/MatrixNotation";
@@ -245,7 +245,56 @@ function TaskCard({
 }
 
 export function PracticePanel({ topicId }: { topicId: string }) {
-  const tasks = practiceByTopic[topicId] ?? [];
+  const [tasks, setTasks] = useState<PracticeTask[] | null>(null);
+  const [loadError, setLoadError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setTasks(null);
+    setLoadError(false);
+
+    void loadPracticeForTopic(topicId)
+      .then((loaded) => {
+        if (!cancelled) setTasks(loaded);
+      })
+      .catch(() => {
+        if (!cancelled) setLoadError(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [topicId]);
+
+  if (loadError) {
+    return (
+      <section className="practice-panel practice-empty">
+        <div className="eyebrow">ПРАКТИКА / LOAD ERROR</div>
+        <h2>Не удалось загрузить задачи.</h2>
+        <button onClick={() => window.location.reload()}>Повторить</button>
+      </section>
+    );
+  }
+
+  if (!tasks) {
+    return (
+      <section className="practice-panel practice-empty" role="status">
+        <div className="eyebrow">ПРАКТИКА</div>
+        <h2>Загружаю задачи…</h2>
+      </section>
+    );
+  }
+
+  return <PracticePanelContent key={topicId} topicId={topicId} tasks={tasks} />;
+}
+
+function PracticePanelContent({
+  topicId,
+  tasks,
+}: {
+  topicId: string;
+  tasks: PracticeTask[];
+}) {
   const [solved, setSolved] = useState<Set<string>>(() => loadSet(SOLVED_KEY));
   const [difficulty, setDifficulty] = useState<DifficultyFilter>("all");
   const [skill, setSkill] = useState<SkillFilter>("all");
