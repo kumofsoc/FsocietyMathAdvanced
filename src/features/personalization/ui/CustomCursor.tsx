@@ -1,23 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { getLocalStorageItem } from "@/shared/lib/browserStorage";
 
-export const CURSOR_KEY = "fsociety-cursor-style-v1";
-export const CURSOR_EVENT = "fsociety-cursor-change";
-
-export type CursorMode = "native" | "halo" | "minimal" | "crosshair" | "comet";
+import { CURSOR_EVENT, CURSOR_KEY, parseCursorMode, type CursorMode } from "@/features/personalization/model/cursor";
 
 const CURSOR_ACTIVE_SELECTOR =
   "a,button,input,select,textarea,[role='button'],[data-cursor='active'],.react-flow__node";
-
-export function parseCursorMode(value: string | null): CursorMode {
-  return value === "native" ||
-    value === "halo" ||
-    value === "minimal" ||
-    value === "crosshair" ||
-    value === "comet"
-    ? value
-    : "halo";
-}
 
 function readCursorMode(): CursorMode {
   return parseCursorMode(getLocalStorageItem(CURSOR_KEY));
