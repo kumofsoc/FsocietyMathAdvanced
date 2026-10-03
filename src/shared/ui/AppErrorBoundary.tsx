@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { reportRuntimeError } from "@/shared/observability/runtimeTelemetry";
 
 interface Props {
   children: ReactNode;
@@ -16,7 +17,10 @@ export class AppErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("[VisualMath] render failure", error, info);
+    reportRuntimeError(error, {
+      source: "react-boundary",
+      componentStack: info.componentStack ?? undefined,
+    });
   }
 
   render() {
