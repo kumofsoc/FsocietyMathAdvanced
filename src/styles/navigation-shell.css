@@ -103,3 +103,87 @@
   .history-dock.history-dock-topbar button{min-width:40px;padding:0 6px}
   .history-dock.history-dock-topbar small{display:none}
 }
+
+
+/* Current location: compact breadcrumb + stronger active navigation. */
+.topbar-context{
+  min-width:0;
+  max-width:min(34vw,430px);
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:0 2px;
+  color:var(--muted);
+  white-space:nowrap;
+}
+.topbar-context>button{
+  flex:0 1 auto;
+  min-width:0;
+  max-width:180px;
+  overflow:hidden;
+  padding:4px 0;
+  border:0;
+  background:transparent;
+  color:var(--accent);
+  font-size:13px;
+  font-weight:700;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.topbar-context>button:hover{
+  color:var(--text);
+}
+.topbar-context>span{
+  flex:0 0 auto;
+  color:color-mix(in srgb,var(--muted) 55%,transparent);
+  font-size:13px;
+}
+.topbar-context>strong{
+  min-width:0;
+  overflow:hidden;
+  color:var(--text);
+  font-size:14px;
+  font-weight:650;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.sidebar-progress-item.current{
+  border-color:color-mix(in srgb,var(--accent) 62%,var(--border));
+  background:color-mix(in srgb,var(--accent) 8%,var(--elevated));
+  box-shadow:
+    inset 3px 0 0 var(--accent),
+    0 8px 26px color-mix(in srgb,var(--accent) 7%,transparent);
+}
+.sidebar-progress-item.current .sidebar-progress-number{
+  border-color:color-mix(in srgb,var(--accent) 65%,var(--border));
+  background:color-mix(in srgb,var(--accent) 10%,var(--surface));
+}
+.sidebar-progress-item.current .sidebar-progress-title-row strong{
+  color:var(--text);
+}
+
+.map-entry.active{
+  border-color:color-mix(in srgb,var(--accent) 56%,var(--border));
+  background:color-mix(in srgb,var(--accent) 8%,var(--elevated));
+  color:var(--text);
+  box-shadow:inset 2px 0 0 var(--accent);
+}
+
+@media(max-width:1180px){
+  .topbar-context{max-width:260px}
+  .topbar-context>button{max-width:110px}
+}
+@media(max-width:980px){
+  .topbar-context{
+    flex:1 1 auto;
+    max-width:none;
+  }
+  .topbar-context>button{display:none}
+  .topbar-context>span{display:none}
+  .topbar-context>strong{font-size:13px}
+}
+@media(max-width:680px){
+  .topbar-context{display:none}
+}
