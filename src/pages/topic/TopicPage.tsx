@@ -1,7 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { BlockMath } from "react-katex";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { chapters, topicList, topics } from "@/data/course";
+import { chapters, topicMeta } from "@/data/courseMeta";
+import { courseSearchIndex } from "@/data/courseSearchIndex";
+import { loadCourseTopic } from "@/data/course/topicLoaders";
 import { practiceTaskIdsByTopic } from "@/data/practiceMeta";
 import { linearAcademyBlocks } from "@/data/linearAcademy";
 import { linearAcademyPitfallBlocks } from "@/data/linearAcademyPitfalls";
@@ -140,15 +142,21 @@ function dependencyTarget(dependency: string) {
     .replace(/\s+/g, " ")
     .trim();
 
-  for (const candidate of topicList) {
-    for (let index = 0; index < candidate.blocks.length; index += 1) {
-      const title = candidate.blocks[index].title.toLowerCase();
-      if (title.includes(clean) || clean.includes(title)) {
-        return { topicId: candidate.id, index, title: candidate.blocks[index].title };
-      }
-      if (marker && title.includes(marker[1]) && title.includes(marker[2])) {
-        return { topicId: candidate.id, index, title: candidate.blocks[index].title };
-      }
+  for (const candidate of courseSearchIndex) {
+    const title = candidate.title.toLowerCase();
+    if (title.includes(clean) || clean.includes(title)) {
+      return {
+        topicId: candidate.topicId,
+        index: candidate.index,
+        title: candidate.title,
+      };
+    }
+    if (marker && title.includes(marker[1]) && title.includes(marker[2])) {
+      return {
+        topicId: candidate.topicId,
+        index: candidate.index,
+        title: candidate.title,
+      };
     }
   }
 
@@ -482,14 +490,14 @@ function ContentCard({
 function NeighborNav({ topic }: { topic: Topic }) {
   const sequence = chapters.flatMap((chapter) =>
     chapter.topicIds
-      .filter((id) => Boolean(topics[id]))
+      .filter((id) => Boolean(topicMeta[id]))
       .map((id) => ({ id, chapter })),
   );
   const index = sequence.findIndex((entry) => entry.id === topic.id);
   const previousEntry = index > 0 ? sequence[index - 1] : undefined;
   const nextEntry = index >= 0 && index < sequence.length - 1 ? sequence[index + 1] : undefined;
-  const previous = previousEntry ? topics[previousEntry.id] : undefined;
-  const next = nextEntry ? topics[nextEntry.id] : undefined;
+  const previous = previousEntry ? topicMeta[previousEntry.id] : undefined;
+  const next = nextEntry ? topicMeta[nextEntry.id] : undefined;
 
   return (
     <nav className="neighbor-nav">
@@ -522,7 +530,55 @@ function NeighborNav({ topic }: { topic: Topic }) {
 }
 
 export function TopicPage({ topicId }: { topicId: string }) {
-  const baseTopic = topics[topicId];
+  const [baseTopic, setBaseTopic] = useState<Topic | null>(null);
+  const [loadError, setLoadError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setBaseTopic(null);
+    setLoadError(false);
+
+    void loadCourseTopic(topicId)
+      .then((topic) => {
+        if (cancelled) return;
+        if (!topic) {
+          setLoadError(true);
+          return;
+        }
+        setBaseTopic(topic);
+      })
+      .catch(() => {
+        if (!cancelled) setLoadError(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [topicId]);
+
+  if (loadError) {
+    return (
+      <section className="not-found">
+        <div className="eyebrow">TOPIC LOAD ERROR</div>
+        <h1>Не удалось загрузить тему.</h1>
+        <button onClick={() => window.location.reload()}>Повторить</button>
+      </section>
+    );
+  }
+
+  if (!baseTopic) {
+    return (
+      <div className="route-loading" role="status">
+        <span />
+        <strong>Загружаю теорию…</strong>
+      </div>
+    );
+  }
+
+  return <TopicPageContent key={baseTopic.id} baseTopic={baseTopic} />;
+}
+
+function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   const topic = useMemo(() => composeTopicWithSupplements(baseTopic), [baseTopic]);
   const chapter = chapters.find((item) => item.id === topic.chapterId);
   const tracksLearning = isTrackedTopic(topic.id);
@@ -781,7 +837,7 @@ export function TopicPage({ topicId }: { topicId: string }) {
             <span>Prerequisites</span>
             {topic.prerequisites.map((id) => (
               <button key={id} onClick={() => (window.location.hash = id)}>
-                {topics[id]?.title ?? id}
+                {topicMeta[id]?.title ?? id}
               </button>
             ))}
           </div>
