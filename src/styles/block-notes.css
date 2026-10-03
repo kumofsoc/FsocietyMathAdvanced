@@ -49,7 +49,7 @@
 
 .block-note-button.has-note>span{
   color:var(--formula);
-  font-size:10px;
+  font-size:var(--font-xs);
 }
 
 .block-note-panel{
