@@ -1,13 +1,16 @@
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import navigationCss from "./navigation-shell.css?raw";
+import topicOutlineCss from "./topic-outline.css?raw";
+import reviewCss from "./review-hub.css?raw";
+import courseMapCss from "./course-map.css?raw";
+import typographyCss from "./typography.css?raw";
 
 const guardedStyleFiles = [
-  "./navigation-shell.css",
-  "./topic-outline.css",
-  "./review-hub.css",
-  "./course-map.css",
-];
+  ["navigation-shell.css", navigationCss],
+  ["topic-outline.css", topicOutlineCss],
+  ["review-hub.css", reviewCss],
+  ["course-map.css", courseMapCss],
+] as const;
 
 function rawPixelFontSizes(css: string) {
   const sizes: number[] = [];
@@ -26,21 +29,15 @@ function rawPixelFontSizes(css: string) {
 }
 
 describe("VisualMath typography tokens", () => {
-  it.each(guardedStyleFiles)("%s does not introduce microscopic raw font sizes", (relativePath) => {
-    const path = fileURLToPath(new URL(relativePath, import.meta.url));
-    const css = readFileSync(path, "utf8");
+  it.each(guardedStyleFiles)("%s does not introduce microscopic raw font sizes", (_name, css) => {
     const microscopic = rawPixelFontSizes(css).filter((size) => size <= 12);
-
     expect(microscopic).toEqual([]);
   });
 
   it("keeps the canonical readable scale at or above 14px", () => {
-    const path = fileURLToPath(new URL("./typography.css", import.meta.url));
-    const css = readFileSync(path, "utf8");
-
-    expect(css).toContain("--font-xs:14px");
-    expect(css).toContain("--font-sm:15px");
-    expect(css).toContain("--font-body:17px");
-    expect(css).toContain("--font-copy:18px");
+    expect(typographyCss).toContain("--font-xs:14px");
+    expect(typographyCss).toContain("--font-sm:15px");
+    expect(typographyCss).toContain("--font-body:17px");
+    expect(typographyCss).toContain("--font-copy:18px");
   });
 });
