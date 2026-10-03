@@ -768,7 +768,7 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   }, [topic.id]);
 
   useEffect(() => {
-    if (!tracksLearning || theoryRead) return;
+    if (!tracksLearning) return;
 
     const dwellTimers = new Map<Element, number>();
     let observer: IntersectionObserver | null = null;
@@ -832,7 +832,7 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
       dwellTimers.forEach((timer) => window.clearTimeout(timer));
       dwellTimers.clear();
     };
-  }, [topic.id, topic.blocks.length, theoryRead, tracksLearning]);
+  }, [topic.id, topic.blocks.length, tracksLearning]);
 
   useEffect(() => {
     const target = theorySentinel.current;
@@ -1211,24 +1211,26 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
             onClick={() => jumpToBlock(item.index)}
           >
             <span className="topic-outline-index">{String(item.index + 1).padStart(2, "0")}</span>
-            <span
-              className={"topic-outline-state " + item.status}
-              aria-label={
-                item.status === "complete"
-                  ? "раздел просмотрен"
-                  : item.status === "partial"
-                    ? "раздел просмотрен частично"
-                    : "раздел ещё не просмотрен"
-              }
-              title={
-                item.seenCount +
-                " из " +
-                item.blockIndices.length +
-                " блоков просмотрено"
-              }
-            >
-              {item.status === "complete" ? "✓" : item.status === "partial" ? "◐" : "○"}
-            </span>
+            {tracksLearning && (
+              <span
+                className={"topic-outline-state " + item.status}
+                aria-label={
+                  item.status === "complete"
+                    ? "раздел просмотрен"
+                    : item.status === "partial"
+                      ? "раздел просмотрен частично"
+                      : "раздел ещё не просмотрен"
+                }
+                title={
+                  item.seenCount +
+                  " из " +
+                  item.blockIndices.length +
+                  " блоков просмотрено"
+                }
+              >
+                {item.status === "complete" ? "✓" : item.status === "partial" ? "◐" : "○"}
+              </span>
+            )}
             {item.label}
           </button>
         ))}
