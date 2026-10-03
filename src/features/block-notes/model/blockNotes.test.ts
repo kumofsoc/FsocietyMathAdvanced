@@ -1,0 +1,44 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  blockNoteId,
+  BLOCK_NOTES_KEY,
+  deleteBlockNote,
+  loadBlockNote,
+  saveBlockNote,
+} from "./blockNotes";
+
+describe("block notes", () => {
+  let store: Map<string, string>;
+
+  beforeEach(() => {
+    store = new Map();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => store.set(key, value),
+      removeItem: (key: string) => store.delete(key),
+    });
+  });
+
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("uses stable topic and block ids", () => {
+    expect(blockNoteId("rank", 7)).toBe("rank::7");
+  });
+
+  it("persists and restores a note", () => {
+    expect(saveBlockNote("rank", 2, "Проверить связь с минором")).toBe(true);
+    expect(loadBlockNote("rank", 2)?.text).toBe("Проверить связь с минором");
+  });
+
+  it("removes empty notes instead of storing noise", () => {
+    saveBlockNote("rank", 2, "note");
+    expect(deleteBlockNote("rank", 2)).toBe(true);
+    expect(loadBlockNote("rank", 2)).toBeNull();
+    expect(JSON.parse(localStorage.getItem(BLOCK_NOTES_KEY) ?? "{}")).toEqual({});
+  });
+
+  it("normalizes windows line endings", () => {
+    saveBlockNote("rank", 1, "a\r\nb");
+    expect(loadBlockNote("rank", 1)?.text).toBe("a\nb");
+  });
+});
