@@ -29,6 +29,7 @@ import { toLayeredTopic } from "@/entities/course/model/learning-architecture/ad
 import { linearFoundationBlueprints } from "@/data/learning-architecture/linear-foundations";
 import { TopicLabInsert, TopicVisualInsert } from "@/visualizations/registry/TopicVisualRegistry";
 import { RouteSkeleton } from "@/shared/ui/RouteSkeleton";
+import { loadTopicResume, saveTopicResume } from "@/features/learning/model/topicResume";
 import { loadSavedTopicIds, SAVED_TOPICS_EVENT, SAVED_TOPICS_KEY, toggleSavedTopic } from "@/features/saved-topics/model/savedTopics";
 
 const PracticePanel = lazy(() =>
@@ -638,6 +639,11 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   const theorySentinel = useRef<HTMLDivElement>(null);
   const outlineRef = useRef<HTMLDivElement>(null);
   const [activeBlock, setActiveBlock] = useState(0);
+  const [resumeBlockIndex, setResumeBlockIndex] = useState<number | null>(() => {
+    const saved = loadTopicResume(topic.id);
+    if (!saved || saved.blockIndex >= topic.blocks.length) return null;
+    return saved.blockIndex;
+  });
   const [theoryRead, setTheoryRead] = useState(() => loadSet(THEORY_KEY).has(topic.id));
   const [readingRatio, setReadingRatio] = useState(() =>
     theoryRead ? 1 : (loadReadingProgress()[topic.id] ?? 0),
@@ -703,6 +709,11 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
             (visible.target as HTMLElement).dataset.blockIndex ?? "0",
           );
           setActiveBlock(index);
+
+          if (index > 0 && index < topic.blocks.length) {
+            saveTopicResume(topic.id, index);
+            setResumeBlockIndex(index);
+          }
         },
         {
           rootMargin: "-18% 0px -64% 0px",
@@ -951,6 +962,21 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
           </div>
         )}
       </header>
+
+      {resumeBlockIndex !== null && resumeBlockIndex > 0 && topic.blocks[resumeBlockIndex] && (
+        <aside className="topic-resume-card" aria-label="Продолжить чтение">
+          <div>
+            <span>ПРОДОЛЖИТЬ ЧТЕНИЕ</span>
+            <strong>
+              {labels[topic.blocks[resumeBlockIndex].kind]} · {displayBlockTitle(topic.blocks[resumeBlockIndex].title)}
+            </strong>
+          </div>
+          <button type="button" onClick={() => jumpToBlock(resumeBlockIndex)}>
+            Продолжить
+            <span aria-hidden="true">↓</span>
+          </button>
+        </aside>
+      )}
 
       <nav className="topic-quick-actions" aria-label="Быстрые действия по теме">
         <button
