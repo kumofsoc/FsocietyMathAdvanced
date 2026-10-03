@@ -331,10 +331,14 @@ export default function App() {
     }
   }, [route]);
   useEffect(() => {
-    if (!readingFocusMode) return;
-    setSidebarOpen(false);
-    clearTopbarHideTimer();
-    setTopbarVisible(false);
+    if (readingFocusMode) {
+      setSidebarOpen(false);
+      clearTopbarHideTimer();
+      setTopbarVisible(false);
+      return;
+    }
+
+    revealTopbar();
   }, [readingFocusMode, setSidebarOpen]);
 
 
