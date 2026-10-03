@@ -24,12 +24,12 @@ import {
 import type { Chapter } from "@/entities/course/model/types";
 import { useAppShellStore } from "@/app/store/useAppShellStore";
 import { loadSavedTopicIds, SAVED_TOPICS_EVENT, SAVED_TOPICS_KEY, setTopicSaved } from "@/features/saved-topics/model/savedTopics";
+import { parseVisualMathHash } from "@/shared/lib/blockDeepLink";
 
 const LAST_TOPIC_KEY = "fsociety-last-topic-v1";
 
 function routeFromHash() {
-  const raw = window.location.hash.replace(/^#/, "");
-  return raw || "home";
+  return parseVisualMathHash(window.location.hash).route;
 }
 
 const HomePage = lazy(() =>
