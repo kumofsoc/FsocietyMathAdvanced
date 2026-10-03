@@ -2,6 +2,9 @@ export type HomeMotionTier = "cinematic" | "reduced" | "static";
 
 export type MotionProfile = "full" | "balanced" | "eco" | "off";
 
+export const MOTION_PROFILE_KEY = "fsociety-motion-profile-v1";
+export const MOTION_CHANGE_EVENT = "fsociety-motion-change";
+
 export interface HomeMotionEnvironment {
   profile: MotionProfile;
   reducedMotion: boolean;
