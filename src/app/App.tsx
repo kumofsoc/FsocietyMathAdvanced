@@ -21,6 +21,7 @@ import {
 } from "@/features/learning/model/progress";
 import type { Chapter } from "@/entities/course/model/types";
 import { useAppShellStore } from "@/app/store/useAppShellStore";
+import { MOTION_CHANGE_EVENT, MOTION_PROFILE_KEY, parseMotionProfile } from "@/features/home-experience/model/homeExperience";
 
 const LAST_TOPIC_KEY = "fsociety-last-topic-v1";
 const ROUTE_SCROLL_KEY = "fsociety-route-scroll-v1";
@@ -56,6 +57,49 @@ function RouteScrollRestorer({ route }: { route: string }) {
   }, [route]);
 
   return null;
+}
+
+function shouldLoadMathBackdrop() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
+  return parseMotionProfile(getLocalStorageItem(MOTION_PROFILE_KEY)) !== "off";
+}
+
+function DeferredMathBackdrop() {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let timer = 0;
+
+    const refresh = () => {
+      window.clearTimeout(timer);
+      if (!shouldLoadMathBackdrop()) {
+        setReady(false);
+        return;
+      }
+
+      // Keep the ~900 KB Three.js vendor chunk off the critical first render.
+      timer = window.setTimeout(() => setReady(true), 220);
+    };
+
+    refresh();
+    window.addEventListener(MOTION_CHANGE_EVENT, refresh);
+    media.addEventListener("change", refresh);
+
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener(MOTION_CHANGE_EVENT, refresh);
+      media.removeEventListener("change", refresh);
+    };
+  }, []);
+
+  if (!ready) return null;
+
+  return (
+    <Suspense fallback={null}>
+      <MathBackdrop />
+    </Suspense>
+  );
 }
 
 function routeFromHash() {
@@ -298,9 +342,7 @@ export default function App() {
   return (
     <div className={"app-shell " + (sidebarCollapsed ? "sidebar-collapsed" : "")}>
       <ScrollProgress />
-      <Suspense fallback={null}>
-        <MathBackdrop />
-      </Suspense>
+      <DeferredMathBackdrop />
       <CustomCursor />
       {route === "home" && <HistoryDock />}
       <BackgroundMusicPlayer />
