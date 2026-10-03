@@ -235,7 +235,7 @@ function ContentCard({
             </button>
           )}
         </div>
-        <p><RichMatrixText text={block.body} /></p>
+        {!block.matrixOperation && <p><RichMatrixText text={block.body} /></p>}
 
         {block.matrixOperation && <MatrixOperationScene visual={block.matrixOperation} />}
 
