@@ -178,8 +178,21 @@ function ContentCard({
   const academyBlock = isAdvancedLearningBlock(topic.id, block);
   const [saved, setSaved] = useState(() => loadSavedTheorems().some((item) => item.id === theoremId));
   const [propertyPanel, setPropertyPanel] = useState<"proof" | "corollary" | null>(
-    () => topic.id === "determinants" ? null : block.proofs?.length ? "proof" : null,
+    () => topic.id === "matrices" && block.proofs?.length ? "proof" : null,
   );
+  const [openStatements, setOpenStatements] = useState<Set<string>>(
+    () => new Set(topic.id === "matrices" ? (block.statements ?? []).map((statement) => statement.id) : []),
+  );
+
+  const toggleStatement = (statementId: string) => {
+    if (topic.id === "matrices") return;
+    setOpenStatements((current) => {
+      const next = new Set(current);
+      if (next.has(statementId)) next.delete(statementId);
+      else next.add(statementId);
+      return next;
+    });
+  };
 
   const toggleSaved = () => {
     const current = loadSavedTheorems();
@@ -279,46 +292,68 @@ function ContentCard({
         ) : null}
 
         {block.statements?.length ? (
-          <div className="rigorous-statements">
-            {block.statements.map((statement, statementIndex) => (
-              <article key={statement.id} className="rigorous-statement">
-                <div className="rigorous-statement-head">
-                  <span>СВОЙСТВО {String(statementIndex + 1).padStart(2, "0")}</span>
-                  <strong><RichMatrixText text={statement.claim} /></strong>
-                </div>
-                {statement.conditions && (
-                  <div className="rigorous-conditions">
-                    <b>УСЛОВИЯ</b>
-                    <p><RichMatrixText text={statement.conditions} /></p>
-                  </div>
-                )}
-                <div className="rigorous-proof">
-                  <b>ДОКАЗАТЕЛЬСТВО</b>
-                  <h4>{statement.proof.label}</h4>
-                  <p><RichMatrixText text={statement.proof.body} /></p>
-                  {statement.proof.formula && (
-                    <div className="property-panel-formula">
-                      <BlockMath math={statement.proof.formula} />
-                    </div>
-                  )}
-                </div>
-                <div className="rigorous-example">
-                  <b>ПРИМЕР</b>
-                  <p><RichMatrixText text={statement.example.body} /></p>
-                  {statement.example.formula && (
-                    <div className="property-panel-formula">
-                      <BlockMath math={statement.example.formula} />
-                    </div>
-                  )}
-                </div>
-                {statement.withoutConditions && (
-                  <div className="rigorous-boundary">
-                    <b>БЕЗ УСЛОВИЙ</b>
-                    <p><RichMatrixText text={statement.withoutConditions} /></p>
-                  </div>
-                )}
-              </article>
-            ))}
+          <div className={"rigorous-statements " + (topic.id === "matrices" ? "always-open" : "inline-accordion")}>
+            {block.statements.map((statement, statementIndex) => {
+              const expanded = topic.id === "matrices" || openStatements.has(statement.id);
+              return (
+                <article key={statement.id} className={"rigorous-statement " + (expanded ? "expanded" : "")}>
+                  <button
+                    type="button"
+                    className="rigorous-statement-head"
+                    onClick={() => toggleStatement(statement.id)}
+                    aria-expanded={expanded}
+                  >
+                    <span>СВОЙСТВО {String(statementIndex + 1).padStart(2, "0")}</span>
+                    <strong><RichMatrixText text={statement.claim} /></strong>
+                    {topic.id !== "matrices" && <b aria-hidden="true">{expanded ? "−" : "+"}</b>}
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {expanded && (
+                      <motion.div
+                        className="rigorous-statement-details"
+                        initial={topic.id === "matrices" ? false : { height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+                      >
+                        {statement.conditions && (
+                          <div className="rigorous-conditions">
+                            <b>УСЛОВИЯ</b>
+                            <p><RichMatrixText text={statement.conditions} /></p>
+                          </div>
+                        )}
+                        <div className="rigorous-proof">
+                          <b>ДОКАЗАТЕЛЬСТВО</b>
+                          <h4>{statement.proof.label}</h4>
+                          <p><RichMatrixText text={statement.proof.body} /></p>
+                          {statement.proof.formula && (
+                            <div className="property-panel-formula">
+                              <BlockMath math={statement.proof.formula} />
+                            </div>
+                          )}
+                        </div>
+                        <div className="rigorous-example">
+                          <b>ПРИМЕР</b>
+                          <p><RichMatrixText text={statement.example.body} /></p>
+                          {statement.example.formula && (
+                            <div className="property-panel-formula">
+                              <BlockMath math={statement.example.formula} />
+                            </div>
+                          )}
+                        </div>
+                        {statement.withoutConditions && (
+                          <div className="rigorous-boundary">
+                            <b>БЕЗ УСЛОВИЙ</b>
+                            <p><RichMatrixText text={statement.withoutConditions} /></p>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </article>
+              );
+            })}
           </div>
         ) : null}
 
