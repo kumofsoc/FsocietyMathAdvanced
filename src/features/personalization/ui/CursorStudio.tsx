@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getLocalStorageItem, setLocalStorageItem } from "@/shared/lib/browserStorage";
 import { CURSOR_EVENT, CURSOR_KEY, type CursorMode } from "@/features/personalization/ui/CustomCursor";
 
 const modes: { id: CursorMode; title: string; copy: string }[] = [
@@ -11,10 +12,10 @@ const modes: { id: CursorMode; title: string; copy: string }[] = [
 
 export function CursorStudio() {
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<CursorMode>(() => (localStorage.getItem(CURSOR_KEY) as CursorMode) || "halo");
+  const [mode, setMode] = useState<CursorMode>(() => (getLocalStorageItem(CURSOR_KEY) as CursorMode) || "halo");
 
   const choose = (next: CursorMode) => {
-    localStorage.setItem(CURSOR_KEY, next);
+    setLocalStorageItem(CURSOR_KEY, next);
     setMode(next);
     window.dispatchEvent(new CustomEvent(CURSOR_EVENT));
   };
