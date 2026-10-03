@@ -1,3 +1,5 @@
+import { getLocalStorageItem, setLocalStorageItem } from "@/shared/lib/browserStorage";
+
 export const THEORY_KEY = "fsociety-theory-read-v2";
 export const SOLVED_KEY = "fsociety-solved-tasks-v2";
 export const SAVED_THEOREMS_KEY = "fsociety-saved-theorems-v1";
@@ -16,7 +18,7 @@ export interface SavedTheorem {
 
 export function loadSet(key: string): Set<string> {
   try {
-    return new Set(JSON.parse(localStorage.getItem(key) || "[]"));
+    return new Set(JSON.parse(getLocalStorageItem(key) || "[]"));
   } catch {
     return new Set();
   }
@@ -24,7 +26,7 @@ export function loadSet(key: string): Set<string> {
 
 export function saveSet(key: string, value: Set<string>) {
   try {
-    localStorage.setItem(key, JSON.stringify([...value]));
+    setLocalStorageItem(key, JSON.stringify([...value]));
   } catch (error) {
     console.warn("[FsocietyMath] could not persist learning set", error);
   }
@@ -33,7 +35,7 @@ export function saveSet(key: string, value: Set<string>) {
 
 export function loadSavedTheorems(): SavedTheorem[] {
   try {
-    return JSON.parse(localStorage.getItem(SAVED_THEOREMS_KEY) || "[]");
+    return JSON.parse(getLocalStorageItem(SAVED_THEOREMS_KEY) || "[]");
   } catch {
     return [];
   }
@@ -41,7 +43,7 @@ export function loadSavedTheorems(): SavedTheorem[] {
 
 export function saveTheorems(value: SavedTheorem[]) {
   try {
-    localStorage.setItem(SAVED_THEOREMS_KEY, JSON.stringify(value));
+    setLocalStorageItem(SAVED_THEOREMS_KEY, JSON.stringify(value));
   } catch (error) {
     console.warn("[FsocietyMath] could not persist saved theorems", error);
   }
@@ -51,7 +53,7 @@ export function saveTheorems(value: SavedTheorem[]) {
 
 export function loadReadingProgress(): Record<string, number> {
   try {
-    const parsed = JSON.parse(localStorage.getItem(READING_PROGRESS_KEY) || "{}") as Record<string, unknown>;
+    const parsed = JSON.parse(getLocalStorageItem(READING_PROGRESS_KEY) || "{}") as Record<string, unknown>;
     return Object.fromEntries(
       Object.entries(parsed)
         .filter(([, value]) => typeof value === "number" && Number.isFinite(value))
@@ -70,7 +72,7 @@ export function saveReadingProgress(topicId: string, ratio: number) {
 
   const next = { ...current, [topicId]: nextRatio };
   try {
-    localStorage.setItem(READING_PROGRESS_KEY, JSON.stringify(next));
+    setLocalStorageItem(READING_PROGRESS_KEY, JSON.stringify(next));
   } catch (error) {
     console.warn("[VisualMath] could not persist reading progress", error);
   }
