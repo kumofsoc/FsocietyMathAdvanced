@@ -24,6 +24,40 @@ import type { Chapter } from "@/entities/course/model/types";
 import { useAppShellStore } from "@/app/store/useAppShellStore";
 
 const LAST_TOPIC_KEY = "fsociety-last-topic-v1";
+const ROUTE_SCROLL_KEY = "fsociety-route-scroll-v1";
+
+function readRouteScrollPositions(): Record<string, number> {
+  try {
+    const parsed = JSON.parse(getSessionStorageItem(ROUTE_SCROLL_KEY) || "{}") as unknown;
+    if (!parsed || typeof parsed !== "object") return {};
+
+    return Object.fromEntries(
+      Object.entries(parsed)
+        .filter(([, value]) => typeof value === "number" && Number.isFinite(value))
+        .map(([route, value]) => [route, Math.max(0, Number(value))]),
+    );
+  } catch {
+    return {};
+  }
+}
+
+function writeRouteScrollPosition(route: string, y: number) {
+  const positions = readRouteScrollPositions();
+  positions[route] = Math.max(0, y);
+  setSessionStorageItem(ROUTE_SCROLL_KEY, JSON.stringify(positions));
+}
+
+function RouteScrollRestorer({ route }: { route: string }) {
+  useEffect(() => {
+    const y = readRouteScrollPositions()[route] ?? 0;
+    const frame = window.requestAnimationFrame(() => {
+      window.scrollTo({ top: y, behavior: "auto" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [route]);
+
+  return null;
+}
 
 function routeFromHash() {
   const raw = window.location.hash.replace(/^#/, "");
@@ -171,14 +205,7 @@ export default function App() {
   const routeRef = useRef(route);
 
   const openHomeAtTop = () => {
-    try {
-      const key = "fsociety-route-scroll-v1";
-      const positions = JSON.parse(getSessionStorageItem(key) || "{}") as Record<string, number>;
-      positions.home = 0;
-      setSessionStorageItem(key, JSON.stringify(positions));
-    } catch {
-      // Scroll restoration is optional.
-    }
+    writeRouteScrollPosition("home", 0);
 
     if (routeRef.current === "home") {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -196,39 +223,18 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const key = "fsociety-route-scroll-v1";
-
-    const readPositions = (): Record<string, number> => {
-      try {
-        return JSON.parse(getSessionStorageItem(key) || "{}");
-      } catch {
-        return {};
-      }
-    };
-
     const onHash = () => {
-      const positions = readPositions();
-      positions[routeRef.current] = window.scrollY;
-      try {
-        setSessionStorageItem(key, JSON.stringify(positions));
-      } catch {
-        // Scroll restoration is optional.
-      }
+      writeRouteScrollPosition(routeRef.current, window.scrollY);
 
       const next = routeFromHash();
       setRoute(next);
       routeRef.current = next;
       setSidebarOpen(false);
-
-      window.requestAnimationFrame(() => {
-        const y = positions[next] ?? 0;
-        window.scrollTo({ top: y, behavior: y > 0 ? "auto" : "smooth" });
-      });
     };
 
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
-  }, []);
+  }, [setSidebarOpen]);
 
   useEffect(() => {
     const current = topicMeta[route];
@@ -429,6 +435,7 @@ export default function App() {
                   </div>
                 }
               >
+                <RouteScrollRestorer route={route} />
                 {route === "home" ? (
                   <HomePage
                     progress={courseProgress}
