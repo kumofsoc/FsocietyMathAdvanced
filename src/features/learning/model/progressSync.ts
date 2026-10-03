@@ -1,4 +1,5 @@
 import { api, isBackendConfigured } from "@/shared/api/client";
+import { getLocalStorageItem } from "@/shared/lib/browserStorage";
 import {
   SAVED_THEOREMS_KEY,
   SOLVED_KEY,
@@ -17,7 +18,7 @@ export function buildLocalProgressSyncPayload(): ProgressSyncRequest {
 
   let lastTopicId: string | null = null;
   try {
-    lastTopicId = localStorage.getItem(LAST_TOPIC_KEY);
+    lastTopicId = getLocalStorageItem(LAST_TOPIC_KEY);
   } catch {
     lastTopicId = null;
   }
