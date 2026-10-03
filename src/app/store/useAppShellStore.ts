@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { getLocalStorageItem, setLocalStorageItem } from "@/shared/lib/browserStorage";
 
 const SIDEBAR_COLLAPSED_KEY = "fsociety-sidebar-collapsed-v1";
 
@@ -13,7 +14,7 @@ interface AppShellState {
 
 function readSidebarCollapsed() {
   try {
-    return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1";
+    return getLocalStorageItem(SIDEBAR_COLLAPSED_KEY) === "1";
   } catch {
     return false;
   }
@@ -21,7 +22,7 @@ function readSidebarCollapsed() {
 
 function persistSidebarCollapsed(value: boolean) {
   try {
-    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, value ? "1" : "0");
+    setLocalStorageItem(SIDEBAR_COLLAPSED_KEY, value ? "1" : "0");
   } catch {
     // Persistence is optional in private/strict browser contexts.
   }
