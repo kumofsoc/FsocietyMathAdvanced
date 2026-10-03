@@ -20,7 +20,11 @@ export interface CourseIntegrityIssue {
     | "chapter-duplicate-topic"
     | "prerequisite-cycle"
     | "practice-meta-orphan"
-    | "search-index-extra";
+    | "search-index-extra"
+    | "topic-id"
+    | "topic-content"
+    | "prerequisite-self"
+    | "prerequisite-duplicate";
   message: string;
 }
 
@@ -101,10 +105,48 @@ export function validateCourseIntegrity(): CourseIntegrityIssue[] {
 
   for (const topicId of topicIds) visitPrerequisites(topicId);
 
-  for (const topic of Object.values(topics)) {
+  for (const [topicKey, topic] of Object.entries(topics)) {
     const meta = topicMeta[topic.id];
 
+    if (topic.id !== topicKey) {
+      issues.push({
+        kind: "topic-id",
+        message: `Ключ темы ${topicKey} не совпадает с topic.id = ${topic.id}.`,
+      });
+    }
+
+    if (!topic.title.trim() || !topic.summary.trim() || topic.blocks.length === 0) {
+      issues.push({
+        kind: "topic-content",
+        message: `Тема ${topic.id} имеет пустой title/summary или не содержит учебных блоков.`,
+      });
+    }
+
+    topic.blocks.forEach((block, blockIndex) => {
+      if (!block.title.trim() || !block.body.trim()) {
+        issues.push({
+          kind: "topic-content",
+          message: `Тема ${topic.id}, блок ${blockIndex}: пустой title или body.`,
+        });
+      }
+    });
+
+    const prerequisiteSet = new Set<string>();
     for (const prerequisite of topic.prerequisites) {
+      if (prerequisite === topic.id) {
+        issues.push({
+          kind: "prerequisite-self",
+          message: `Тема ${topic.id} содержит саму себя в prerequisites.`,
+        });
+      }
+
+      if (prerequisiteSet.has(prerequisite)) {
+        issues.push({
+          kind: "prerequisite-duplicate",
+          message: `Тема ${topic.id} повторяет prerequisite ${prerequisite}.`,
+        });
+      }
+      prerequisiteSet.add(prerequisite);
       if (!topicIds.has(prerequisite)) {
         issues.push({
           kind: "prerequisite",
@@ -286,12 +328,12 @@ export function reportCourseIntegrity() {
   if (!import.meta.env.DEV) return;
   const issues = validateCourseIntegrity();
   if (!issues.length) {
-    console.info("[FsocietyMath] course integrity: OK");
+    console.info("[VisualMath] course integrity: OK");
     return;
   }
 
   console.groupCollapsed(
-    `[FsocietyMath] course integrity: ${issues.length} issue(s)`,
+    `[VisualMath] course integrity: ${issues.length} issue(s)`,
   );
   issues.forEach((issue) => console.warn(issue.kind, issue.message));
   console.groupEnd();
