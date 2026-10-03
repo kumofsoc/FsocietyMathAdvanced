@@ -29,6 +29,8 @@ let accessToken: string | null = null;
 let accessExpiresAt: string | null = null;
 let refreshInFlight: Promise<AuthResponseDto | null> | null = null;
 
+export const AUTH_SESSION_EVENT = "visualmath:auth-session-change";
+
 type RequestOptions = {
   auth?: boolean;
   retryAuth?: boolean;
@@ -73,6 +75,13 @@ export function getApiBaseUrl() {
 export function setAccessToken(token: string | null, expiresAt?: string | null) {
   accessToken = token;
   accessExpiresAt = token ? expiresAt ?? null : null;
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(
+      new CustomEvent(AUTH_SESSION_EVENT, {
+        detail: { authenticated: Boolean(token), expiresAt: accessExpiresAt },
+      }),
+    );
+  }
 }
 
 export function getAccessTokenSnapshot() {
