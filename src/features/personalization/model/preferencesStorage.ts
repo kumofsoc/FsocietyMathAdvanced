@@ -156,11 +156,14 @@ export function hydrateLocalPreferences(value: PreferencesDto) {
     ),
   ];
 
-  if (writes.every(Boolean) && typeof window !== "undefined") {
+  const saved = writes.every(Boolean);
+  if (saved) {
     writeLocalStorage(PREFERENCES_DIRTY_KEY, "0");
-    emitPreferencesChange(false);
-    window.dispatchEvent(new CustomEvent("fsociety-cursor-change"));
-    window.dispatchEvent(new CustomEvent("fsociety-motion-change"));
+    if (typeof window !== "undefined") {
+      emitPreferencesChange(false);
+      window.dispatchEvent(new CustomEvent("fsociety-cursor-change"));
+      window.dispatchEvent(new CustomEvent("fsociety-motion-change"));
+    }
   }
-  return writes.every(Boolean);
+  return saved;
 }
