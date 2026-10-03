@@ -399,7 +399,7 @@ function CourseMapInner() {
             className="map-focus-entry"
             onClick={() => {
               setFullscreen(false);
-              setInspectorOpen(true);
+              setInspectorOpen(false);
               setMapFocus(true);
             }}
           >
@@ -504,7 +504,13 @@ function CourseMapInner() {
               <button onClick={() => setInspectorOpen((value) => !value)}>
                 {inspectorOpen ? "Скрыть панель" : "Показать панель"}
               </button>
-              <button onClick={() => setMapFocus(false)}>× Выйти</button>
+              <button
+                className="map-focus-exit"
+                onClick={() => setMapFocus(false)}
+                title="Выйти из режима «Только карта» · Esc"
+              >
+                × Выйти <kbd>Esc</kbd>
+              </button>
             </div>
           </div>
         )}
