@@ -10,6 +10,7 @@ const guardedStyleFiles = [
   "./topic-outline.css",
   "./review-hub.css",
   "./course-map.css",
+  "./topic-search.css",
 ];
 
 function rawPixelFontSizes(css: string) {
