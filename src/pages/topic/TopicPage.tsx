@@ -1076,7 +1076,7 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
         readingBlocks.has(topic.id + "::" + index),
       ).length;
 
-      const status =
+      const status: "unread" | "partial" | "complete" =
         seenCount === 0
           ? "unread"
           : seenCount === item.blockIndices.length
