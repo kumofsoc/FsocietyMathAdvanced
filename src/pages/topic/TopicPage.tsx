@@ -36,6 +36,8 @@ import { TopicLocalSearch } from "@/features/topic-search/ui/TopicLocalSearch";
 import { copyTextToClipboard } from "@/shared/lib/clipboard";
 import { CollapsibleProof } from "@/features/proof-collapse/ui/CollapsibleProof";
 import { buildBlockDeepLink, parseVisualMathHash } from "@/shared/lib/blockDeepLink";
+import { ReadingWidthControl } from "@/features/reading-width/ui/ReadingWidthControl";
+import { loadReadingWidth, saveReadingWidth, type ReadingWidth } from "@/features/reading-width/model/readingWidth";
 
 const PracticePanel = lazy(() =>
   import("@/features/learning/ui/PracticePanel").then((module) => ({ default: module.PracticePanel })),
@@ -795,6 +797,7 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   const [topicSaved, setTopicSavedState] = useState(() =>
     loadSavedTopicIds().includes(topic.id),
   );
+  const [readingWidth, setReadingWidth] = useState<ReadingWidth>(loadReadingWidth);
 
   useEffect(() => {
     const syncSaved = () => setTopicSavedState(loadSavedTopicIds().includes(topic.id));
@@ -1136,8 +1139,13 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
     setTopicSavedState(next.saved);
   };
 
+  const changeReadingWidth = (value: ReadingWidth) => {
+    setReadingWidth(value);
+    saveReadingWidth(value);
+  };
+
   return (
-    <div className="topic-page">
+    <div className={"topic-page reading-width-" + readingWidth}>
       <header className="topic-hero">
         <div className="eyebrow">
           ГЛАВА {chapter?.number} / § {topic.number} · {chapter?.title}
@@ -1260,6 +1268,8 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
           </button>
         )}
       </nav>
+
+      <ReadingWidthControl value={readingWidth} onChange={changeReadingWidth} />
 
       <TopicLocalSearch topic={topic} onJump={jumpToBlock} />
 
