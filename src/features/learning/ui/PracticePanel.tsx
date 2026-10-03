@@ -61,6 +61,12 @@ function parseSimpleNumber(value: string) {
 }
 
 function answersMatch(task: PracticeTask, value: string) {
+  if (task.type === "choice") {
+    // A selected option comes directly from task.options. Keep mathematical
+    // identifiers case-sensitive: F and f can denote different objects.
+    return value === task.answer;
+  }
+
   if (task.type !== "number") {
     return normalize(value) === normalize(task.answer);
   }
