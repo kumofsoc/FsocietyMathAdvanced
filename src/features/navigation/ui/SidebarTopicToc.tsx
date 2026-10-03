@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import type { SidebarTopicTocItem } from "@/app/store/useAppShellStore";
 import { buildBlockHash } from "@/shared/lib/blockDeepLink";
 
@@ -21,6 +22,15 @@ export function SidebarTopicToc({
   items: SidebarTopicTocItem[];
   activeKey: string | null;
 }) {
+  const navRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!activeKey) return;
+    navRef.current
+      ?.querySelector<HTMLElement>('[data-toc-key="' + activeKey + '"]')
+      ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [activeKey]);
+
   if (!items.length) return null;
 
   return (
@@ -33,10 +43,11 @@ export function SidebarTopicToc({
         <small>{items.length}</small>
       </header>
 
-      <nav>
+      <nav ref={navRef}>
         {items.map((item, index) => (
           <button
             key={item.key}
+            data-toc-key={item.key}
             type="button"
             className={activeKey === item.key ? "active" : ""}
             onClick={() => {
