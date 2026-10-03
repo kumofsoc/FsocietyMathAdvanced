@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { getLocalStorageItem, setLocalStorageItem } from "@/shared/lib/browserStorage";
 import { CURSOR_EVENT, CURSOR_KEY, type CursorMode } from "@/features/personalization/ui/CustomCursor";
+import { getThemeTone } from "@/features/personalization/model/themeTone";
 import { LEARNING_EVENT, loadSavedTheorems, saveTheorems } from "@/lib/learning";
 import { MusicSettings } from "@/features/background-music/ui/MusicSettings";
 import "@/features/personalization/styles/system-config.css";
@@ -78,10 +79,17 @@ const tokenLabels: Record<string, string> = {
   formula: "Formula",
 };
 
-function applyTheme(theme: Theme) {
+function applyTheme(theme: Theme, name: string) {
+  const root = document.documentElement;
+
   Object.entries(theme).forEach(([key, value]) => {
-    document.documentElement.style.setProperty("--" + key, value);
+    root.style.setProperty("--" + key, value);
   });
+
+  const tone = getThemeTone(theme.bg);
+  root.dataset.theme = name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  root.dataset.themeTone = tone;
+  root.style.colorScheme = tone;
 }
 
 function applyMotion(profile: MotionProfile) {
@@ -114,12 +122,12 @@ export function SettingsPanel() {
     [themeName, custom],
   );
 
-  useEffect(() => {
-    applyTheme(activeTheme);
+  useLayoutEffect(() => {
+    applyTheme(activeTheme, themeName);
     setLocalStorageItem(THEME_NAME_KEY, themeName);
   }, [activeTheme, themeName]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     applyMotion(motion);
   }, [motion]);
 
