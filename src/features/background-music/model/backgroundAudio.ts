@@ -15,6 +15,14 @@ export interface StoredBackgroundTrack {
   updatedAt: number;
 }
 
+interface LegacyBackgroundTrackRecord {
+  key?: string;
+  name?: string;
+  type?: string;
+  blob?: Blob;
+  updatedAt?: number;
+}
+
 export interface BackgroundMusicTrackSummary {
   id: string;
   name: string;
@@ -80,10 +88,10 @@ async function migrateLegacyTrack(db: IDBDatabase) {
   });
   if (existing > 0) return;
 
-  const legacy = await new Promise<any>((resolve, reject) => {
+  const legacy = await new Promise<LegacyBackgroundTrackRecord | null>((resolve, reject) => {
     const transaction = db.transaction(LEGACY_STORE_NAME, "readonly");
     const request = transaction.objectStore(LEGACY_STORE_NAME).get(LEGACY_TRACK_KEY);
-    request.onsuccess = () => resolve(request.result ?? null);
+    request.onsuccess = () => resolve((request.result as LegacyBackgroundTrackRecord | undefined) ?? null);
     request.onerror = () => reject(request.error);
   });
   if (!legacy?.blob) return;
