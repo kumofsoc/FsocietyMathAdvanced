@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { getLocalStorageItem, setLocalStorageItem } from "@/shared/lib/browserStorage";
-import { CURSOR_EVENT, CURSOR_KEY, parseCursorMode, type CursorMode } from "@/features/personalization/ui/CustomCursor";
+import { CURSOR_EVENT, CURSOR_KEY, parseCursorMode, type CursorMode } from "@/features/personalization/model/cursor";
 
 const modes: { id: CursorMode; title: string; copy: string }[] = [
   { id: "halo", title: "Halo", copy: "Точка + пружинящее кольцо. Основной режим." },
