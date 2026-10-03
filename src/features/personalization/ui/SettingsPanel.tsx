@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { getLocalStorageItem, setLocalStorageItem } from "@/shared/lib/browserStorage";
 import { CURSOR_EVENT, CURSOR_KEY, type CursorMode } from "@/features/personalization/ui/CustomCursor";
 import { LEARNING_EVENT, loadSavedTheorems, saveTheorems } from "@/lib/learning";
 import { MusicSettings } from "@/features/background-music/ui/MusicSettings";
@@ -85,25 +86,25 @@ function applyTheme(theme: Theme) {
 
 function applyMotion(profile: MotionProfile) {
   document.documentElement.dataset.motionProfile = profile;
-  localStorage.setItem(MOTION_KEY, profile);
+  setLocalStorageItem(MOTION_KEY, profile);
   window.dispatchEvent(new CustomEvent("fsociety-motion-change"));
 }
 
 export function SettingsPanel() {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"theme" | "cursor" | "motion" | "music" | "saved">("theme");
-  const [themeName, setThemeName] = useState(() => localStorage.getItem(THEME_NAME_KEY) || "Black");
+  const [themeName, setThemeName] = useState(() => getLocalStorageItem(THEME_NAME_KEY) || "Black");
   const [custom, setCustom] = useState<Theme>(() => {
     try {
-      return JSON.parse(localStorage.getItem(THEME_CUSTOM_KEY) || "null") || { ...themes.Black };
+      return JSON.parse(getLocalStorageItem(THEME_CUSTOM_KEY) || "null") || { ...themes.Black };
     } catch {
       return { ...themes.Black };
     }
   });
   const [customDirty, setCustomDirty] = useState(false);
   const [customSaved, setCustomSaved] = useState(false);
-  const [cursor, setCursor] = useState<CursorMode>(() => (localStorage.getItem(CURSOR_KEY) as CursorMode) || "halo");
-  const [motion, setMotion] = useState<MotionProfile>(() => (localStorage.getItem(MOTION_KEY) as MotionProfile) || "balanced");
+  const [cursor, setCursor] = useState<CursorMode>(() => (getLocalStorageItem(CURSOR_KEY) as CursorMode) || "halo");
+  const [motion, setMotion] = useState<MotionProfile>(() => (getLocalStorageItem(MOTION_KEY) as MotionProfile) || "balanced");
   const [saved, setSaved] = useState(loadSavedTheorems);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
@@ -115,7 +116,7 @@ export function SettingsPanel() {
 
   useEffect(() => {
     applyTheme(activeTheme);
-    localStorage.setItem(THEME_NAME_KEY, themeName);
+    setLocalStorageItem(THEME_NAME_KEY, themeName);
   }, [activeTheme, themeName]);
 
   useEffect(() => {
@@ -158,8 +159,8 @@ export function SettingsPanel() {
   };
 
   const saveCustomTheme = () => {
-    localStorage.setItem(THEME_CUSTOM_KEY, JSON.stringify(custom));
-    localStorage.setItem(THEME_NAME_KEY, "Custom");
+    setLocalStorageItem(THEME_CUSTOM_KEY, JSON.stringify(custom));
+    setLocalStorageItem(THEME_NAME_KEY, "Custom");
     setThemeName("Custom");
     setCustomDirty(false);
     setCustomSaved(true);
@@ -167,7 +168,7 @@ export function SettingsPanel() {
 
   const restoreCustomTheme = () => {
     try {
-      const stored = JSON.parse(localStorage.getItem(THEME_CUSTOM_KEY) || "null");
+      const stored = JSON.parse(getLocalStorageItem(THEME_CUSTOM_KEY) || "null");
       setCustom(stored || { ...themes.Black });
     } catch {
       setCustom({ ...themes.Black });
@@ -177,7 +178,7 @@ export function SettingsPanel() {
   };
 
   const chooseCursor = (next: CursorMode) => {
-    localStorage.setItem(CURSOR_KEY, next);
+    setLocalStorageItem(CURSOR_KEY, next);
     setCursor(next);
     window.dispatchEvent(new CustomEvent(CURSOR_EVENT));
   };
