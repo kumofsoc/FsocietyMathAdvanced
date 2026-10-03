@@ -2304,3 +2304,348 @@ html[data-motion-profile="off"] .visual-loading::after {
 @media(max-width:620px){
   .matrix-example-strip{grid-template-columns:1fr}
 }
+
+
+/* ===== Visual examples / inline proof cards ===== */
+.matrix-operation-scene{
+  display:grid;
+  gap:14px;
+  margin-top:14px;
+  padding:18px;
+  border:1px solid color-mix(in srgb,var(--accent) 28%,var(--border));
+  background:
+    radial-gradient(circle at 10% 10%,color-mix(in srgb,var(--accent) 7%,transparent),transparent 24%),
+    linear-gradient(145deg,color-mix(in srgb,var(--surface) 96%,transparent),color-mix(in srgb,var(--elevated) 80%,transparent));
+  overflow:hidden;
+}
+.matrix-operation-stage{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(150px,.55fr) minmax(0,1fr);
+  gap:16px;
+  align-items:center;
+}
+.matrix-operation-matrix{
+  min-height:178px;
+  display:grid;
+  place-items:center;
+  gap:12px;
+  padding:16px;
+  border:1px solid var(--border);
+  background:color-mix(in srgb,var(--elevated) 88%,transparent);
+}
+.matrix-operation-matrix>span,
+.matrix-operation-explanation>span{
+  color:var(--muted);
+  font:800 10px ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.12em;
+}
+.matrix-operation-arrow{
+  display:grid;
+  justify-items:center;
+  gap:12px;
+}
+.matrix-operation-arrow code{
+  max-width:100%;
+  padding:9px 12px;
+  overflow:auto;
+  border:1px solid color-mix(in srgb,var(--accent2) 38%,var(--border));
+  background:color-mix(in srgb,var(--accent2) 6%,var(--surface));
+  color:var(--text);
+  font-size:14px;
+  white-space:nowrap;
+}
+.matrix-operation-arrow i{
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:center;
+}
+.matrix-operation-arrow i b{
+  height:1px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  box-shadow:0 0 14px color-mix(in srgb,var(--accent) 28%,transparent);
+}
+.matrix-operation-arrow i span{
+  margin-left:-1px;
+  color:var(--accent2);
+  font-size:27px;
+  line-height:1;
+}
+.matrix-operation-explanation{
+  display:grid;
+  grid-template-columns:160px minmax(0,1fr);
+  gap:16px;
+  align-items:start;
+  padding-top:12px;
+  border-top:1px solid var(--border);
+}
+.matrix-operation-explanation p{
+  margin:0;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.65;
+}
+.matrix-operation-scene .inline-matrix-large{
+  transform:scale(1.12);
+  transform-origin:center;
+}
+.matrix-cell-highlight{
+  position:relative;
+  color:var(--accent);
+  font-weight:800;
+}
+.matrix-cell-highlight:after{
+  content:"";
+  position:absolute;
+  inset:-5px -7px;
+  z-index:-1;
+  border:1px solid color-mix(in srgb,var(--accent) 24%,transparent);
+  background:color-mix(in srgb,var(--accent) 6%,transparent);
+}
+
+.example-showcase-block{
+  position:relative;
+  overflow:hidden;
+}
+.example-showcase-block:before{
+  content:"EXAMPLE";
+  position:absolute;
+  right:-8px;
+  top:16px;
+  color:color-mix(in srgb,var(--text) 5%,transparent);
+  font:900 clamp(42px,6vw,86px)/.8 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:-.08em;
+  pointer-events:none;
+}
+.matrix-example-block{
+  border-color:color-mix(in srgb,var(--accent2) 24%,var(--border));
+}
+.matrix-example-strip{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:8px;
+  margin-top:14px;
+}
+.matrix-example-strip-item{
+  min-height:150px;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:12px;
+  padding:16px;
+  border:1px solid var(--border);
+  background:
+    linear-gradient(145deg,color-mix(in srgb,var(--surface) 96%,transparent),color-mix(in srgb,var(--accent) 4%,var(--elevated)));
+}
+.matrix-example-strip-item>span{
+  justify-self:start;
+  align-self:start;
+  color:var(--muted);
+  font:800 9px ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.1em;
+}
+
+.property-proof-examples{
+  display:grid;
+  gap:9px;
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px solid var(--border);
+}
+.property-proof-example-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.property-proof-example{
+  min-width:0;
+  display:grid;
+  align-content:start;
+  gap:7px;
+  padding:13px;
+  border:1px solid color-mix(in srgb,var(--accent2) 24%,var(--border));
+  background:color-mix(in srgb,var(--accent2) 4%,var(--elevated));
+}
+.property-proof-example>span{
+  color:var(--accent2);
+  font:800 9px ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.1em;
+}
+.property-proof-example>strong{
+  font-size:13px;
+  line-height:1.25;
+}
+.property-proof-example>p{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.6;
+}
+
+.rigorous-statements.inline-accordion{
+  display:grid;
+  gap:7px;
+}
+.rigorous-statement{
+  overflow:hidden;
+  border:1px solid var(--border);
+  background:color-mix(in srgb,var(--surface) 94%,transparent);
+}
+.rigorous-statement.expanded{
+  border-color:color-mix(in srgb,var(--accent) 34%,var(--border));
+}
+.rigorous-statement-head{
+  width:100%;
+  display:grid;
+  grid-template-columns:92px minmax(0,1fr) auto;
+  gap:12px;
+  align-items:center;
+  padding:13px;
+  border:0;
+  background:transparent;
+  color:var(--text);
+  text-align:left;
+  cursor:pointer;
+}
+.always-open .rigorous-statement-head{
+  cursor:default;
+}
+.rigorous-statement-head>span{
+  color:var(--accent);
+  font:800 9px ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.08em;
+}
+.rigorous-statement-head>strong{
+  font-size:14px;
+  line-height:1.45;
+}
+.rigorous-statement-head>b{
+  width:28px;
+  height:28px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--border);
+  color:var(--accent);
+  font:700 15px ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.rigorous-statement-head:hover{
+  background:color-mix(in srgb,var(--accent) 4%,transparent);
+}
+.rigorous-statement-details{
+  overflow:hidden;
+  display:grid;
+  gap:8px;
+  padding:0 13px 13px;
+}
+.rigorous-proof,
+.rigorous-example,
+.rigorous-conditions,
+.rigorous-boundary{
+  padding:12px;
+  border:1px solid var(--border);
+  background:var(--elevated);
+}
+.rigorous-example{
+  border-color:color-mix(in srgb,var(--accent2) 28%,var(--border));
+  background:color-mix(in srgb,var(--accent2) 4%,var(--elevated));
+}
+.rigorous-proof>b,
+.rigorous-example>b,
+.rigorous-conditions>b,
+.rigorous-boundary>b{
+  display:block;
+  margin-bottom:6px;
+  color:var(--muted);
+  font:800 9px ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.1em;
+}
+.rigorous-proof h4{
+  margin:0 0 6px;
+  font-size:15px;
+}
+.rigorous-proof p,
+.rigorous-example p,
+.rigorous-conditions p,
+.rigorous-boundary p{
+  margin:0;
+  font-size:14px;
+  line-height:1.65;
+}
+
+.theorem-worked-examples{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:8px;
+  margin-top:12px;
+}
+.theorem-worked-examples>article{
+  padding:13px;
+  border:1px solid color-mix(in srgb,var(--accent2) 28%,var(--border));
+  background:color-mix(in srgb,var(--accent2) 4%,var(--elevated));
+}
+.theorem-worked-examples p{
+  margin:7px 0 0;
+  color:var(--muted);
+  line-height:1.65;
+}
+
+@media(max-width:760px){
+  .matrix-operation-stage{grid-template-columns:1fr}
+  .matrix-operation-arrow{grid-template-columns:1fr;gap:7px}
+  .matrix-operation-arrow i{transform:rotate(90deg);width:58px}
+  .matrix-operation-explanation{grid-template-columns:1fr;gap:7px}
+  .property-proof-example-grid{grid-template-columns:1fr}
+  .rigorous-statement-head{grid-template-columns:72px minmax(0,1fr) auto;padding:11px}
+}
+@media(min-width:1800px){
+  .matrix-operation-stage{gap:24px}
+  .matrix-operation-matrix{min-height:210px}
+  .property-proof-example-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+
+.example-showcase-block .block-rail{
+  border-color:color-mix(in srgb,var(--accent2) 26%,var(--border));
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent2) 6%,var(--elevated)),var(--elevated));
+}
+.example-showcase-block .block-rail>span{
+  color:var(--accent2);
+}
+.example-showcase-block .block-title-row h3{
+  max-width:900px;
+}
+.example-showcase-block .block-body>p:first-of-type{
+  max-width:84ch;
+  font-size:15px;
+  line-height:1.72;
+}
+.matrix-example-block .formula-box{
+  border-color:color-mix(in srgb,var(--accent2) 24%,var(--border));
+  background:color-mix(in srgb,var(--accent2) 4%,var(--surface));
+}
+.property-proof-panel{
+  scroll-margin-top:110px;
+}
+.property-disclosure-actions button{
+  min-height:42px;
+}
+.property-disclosure-actions button.active{
+  border-color:color-mix(in srgb,var(--accent) 50%,var(--border));
+  background:color-mix(in srgb,var(--accent) 7%,var(--elevated));
+}
+.property-proof-panel>article+article{
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid var(--border);
+}
+
+html[data-theme-tone="light"] .matrix-operation-scene,
+html[data-theme-tone="light"] .matrix-example-strip-item,
+html[data-theme-tone="light"] .property-proof-example,
+html[data-theme-tone="light"] .rigorous-statement,
+html[data-theme-tone="light"] .theorem-worked-examples>article{
+  box-shadow:0 12px 34px rgba(23,23,26,.07);
+}
+html[data-theme-tone="light"] .matrix-operation-arrow code{
+  background:color-mix(in srgb,var(--accent2) 5%,var(--surface));
+}
