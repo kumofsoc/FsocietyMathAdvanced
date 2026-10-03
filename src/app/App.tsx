@@ -28,6 +28,8 @@ import { loadSavedTopicIds, SAVED_TOPICS_EVENT, SAVED_TOPICS_KEY, setTopicSaved 
 import { parseVisualMathHash } from "@/shared/lib/blockDeepLink";
 import { installAuthSessionListener, useAuthStore } from "@/features/auth/model/authSession";
 import { installUserDataSyncListeners, syncAuthenticatedUserData } from "@/features/sync/model/userDataSync";
+import { assertRuntimeConfig } from "@/shared/config/runtime";
+import { useRuntimeStatusStore } from "@/features/runtime/model/runtimeStatus";
 
 const LAST_TOPIC_KEY = "fsociety-last-topic-v1";
 
@@ -167,7 +169,9 @@ function SidebarProgressItem({
 }
 
 export default function App() {
+  useMemo(() => assertRuntimeConfig(), []);
   const [route, setRoute] = useState(routeFromHash);
+  const checkRuntime = useRuntimeStatusStore((state) => state.check);
   const bootstrapAuth = useAuthStore((state) => state.bootstrap);
   const authStatus = useAuthStore((state) => state.status);
   const sidebarOpen = useAppShellStore((state) => state.sidebarOpen);
@@ -235,6 +239,10 @@ export default function App() {
     installAuthSessionListener();
     void bootstrapAuth();
   }, [bootstrapAuth]);
+
+  useEffect(() => {
+    void checkRuntime();
+  }, [checkRuntime]);
 
   useEffect(() => {
     installUserDataSyncListeners();
