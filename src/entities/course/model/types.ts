@@ -26,6 +26,7 @@ export interface PropertyCorollary {
 }
 
 export interface RigorousStatementExample {
+  title?: string;
   body: string;
   formula?: string;
 }
@@ -39,6 +40,15 @@ export interface RigorousStatement {
   withoutConditions?: string;
 }
 
+export interface MatrixOperationVisual {
+  before: string;
+  after: string;
+  operation: string;
+  explanation: string;
+  beforeHighlightRows?: number[];
+  afterHighlightRows?: number[];
+}
+
 export interface ContentBlock {
   kind: BlockKind;
   title: string;
@@ -49,6 +59,7 @@ export interface ContentBlock {
   workedExamples?: RigorousStatementExample[];
   corollaries?: PropertyCorollary[];
   statements?: RigorousStatement[];
+  matrixOperation?: MatrixOperationVisual;
   dependsOn?: string[];
 }
 
