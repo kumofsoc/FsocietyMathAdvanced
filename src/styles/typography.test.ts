@@ -13,6 +13,7 @@ const guardedStyleFiles = [
   "./topic-search.css",
   "./topic-copy.css",
   "./topic-proof-collapse.css",
+  "./reading-width.css",
 ];
 
 function rawPixelFontSizes(css: string) {
