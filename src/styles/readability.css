@@ -125,6 +125,24 @@ body{
   font-size:var(--readable-xs)!important;
 }
 
+:where(
+  [class*="badge"] span,
+  [class*="badges"] span,
+  [class*="metric"] span,
+  [class*="metrics"] span,
+  [class*="flow"] span,
+  [class*="state"] span,
+  [class*="readout"] span,
+  [class*="legend"] span,
+  [class*="tabs"] span,
+  .future-system-line,
+  .constellation-label strong,
+  .growth-node .year,
+  .future-formula-track span
+){
+  font-size:var(--readable-xs)!important;
+}
+
 :where([class*="card"] p,[class*="panel"] p,[class*="copy"] small){
   font-size:var(--readable-sm)!important;
   line-height:1.65;
