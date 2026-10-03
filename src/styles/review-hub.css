@@ -8,3 +8,113 @@
 .review-formulas{position:relative;z-index:2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:7px}.review-formulas>div{display:grid;gap:8px;padding:13px;border:1px solid color-mix(in srgb,var(--formula) 26%,var(--border));background:color-mix(in srgb,var(--formula) 3%,var(--elevated))}.review-formulas span{color:var(--muted);font:8px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.07em}.review-formula-math{overflow-x:auto;color:var(--formula);font-size:15px}.review-formula-math .katex-display{margin:.3em 0;text-align:left}.review-formula-math .katex-display>.katex{white-space:nowrap}.review-formulas small{color:var(--muted);font-size:11px}
 @media(max-width:900px){.review-toolbar{position:static;grid-template-columns:1fr 1fr}.review-toolbar>strong{grid-column:1/-1}.review-statements,.review-formulas{grid-template-columns:1fr}}
 @media(max-width:620px){.review-hub{width:min(100% - 18px,1460px);padding-top:22px}.review-hero{min-height:260px}.review-hero h1{font-size:clamp(50px,14vw,76px)}.review-toolbar{grid-template-columns:1fr}.review-topic{padding:14px}.review-topic>header{display:grid}.review-topic>header button{justify-self:start}}
+
+
+/* ===== Readability pass ===== */
+.review-hero .eyebrow{
+  font-size:13px;
+  line-height:1.4;
+}
+.review-hero p{
+  max-width:880px;
+  font-size:17px;
+  line-height:1.72;
+}
+.review-toolbar:before{
+  font-size:12px;
+}
+.review-toolbar input,
+.review-toolbar select,
+.review-toolbar button{
+  min-height:48px;
+  padding-inline:14px;
+  font-size:15px;
+}
+.review-toolbar>strong{
+  font-size:13px;
+}
+.review-topic{
+  padding:24px;
+}
+.review-topic>header span{
+  font-size:13px;
+}
+.review-topic>header button{
+  min-height:42px;
+  padding-inline:13px;
+  font-size:14px;
+}
+.review-topic-summary{
+  font-size:17px;
+}
+.review-statements{
+  gap:10px;
+}
+.review-statements>div{
+  padding:16px;
+}
+.review-statements span{
+  font-size:13px;
+}
+.review-statements strong{
+  margin:8px 0;
+  font-size:17px;
+  line-height:1.35;
+}
+.review-statements p{
+  font-size:16px;
+  line-height:1.65;
+}
+.review-formulas{
+  gap:10px;
+  margin-top:12px;
+}
+.review-formulas>div{
+  gap:12px;
+  min-width:0;
+  padding:18px;
+}
+.review-formulas span{
+  font-size:14px;
+  line-height:1.45;
+}
+.review-formula-math{
+  font-size:clamp(19px,1.45vw,24px);
+  line-height:1.4;
+  scrollbar-width:thin;
+}
+.review-formulas small{
+  font-size:14px;
+  line-height:1.55;
+}
+.review-hub.formula-only .review-list{
+  gap:12px;
+}
+.review-hub.formula-only .review-topic{
+  padding:26px;
+}
+.review-hub.formula-only .review-topic>header{
+  padding-bottom:18px;
+}
+.review-hub.formula-only .review-formulas{
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));
+  gap:12px;
+  margin-top:16px;
+}
+.review-hub.formula-only .review-formulas>div{
+  min-height:112px;
+  align-content:center;
+  padding:20px;
+}
+.review-hub.formula-only .review-formula-math{
+  font-size:clamp(21px,1.75vw,28px);
+}
+@media(max-width:620px){
+  .review-hero p{font-size:16px}
+  .review-topic{padding:17px}
+  .review-statements strong{font-size:16px}
+  .review-statements p{font-size:15px}
+  .review-formula-math,
+  .review-hub.formula-only .review-formula-math{font-size:19px}
+  .review-hub.formula-only .review-topic{padding:17px}
+}
