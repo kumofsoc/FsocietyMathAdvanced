@@ -168,6 +168,29 @@ export default function App() {
     }
   });
   const routeRef = useRef(route);
+  const [topbarVisible, setTopbarVisible] = useState(true);
+  const topbarHideTimer = useRef<number | null>(null);
+  const lastScrollY = useRef(0);
+
+  const clearTopbarHideTimer = () => {
+    if (topbarHideTimer.current === null) return;
+    window.clearTimeout(topbarHideTimer.current);
+    topbarHideTimer.current = null;
+  };
+
+  const revealTopbar = () => {
+    clearTopbarHideTimer();
+    setTopbarVisible(true);
+  };
+
+  const scheduleTopbarHide = (delay = 700) => {
+    clearTopbarHideTimer();
+    if (window.scrollY < 72 && routeRef.current !== "map") return;
+    topbarHideTimer.current = window.setTimeout(() => {
+      setTopbarVisible(false);
+      topbarHideTimer.current = null;
+    }, delay);
+  };
 
   const openHomeAtTop = () => {
     try {
@@ -251,6 +274,40 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    lastScrollY.current = window.scrollY;
+
+    const onScroll = () => {
+      const nextY = window.scrollY;
+      const delta = nextY - lastScrollY.current;
+
+      if (nextY < 32) {
+        revealTopbar();
+      } else if (delta > 8) {
+        clearTopbarHideTimer();
+        setTopbarVisible(false);
+      } else if (delta < -8) {
+        revealTopbar();
+        scheduleTopbarHide(1100);
+      }
+
+      lastScrollY.current = nextY;
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearTopbarHideTimer();
+    };
+  }, []);
+
+  useEffect(() => {
+    revealTopbar();
+    if (route === "map") {
+      scheduleTopbarHide(1200);
+    }
+  }, [route]);
+
+  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const direction = getHistoryHotkeyDirection(event);
       if (!direction) return;
@@ -291,7 +348,7 @@ export default function App() {
       <ScrollProgress />
       <MathBackdrop />
       <CustomCursor />
-      {route === "home" && <HistoryDock />}
+      <HistoryDock />
       <BackgroundMusicPlayer />
 
       <aside className={"sidebar " + (sidebarOpen ? "open " : "") + (sidebarCollapsed ? "collapsed" : "")}>
@@ -378,7 +435,16 @@ export default function App() {
       )}
 
       <div className="page-column">
-        <header className="topbar topbar-minimal">
+        <div
+          className="topbar-reveal-zone"
+          onMouseEnter={revealTopbar}
+          aria-hidden="true"
+        />
+        <header
+          className={"topbar topbar-minimal " + (topbarVisible ? "is-visible" : "is-hidden")}
+          onMouseEnter={revealTopbar}
+          onMouseLeave={() => scheduleTopbarHide()}
+        >
           <button
             className="mobile-menu"
             onClick={() => {
