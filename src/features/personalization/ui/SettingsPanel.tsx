@@ -128,6 +128,9 @@ export function SettingsPanel() {
   useEffect(() => {
     if (!open) return;
 
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
     };
@@ -143,8 +146,10 @@ export function SettingsPanel() {
     window.addEventListener("keydown", onKeyDown);
     document.addEventListener("pointerdown", onPointerDown, true);
     return () => {
+      document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("pointerdown", onPointerDown, true);
+      window.requestAnimationFrame(() => triggerRef.current?.focus());
     };
   }, [open]);
 
@@ -183,7 +188,14 @@ export function SettingsPanel() {
 
   return (
     <div className="settings-shell">
-      <button ref={triggerRef} className="settings-trigger" onClick={() => setOpen((value) => !value)}>
+      <button
+        ref={triggerRef}
+        className="settings-trigger"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-controls="visualmath-settings-panel"
+        onClick={() => setOpen((value) => !value)}
+      >
         <span>⚙</span>
         Настройки
       </button>
@@ -192,15 +204,19 @@ export function SettingsPanel() {
         <div className="settings-backdrop" onPointerDown={() => setOpen(false)}>
           <aside
             ref={panelRef}
+            id="visualmath-settings-panel"
             className="settings-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="visualmath-settings-title"
             onPointerDown={(event) => event.stopPropagation()}
           >
             <header className="settings-head">
               <div>
                 <div className="mini-kicker">VISUALMATH / НАСТРОЙКИ И ПЕРСОНАЛИЗАЦИЯ</div>
-                <h2>Настройки</h2>
+                <h2 id="visualmath-settings-title">Настройки</h2>
               </div>
-              <button onClick={() => setOpen(false)}>×</button>
+              <button onClick={() => setOpen(false)} aria-label="Закрыть настройки">×</button>
             </header>
 
             <nav className="settings-tabs">
