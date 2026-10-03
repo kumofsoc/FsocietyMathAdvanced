@@ -3,6 +3,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { type RefObject, useLayoutEffect, useState } from "react";
 import {
   getHomeMotionMode,
+  MOTION_CHANGE_EVENT,
   shouldUsePointerDepth,
   type HomeMotionEnvironment,
   type HomeMotionTier,
@@ -29,8 +30,8 @@ export function useHomeExperience(root: RefObject<HTMLDivElement | null>) {
 
   useLayoutEffect(() => {
     const onMotionChange = () => setMotionEpoch((value) => value + 1);
-    window.addEventListener("fsociety-motion-change", onMotionChange);
-    return () => window.removeEventListener("fsociety-motion-change", onMotionChange);
+    window.addEventListener(MOTION_CHANGE_EVENT, onMotionChange);
+    return () => window.removeEventListener(MOTION_CHANGE_EVENT, onMotionChange);
   }, []);
 
   useLayoutEffect(() => {
