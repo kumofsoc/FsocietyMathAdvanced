@@ -149,6 +149,7 @@ export function CustomCursor() {
         (visible ? " is-visible" : " is-hidden")
       }
       aria-hidden="true"
+      style={{ opacity: visible ? 1 : 0 }}
     >
       <div ref={coreRef} className="cursor-core" />
       <div ref={orbitRef} className="cursor-orbit" />
