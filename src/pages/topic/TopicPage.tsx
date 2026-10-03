@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { BlockMath } from "react-katex";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { chapters, topicMeta } from "@/data/courseMeta";
-import { courseSearchIndex } from "@/data/courseSearchIndex";
+import type { CourseSearchEntry } from "@/data/courseSearchIndex";
 import { loadCourseTopic } from "@/data/course/topicLoaders";
 import { practiceTaskIdsByTopic } from "@/data/practiceMeta";
 import { linearAcademyBlocks } from "@/data/linearAcademy";
@@ -134,7 +134,7 @@ const ACADEMY_CHAPTERS = new Set([
   "tensor-algebra",
 ]);
 
-function dependencyTarget(dependency: string) {
+function dependencyTarget(dependency: string, courseSearchIndex: CourseSearchEntry[]) {
   const marker = dependency.toLowerCase().match(/(теорема|свойство)\s*(\d+(?:\.\d+)?)/);
   const clean = dependency
     .toLowerCase()
@@ -171,6 +171,20 @@ function openBlock(topicId: string, index: number) {
   }
   sessionStorage.setItem(BLOCK_TARGET_KEY, topicId + "::" + index);
   window.location.hash = topicId;
+}
+
+async function openDependency(dependency: string) {
+  try {
+    const { courseSearchIndex } = await import("@/data/courseSearchIndex");
+    const target = dependencyTarget(dependency, courseSearchIndex);
+    if (!target) {
+      console.warn("[VisualMath] dependency target not found", dependency);
+      return;
+    }
+    openBlock(target.topicId, target.index);
+  } catch (error) {
+    console.warn("[VisualMath] dependency index failed to load", error);
+  }
 }
 
 function ContentCard({
@@ -465,21 +479,16 @@ function ContentCard({
         {block.dependsOn && (
           <div className="depends-row">
             <span>Использует:</span>
-            {block.dependsOn.map((dependency) => {
-              const target = dependencyTarget(dependency);
-              return target ? (
-                <button
-                  key={dependency}
-                  className="dependency-link"
-                  onClick={() => openBlock(target.topicId, target.index)}
-                  title={"Перейти: " + target.title}
-                >
-                  {dependency} ↗
-                </button>
-              ) : (
-                <b key={dependency}>{dependency}</b>
-              );
-            })}
+            {block.dependsOn.map((dependency) => (
+              <button
+                key={dependency}
+                className="dependency-link"
+                onClick={() => void openDependency(dependency)}
+                title={"Найти и перейти: " + dependency}
+              >
+                {dependency} ↗
+              </button>
+            ))}
           </div>
         )}
       </div>
