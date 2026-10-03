@@ -1105,9 +1105,14 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
         status: tracksLearning ? item.status : null,
       })),
     );
+  }, [topic.id, outlineItems, tracksLearning, setSidebarTopicToc]);
 
-    return () => clearSidebarTopicToc(topic.id);
-  }, [topic.id, outlineItems, tracksLearning, setSidebarTopicToc, clearSidebarTopicToc]);
+  useEffect(
+    () => () => {
+      clearSidebarTopicToc(topic.id);
+    },
+    [topic.id, clearSidebarTopicToc],
+  );
 
   useEffect(() => {
     setActiveSidebarTopicTocKey(activeOutlineKey ?? null);
