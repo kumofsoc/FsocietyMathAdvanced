@@ -173,6 +173,7 @@ export function G6CourseGraph({
   const selectedIdRef = useRef<string | null>(selectedId);
   const callbacksRef = useRef({ onSelect, onOpen });
   const [themeVersion, setThemeVersion] = useState(0);
+  const [renderError, setRenderError] = useState<string | null>(null);
 
   useEffect(() => {
     callbacksRef.current = { onSelect, onOpen };
@@ -182,7 +183,9 @@ export function G6CourseGraph({
     selectedIdRef.current = selectedId;
     const graph = graphRef.current;
     if (!graph || !graphReadyRef.current) return;
-    void applySelectionState(graph, model, selectedId);
+    void applySelectionState(graph, model, selectedId).catch((error) => {
+      console.warn("[VisualMath] could not update graph selection", error);
+    });
   }, [model, selectedId]);
 
   useEffect(() => {
@@ -200,6 +203,7 @@ export function G6CourseGraph({
     const container = containerRef.current;
     if (!container) return;
 
+    setRenderError(null);
     const theme = readGraphTheme();
     const data = toG6Data(model);
 
@@ -316,14 +320,18 @@ export function G6CourseGraph({
     graphReadyRef.current = false;
     graphRef.current = graph;
 
-    const nodeIdFromEvent = (event: unknown) =>
-      String((event as { target: { id: string } }).target.id);
+    const nodeIdFromEvent = (event: unknown) => {
+      const id = (event as { target?: { id?: unknown } } | null)?.target?.id;
+      return typeof id === "string" && id ? id : null;
+    };
 
     graph.on(NodeEvent.CLICK, (event) => {
-      callbacksRef.current.onSelect(nodeIdFromEvent(event));
+      const id = nodeIdFromEvent(event);
+      if (id) callbacksRef.current.onSelect(id);
     });
     graph.on(NodeEvent.DBLCLICK, (event) => {
-      callbacksRef.current.onOpen(nodeIdFromEvent(event));
+      const id = nodeIdFromEvent(event);
+      if (id) callbacksRef.current.onOpen(id);
     });
     graph.on(CanvasEvent.CLICK, () => {
       callbacksRef.current.onSelect(null);
@@ -331,16 +339,26 @@ export function G6CourseGraph({
 
     let destroyed = false;
 
-    void graph.render().then(async () => {
-      if (destroyed) return;
-      graphReadyRef.current = true;
-      await applySelectionState(graph, model, selectedIdRef.current);
-      if (destroyed) return;
-      await graph.fitView(
-        { when: "always", direction: "both" },
-        { duration: 260, easing: "ease-out" },
-      );
-    });
+    void graph
+      .render()
+      .then(async () => {
+        if (destroyed) return;
+        graphReadyRef.current = true;
+        await applySelectionState(graph, model, selectedIdRef.current);
+        if (destroyed) return;
+        await graph.fitView(
+          { when: "always", direction: "both" },
+          { duration: 260, easing: "ease-out" },
+        );
+      })
+      .catch((error) => {
+        if (destroyed) return;
+        graphReadyRef.current = false;
+        console.error("[VisualMath] course graph render failed", error);
+        setRenderError(
+          error instanceof Error ? error.message : "Не удалось отрисовать карту курса.",
+        );
+      });
 
     const resizeObserver = new ResizeObserver(() => {
       if (destroyed) return;
@@ -353,13 +371,26 @@ export function G6CourseGraph({
       resizeObserver.disconnect();
       graphReadyRef.current = false;
       graphRef.current = null;
-      graph.destroy();
+      try {
+        graph.destroy();
+      } catch (error) {
+        console.warn("[VisualMath] course graph cleanup failed", error);
+      }
     };
   }, [model, themeVersion]);
 
   return (
     <div className="g6-course-graph">
       <div ref={containerRef} className="g6-course-graph-canvas" />
+      {renderError && (
+        <div className="g6-course-graph-error" role="alert">
+          <strong>Карта не отрисовалась.</strong>
+          <span>{renderError}</span>
+          <button onClick={() => setThemeVersion((version) => version + 1)}>
+            Попробовать ещё раз
+          </button>
+        </div>
+      )}
       <div className="g6-course-graph-hint" aria-hidden="true">
         <span>drag = двигать карту</span>
         <span>колесо = масштаб</span>
