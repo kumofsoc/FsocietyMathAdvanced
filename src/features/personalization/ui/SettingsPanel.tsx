@@ -1,14 +1,13 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { getLocalStorageItem, setLocalStorageItem } from "@/shared/lib/browserStorage";
-import { CURSOR_EVENT, CURSOR_KEY, type CursorMode } from "@/features/personalization/ui/CustomCursor";
+import { CURSOR_EVENT, CURSOR_KEY, parseCursorMode, type CursorMode } from "@/features/personalization/ui/CustomCursor";
 import { getThemeTone } from "@/features/personalization/model/themeTone";
+import { parseMotionProfile, type MotionProfile } from "@/features/home-experience/model/homeExperience";
 import { LEARNING_EVENT, loadSavedTheorems, saveTheorems } from "@/lib/learning";
 import { MusicSettings } from "@/features/background-music/ui/MusicSettings";
 import "@/features/personalization/styles/system-config.css";
 
 type Theme = Record<string, string>;
-type MotionProfile = "full" | "balanced" | "eco" | "off";
-
 const THEME_NAME_KEY = "math-theme-name";
 const THEME_CUSTOM_KEY = "math-theme-custom";
 const MOTION_KEY = "fsociety-motion-profile-v1";
@@ -56,6 +55,29 @@ const themes: Record<string, Theme> = {
   },
 };
 
+function readThemeName() {
+  const stored = getLocalStorageItem(THEME_NAME_KEY);
+  return stored === "Custom" || (stored !== null && stored in themes) ? stored : "Black";
+}
+
+function readCustomTheme(): Theme {
+  try {
+    const parsed = JSON.parse(getLocalStorageItem(THEME_CUSTOM_KEY) || "null") as unknown;
+    if (!parsed || typeof parsed !== "object") return { ...themes.Black };
+
+    const candidate = parsed as Record<string, unknown>;
+    return Object.fromEntries(
+      Object.keys(themes.Black).map((token) => [
+        token,
+        typeof candidate[token] === "string" ? candidate[token] : themes.Black[token],
+      ]),
+    );
+  } catch {
+    return { ...themes.Black };
+  }
+}
+
+
 const cursorModes: { id: CursorMode; title: string; copy: string }[] = [
   { id: "halo", title: "Halo", copy: "Точка + инерционное кольцо." },
   { id: "minimal", title: "Minimal", copy: "Компактная точка." },
@@ -101,18 +123,12 @@ function applyMotion(profile: MotionProfile) {
 export function SettingsPanel() {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"theme" | "cursor" | "motion" | "music" | "saved">("theme");
-  const [themeName, setThemeName] = useState(() => getLocalStorageItem(THEME_NAME_KEY) || "Black");
-  const [custom, setCustom] = useState<Theme>(() => {
-    try {
-      return JSON.parse(getLocalStorageItem(THEME_CUSTOM_KEY) || "null") || { ...themes.Black };
-    } catch {
-      return { ...themes.Black };
-    }
-  });
+  const [themeName, setThemeName] = useState(readThemeName);
+  const [custom, setCustom] = useState<Theme>(readCustomTheme);
   const [customDirty, setCustomDirty] = useState(false);
   const [customSaved, setCustomSaved] = useState(false);
-  const [cursor, setCursor] = useState<CursorMode>(() => (getLocalStorageItem(CURSOR_KEY) as CursorMode) || "halo");
-  const [motion, setMotion] = useState<MotionProfile>(() => (getLocalStorageItem(MOTION_KEY) as MotionProfile) || "balanced");
+  const [cursor, setCursor] = useState<CursorMode>(() => parseCursorMode(getLocalStorageItem(CURSOR_KEY)));
+  const [motion, setMotion] = useState<MotionProfile>(() => parseMotionProfile(getLocalStorageItem(MOTION_KEY)));
   const [saved, setSaved] = useState(loadSavedTheorems);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
@@ -175,12 +191,7 @@ export function SettingsPanel() {
   };
 
   const restoreCustomTheme = () => {
-    try {
-      const stored = JSON.parse(getLocalStorageItem(THEME_CUSTOM_KEY) || "null");
-      setCustom(stored || { ...themes.Black });
-    } catch {
-      setCustom({ ...themes.Black });
-    }
+    setCustom(readCustomTheme());
     setCustomDirty(false);
     setCustomSaved(false);
   };
