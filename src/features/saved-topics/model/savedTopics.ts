@@ -37,3 +37,12 @@ export function toggleSavedTopic(topicId: string) {
     saved,
   };
 }
+
+
+export function replaceSavedTopicIds(ids: string[]) {
+  const normalized = ids.filter(
+    (id, index, list) => typeof id === "string" && id.length > 0 && list.indexOf(id) === index,
+  );
+  persistSavedTopicIds(normalized);
+  return normalized;
+}

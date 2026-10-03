@@ -106,3 +106,32 @@ export function markReadingBlock(topicId: string, blockIndex: number, totalBlock
   saveReadingProgress(topicId, ratio);
   return ratio;
 }
+
+
+export type CanonicalLearningCache = {
+  theoryRead: string[];
+  solvedTaskIds: string[];
+  savedTheorems: SavedTheorem[];
+  readingProgress: Record<string, number>;
+};
+
+export function replaceLearningCache(snapshot: CanonicalLearningCache) {
+  try {
+    localStorage.setItem(THEORY_KEY, JSON.stringify([...new Set(snapshot.theoryRead)]));
+    localStorage.setItem(SOLVED_KEY, JSON.stringify([...new Set(snapshot.solvedTaskIds)]));
+    localStorage.setItem(SAVED_THEOREMS_KEY, JSON.stringify(snapshot.savedTheorems));
+
+    const reading = Object.fromEntries(
+      Object.entries(snapshot.readingProgress)
+        .filter(([, value]) => typeof value === "number" && Number.isFinite(value))
+        .map(([topicId, value]) => [topicId, Math.min(1, Math.max(0, value))]),
+    );
+    localStorage.setItem(READING_PROGRESS_KEY, JSON.stringify(reading));
+  } catch (error) {
+    console.warn("[VisualMath] could not hydrate canonical learning cache", error);
+    return false;
+  }
+
+  window.dispatchEvent(new CustomEvent(LEARNING_EVENT));
+  return true;
+}

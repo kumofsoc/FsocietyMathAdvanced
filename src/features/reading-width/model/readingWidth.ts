@@ -3,6 +3,7 @@ import { readLocalStorage, writeLocalStorage } from "@/shared/lib/browserStorage
 export type ReadingWidth = "narrow" | "normal" | "wide";
 
 export const READING_WIDTH_KEY = "visualmath-reading-width-v1";
+export const READING_WIDTH_EVENT = "visualmath:reading-width-change";
 
 export const readingWidthOptions: Array<{
   id: ReadingWidth;
@@ -22,5 +23,9 @@ export function loadReadingWidth(): ReadingWidth {
 }
 
 export function saveReadingWidth(value: ReadingWidth) {
-  return writeLocalStorage(READING_WIDTH_KEY, value);
+  const saved = writeLocalStorage(READING_WIDTH_KEY, value);
+  if (saved && typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent(READING_WIDTH_EVENT, { detail: value }));
+  }
+  return saved;
 }

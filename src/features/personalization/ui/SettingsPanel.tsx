@@ -3,14 +3,18 @@ import { CURSOR_EVENT, CURSOR_KEY, type CursorMode } from "@/features/personaliz
 import { LEARNING_EVENT, loadSavedTheorems, saveTheorems } from "@/lib/learning";
 import { MusicSettings } from "@/features/background-music/ui/MusicSettings";
 import { readLocalStorage, readLocalStorageJson, writeLocalStorage } from "@/shared/lib/browserStorage";
+import {
+  MOTION_KEY,
+  PREFERENCES_EVENT,
+  THEME_CUSTOM_KEY,
+  THEME_NAME_KEY,
+  emitPreferencesChange,
+  loadLocalPreferences,
+} from "@/features/personalization/model/preferencesStorage";
 import "@/features/personalization/styles/system-config.css";
 
 type Theme = Record<string, string>;
 type MotionProfile = "full" | "balanced" | "eco" | "off";
-
-const THEME_NAME_KEY = "math-theme-name";
-const THEME_CUSTOM_KEY = "math-theme-custom";
-const MOTION_KEY = "fsociety-motion-profile-v1";
 
 const themes: Record<string, Theme> = {
   Black: {
@@ -88,6 +92,7 @@ function applyMotion(profile: MotionProfile) {
   document.documentElement.dataset.motionProfile = profile;
   writeLocalStorage(MOTION_KEY, profile);
   window.dispatchEvent(new CustomEvent("fsociety-motion-change"));
+  emitPreferencesChange();
 }
 
 export function SettingsPanel() {
@@ -112,8 +117,12 @@ export function SettingsPanel() {
 
   useEffect(() => {
     applyTheme(activeTheme);
+  }, [activeTheme]);
+
+  useEffect(() => {
     writeLocalStorage(THEME_NAME_KEY, themeName);
-  }, [activeTheme, themeName]);
+    emitPreferencesChange();
+  }, [themeName]);
 
   useEffect(() => {
     applyMotion(motion);
@@ -123,6 +132,18 @@ export function SettingsPanel() {
     const refresh = () => setSaved(loadSavedTheorems());
     window.addEventListener(LEARNING_EVENT, refresh);
     return () => window.removeEventListener(LEARNING_EVENT, refresh);
+  }, []);
+
+  useEffect(() => {
+    const refreshPreferences = () => {
+      const next = loadLocalPreferences();
+      setThemeName(next.themeName);
+      setCustom({ ...next.customTheme } as Theme);
+      setCursor(next.cursorMode);
+      setMotion(next.motionProfile);
+    };
+    window.addEventListener(PREFERENCES_EVENT, refreshPreferences);
+    return () => window.removeEventListener(PREFERENCES_EVENT, refreshPreferences);
   }, []);
 
   useEffect(() => {
@@ -165,6 +186,7 @@ export function SettingsPanel() {
     setThemeName("Custom");
     setCustomDirty(false);
     setCustomSaved(true);
+    emitPreferencesChange();
   };
 
   const restoreCustomTheme = () => {
@@ -178,6 +200,7 @@ export function SettingsPanel() {
     writeLocalStorage(CURSOR_KEY, next);
     setCursor(next);
     window.dispatchEvent(new CustomEvent(CURSOR_EVENT));
+    emitPreferencesChange();
   };
 
   const removeSaved = (id: string) => {
