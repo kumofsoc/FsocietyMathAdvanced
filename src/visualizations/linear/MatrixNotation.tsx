@@ -45,6 +45,27 @@ export function InlineMatrix({
   );
 }
 
+export function extractMatrixLiterals(text: string) {
+  const matches = text.match(/\[\[(?:[^\]]|\](?!\]))*\]\]/g) ?? [];
+  return [...new Set(matches)];
+}
+
+export function MatrixExampleStrip({ text }: { text: string }) {
+  const matrices = extractMatrixLiterals(text);
+  if (!matrices.length) return null;
+
+  return (
+    <div className="matrix-example-strip">
+      {matrices.map((raw, index) => (
+        <div className="matrix-example-strip-item" key={raw + index}>
+          <span>МАТРИЦА {String(index + 1).padStart(2, "0")}</span>
+          <InlineMatrix raw={raw} size="large" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function RichMatrixText({ text }: { text: string }) {
   const regex = /\[\[(?:[^\]]|\](?!\]))*\]\]/g;
   const nodes: ReactNode[] = [];
