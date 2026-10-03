@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { getLocalStorageItem, setLocalStorageItem } from "@/shared/lib/browserStorage";
 import { getThemeTone } from "@/features/personalization/model/themeTone";
 
 type Theme = Record<string, string>;
@@ -72,10 +73,15 @@ function applyTheme(theme: Theme, name: string) {
 }
 
 export function ThemeStudio() {
-  const [name, setName] = useState(() => localStorage.getItem("math-theme-name") || "Black");
+  const [name, setName] = useState(() => getLocalStorageItem("math-theme-name") || "Black");
   const [custom, setCustom] = useState<Theme>(() => {
-    const saved = localStorage.getItem("math-theme-custom");
-    return saved ? JSON.parse(saved) : { ...themes.Black };
+    try {
+      const saved = getLocalStorageItem("math-theme-custom");
+      const parsed = saved ? JSON.parse(saved) : null;
+      return parsed && typeof parsed === "object" ? parsed as Theme : { ...themes.Black };
+    } catch {
+      return { ...themes.Black };
+    }
   });
   const [open, setOpen] = useState(false);
 
@@ -83,8 +89,8 @@ export function ThemeStudio() {
 
   useEffect(() => {
     applyTheme(current, name);
-    localStorage.setItem("math-theme-name", name);
-    if (name === "Custom") localStorage.setItem("math-theme-custom", JSON.stringify(custom));
+    setLocalStorageItem("math-theme-name", name);
+    if (name === "Custom") setLocalStorageItem("math-theme-custom", JSON.stringify(custom));
   }, [current, name, custom]);
 
   const choose = (next: string) => {
