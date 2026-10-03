@@ -1102,12 +1102,12 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
         key: item.key,
         label: item.label,
         blockIndex: item.index,
-        status: item.status,
+        status: tracksLearning ? item.status : null,
       })),
     );
 
     return () => clearSidebarTopicToc(topic.id);
-  }, [topic.id, outlineItems, setSidebarTopicToc, clearSidebarTopicToc]);
+  }, [topic.id, outlineItems, tracksLearning, setSidebarTopicToc, clearSidebarTopicToc]);
 
   useEffect(() => {
     setActiveSidebarTopicTocKey(activeOutlineKey ?? null);
