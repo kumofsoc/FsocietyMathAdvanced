@@ -1,4 +1,5 @@
 import { type CSSProperties, useMemo, useState } from "react";
+import { getLocalStorageItem, setLocalStorageItem } from "@/shared/lib/browserStorage";
 import { chapters } from "@/data/courseMeta";
 import {
   getChapterProgress,
@@ -22,10 +23,22 @@ type LocalProfile = {
   joinedAt: string;
 };
 
+function isLocalProfile(value: unknown): value is LocalProfile {
+  if (!value || typeof value !== "object") return false;
+  const profile = value as Partial<LocalProfile>;
+  return (
+    typeof profile.displayName === "string" &&
+    typeof profile.handle === "string" &&
+    typeof profile.bio === "string" &&
+    typeof profile.joinedAt === "string" &&
+    Number.isFinite(Date.parse(profile.joinedAt))
+  );
+}
+
 function loadProfile(): LocalProfile {
   try {
-    const stored = JSON.parse(localStorage.getItem(PROFILE_KEY) || "null");
-    if (stored) return stored;
+    const stored = JSON.parse(getLocalStorageItem(PROFILE_KEY) || "null") as unknown;
+    if (isLocalProfile(stored)) return stored;
   } catch {
     // Ignore malformed local profile.
   }
@@ -36,7 +49,7 @@ function loadProfile(): LocalProfile {
     bio: "Изучаю математику через структуру, визуализацию и практику.",
     joinedAt: new Date().toISOString(),
   };
-  localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+  setLocalStorageItem(PROFILE_KEY, JSON.stringify(profile));
   return profile;
 }
 
@@ -94,7 +107,7 @@ export function AccountPage({
     };
     setProfile(next);
     setDraft(next);
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(next));
+    setLocalStorageItem(PROFILE_KEY, JSON.stringify(next));
     setEditing(false);
   };
 
