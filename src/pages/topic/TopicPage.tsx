@@ -29,7 +29,7 @@ import { toLayeredTopic } from "@/entities/course/model/learning-architecture/ad
 import { linearFoundationBlueprints } from "@/data/learning-architecture/linear-foundations";
 import { TopicLabInsert, TopicVisualInsert } from "@/visualizations/registry/TopicVisualRegistry";
 import { RouteSkeleton } from "@/shared/ui/RouteSkeleton";
-import { readLocalStorageJson, writeLocalStorage } from "@/shared/lib/browserStorage";
+import { loadSavedTopicIds, toggleSavedTopic } from "@/features/saved-topics/model/savedTopics";
 
 const PracticePanel = lazy(() =>
   import("@/features/learning/ui/PracticePanel").then((module) => ({ default: module.PracticePanel })),
@@ -117,7 +117,6 @@ function displayBlockTitle(title: string) {
 }
 
 const BLOCK_TARGET_KEY = "fsociety-block-target-v1";
-const SAVED_TOPICS_KEY = "visualmath-saved-topics-v1";
 function isAdvancedLearningBlock(_topicId: string, block: ContentBlock) {
   return block.source === "academy";
 }
@@ -645,8 +644,8 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   );
   const [reachedTheoryEnd, setReachedTheoryEnd] = useState(theoryRead);
   const [solved, setSolved] = useState(() => loadSet(SOLVED_KEY));
-  const [topicSaved, setTopicSaved] = useState(() =>
-    readLocalStorageJson<string[]>(SAVED_TOPICS_KEY, []).includes(topic.id),
+  const [topicSaved, setTopicSavedState] = useState(() =>
+    loadSavedTopicIds().includes(topic.id),
   );
 
   useEffect(() => {
@@ -887,14 +886,8 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   };
 
   const toggleTopicSaved = () => {
-    const current = readLocalStorageJson<string[]>(SAVED_TOPICS_KEY, []);
-    const next = current.includes(topic.id)
-      ? current.filter((id) => id !== topic.id)
-      : [...current, topic.id];
-
-    if (writeLocalStorage(SAVED_TOPICS_KEY, JSON.stringify(next))) {
-      setTopicSaved(next.includes(topic.id));
-    }
+    const next = toggleSavedTopic(topic.id);
+    setTopicSavedState(next.saved);
   };
 
   return (
