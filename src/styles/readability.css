@@ -221,3 +221,35 @@ body{
     max-width:none;
   }
 }
+
+
+/* Interactive labs: controls and readouts must stay readable without zooming. */
+:where(
+  .field-mode-row button,
+  .field-preset-row button,
+  .series-mode-row button,
+  .power-mode-row button,
+  .field-readout span,
+  .field-readout strong,
+  .series-readout span,
+  .series-readout strong,
+  .fourier-state span,
+  .fourier-state small,
+  .power-state span,
+  .power-state small,
+  .laplace-state span,
+  .complex-state span
+){
+  font-size:var(--readable-xs)!important;
+}
+
+:where(
+  .field-axes text,
+  .field-gradient-arrow text,
+  .field-direction-arrow text,
+  .field-current-arrow text,
+  .series-axes text,
+  .residue-stage text
+){
+  font-size:10px!important;
+}
