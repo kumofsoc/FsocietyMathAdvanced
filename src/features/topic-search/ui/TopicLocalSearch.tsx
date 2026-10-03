@@ -10,6 +10,15 @@ import {
   topicSearchKindLabels,
 } from "@/features/topic-search/model/topicSearch";
 
+function displaySearchTitle(title: string) {
+  return title
+    .replace(/^ACADEMY\s+VISUAL\s*[·/]\s*/i, "Визуализация · ")
+    .replace(/^ACADEMY\s+LAB\s*\/\s*/i, "Интерактивная лаборатория · ")
+    .replace(/^ACADEMY\s+PRO\s*\/\s*/i, "Углублённое изучение · ")
+    .replace(/^ACADEMY\s*\/\s*/i, "")
+    .replace(/^ACADEMY\s+/i, "");
+}
+
 export function TopicLocalSearch({
   topic,
   onJump,
@@ -126,7 +135,7 @@ export function TopicLocalSearch({
                     {topicSearchKindLabels[result.kind]}
                   </span>
                   <span className="topic-local-search-copy">
-                    <strong>{result.title}</strong>
+                    <strong>{displaySearchTitle(result.title)}</strong>
                     <small>{result.snippet}</small>
                   </span>
                   <span className="topic-local-search-jump">↓</span>
