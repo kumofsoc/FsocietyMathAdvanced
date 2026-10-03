@@ -19,6 +19,7 @@ const guardedStyleFiles = [
   "./block-notes.css",
   "./important-blocks.css",
   "./my-marks.css",
+  "../features/account-experience/styles/account-runtime.css",
 ];
 
 function rawPixelFontSizes(css: string) {
