@@ -8,6 +8,7 @@ import { HistoryDock } from "@/features/navigation/ui/HistoryDock";
 import { getHistoryHotkeyDirection } from "@/features/navigation/model/historyHotkeys";
 import { MathBackdrop } from "@/shared/ui/MathBackdrop";
 import { ScrollProgress } from "@/features/navigation/ui/ScrollProgress";
+import { BackToTop } from "@/features/navigation/ui/BackToTop";
 import { SettingsPanel } from "@/features/personalization/ui/SettingsPanel";
 import { StubTopicPage } from "@/pages/topic/StubTopicPage";
 import { LEARNING_EVENT } from "@/features/learning/model/learning";
@@ -367,6 +368,7 @@ export default function App() {
   return (
     <div className={"app-shell " + (sidebarCollapsed ? "sidebar-collapsed" : "")}>
       <ScrollProgress />
+      <BackToTop />
       <MathBackdrop />
       <CustomCursor />
       <BackgroundMusicPlayer />
