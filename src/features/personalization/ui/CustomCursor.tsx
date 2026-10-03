@@ -9,15 +9,18 @@ export type CursorMode = "native" | "halo" | "minimal" | "crosshair" | "comet";
 const CURSOR_ACTIVE_SELECTOR =
   "a,button,input,select,textarea,[role='button'],[data-cursor='active'],.react-flow__node";
 
-function readCursorMode(): CursorMode {
-  const stored = getLocalStorageItem(CURSOR_KEY);
-  return stored === "native" ||
-    stored === "halo" ||
-    stored === "minimal" ||
-    stored === "crosshair" ||
-    stored === "comet"
-    ? stored
+export function parseCursorMode(value: string | null): CursorMode {
+  return value === "native" ||
+    value === "halo" ||
+    value === "minimal" ||
+    value === "crosshair" ||
+    value === "comet"
+    ? value
     : "halo";
+}
+
+function readCursorMode(): CursorMode {
+  return parseCursorMode(getLocalStorageItem(CURSOR_KEY));
 }
 
 export function CustomCursor() {
