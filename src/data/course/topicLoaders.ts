@@ -1,5 +1,9 @@
 import type { Topic } from "@/entities/course/model/types";
 import { loadLinearAcademyBlocks } from "@/data/linear-academy/loaders";
+import { loadTopicPatches } from "@/data/topic-enrichments/loaders";
+import { applyTopicPatches } from "@/data/topic-enrichments/model";
+import { loadTopicSupplement } from "@/data/topic-supplements/loaders";
+import { promoteLegacyRigor } from "@/entities/course/model/learning-architecture/rigor";
 
 export type TopicLoader = () => Promise<Topic>;
 
@@ -101,13 +105,25 @@ export async function loadCourseTopic(topicId: string): Promise<Topic | null> {
   const loader = topicLoaders[topicId];
   if (!loader) return null;
 
-  const [topic, academyBlocks] = await Promise.all([
+  const [topic, academyBlocks, patches, supplement] = await Promise.all([
     loader(),
     loadLinearAcademyBlocks(topicId),
+    loadTopicPatches(topicId),
+    loadTopicSupplement(topicId),
   ]);
 
+  const enriched = applyTopicPatches(
+    {
+      ...topic,
+      blocks: [...topic.blocks, ...academyBlocks],
+    },
+    patches,
+  );
+
   return {
-    ...topic,
-    blocks: [...topic.blocks, ...academyBlocks],
+    ...enriched,
+    blocks: promoteLegacyRigor(
+      supplement.length ? [...enriched.blocks, ...supplement] : enriched.blocks,
+    ),
   };
 }

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { topics } from "@/data/course";
 import { topicMeta } from "@/data/courseMeta";
+import { composeTopicWithSupplements } from "@/data/topic-supplements";
 import { loadCourseTopic, topicLoaders } from "./topicLoaders";
 
 describe("topic loaders", () => {
@@ -11,7 +12,7 @@ describe("topic loaders", () => {
   it("loads every topic with the same enriched content as the full registry", async () => {
     for (const topicId of Object.keys(topicLoaders)) {
       const topic = await loadCourseTopic(topicId);
-      expect(topic).toEqual(topics[topicId]);
+      expect(topic).toEqual(composeTopicWithSupplements(topics[topicId]));
     }
   });
 });

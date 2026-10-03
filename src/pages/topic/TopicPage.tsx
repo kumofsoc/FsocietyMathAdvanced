@@ -27,7 +27,6 @@ import { MatrixExampleStrip, RichMatrixText } from "@/visualizations/linear/Matr
 import { MatrixOperationScene } from "@/visualizations/linear/MatrixOperationScene";
 import { toLayeredTopic } from "@/entities/course/model/learning-architecture/adapter";
 import { linearFoundationBlueprints } from "@/data/learning-architecture/linear-foundations";
-import { composeTopicWithSupplements } from "@/data/topic-supplements";
 import { TopicLabInsert, TopicVisualInsert } from "@/visualizations/registry/TopicVisualRegistry";
 
 const PracticePanel = lazy(() =>
@@ -582,7 +581,7 @@ export function TopicPage({ topicId }: { topicId: string }) {
 }
 
 function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
-  const topic = useMemo(() => composeTopicWithSupplements(baseTopic), [baseTopic]);
+  const topic = baseTopic;
   const chapter = chapters.find((item) => item.id === topic.chapterId);
   const tracksLearning = isTrackedTopic(topic.id);
   const theorySentinel = useRef<HTMLDivElement>(null);
