@@ -37,6 +37,7 @@ import { copyTextToClipboard } from "@/shared/lib/clipboard";
 import { CollapsibleProof } from "@/features/proof-collapse/ui/CollapsibleProof";
 import { buildBlockDeepLink, parseVisualMathHash } from "@/shared/lib/blockDeepLink";
 import { ReadingWidthControl } from "@/features/reading-width/ui/ReadingWidthControl";
+import { useAppShellStore } from "@/app/store/useAppShellStore";
 import { loadReadingWidth, saveReadingWidth, type ReadingWidth } from "@/features/reading-width/model/readingWidth";
 
 const PracticePanel = lazy(() =>
@@ -797,6 +798,8 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   const [topicSaved, setTopicSavedState] = useState(() =>
     loadSavedTopicIds().includes(topic.id),
   );
+  const readingFocusMode = useAppShellStore((state) => state.readingFocusMode);
+  const setReadingFocusMode = useAppShellStore((state) => state.setReadingFocusMode);
   const [readingWidth, setReadingWidth] = useState<ReadingWidth>(loadReadingWidth);
 
   useEffect(() => {
@@ -1247,6 +1250,17 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
         >
           <span aria-hidden="true">◌</span>
           <strong>Карта</strong>
+        </button>
+
+        <button
+          type="button"
+          className={readingFocusMode ? "focus active" : "focus"}
+          onClick={() => setReadingFocusMode((value) => !value)}
+          aria-pressed={readingFocusMode}
+          title={readingFocusMode ? "Вернуть обычный интерфейс" : "Оставить только режим чтения"}
+        >
+          <span aria-hidden="true">{readingFocusMode ? "◉" : "◎"}</span>
+          <strong>{readingFocusMode ? "Фокус включён" : "Фокус"}</strong>
         </button>
 
         {tracksLearning && (
