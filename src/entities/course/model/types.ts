@@ -50,6 +50,7 @@ export interface MatrixOperationVisual {
 }
 
 export interface ContentBlock {
+  source?: "core" | "academy" | "supplement";
   kind: BlockKind;
   title: string;
   body: string;

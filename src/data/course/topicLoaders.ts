@@ -1,5 +1,5 @@
 import type { Topic } from "@/entities/course/model/types";
-import { enrichTopic } from "./enrichments";
+import { loadLinearAcademyBlocks } from "@/data/linear-academy/loaders";
 
 export type TopicLoader = () => Promise<Topic>;
 
@@ -99,5 +99,15 @@ export function hasCourseTopic(topicId: string) {
 
 export async function loadCourseTopic(topicId: string): Promise<Topic | null> {
   const loader = topicLoaders[topicId];
-  return loader ? loader() : null;
+  if (!loader) return null;
+
+  const [topic, academyBlocks] = await Promise.all([
+    loader(),
+    loadLinearAcademyBlocks(topicId),
+  ]);
+
+  return {
+    ...topic,
+    blocks: [...topic.blocks, ...academyBlocks],
+  };
 }

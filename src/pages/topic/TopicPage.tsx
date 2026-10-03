@@ -5,8 +5,6 @@ import { chapters, topicMeta } from "@/data/courseMeta";
 import type { CourseSearchEntry } from "@/data/courseSearchIndex";
 import { loadCourseTopic } from "@/data/course/topicLoaders";
 import { practiceTaskIdsByTopic } from "@/data/practiceMeta";
-import { linearAcademyBlocks } from "@/data/linearAcademy";
-import { linearAcademyPitfallBlocks } from "@/data/linearAcademyPitfalls";
 import {
   LEARNING_EVENT,
   loadReadingProgress,
@@ -114,12 +112,8 @@ function displayBlockTitle(title: string) {
 }
 
 const BLOCK_TARGET_KEY = "fsociety-block-target-v1";
-function isAdvancedLearningBlock(topicId: string, block: ContentBlock) {
-  return (
-    linearAcademyBlocks[topicId]?.includes(block) ||
-    linearAcademyPitfallBlocks[topicId]?.includes(block) ||
-    false
-  );
+function isAdvancedLearningBlock(_topicId: string, block: ContentBlock) {
+  return block.source === "academy";
 }
 
 const ACADEMY_CHAPTERS = new Set([
