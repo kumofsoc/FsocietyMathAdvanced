@@ -1,8 +1,8 @@
 :root{
-  --readable-xs:12px;
-  --readable-sm:13px;
-  --readable-body:15px;
-  --readable-copy:16px;
+  --readable-xs:13px;
+  --readable-sm:14px;
+  --readable-body:16px;
+  --readable-copy:17px;
 }
 
 body{
@@ -149,7 +149,7 @@ body{
 
 @media(min-width:1600px){
   :root{
-    --readable-xs:12px;
+    --readable-xs:13px;
     --readable-sm:14px;
     --readable-body:16px;
     --readable-copy:17px;
@@ -190,10 +190,10 @@ body{
 
 @media(max-width:700px){
   :root{
-    --readable-xs:12px;
-    --readable-sm:13px;
-    --readable-body:15px;
-    --readable-copy:15px;
+    --readable-xs:13px;
+    --readable-sm:14px;
+    --readable-body:16px;
+    --readable-copy:16px;
   }
 
   .content-block p,
