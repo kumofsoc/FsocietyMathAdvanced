@@ -287,3 +287,71 @@
   .map-focus-toolbar{left:8px;right:8px;top:8px;align-items:flex-start}
   .map-focus-toolbar>div:last-child{flex-direction:column}
 }
+
+
+/* ===== UX pass: graph-only controls ===== */
+.map-focus-toolbar{
+  position:fixed;
+  left:16px;
+  right:auto;
+  top:16px;
+  z-index:1400;
+  width:min(560px,calc(100vw - 32px));
+  max-width:none;
+  padding:9px 10px;
+  border-radius:14px;
+  pointer-events:auto;
+}
+.map-focus-toolbar>div:first-child{
+  min-width:0;
+  max-width:300px;
+}
+.map-focus-toolbar strong{
+  font-size:14px;
+  line-height:1.2;
+}
+.map-focus-toolbar span{
+  font-size:13px;
+  line-height:1.3;
+}
+.map-focus-toolbar button{
+  min-height:40px;
+  padding:0 12px;
+  border-radius:9px;
+  font-size:14px;
+  white-space:nowrap;
+}
+.map-focus-exit{
+  border-color:color-mix(in srgb,var(--accent) 60%,var(--border))!important;
+  background:color-mix(in srgb,var(--accent) 10%,var(--elevated))!important;
+}
+.map-focus-exit kbd{
+  margin-left:5px;
+  padding:2px 5px;
+  border:1px solid color-mix(in srgb,var(--text) 16%,var(--border));
+  border-radius:5px;
+  background:color-mix(in srgb,var(--bg) 68%,transparent);
+  color:var(--muted);
+  font:700 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.knowledge-map-canvas:before,
+.knowledge-map-canvas:after{
+  font-size:11px;
+}
+@media(max-width:760px){
+  .map-focus-toolbar{
+    left:8px;
+    right:8px;
+    top:8px;
+    width:auto;
+    max-width:none;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+  }
+  .map-focus-toolbar>div:first-child{max-width:none}
+  .map-focus-toolbar>div:last-child{flex-direction:row}
+  .map-focus-toolbar span{font-size:12px}
+  .map-focus-toolbar button{min-height:38px;font-size:13px}
+  .map-focus-exit kbd{display:none}
+}
