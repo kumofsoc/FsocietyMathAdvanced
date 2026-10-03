@@ -287,3 +287,9 @@
   .map-focus-toolbar{left:8px;right:8px;top:8px;align-items:flex-start}
   .map-focus-toolbar>div:last-child{flex-direction:column}
 }
+
+.knowledge-map-graph-loading{min-height:inherit;height:100%;display:grid;place-items:center;align-content:center;gap:12px;padding:24px;text-align:center;background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--accent) 7%,transparent),transparent 34%)}
+.knowledge-map-graph-loading>span{width:34px;height:34px;border:2px solid color-mix(in srgb,var(--border) 90%,transparent);border-top-color:var(--accent);border-radius:50%;animation:knowledge-map-loader .8s linear infinite}
+.knowledge-map-graph-loading>div{display:grid;gap:5px}.knowledge-map-graph-loading strong{font-size:14px}.knowledge-map-graph-loading small{color:var(--muted);font-size:12px}
+@keyframes knowledge-map-loader{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.knowledge-map-graph-loading>span{animation:none;border-top-color:var(--accent2)}}
