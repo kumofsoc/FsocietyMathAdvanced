@@ -1,10 +1,18 @@
 export type HomeMotionTier = "cinematic" | "reduced" | "static";
 
+export type MotionProfile = "full" | "balanced" | "eco" | "off";
+
 export interface HomeMotionEnvironment {
-  profile: "full" | "balanced" | "eco" | "off";
+  profile: MotionProfile;
   reducedMotion: boolean;
   mobile: boolean;
   coarsePointer: boolean;
+}
+
+export function parseMotionProfile(value: string | null): MotionProfile {
+  return value === "full" || value === "balanced" || value === "eco" || value === "off"
+    ? value
+    : "balanced";
 }
 
 export function getHomeMotionMode(env: HomeMotionEnvironment): HomeMotionTier {
