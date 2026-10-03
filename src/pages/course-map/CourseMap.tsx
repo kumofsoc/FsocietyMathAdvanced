@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import {
   chapters,
   topicListMeta,
@@ -10,7 +10,6 @@ import {
   type CourseMapGraphModel,
   type CourseMapMode,
 } from "@/features/course-map/model/courseMapGraph";
-import { G6CourseGraph } from "@/features/course-map/ui/G6CourseGraph";
 import { LEARNING_EVENT } from "@/features/learning/model/learning";
 import {
   getChapterProgress,
@@ -19,6 +18,12 @@ import {
   getTopicProgress,
 } from "@/features/learning/model/progress";
 import "@/styles/course-map.css";
+
+const G6CourseGraph = lazy(() =>
+  import("@/features/course-map/ui/G6CourseGraph").then((module) => ({
+    default: module.G6CourseGraph,
+  })),
+);
 
 type EdgeMode = "all" | "prerequisite" | "study-flow";
 
@@ -517,12 +522,24 @@ function CourseMapInner() {
         )}
 
         <div className="knowledge-map-canvas">
-          <G6CourseGraph
-            model={visibleGraphModel}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            onOpen={openGraphNode}
-          />
+          <Suspense
+            fallback={
+              <div className="knowledge-map-graph-loading" role="status">
+                <span />
+                <div>
+                  <strong>Загружаю граф курса…</strong>
+                  <small>Интерфейс карты уже доступен, G6 подключается отдельно.</small>
+                </div>
+              </div>
+            }
+          >
+            <G6CourseGraph
+              model={visibleGraphModel}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              onOpen={openGraphNode}
+            />
+          </Suspense>
         </div>
 
         {inspector}
