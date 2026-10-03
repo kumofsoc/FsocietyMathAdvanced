@@ -182,7 +182,7 @@
   }
   .topbar-context>button{display:none}
   .topbar-context>span{display:none}
-  .topbar-context>strong{font-size:13px}
+  .topbar-context>strong{font-size:var(--font-xs)}
 }
 @media(max-width:680px){
   .topbar-context{display:none}
