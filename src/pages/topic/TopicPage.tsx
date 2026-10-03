@@ -29,6 +29,7 @@ import { toLayeredTopic } from "@/entities/course/model/learning-architecture/ad
 import { linearFoundationBlueprints } from "@/data/learning-architecture/linear-foundations";
 import { TopicLabInsert, TopicVisualInsert } from "@/visualizations/registry/TopicVisualRegistry";
 import { RouteSkeleton } from "@/shared/ui/RouteSkeleton";
+import { loadTopicResume, saveTopicResume } from "@/features/learning/model/topicResume";
 import { loadSavedTopicIds, SAVED_TOPICS_EVENT, SAVED_TOPICS_KEY, toggleSavedTopic } from "@/features/saved-topics/model/savedTopics";
 
 const PracticePanel = lazy(() =>
@@ -638,6 +639,11 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   const theorySentinel = useRef<HTMLDivElement>(null);
   const outlineRef = useRef<HTMLDivElement>(null);
   const [activeBlock, setActiveBlock] = useState(0);
+  const [resumeBlockIndex, setResumeBlockIndex] = useState<number | null>(() => {
+    const saved = loadTopicResume(topic.id);
+    if (!saved || saved.blockIndex >= topic.blocks.length) return null;
+    return saved.blockIndex;
+  });
   const [theoryRead, setTheoryRead] = useState(() => loadSet(THEORY_KEY).has(topic.id));
   const [readingRatio, setReadingRatio] = useState(() =>
     theoryRead ? 1 : (loadReadingProgress()[topic.id] ?? 0),
@@ -679,6 +685,27 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   useEffect(() => {
     setActiveBlock(0);
     let observer: IntersectionObserver | null = null;
+    let resumeTimer: number | null = null;
+    let resumeCandidate = -1;
+
+    const scheduleResumePersist = (index: number) => {
+      if (index === resumeCandidate) return;
+      resumeCandidate = index;
+
+      if (resumeTimer !== null) {
+        window.clearTimeout(resumeTimer);
+      }
+
+      resumeTimer = window.setTimeout(() => {
+        resumeTimer = null;
+        if (document.visibilityState !== "visible") return;
+        if (resumeCandidate < 0 || resumeCandidate >= topic.blocks.length) return;
+
+        if (saveTopicResume(topic.id, resumeCandidate)) {
+          setResumeBlockIndex(resumeCandidate);
+        }
+      }, 1000);
+    };
 
     const frame = requestAnimationFrame(() => {
       const nodes = Array.from(
@@ -703,6 +730,7 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
             (visible.target as HTMLElement).dataset.blockIndex ?? "0",
           );
           setActiveBlock(index);
+          scheduleResumePersist(index);
         },
         {
           rootMargin: "-18% 0px -64% 0px",
@@ -716,6 +744,9 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
     return () => {
       cancelAnimationFrame(frame);
       observer?.disconnect();
+      if (resumeTimer !== null) {
+        window.clearTimeout(resumeTimer);
+      }
     };
   }, [topic.id, topic.blocks.length]);
 
@@ -951,6 +982,21 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
           </div>
         )}
       </header>
+
+      {resumeBlockIndex !== null && resumeBlockIndex > 0 && topic.blocks[resumeBlockIndex] && (
+        <aside className="topic-resume-card" aria-label="Продолжить чтение">
+          <div>
+            <span>ПРОДОЛЖИТЬ ЧТЕНИЕ</span>
+            <strong>
+              {labels[topic.blocks[resumeBlockIndex].kind]} · {displayBlockTitle(topic.blocks[resumeBlockIndex].title)}
+            </strong>
+          </div>
+          <button type="button" onClick={() => jumpToBlock(resumeBlockIndex)}>
+            Продолжить
+            <span aria-hidden="true">↓</span>
+          </button>
+        </aside>
+      )}
 
       <nav className="topic-quick-actions" aria-label="Быстрые действия по теме">
         <button
