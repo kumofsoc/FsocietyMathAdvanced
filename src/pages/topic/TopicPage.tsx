@@ -34,6 +34,7 @@ import { loadTopicResume, saveTopicResume } from "@/features/learning/model/topi
 import { loadSavedTopicIds, SAVED_TOPICS_EVENT, SAVED_TOPICS_KEY, toggleSavedTopic } from "@/features/saved-topics/model/savedTopics";
 import { TopicLocalSearch } from "@/features/topic-search/ui/TopicLocalSearch";
 import { copyTextToClipboard } from "@/shared/lib/clipboard";
+import { buildBlockDeepLink, parseVisualMathHash } from "@/shared/lib/blockDeepLink";
 
 const PracticePanel = lazy(() =>
   import("@/features/learning/ui/PracticePanel").then((module) => ({ default: module.PracticePanel })),
@@ -190,6 +191,53 @@ function CopyableMath({
   );
 }
 
+function CopyBlockLinkButton({
+  topicId,
+  blockIndex,
+}: {
+  topicId: string;
+  blockIndex: number;
+}) {
+  const [copied, setCopied] = useState(false);
+  const resetTimer = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (resetTimer.current !== null) {
+        window.clearTimeout(resetTimer.current);
+      }
+    },
+    [],
+  );
+
+  const copyLink = async () => {
+    const link = buildBlockDeepLink(window.location.href, topicId, blockIndex);
+    const ok = await copyTextToClipboard(link);
+    setCopied(ok);
+
+    if (resetTimer.current !== null) {
+      window.clearTimeout(resetTimer.current);
+    }
+    resetTimer.current = window.setTimeout(() => {
+      setCopied(false);
+      resetTimer.current = null;
+    }, 1400);
+  };
+
+  return (
+    <button
+      type="button"
+      className={"block-deep-link-button " + (copied ? "copied" : "")}
+      onClick={() => void copyLink()}
+      title="Скопировать ссылку на этот блок"
+      aria-label="Скопировать ссылку на этот блок"
+    >
+      <span aria-hidden="true">{copied ? "✓" : "↗"}</span>
+      <strong>{copied ? "Ссылка скопирована" : "Ссылка"}</strong>
+    </button>
+  );
+}
+
 const BLOCK_TARGET_KEY = "fsociety-block-target-v1";
 function isAdvancedLearningBlock(_topicId: string, block: ContentBlock) {
   return block.source === "academy";
@@ -238,7 +286,7 @@ function dependencyTarget(dependency: string, courseSearchIndex: CourseSearchEnt
 
 function openBlock(topicId: string, index: number) {
   const id = "block-" + topicId + "-" + index;
-  if (window.location.hash.replace(/^#/, "") === topicId) {
+  if (parseVisualMathHash(window.location.hash).route === topicId) {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
     return;
   }
@@ -333,29 +381,32 @@ function ContentCard({
       <div className="block-body">
         <div className="block-title-row">
           <h3>{displayBlockTitle(block.title)}</h3>
-          {block.kind === "theorem" && (
-            <div className="block-title-actions">
-              <CopyContentButton
-                value={
-                  displayBlockTitle(block.title) +
-                  "\n\n" +
-                  block.body +
-                  (block.formula ? "\n\n" + block.formula : "")
-                }
-                label="Текст"
-                className="theorem-text"
-                title="Скопировать текст теоремы"
-              />
-              <button
-                className={"save-theorem-button " + (saved ? "saved" : "")}
-                onClick={toggleSaved}
-                title={saved ? "Убрать из сохранённых" : "Сохранить теорему"}
-                aria-label={saved ? "Убрать теорему из сохранённых" : "Сохранить теорему"}
-              >
-                {saved ? "★" : "☆"}
-              </button>
-            </div>
-          )}
+          <div className="block-title-actions">
+            <CopyBlockLinkButton topicId={topic.id} blockIndex={index} />
+            {block.kind === "theorem" && (
+              <>
+                <CopyContentButton
+                  value={
+                    displayBlockTitle(block.title) +
+                    "\n\n" +
+                    block.body +
+                    (block.formula ? "\n\n" + block.formula : "")
+                  }
+                  label="Текст"
+                  className="theorem-text"
+                  title="Скопировать текст теоремы"
+                />
+                <button
+                  className={"save-theorem-button " + (saved ? "saved" : "")}
+                  onClick={toggleSaved}
+                  title={saved ? "Убрать из сохранённых" : "Сохранить теорему"}
+                  aria-label={saved ? "Убрать теорему из сохранённых" : "Сохранить теорему"}
+                >
+                  {saved ? "★" : "☆"}
+                </button>
+              </>
+            )}
+          </div>
         </div>
         {!block.matrixOperation && <p><RichMatrixText text={block.body} /></p>}
 
@@ -743,18 +794,43 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   }, [topic.id]);
 
   useEffect(() => {
-    const target = sessionStorage.getItem(BLOCK_TARGET_KEY);
-    if (!target) return;
-    const [targetTopic, rawIndex] = target.split("::");
-    if (targetTopic !== topic.id) return;
-    sessionStorage.removeItem(BLOCK_TARGET_KEY);
-    const timer = window.setTimeout(() => {
-      document
-        .getElementById("block-" + topic.id + "-" + rawIndex)
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 140);
-    return () => window.clearTimeout(timer);
-  }, [topic.id]);
+    let timer: number | null = null;
+
+    const scrollToIndex = (index: number, behavior: ScrollBehavior = "smooth") => {
+      if (!Number.isInteger(index) || index < 0 || index >= topic.blocks.length) return;
+      if (timer !== null) window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        document
+          .getElementById("block-" + topic.id + "-" + index)
+          ?.scrollIntoView({ behavior, block: "start" });
+        timer = null;
+      }, 140);
+    };
+
+    const applyHashTarget = () => {
+      const parsed = parseVisualMathHash(window.location.hash);
+      if (parsed.topicId !== topic.id || parsed.blockIndex === null) return false;
+      scrollToIndex(parsed.blockIndex, "smooth");
+      return true;
+    };
+
+    if (!applyHashTarget()) {
+      const target = sessionStorage.getItem(BLOCK_TARGET_KEY);
+      if (target) {
+        const [targetTopic, rawIndex] = target.split("::");
+        if (targetTopic === topic.id) {
+          sessionStorage.removeItem(BLOCK_TARGET_KEY);
+          scrollToIndex(Number(rawIndex), "smooth");
+        }
+      }
+    }
+
+    window.addEventListener("hashchange", applyHashTarget);
+    return () => {
+      window.removeEventListener("hashchange", applyHashTarget);
+      if (timer !== null) window.clearTimeout(timer);
+    };
+  }, [topic.id, topic.blocks.length]);
 
   useEffect(() => {
     setActiveBlock(0);
