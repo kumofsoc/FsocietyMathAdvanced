@@ -61,7 +61,11 @@ function RouteScrollRestorer({ route }: { route: string }) {
 
 function shouldLoadMathBackdrop() {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
-  return parseMotionProfile(getLocalStorageItem(MOTION_PROFILE_KEY)) !== "off";
+  if (window.matchMedia("(max-width: 820px)").matches) return false;
+  if (window.matchMedia("(pointer: coarse)").matches) return false;
+
+  const profile = parseMotionProfile(getLocalStorageItem(MOTION_PROFILE_KEY));
+  return profile === "full" || profile === "balanced";
 }
 
 function DeferredMathBackdrop() {
