@@ -6,6 +6,7 @@ import type {
   ProfileDto,
   ProgressSyncRequest,
 } from "@/shared/api/types";
+import { readLocalStorage, removeLocalStorage, writeLocalStorage } from "@/shared/lib/browserStorage";
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 const TOKEN_KEY = "fsocietymath-access-token-v1";
@@ -29,12 +30,12 @@ export function isBackendConfigured() {
 }
 
 export function setAccessToken(token: string | null) {
-  if (token) localStorage.setItem(TOKEN_KEY, token);
-  else localStorage.removeItem(TOKEN_KEY);
+  if (token) writeLocalStorage(TOKEN_KEY, token);
+  else removeLocalStorage(TOKEN_KEY);
 }
 
 function getAccessToken() {
-  return localStorage.getItem(TOKEN_KEY);
+  return readLocalStorage(TOKEN_KEY);
 }
 
 async function request<T>(
