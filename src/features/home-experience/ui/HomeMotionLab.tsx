@@ -1,5 +1,61 @@
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { HomeMotionTier } from "../model/homeExperience";
-import { HomeMathField3D } from "../visual/HomeMathField3D";
+
+const HomeMathField3D = lazy(() =>
+  import("../visual/HomeMathField3D").then((module) => ({
+    default: module.HomeMathField3D,
+  })),
+);
+
+function FieldFallback() {
+  return (
+    <div className="math-field-runtime" aria-hidden="true">
+      <div className="math-field-fallback">
+        <i /><i /><i /><span>∇</span>
+      </div>
+    </div>
+  );
+}
+
+function DeferredMathField({ tier }: { tier: HomeMotionTier }) {
+  const anchor = useRef<HTMLDivElement>(null);
+  const [nearViewport, setNearViewport] = useState(false);
+
+  useEffect(() => {
+    if (tier !== "cinematic" || nearViewport) return;
+    const element = anchor.current;
+    if (!element) return;
+
+    if (!("IntersectionObserver" in window)) {
+      setNearViewport(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setNearViewport(true);
+        observer.disconnect();
+      },
+      { rootMargin: "500px 0px" },
+    );
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [nearViewport, tier]);
+
+  if (tier !== "cinematic" || !nearViewport) {
+    return <div ref={anchor}><FieldFallback /></div>;
+  }
+
+  return (
+    <div ref={anchor}>
+      <Suspense fallback={<FieldFallback />}>
+        <HomeMathField3D tier={tier} />
+      </Suspense>
+    </div>
+  );
+}
 
 export function HomeMotionLab({ motionTier }: { motionTier: HomeMotionTier }) {
   return (
@@ -13,7 +69,7 @@ export function HomeMotionLab({ motionTier }: { motionTier: HomeMotionTier }) {
       </div>
 
       <div className="motion-lab-stage" data-parallax>
-        <HomeMathField3D tier={motionTier}/>
+        <DeferredMathField tier={motionTier} />
         <div className="motion-coordinate x">X</div>
         <div className="motion-coordinate y">Y</div>
         <div className="motion-coordinate z">Z</div>
