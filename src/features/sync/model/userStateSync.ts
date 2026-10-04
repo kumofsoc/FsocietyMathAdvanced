@@ -57,6 +57,7 @@ const MIGRATION_VERSION = 2;
 const MIGRATION_PREFIX =
   "visualmath-backend-migration-v" + MIGRATION_VERSION + "::";
 const PREFERENCES_MIGRATION_PREFIX = "visualmath-preferences-migration-v1::";
+const PROGRESS_MIGRATION_PREFIX = "visualmath-progress-migration-v1::";
 
 let syncInFlight: Promise<UserStateSyncResult> | null = null;
 let syncing = false;
@@ -126,13 +127,16 @@ async function syncWorkspace(userId: string) {
 
   let remote = await api.workspace.get();
   const remoteWasPristine = isPristineWorkspace(remote);
-  const reconcileSavedTopics =
-    savedTopicsAreDirty() || (!migrated && remoteWasPristine);
+  const localSet = new Set(localSaved);
+  const remoteSet = new Set(remote.savedTopicIds);
 
-  if (reconcileSavedTopics) {
-    const localSet = new Set(localSaved);
-    const remoteSet = new Set(remote.savedTopicIds);
-
+  if (!migrated) {
+    for (const topicId of localSet) {
+      if (!remoteSet.has(topicId)) {
+        remote = await api.workspace.saveTopic(topicId, true);
+      }
+    }
+  } else if (savedTopicsAreDirty()) {
     for (const topicId of localSet) {
       if (!remoteSet.has(topicId)) {
         remote = await api.workspace.saveTopic(topicId, true);
@@ -356,9 +360,24 @@ async function syncPreferences(userId: string) {
   }
 
   hydrateLocalPreferences(remote);
-  useAppShellStore.getState().setSidebarCollapsed(remote.sidebarCollapsed);
+  useAppShellStore.setState({ sidebarCollapsed: remote.sidebarCollapsed });
   writeLocalStorage(key, "1");
   return remote;
+}
+
+async function syncProgressState(userId: string) {
+  const key = PROGRESS_MIGRATION_PREFIX + userId;
+  const migrated = readLocalStorage(key) === "1";
+
+  await syncLearningMutations();
+
+  if (!migrated) {
+    const snapshot = await syncProgressToBackend();
+    writeLocalStorage(key, "1");
+    return snapshot;
+  }
+
+  return api.progress.get();
 }
 
 async function performSync(userId: string): Promise<UserStateSyncResult> {
@@ -378,8 +397,7 @@ async function performSync(userId: string): Promise<UserStateSyncResult> {
 
   syncing = true;
   try {
-    const progress = await syncProgressToBackend();
-    await syncLearningMutations();
+    const progress = await syncProgressState(userId);
     const readingSnapshot = await syncReadingBlocks();
     const workspace = await syncWorkspace(userId);
     const bookmarks = await syncBookmarks();
