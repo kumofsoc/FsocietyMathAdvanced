@@ -1,9 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const apiBaseUrl =
+const apiBaseUrl = (
   process.env.VISUALMATH_E2E_API_BASE_URL ??
   process.env.VITE_API_BASE_URL ??
-  "";
+  ""
+).replace(/\/+$/, "");
 
 if (!apiBaseUrl) {
   throw new Error(
@@ -24,14 +25,14 @@ export default defineConfig({
     ? [["line"], ["html", { open: "never", outputFolder: "playwright-report-backend" }]]
     : "list",
   use: {
-    baseURL: "http://127.0.0.1:4183",
+    baseURL: "http://localhost:5173",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
   },
   webServer: {
-    command: "pnpm build && pnpm preview --host 127.0.0.1 --port 4183",
-    url: "http://127.0.0.1:4183",
+    command: "pnpm build && pnpm preview --host 127.0.0.1 --port 5173",
+    url: "http://localhost:5173",
     reuseExistingServer: false,
     timeout: 90_000,
     env: {
