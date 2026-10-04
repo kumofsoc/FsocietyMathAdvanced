@@ -214,3 +214,88 @@ describe("API cross-tab refresh serialization", () => {
     expect(locks.request).toHaveBeenCalledTimes(2);
   });
 });
+
+describe("durable logout intent", () => {
+  const logoutPendingKey = "visualmath-auth-logout-pending-v1";
+
+  beforeEach(() => {
+    vi.resetModules();
+    const values = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => values.set(key, String(value)),
+      removeItem: (key: string) => values.delete(key),
+    });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("keeps logout durable across a network failure and retries before refresh", async () => {
+    const calls: string[] = [];
+    let logoutAttempts = 0;
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const path = new URL(String(input)).pathname;
+        calls.push(path);
+
+        if (path === "/api/v1/auth/logout") {
+          logoutAttempts += 1;
+          if (logoutAttempts === 1) throw new TypeError("offline");
+          return new Response(null, { status: 204 });
+        }
+        if (path === "/api/v1/auth/refresh") {
+          throw new Error("refresh must not run while logout is pending");
+        }
+        throw new Error("unexpected fetch " + path);
+      }),
+    );
+
+    const firstClient = await import("./client");
+    firstClient.setAccessToken("token-a", "2026-10-04T16:00:00Z");
+
+    await expect(firstClient.api.auth.logout()).rejects.toMatchObject({
+      code: "network_error",
+    });
+    expect(localStorage.getItem(logoutPendingKey)).toBe("1");
+    expect(firstClient.getAccessTokenSnapshot().accessToken).toBeNull();
+
+    vi.resetModules();
+    const reloadedClient = await import("./client");
+    expect(await reloadedClient.bootstrapBackendSession()).toBeNull();
+
+    expect(calls).toEqual([
+      "/api/v1/auth/logout",
+      "/api/v1/auth/logout",
+    ]);
+    expect(localStorage.getItem(logoutPendingKey)).toBeNull();
+  });
+
+  it("successful explicit login clears a stale logout marker", async () => {
+    localStorage.setItem(logoutPendingKey, "1");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const path = new URL(String(input)).pathname;
+        if (path === "/api/v1/auth/login") {
+          return jsonResponse(session("user-b", "token-b"));
+        }
+        throw new Error("unexpected fetch " + path);
+      }),
+    );
+
+    const client = await import("./client");
+    const loggedIn = await client.api.auth.login({
+      email: "user-b@example.com",
+      password: "VisualMath!2026",
+    });
+
+    expect(loggedIn.user.id).toBe("user-b");
+    expect(localStorage.getItem(logoutPendingKey)).toBeNull();
+    expect(client.getAccessTokenSnapshot().accessToken).toBe("token-b");
+  });
+});

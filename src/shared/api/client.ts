@@ -1,4 +1,9 @@
 import { runtimeConfig } from "@/shared/config/runtime";
+import {
+  readLocalStorage,
+  removeLocalStorage,
+  writeLocalStorage,
+} from "@/shared/lib/browserStorage";
 import type {
   ActivityHeatmapDto,
   ActivityStatsDto,
@@ -33,6 +38,7 @@ let accessToken: string | null = null;
 let accessExpiresAt: string | null = null;
 let refreshInFlight: Promise<AuthResponseDto | null> | null = null;
 const AUTH_COOKIE_LOCK_NAME = "visualmath-auth-cookie-v1";
+const LOGOUT_PENDING_KEY = "visualmath-auth-logout-pending-v1";
 let authTransitionTail: Promise<void> = Promise.resolve();
 let explicitAuthPending = 0;
 let authGeneration = 0;
@@ -97,6 +103,18 @@ export function getAccessTokenSnapshot() {
     accessToken,
     accessExpiresAt,
   };
+}
+
+function hasPendingLogout() {
+  return readLocalStorage(LOGOUT_PENDING_KEY) === "1";
+}
+
+function markPendingLogout() {
+  writeLocalStorage(LOGOUT_PENDING_KEY, "1");
+}
+
+function clearPendingLogout() {
+  removeLocalStorage(LOGOUT_PENDING_KEY);
 }
 
 function backendUrl(path: string) {
@@ -265,7 +283,9 @@ async function withAuthCookieLock<T>(work: () => Promise<T>): Promise<T> {
 }
 
 async function refreshAccessToken(): Promise<AuthResponseDto | null> {
-  if (!isBackendConfigured() || explicitAuthPending > 0) return null;
+  if (!isBackendConfigured() || explicitAuthPending > 0 || hasPendingLogout()) {
+    return null;
+  }
   if (refreshInFlight) return refreshInFlight;
 
   const generation = authGeneration;
@@ -385,7 +405,31 @@ async function requestBlob(
   }
 }
 
+async function flushPendingLogout() {
+  if (!hasPendingLogout()) return true;
+
+  try {
+    await rawRequest<void>(
+      "/api/v1/auth/logout",
+      { method: "POST" },
+      { auth: false, retryAuth: false },
+    );
+    clearPendingLogout();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function bootstrapBackendSession() {
+  if (hasPendingLogout()) {
+    const cleared = await flushPendingLogout();
+    if (!cleared) {
+      setAccessToken(null);
+      return null;
+    }
+  }
+
   const session = await refreshAccessToken();
   if (!session) return null;
   const bootstrap = await request<BootstrapDto>("/api/v1/me/bootstrap");
@@ -409,6 +453,7 @@ export const api = {
           { method: "POST", body: JSON.stringify(body) },
           { auth: false },
         );
+        clearPendingLogout();
         setAccessToken(session.accessToken, session.accessTokenExpiresAt);
         return session;
       }),
@@ -419,22 +464,26 @@ export const api = {
           { method: "POST", body: JSON.stringify(body) },
           { auth: false },
         );
+        clearPendingLogout();
         setAccessToken(session.accessToken, session.accessTokenExpiresAt);
         return session;
       }),
     refresh: refreshAccessToken,
-    logout: () =>
-      runExplicitAuth(async () => {
+    logout: () => {
+      markPendingLogout();
+      return runExplicitAuth(async () => {
         try {
           await rawRequest<void>(
             "/api/v1/auth/logout",
             { method: "POST" },
             { auth: false, retryAuth: false },
           );
+          clearPendingLogout();
         } finally {
           setAccessToken(null);
         }
-      }),
+      });
+    },
   },
   me: {
     get: () => request<UserDto>("/api/v1/me"),
