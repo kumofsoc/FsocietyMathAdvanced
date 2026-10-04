@@ -27,9 +27,11 @@ import {
   setBlockImportant,
 } from "@/features/important-blocks/model/importantBlocks";
 import {
+  clearLocalPreferencesDirty,
   hydrateLocalPreferences,
   isDefaultPreferences,
   loadLocalPreferences,
+  localPreferencesAreDirty,
 } from "@/features/personalization/model/preferencesStorage";
 import { useAppShellStore } from "@/app/store/useAppShellStore";
 
@@ -205,14 +207,16 @@ async function syncPreferences(userId: string) {
   const key = PREFERENCES_MIGRATION_PREFIX + userId;
   const migrated = readLocalStorage(key) === "1";
   const local = loadLocalPreferences();
+  const dirty = localPreferencesAreDirty();
   let remote = await api.preferences.get();
 
-  if (!migrated && isDefaultPreferences(remote)) {
+  if (dirty || (!migrated && isDefaultPreferences(remote))) {
     remote = await api.preferences.replace(local);
   }
 
   hydrateLocalPreferences(remote);
   useAppShellStore.getState().setSidebarCollapsed(remote.sidebarCollapsed);
+  clearLocalPreferencesDirty();
   writeLocalStorage(key, "1");
   return remote;
 }

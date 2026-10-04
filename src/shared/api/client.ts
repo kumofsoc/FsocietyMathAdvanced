@@ -1,3 +1,4 @@
+import { runtimeConfig } from "@/shared/config/runtime";
 import type {
   ActivityHeatmapDto,
   ActivityStatsDto,
@@ -18,12 +19,8 @@ import type {
   WorkspaceDto,
 } from "@/shared/api/types";
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
-const configuredTimeout = Number(import.meta.env.VITE_API_TIMEOUT_MS ?? 12000);
-const API_TIMEOUT_MS =
-  Number.isFinite(configuredTimeout) && configuredTimeout >= 1000
-    ? configuredTimeout
-    : 12000;
+const API_BASE_URL = runtimeConfig.apiBaseUrl;
+const API_TIMEOUT_MS = runtimeConfig.apiTimeoutMs;
 
 let accessToken: string | null = null;
 let accessExpiresAt: string | null = null;
