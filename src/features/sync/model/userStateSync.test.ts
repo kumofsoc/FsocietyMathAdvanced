@@ -284,6 +284,89 @@ describe("authenticated user state policy", () => {
     expect(loadPendingImportantBlockMutations()).toEqual({});
     expect(loadImportantBlocks()[0]?.updatedAt).toBe(900);
   });
+  it("retries note migration after core migration already completed", async () => {
+    const snapshot: BootstrapDto = {
+      version: 1,
+      generatedAt: "2026-10-04T08:00:00Z",
+      user: {
+        id: "user-1",
+        email: "user-1@example.com",
+        profile: {
+          displayName: "User 1",
+          handle: "user_1",
+          bio: "",
+          avatarUrl: null,
+          joinedAt: "2026-10-04T08:00:00Z",
+          updatedAt: "2026-10-04T08:00:00Z",
+        },
+      },
+      preferences: DEFAULT_PREFERENCES,
+      workspace: {
+        savedTopicIds: [],
+        topicResume: {},
+        readingWidth: "normal",
+      },
+      learning: {
+        revision: 1,
+        theoryRead: [],
+        solvedTaskIds: [],
+        savedTheoremIds: [],
+        reading: {},
+        readingProgress: {},
+        readingBlockIds: [],
+        lastTopicId: null,
+        updatedAt: "2026-10-04T08:00:00Z",
+      },
+      capabilities: { mediaAudio: false },
+    };
+
+    localStorage.setItem(ACCOUNT_CACHE_OWNER_KEY, "user-1");
+    localStorage.setItem("visualmath-backend-migration-v2::user-1", "1");
+    localStorage.setItem(
+      "visualmath-important-blocks-migration-v2::user-1",
+      "1",
+    );
+    saveBlockNote("rank", 1, "retained after partial migration");
+
+    const canonical = {
+      id: "rank::1",
+      topicId: "rank",
+      blockIndex: 1,
+      text: "retained after partial migration",
+      updatedAt: 999,
+    };
+    const notesList = vi.spyOn(api.notes, "list");
+    notesList
+      .mockResolvedValueOnce({
+        notes: [],
+        limit: 100,
+        offset: 0,
+        hasMore: false,
+      })
+      .mockResolvedValueOnce({
+        notes: [canonical],
+        limit: 100,
+        offset: 0,
+        hasMore: false,
+      });
+    const put = vi.spyOn(api.notes, "put").mockResolvedValue(canonical);
+    vi.spyOn(api.importantBlocks, "list").mockResolvedValue({ blocks: [] });
+
+    await syncAuthenticatedUserState("user-1", snapshot);
+
+    expect(put).toHaveBeenCalledWith(
+      "rank",
+      1,
+      "retained after partial migration",
+    );
+    expect(
+      localStorage.getItem("visualmath-notes-migration-v2::user-1"),
+    ).toBe("1");
+    expect(loadBlockNote("rank", 1)?.text).toBe(
+      "retained after partial migration",
+    );
+  });
+
   it("serializes overlapping account hydration instead of dropping the second account", async () => {
     const makeSnapshot = (userId: string, savedTopicId: string): BootstrapDto => ({
       version: 1,
