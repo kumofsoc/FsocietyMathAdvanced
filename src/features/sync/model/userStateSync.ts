@@ -22,6 +22,12 @@ import {
   loadImportantBlocks,
   setBlockImportant,
 } from "@/features/important-blocks/model/importantBlocks";
+import {
+  hydrateLocalPreferences,
+  isDefaultPreferences,
+  loadLocalPreferences,
+} from "@/features/personalization/model/preferencesStorage";
+import { useAppShellStore } from "@/app/store/useAppShellStore";
 
 const MIGRATION_VERSION = 1;
 const MIGRATION_PREFIX = "visualmath-backend-migration-v" + MIGRATION_VERSION + "::";
