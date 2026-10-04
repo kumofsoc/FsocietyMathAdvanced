@@ -1,152 +1,302 @@
 # Backend contract / frontend boundary
 
-VisualMath is **local-first with authenticated server sync**. The frontend remains fully usable when no backend is configured, while a configured backend becomes the canonical account-scoped store after authentication.
+VisualMath is **local-first for anonymous/offline use** and **server-canonical after authentication**.
+
+The frontend remains usable when no backend is configured. When a user authenticates successfully, account-scoped data is hydrated from the Go backend and local feature models become an optimistic cache/write-through boundary.
+
+Backend release gate used for this integration:
+
+```text
+kumofsoc/FsocietyMathAdvancedBackend
+809eb92876259caed3c4ad87801851ae167da512
+```
 
 ## Runtime configuration
+
+Local development:
 
 ```env
 VITE_API_BASE_URL=http://localhost:8080
 VITE_API_TIMEOUT_MS=12000
 ```
 
-The base URL is the backend origin. Frontend routes use the backend's real `/api/v1` namespace.
+Production:
 
-## Auth lifecycle
+```env
+VITE_API_BASE_URL=https://<final-visualmath-origin>
+VITE_API_TIMEOUT_MS=12000
+VITE_APP_RELEASE=<git-sha>
+```
 
-The frontend matches the current Go backend contract:
+`VITE_API_BASE_URL` is the origin only. Do **not** append `/api`; the shared client already calls `/api/v1/...`.
+
+Bundled course content never depends on the backend.
+
+## HTTP/auth boundary
+
+All product HTTP goes through `src/shared/api/client.ts` or transport adapters built on that same boundary.
+
+The client owns:
+
+- `credentials: include`;
+- request timeout/cancellation;
+- bearer access-token injection;
+- normalized backend errors/request IDs;
+- one authenticated retry after HTTP 401;
+- serialized refresh so React StrictMode cannot rotate the refresh cookie twice;
+- JSON and authenticated Blob responses.
+
+Security rules:
+
+- access token lives **only in memory**;
+- refresh token is never read by JavaScript;
+- refresh remains the backend-owned HttpOnly cookie;
+- media content is fetched with Authorization headers and converted to Blob/ObjectURL;
+- auth tokens are never embedded in media URLs.
+
+## Session bootstrap
+
+Auth routes:
 
 - `POST /api/v1/auth/register`
 - `POST /api/v1/auth/login`
 - `POST /api/v1/auth/refresh`
 - `POST /api/v1/auth/logout`
-- `GET /api/v1/me`
-- `PATCH /api/v1/me/profile`
 
-Access tokens live **in memory only**. Refresh credentials remain in the backend-issued HttpOnly cookie. On application startup, a configured frontend attempts one serialized refresh; React StrictMode cannot trigger duplicate refresh rotations. Protected requests receive one automatic retry after a successful refresh on HTTP 401.
+Session-start read model:
 
-## Request boundary
+- `GET /api/v1/me/bootstrap`
 
-`src/shared/api/client.ts` is the only HTTP transport boundary.
+Typed response:
 
-It provides:
+```ts
+{
+  version: number;
+  generatedAt: string;
+  user: UserDto;
+  preferences: PreferencesDto;
+  workspace: WorkspaceDto;
+  learning: LearningProgressDto;
+  capabilities: {
+    mediaAudio: boolean;
+  };
+}
+```
 
-- request timeout/cancellation;
-- `credentials: include`;
-- bearer access-token injection;
-- nested backend error-envelope parsing;
-- request ID capture when returned by the backend;
-- normalized timeout/network errors;
-- serialized token refresh;
-- one authenticated retry after 401.
+After refresh/login/register, bootstrap is the primary session-start snapshot. The frontend does not immediately repeat four equivalent reads for user/preferences/workspace/learning.
 
-UI components do not call raw `fetch`.
+Bootstrap hydrates:
 
-## Learning sync
+- current user/profile;
+- UI preferences;
+- workspace;
+- learning/progress and exact reading blocks;
+- runtime capabilities.
 
-Canonical backend routes:
+Notes, Important Blocks, bookmarks, activity and media track lists remain separate/lazy resources because the backend intentionally does not include them in bootstrap.
+
+## First authenticated migration vs normal hydration
+
+`src/features/sync/model/userStateSync.ts` separates three concerns.
+
+### First authenticated migration
+
+A per-user, versioned migration marker controls anonymous -> account migration.
+
+Before bootstrap hydration overwrites core local state, VisualMath captures the anonymous migration seed. Migration then:
+
+- union-merges monotonic learning facts;
+- migrates exact reading blocks;
+- migrates saved topics;
+- migrates resume by `updatedAt`;
+- seeds reading width only when the remote workspace is pristine;
+- migrates meaningful/dirty preferences without overwriting established server preferences;
+- creates missing theorem bookmark metadata.
+
+The marker is written only after successful migration.
+
+### Ordinary authenticated hydration
+
+On normal login/session restore, server bootstrap is canonical. A browser cache previously owned by another user is not migrated into the new account.
+
+Hydration-generated browser events are tagged as `source: "hydrate"` and do not trigger write-back loops.
+
+### Background mutations
+
+After migration, UI events use resource-specific endpoints instead of re-running a full multi-resource merge after each small change.
+
+Examples:
+
+- saved topic -> workspace saved-topic endpoint;
+- resume -> workspace resume endpoint;
+- reading width -> workspace reading-width endpoint;
+- preferences -> preferences PUT;
+- reading block -> exact reading-block PUT;
+- theory/exercise -> dedicated progress mutation;
+- note -> dedicated note endpoint;
+- Important -> dedicated Important Blocks endpoint.
+
+Offline/network failures keep optimistic local state and durable pending mutations where needed.
+
+## Learning/progress
+
+Canonical endpoints used by the frontend include:
 
 - `GET /api/v1/me/learning`
-- `POST /api/v1/me/learning/sync`
-- `POST /api/v1/me/reading-blocks/sync`
+- `POST /api/v1/me/learning/sync` — first migration/coarse recovery
+- `PUT /api/v1/me/progress/topics/{topicId}`
+- `POST/DELETE /api/v1/me/theory/{topicId}/complete`
+- `POST/DELETE /api/v1/me/exercises/{exerciseId}/solve`
+- `PUT /api/v1/me/resume`
+- `PUT /api/v1/me/reading-blocks/{topicId}/{blockIndex}`
+- `POST /api/v1/me/reading-blocks/sync` — first migration
 
-On authenticated bootstrap and debounced local changes the frontend sends:
+Saved theorem metadata uses:
 
-- completed theory topic IDs;
-- solved task IDs;
-- saved theorem IDs;
-- per-topic reading coverage;
-- semantic reading-block identities used by `○ / ◐ / ✓` section progress;
-- last topic;
-- client timestamp.
+- `GET /api/v1/me/bookmarks`
+- `POST /api/v1/me/bookmarks`
+- `DELETE /api/v1/me/bookmarks/{id}`
 
-The backend performs set-union / monotonic merge. The returned canonical state hydrates the local cache. Semantic reading-block IDs are merged separately so section-level reading state survives across devices. Rich bookmark metadata is fetched from `GET /api/v1/me/bookmarks`; saved theorems and generic Important marks are represented with stable content-block identities.
+Bookmarks remain bookmarks. Important Blocks are no longer represented by new `kind="important:*"` bookmarks.
 
-## Learning workspace sync
+## Workspace
 
-Canonical backend routes:
+Endpoints:
 
 - `GET /api/v1/me/workspace`
 - `PUT/DELETE /api/v1/me/workspace/saved-topics/{topicId}`
 - `PUT /api/v1/me/workspace/topics/{topicId}/resume`
 - `PUT /api/v1/me/workspace/reading-width`
 
-Merge strategy:
+The existing local feature models remain the UI boundary for instant local-first UX.
 
-1. saved topics are additive during bootstrap;
-2. resume entries use their existing millisecond `updatedAt` timestamps;
-3. a non-default local reading width seeds a default server workspace;
-4. the final server snapshot hydrates local caches.
+## Preferences
 
-## Preferences sync
-
-Canonical backend routes:
+Endpoints:
 
 - `GET /api/v1/me/preferences`
 - `PUT /api/v1/me/preferences`
 
-The frontend exposes one normalized preference snapshot containing theme, all 12 theme tokens, cursor mode, motion profile and sidebar state.
+Hydration never marks preferences dirty. Theme/cursor/motion/sidebar mutations are persisted only after an explicit local user change.
 
-Local preference changes set a dirty marker. A dirty local snapshot is pushed to the backend before hydration; canonical server hydration clears the marker. If neither side is dirty, server account preferences win. This prevents ordinary server hydration from overwriting a fresh local UI change.
+This prevents a normal login on another device from sending browser defaults back over established account preferences.
 
-## Data currently server-capable
+## Block Notes
 
-The frontend has transport/reconciliation boundaries for:
+Endpoints:
 
-- auth/session;
-- user profile;
-- learning progress;
-- saved theorem IDs / bookmark metadata;
-- generic Important marks via rich bookmarks;
-- semantic reading-block coverage;
-- saved topics;
-- reading resume;
-- reading width;
-- interface preferences;
-- activity stats/heatmap.
+- `GET /api/v1/me/notes`
+- `GET /api/v1/me/notes/{topicId}/{blockIndex}`
+- `PUT /api/v1/me/notes/{topicId}/{blockIndex}`
+- `DELETE /api/v1/me/notes/{topicId}/{blockIndex}`
 
-The Go backend also exposes catalog, search and media APIs; existing frontend course content remains bundled and browser audio remains IndexedDB-first until those transports are deliberately enabled.
+`src/features/block-notes/model/blockNotes.ts` remains the UI/cache boundary.
 
-## Local-only free-form notes
+Anonymous:
 
-Block notes remain intentionally isolated behind their feature model and stable `topicId::blockIndex` identities. Generic Important marks already round-trip through backend bookmarks. The current Go backend does **not** expose a free-form note/annotation endpoint, so the frontend does not invent one or overload bookmark titles with note text.
+- localStorage only.
 
-This is not a UI coupling problem: adding a server annotation adapter later does not require changes to TopicPage or MyMarksPage. Required future backend capability:
+Authenticated:
 
-```text
-GET    /api/v1/me/annotations
-PUT    /api/v1/me/annotations/{contentBlockId}
-DELETE /api/v1/me/annotations/{contentBlockId}
+- optimistic local save;
+- durable pending mutation;
+- debounced backend write-through;
+- canonical response replaces the optimistic timestamp/cache entry.
+
+First authenticated migration:
+
+1. read local notes;
+2. list remote notes;
+3. upload local-only notes;
+4. resolve conflicts by `updatedAt`;
+5. hydrate canonical local cache;
+6. write a per-user migration marker only after success.
+
+A failed network write never deletes the local note; pending state is retried later.
+
+## Important Blocks
+
+Dedicated endpoints:
+
+- `GET /api/v1/me/important-blocks`
+- `PUT /api/v1/me/important-blocks/{topicId}/{blockIndex}`
+- `DELETE /api/v1/me/important-blocks/{topicId}/{blockIndex}`
+
+Backend metadata (`topicTitle`, `blockTitle`, `kind`) is authoritative.
+
+The existing `visualmath-important-blocks-v1` feature model remains the UI cache.
+
+One-time migration is idempotent:
+
+- migrate existing local Important Blocks;
+- detect legacy server bookmarks with `kind="important:*"`;
+- PUT the dedicated Important marker;
+- delete the legacy bookmark only after that PUT succeeds;
+- mark migration complete per user.
+
+After migration, dedicated Important Blocks are the server resource. Saved theorem/bookmark behavior remains separate.
+
+## Background audio
+
+Runtime switch:
+
+```ts
+bootstrap.capabilities.mediaAudio
 ```
 
-Suggested resource fields:
+Anonymous or `mediaAudio === false`:
 
-```json
-{
-  "contentBlockId": "matrices::12",
-  "topicId": "matrices",
-  "note": "my note",
-  "important": true,
-  "updatedAt": "RFC3339"
-}
+- existing IndexedDB playlist remains active.
+
+Authenticated and `mediaAudio === true`:
+
+- `POST /api/v1/me/media/audio`
+- `GET /api/v1/me/media/audio`
+- `PUT /api/v1/me/media/audio/order`
+- `PATCH /api/v1/me/media/audio/{id}`
+- `DELETE /api/v1/me/media/audio/{id}`
+- `GET /api/v1/me/media/audio/{id}/content`
+
+Playback uses authenticated fetch -> Blob -> ObjectURL. Object URLs are revoked when the selected track changes or the player unmounts.
+
+If server media becomes unavailable, the player can fall back to the local IndexedDB playlist. Existing local blobs are never silently deleted.
+
+When account media is available and old local blobs exist, the Settings UI exposes an explicit import action. Import does not remove the original local files.
+
+## Local-first guarantees
+
+When `VITE_API_BASE_URL` is empty, VisualMath remains fully usable locally.
+
+When the user is anonymous:
+
+- course content stays bundled;
+- learning state keeps working locally;
+- notes and Important marks stay local;
+- music stays IndexedDB-backed.
+
+When a configured backend is temporarily unavailable:
+
+- already loaded app/course content remains usable;
+- local caches remain readable;
+- note/Important optimistic writes remain pending instead of being discarded;
+- media falls back locally where possible;
+- account/network errors do not turn the course into a blank screen.
+
+## Tests
+
+Local/frontend release gate:
+
+```bash
+pnpm test
+pnpm typecheck
+pnpm build
+pnpm test:e2e
 ```
 
-Until the backend implements that capability, free-form note text remains device-local by design. Important marks are already server-capable.
+Real-backend mode:
 
-## Backend readiness rule
+```bash
+VISUALMATH_E2E_API_BASE_URL=http://127.0.0.1:8080 pnpm test:e2e:backend
+```
 
-The frontend is considered backend-ready when:
-
-1. all account-capable UI reads/writes through local feature models or the shared API boundary;
-2. authenticated bootstrap can merge and hydrate learning/workspace/preferences without page rewrites;
-3. account UI uses the auth/profile API when configured;
-4. API errors, timeout, session refresh and offline fallback have defined behavior;
-5. integration-critical E2E smoke tests run in CI.
-
-Production readiness additionally requires deployment observability, security/runtime configuration, and a live backend/staging environment.
-
-
-## Browser integration gate
-
-CI runs Playwright Chromium smoke tests against the built production bundle. The local-first suite verifies the app shell, a semantic topic deep link, topic-local search, My Marks and Account fallback behavior. A second staging suite should target the live Go backend once staging deployment exists.
-
-See `docs/production-readiness.md` for the deployment/security acceptance checklist.
+The backend-integrated suite covers registration, bootstrap, preferences, progress/reading, saved topic/resume, notes, Important Blocks, reload/session restore, logout/login, cross-browser account state, one 401 -> one refresh -> retry, backend outage fallback, and capability-gated media CRUD.

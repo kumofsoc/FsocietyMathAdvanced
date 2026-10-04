@@ -2,67 +2,173 @@
 
 This document is the frontend release gate for VisualMath.
 
-## Status definitions
+Backend contract target for the current MVP integration:
 
-### Backend ready
+```text
+kumofsoc/FsocietyMathAdvancedBackend
+809eb92876259caed3c4ad87801851ae167da512
+```
 
-The frontend is **backend ready** when all of the following are true:
+## Current status
 
-- one typed HTTP boundary owns backend requests;
-- auth/session restore uses the Go backend's refresh-cookie contract;
-- local anonymous learning state can merge into an authenticated account;
-- canonical server learning/workspace/preferences hydrate browser caches;
-- account/profile/activity UI uses real backend data when configured;
-- failure modes for timeout, offline, 401 refresh and unavailable backend are defined;
-- integration-critical browser smoke tests run in CI.
+### MVP integration-ready
 
-### Production ready
+The frontend is MVP integration-ready when all of these are green:
 
-Production ready additionally requires:
+- typed shared HTTP/auth boundary;
+- refresh-cookie session restore;
+- `GET /api/v1/me/bootstrap` session hydration;
+- controlled one-time anonymous -> account migration;
+- server-canonical ordinary authenticated hydration;
+- resource-specific background writes without full merge loops;
+- dedicated Notes API integration;
+- dedicated Important Blocks integration;
+- capability-gated account media adapter;
+- local-first/offline fallback;
+- unit tests;
+- production build;
+- local-first Playwright;
+- real-backend Playwright against the release-gate backend.
 
-- a deployed staging backend reachable over HTTPS;
-- production CORS/cookie settings verified against the final frontend origin;
-- runtime error ingestion configured and verified;
-- security headers configured at the deployment edge;
-- database migrations/backups/monitoring owned by backend infrastructure;
-- a final staging smoke run using the live API, not only local-first mode.
+### Production-ready
+
+Production additionally requires infrastructure/runtime validation that cannot be proven by frontend code alone:
+
+- final HTTPS frontend/backend origin;
+- production CORS and cookie behavior;
+- deployed PostgreSQL migrations/backups;
+- error ingestion/monitoring;
+- storage quota/capacity monitoring for media;
+- edge security headers/CSP;
+- live staging/production smoke.
 
 ## Frontend runtime variables
 
+Local:
+
 ```env
-VITE_API_BASE_URL=https://api.example.com
+VITE_API_BASE_URL=http://localhost:8080
 VITE_API_TIMEOUT_MS=12000
-VITE_ERROR_REPORTING_URL=https://errors.example.com/v1/frontend
-VITE_APP_RELEASE=<git-sha-or-release>
 ```
 
-`VITE_API_BASE_URL` may be empty for local-first builds.
+Production:
 
-`VITE_ERROR_REPORTING_URL` is optional. When configured, VisualMath sends small JSON payloads for React render failures, global window errors and unhandled promise rejections. Error reporting deliberately excludes localStorage contents, note text, auth tokens and user profile fields.
+```env
+VITE_API_BASE_URL=https://<final-visualmath-origin>
+VITE_API_TIMEOUT_MS=12000
+VITE_APP_RELEASE=<git-sha>
+VITE_ERROR_REPORTING_URL=https://<optional-error-ingestion-origin>
+```
 
-## Browser release gate
+The API base is an origin only. Do not append `/api`.
 
-Every pull request to `main` must pass:
+`VITE_API_BASE_URL` may be empty for a pure local-first build.
+
+## Release commands
+
+Required frontend commands:
 
 ```bash
 pnpm test
+pnpm typecheck
 pnpm build
 pnpm test:e2e
 ```
 
-The Chromium smoke suite runs against the built production bundle and covers:
+Backend-integrated browser suite:
 
-- home/app shell;
-- semantic topic deep links;
-- topic-local search rendering;
-- My Marks route;
-- Account local-first fallback without a backend.
+```bash
+VISUALMATH_E2E_API_BASE_URL=http://127.0.0.1:8080 pnpm test:e2e:backend
+```
 
-A staging job with real backend credentials/origin should be added when the Go deployment is available.
+The integrated backend must match the current release-gate contract. The frontend suite must not invent or mock replacement endpoints for this gate.
+
+## Auth/security acceptance
+
+- access token exists only in JavaScript memory;
+- refresh token is HttpOnly and never read by JavaScript;
+- protected calls use bearer Authorization;
+- exactly one refresh is serialized when concurrent requests hit 401;
+- the original protected request is retried once;
+- logout removes the authenticated session state;
+- no auth token is persisted to localStorage/sessionStorage/IndexedDB;
+- no token is placed in an audio/content URL.
+
+## Data ownership
+
+Server-canonical after authentication:
+
+- current user/profile;
+- learning/progress;
+- exact reading blocks;
+- saved theorem/bookmark metadata;
+- saved topics;
+- topic resume;
+- reading width;
+- UI preferences;
+- block notes;
+- Important Blocks;
+- activity/stats;
+- media playlist when `capabilities.mediaAudio === true`.
+
+Local cache/fallback remains intentionally present for instant UX and offline resilience.
+
+Anonymous/device-local by design:
+
+- anonymous learning/workspace/preferences caches;
+- anonymous block notes;
+- anonymous Important Blocks;
+- IndexedDB audio when anonymous or server media is unavailable/disabled;
+- original IndexedDB audio blobs that have not been explicitly imported.
+
+## Migration acceptance
+
+For every account:
+
+- core migration has a versioned per-user marker;
+- note migration has a separate per-user marker;
+- Important migration has a separate per-user marker;
+- markers are written only after success;
+- logging into another account does not migrate the previous account cache;
+- server state wins after first successful migration;
+- note conflict resolution uses `updatedAt`;
+- legacy `important:*` bookmarks are removed only after dedicated Important PUT succeeds;
+- retries are idempotent.
+
+## Offline/failure acceptance
+
+- missing `VITE_API_BASE_URL` does not break the app;
+- bundled course content has no backend hard dependency;
+- backend outage does not blank the shell/topic pages;
+- failed note writes remain locally visible and pending;
+- failed Important writes remain locally visible and pending;
+- media API failure does not delete local IndexedDB audio;
+- hydration events do not start infinite write-back loops.
+
+## Browser acceptance scenarios
+
+The real-backend Playwright suite verifies:
+
+1. anonymous local data -> first registration/login migration;
+2. authenticated bootstrap response;
+3. preference mutation;
+4. topic reading/progress mutation;
+5. saved topic;
+6. resume;
+7. note;
+8. Important Block;
+9. reload -> refresh-cookie session restore;
+10. logout;
+11. login -> server state restore;
+12. second browser context -> account-scoped state restore;
+13. different account does not receive the first account's state;
+14. forced 401 -> exactly one refresh -> retry;
+15. backend offline -> bundled UI remains usable;
+16. media upload/content/rename/reorder/delete when the capability flag is true.
 
 ## Security headers
 
-Configure these at the CDN/reverse proxy. Do not hardcode them in React:
+Configure these at the CDN/reverse proxy, not inside React:
 
 ```text
 Strict-Transport-Security: max-age=31536000; includeSubDomains
@@ -72,69 +178,32 @@ Permissions-Policy: camera=(), microphone=(), geolocation=()
 Cross-Origin-Opener-Policy: same-origin
 ```
 
-Use a Content-Security-Policy appropriate for the final hosting setup. At minimum, restrict `default-src`, `script-src`, `style-src`, `img-src`, `font-src`, `connect-src`, `media-src`, `worker-src`, `frame-ancestors` and `base-uri`. The `connect-src` allowlist must include the Go API and the optional error ingestion endpoint.
+Use a CSP appropriate for the final deployment. At minimum restrict:
 
-## Auth / cookie deployment requirements
+- `default-src`;
+- `script-src`;
+- `style-src`;
+- `img-src`;
+- `font-src`;
+- `connect-src`;
+- `media-src`;
+- `worker-src`;
+- `frame-ancestors`;
+- `base-uri`.
 
-The backend owns the refresh cookie. For production:
+`connect-src` must allow the VisualMath API origin and optional error-ingestion origin.
 
-- cookie must be `HttpOnly`, `Secure` and scoped as narrowly as possible;
-- choose `SameSite=Lax` for same-site deployment or the backend-approved cross-site strategy if origins differ;
-- CORS must allow only the real frontend origins and credentials;
-- access tokens remain in frontend memory only;
-- never expose refresh credentials to JavaScript.
+## What still remains before production
 
-## Data ownership
+Even after frontend MVP merge, production still needs:
 
-Server-capable today:
-
-- auth/session;
-- user profile;
-- learning progress;
-- semantic reading blocks;
-- saved theorem bookmark metadata;
-- saved topics;
-- topic resume;
-- reading width;
-- UI preferences;
-- activity heatmap/stats.
-
-Device-local by deliberate product boundary:
-
-- uploaded background audio blobs;
-- free-form block notes until the backend exposes an annotation resource.
-
-Generic Important marks use rich bookmarks where possible and still keep a local cache for instant UX.
-
-## Annotation backend gap
-
-Free-form notes require an explicit backend resource. The frontend already uses stable `topicId::blockIndex` identities and does not need page rewrites when this arrives.
-
-Recommended contract:
-
-```text
-GET    /api/v1/me/annotations
-PUT    /api/v1/me/annotations/{contentBlockId}
-DELETE /api/v1/me/annotations/{contentBlockId}
-```
-
-Until then notes remain device-local and the UI states that local-first behavior.
-
-## Staging acceptance checklist
-
-Before calling the complete product production-ready:
-
-1. deploy frontend + Go backend to staging HTTPS origins;
-2. verify `/health`, `/ready`, auth register/login/refresh/logout;
-3. create an anonymous local progress state, sign in, verify merge;
-4. reload and verify refresh-cookie session restoration;
-5. verify workspace/preferences sync on a second browser;
-6. verify activity appears after real learning mutations;
-7. force backend offline and verify graceful fallback/error states;
-8. force a 401 access-token expiry and verify single refresh + retry;
-9. trigger a controlled frontend error and confirm error ingestion;
-10. run the browser smoke suite against staging;
-11. verify CSP/CORS/cookies in browser devtools;
-12. verify backend backups/migrations/alerts separately.
-
-The frontend code can be backend-ready before the backend deployment itself is production-ready.
+1. choose the final VisualMath HTTPS origin;
+2. deploy frontend + backend + PostgreSQL;
+3. configure backend `CORS_ALLOWED_ORIGINS` for the exact origin;
+4. verify Secure/HttpOnly refresh cookie behavior on the deployed topology;
+5. configure migrations/backups/restore drill;
+6. configure backend/runtime logs, metrics and alerts;
+7. configure media disk/object storage capacity controls;
+8. configure CDN/reverse-proxy CSP/security headers;
+9. run the same backend-integrated Playwright suite against staging;
+10. set `VITE_APP_RELEASE` to the deployed git SHA and verify error reporting.
