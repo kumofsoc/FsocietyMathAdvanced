@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { chapters, topicMeta } from "@/data/courseMeta";
 import { loadCourseTopic } from "@/data/course/topicLoaders";
@@ -20,7 +19,6 @@ import {
   THEORY_CHECKPOINT_THRESHOLD,
 } from "@/features/learning/model/progress";
 import type { ContentBlock, Topic } from "@/entities/course/model/types";
-import { MatrixOperationScene } from "@/visualizations/linear/MatrixOperationScene";
 import { toLayeredTopic } from "@/entities/course/model/learning-architecture/adapter";
 import { linearFoundationBlueprints } from "@/data/learning-architecture/linear-foundations";
 import { TopicLabInsert, TopicVisualInsert } from "@/visualizations/registry/TopicVisualRegistry";
@@ -28,10 +26,13 @@ import { RouteSkeleton } from "@/shared/ui/RouteSkeleton";
 import { loadTopicResume, saveTopicResume } from "@/features/learning/model/topicResume";
 import { loadSavedTopicIds, SAVED_TOPICS_EVENT, SAVED_TOPICS_KEY, toggleSavedTopic } from "@/features/saved-topics/model/savedTopics";
 import { TopicLocalSearch } from "@/features/topic-search/ui/TopicLocalSearch";
-import { CollapsibleProof } from "@/features/proof-collapse/ui/CollapsibleProof";
 import { parseVisualMathHash } from "@/shared/lib/blockDeepLink";
 import { ReadingWidthControl } from "@/features/reading-width/ui/ReadingWidthControl";
-import { ContentCard } from "@/features/topic-content/ui/ContentCard";
+import {
+  CONTENT_BLOCK_LABELS,
+  ContentCard,
+  displayBlockTitle,
+} from "@/features/topic-content/ui/ContentCard";
 import { BLOCK_TARGET_KEY } from "@/features/topic-content/model/dependencyNavigation";
 import { useAppShellStore } from "@/app/store/useAppShellStore";
 import { loadReadingWidth, saveReadingWidth, type ReadingWidth } from "@/features/reading-width/model/readingWidth";
@@ -698,7 +699,7 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
           <div>
             <span>ПРОДОЛЖИТЬ ЧТЕНИЕ</span>
             <strong>
-              {labels[topic.blocks[resumeBlockIndex].kind]} · {displayBlockTitle(topic.blocks[resumeBlockIndex].title)}
+              {CONTENT_BLOCK_LABELS[topic.blocks[resumeBlockIndex].kind]} · {displayBlockTitle(topic.blocks[resumeBlockIndex].title)}
             </strong>
           </div>
           <button type="button" onClick={() => jumpToBlock(resumeBlockIndex)}>

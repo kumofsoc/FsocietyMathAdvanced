@@ -29,7 +29,7 @@ import {
 import { MatrixOperationScene } from "@/visualizations/linear/MatrixOperationScene";
 import { openDependency } from "../model/dependencyNavigation";
 
-const labels: Record<BlockKind, string> = {
+export const CONTENT_BLOCK_LABELS: Record<BlockKind, string> = {
   definition: "ОПРЕДЕЛЕНИЕ",
   concepts: "ОСНОВНЫЕ ПОНЯТИЯ",
   property: "СВОЙСТВО",
@@ -45,7 +45,7 @@ const labels: Record<BlockKind, string> = {
   summary: "ИТОГ",
 };
 
-function displayBlockTitle(title: string) {
+export function displayBlockTitle(title: string) {
   return title
     .replace(/^ACADEMY\s+VISUAL\s*[·/]\s*/i, "Визуализация · ")
     .replace(/^ACADEMY\s+LAB\s*\/\s*/i, "Интерактивная лаборатория · ")
@@ -309,7 +309,7 @@ export function ContentCard({
       transition={{ duration: 0.44, delay: Math.min(index * 0.018, 0.16) }}
     >
       <div className="block-rail">
-        <span>{academyBlock ? "УГЛУБЛЁННО / " + labels[block.kind] : labels[block.kind]}</span>
+        <span>{academyBlock ? "УГЛУБЛЁННО / " + CONTENT_BLOCK_LABELS[block.kind] : CONTENT_BLOCK_LABELS[block.kind]}</span>
         <small>{String(index + 1).padStart(2, "0")}</small>
       </div>
 
@@ -377,7 +377,7 @@ export function ContentCard({
               <header>
                 <div>
                   <span>МОЯ ЗАМЕТКА</span>
-                  <strong>{labels[block.kind]} · блок {String(index + 1).padStart(2, "0")}</strong>
+                  <strong>{CONTENT_BLOCK_LABELS[block.kind]} · блок {String(index + 1).padStart(2, "0")}</strong>
                 </div>
                 <small>
                   {noteSaveState === "failed"
