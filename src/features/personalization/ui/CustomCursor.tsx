@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { readLocalStorage } from "@/shared/lib/browserStorage";
+import { CURSOR_KEY } from "@/features/personalization/model/preferences";
 
-export const CURSOR_KEY = "fsociety-cursor-style-v1";
+export { CURSOR_KEY };
 export const CURSOR_EVENT = "fsociety-cursor-change";
 
 export type CursorMode = "native" | "halo" | "minimal" | "crosshair" | "comet";
