@@ -94,6 +94,20 @@ export function loadReadingBlocks() {
   return loadSet(READING_BLOCKS_KEY);
 }
 
+export function replaceReadingBlocks(blockIds: string[]) {
+  const normalized = new Set(
+    blockIds.filter((value) => typeof value === "string" && value.includes("::")),
+  );
+  try {
+    localStorage.setItem(READING_BLOCKS_KEY, JSON.stringify([...normalized]));
+  } catch (error) {
+    console.warn("[VisualMath] could not hydrate reading blocks", error);
+    return false;
+  }
+  window.dispatchEvent(new CustomEvent(LEARNING_EVENT));
+  return true;
+}
+
 export function markReadingBlock(topicId: string, blockIndex: number, totalBlocks: number) {
   const current = loadReadingBlocks();
   const key = topicId + "::" + blockIndex;

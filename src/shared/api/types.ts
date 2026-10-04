@@ -71,6 +71,7 @@ export interface LearningProgressDto {
   savedTheoremIds: string[];
   reading: Record<string, number>;
   readingProgress: Record<string, number>;
+  readingBlockIds: string[];
   lastTopicId?: string | null;
   updatedAt: string;
 }

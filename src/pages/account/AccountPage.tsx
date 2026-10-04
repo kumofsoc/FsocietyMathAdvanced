@@ -18,6 +18,7 @@ import type {
   UserProfileDto,
 } from "@/shared/api/types";
 import "@/features/account-experience/styles/account-experience.css";
+import "@/styles/account-production.css";
 
 const PROFILE_KEY = "visualmath-local-profile-v1";
 
@@ -435,6 +436,7 @@ function BackendAccount({
   const [stats, setStats] = useState<ActivityStatsDto | null>(null);
   const [activityError, setActivityError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -472,6 +474,7 @@ function BackendAccount({
   const saveProfile = async () => {
     if (saving) return;
     setSaving(true);
+    setProfileError(null);
     try {
       await updateProfile({
         displayName: draft.displayName.trim(),
@@ -479,6 +482,8 @@ function BackendAccount({
         bio: draft.bio.trim(),
       });
       setEditing(false);
+    } catch (error) {
+      setProfileError(errorMessage(error));
     } finally {
       setSaving(false);
     }
@@ -561,6 +566,7 @@ function BackendAccount({
           <button type="button" onClick={() => void saveProfile()} disabled={saving}>
             {saving ? "Сохраняю…" : "Сохранить"}
           </button>
+          {profileError && <div className="account-profile-error">{profileError}</div>}
         </section>
       )}
 
