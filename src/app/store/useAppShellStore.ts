@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import {
   SIDEBAR_COLLAPSED_KEY,
-  emitPreferencesChange,
+  saveSidebarCollapsedPreference,
 } from "@/features/personalization/model/preferencesStorage";
 
 type BooleanSetter = boolean | ((current: boolean) => boolean);
@@ -40,15 +40,6 @@ function readSidebarCollapsed() {
   }
 }
 
-function persistSidebarCollapsed(value: boolean) {
-  try {
-    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, value ? "1" : "0");
-    emitPreferencesChange();
-  } catch {
-    // Persistence is optional in private/strict browser contexts.
-  }
-}
-
 export const useAppShellStore = create<AppShellState>((set) => ({
   sidebarOpen: false,
   sidebarCollapsed: readSidebarCollapsed(),
@@ -63,7 +54,7 @@ export const useAppShellStore = create<AppShellState>((set) => ({
     set((state) => {
       const sidebarCollapsed =
         typeof next === "function" ? next(state.sidebarCollapsed) : next;
-      persistSidebarCollapsed(sidebarCollapsed);
+      saveSidebarCollapsedPreference(sidebarCollapsed);
       return { sidebarCollapsed };
     }),
   setReadingFocusMode: (next) =>
