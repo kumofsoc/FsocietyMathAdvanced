@@ -60,7 +60,24 @@ jobs:
           grep -qi '^Cross-Origin-Opener-Policy: same-origin' <<<"$headers"
           grep -qi '^Content-Security-Policy:' <<<"$headers"
       - name: Browser smoke production frontend image
-        run: PLAYWRIGHT_BASE_URL=http://127.0.0.1:18080 pnpm exec playwright test e2e/production-image.spec.ts
+        run: |
+          docker run -d --rm \
+            --name visualmath-frontend-ci-browser \
+            --read-only \
+            --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+            --security-opt no-new-privileges:true \
+            --cap-drop ALL \
+            -p 127.0.0.1:18081:8080 \
+            visualmath-frontend-ci
+          trap 'docker stop visualmath-frontend-ci-browser >/dev/null 2>&1 || true' EXIT
+          for attempt in {1..20}; do
+            if curl -fsS http://127.0.0.1:18081/healthz >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:18081/healthz
+          PLAYWRIGHT_BASE_URL=http://127.0.0.1:18081 pnpm exec playwright test e2e/production-image.spec.ts
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
