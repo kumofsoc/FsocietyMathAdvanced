@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { readLocalStorage } from "@/shared/lib/browserStorage";
-import { CURSOR_KEY } from "@/features/personalization/model/preferences";
+import { CURSOR_KEY } from "@/features/personalization/model/preferencesStorage";
 
 export { CURSOR_KEY };
 export const CURSOR_EVENT = "fsociety-cursor-change";
