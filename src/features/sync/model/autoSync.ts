@@ -97,6 +97,13 @@ type PendingGeneralMutation =
       value: PreferencesDto;
     });
 
+type PendingGeneralMutationInput =
+  PendingGeneralMutation extends infer Mutation
+    ? Mutation extends PendingGeneralMutation
+      ? Omit<Mutation, "updatedAt" | "userId">
+      : never
+    : never;
+
 type PendingGeneralState = Record<string, PendingGeneralMutation>;
 
 let installed = false;
@@ -315,7 +322,7 @@ export async function flushPendingGeneralMutations(userId: string) {
 function queueMutation(
   userId: string,
   semanticKey: string,
-  mutation: Omit<PendingGeneralMutation, "updatedAt" | "userId">,
+  mutation: PendingGeneralMutationInput,
   delay?: number,
 ) {
   const storageKey = userId + "::" + semanticKey;
