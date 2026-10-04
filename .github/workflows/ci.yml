@@ -25,6 +25,13 @@ jobs:
         env:
           VITE_API_BASE_URL: ""
           VITE_ERROR_REPORTING_URL: ""
+      - name: Build production frontend image
+        run: |
+          docker build \
+            --build-arg VITE_API_BASE_URL=https://visualmath.invalid \
+            --build-arg VITE_API_TIMEOUT_MS=12000 \
+            --build-arg VITE_APP_RELEASE=ci \
+            --tag visualmath-frontend-ci .
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
