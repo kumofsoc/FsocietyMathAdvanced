@@ -71,6 +71,7 @@ export interface LearningProgressDto {
   savedTheoremIds: string[];
   reading: Record<string, number>;
   readingProgress: Record<string, number>;
+  readingBlockIds?: string[];
   lastTopicId?: string | null;
   updatedAt: string;
 }
@@ -169,4 +170,39 @@ export interface ActivityStatsDto {
   activeDays: number;
   currentStreak: number;
   longestStreak: number;
+}
+
+
+export interface NoteDto {
+  id: string;
+  topicId: string;
+  blockIndex: number;
+  text: string;
+  updatedAt: number;
+}
+
+export interface NoteListDto {
+  notes: NoteDto[];
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}
+
+export interface ImportantBlockDto {
+  id: string;
+  topicId: string;
+  blockIndex: number;
+  topicTitle: string;
+  blockTitle: string;
+  kind: string;
+  updatedAt: number;
+}
+
+export interface ImportantBlockListDto {
+  blocks: ImportantBlockDto[];
+}
+
+export interface ReadingBlockRefDto {
+  topicId: string;
+  blockIndex: number;
 }
