@@ -41,12 +41,17 @@ function matchesFallbackShape(value: unknown, fallback: unknown) {
   return typeof value === typeof fallback;
 }
 
-export function readLocalStorageJson<T>(key: string, fallback: T): T {
+export function readLocalStorageJson<T>(
+  key: string,
+  fallback: T,
+  isValid?: (value: unknown) => value is T,
+): T {
   const raw = readLocalStorage(key);
   if (raw === null) return fallback;
 
   try {
     const parsed = JSON.parse(raw) as unknown;
+    if (isValid) return isValid(parsed) ? parsed : fallback;
     return matchesFallbackShape(parsed, fallback) ? (parsed as T) : fallback;
   } catch {
     return fallback;

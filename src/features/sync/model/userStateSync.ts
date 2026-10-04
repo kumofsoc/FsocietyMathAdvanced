@@ -132,6 +132,57 @@ type MigrationSeed = {
   savedTheorems: SavedTheorem[];
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+export function isMigrationSeed(
+  value: unknown,
+): value is MigrationSeed | null {
+  if (value === null) return true;
+  if (!isRecord(value)) return false;
+
+  const progress = value.progress;
+  if (!isRecord(progress)) return false;
+
+  const readingBlocks = value.readingBlocks;
+  if (
+    !Array.isArray(readingBlocks) ||
+    !readingBlocks.every(
+      (item) =>
+        isRecord(item) &&
+        typeof item.topicId === "string" &&
+        Number.isInteger(item.blockIndex) &&
+        Number(item.blockIndex) >= 0,
+    )
+  ) {
+    return false;
+  }
+
+  if (!isStringArray(value.savedTopicIds)) return false;
+  if (!isRecord(value.topicResume)) return false;
+  if (
+    value.readingWidth !== "narrow" &&
+    value.readingWidth !== "normal" &&
+    value.readingWidth !== "wide"
+  ) {
+    return false;
+  }
+  if (!isRecord(value.preferences)) return false;
+  if (typeof value.preferencesDirty !== "boolean") return false;
+  if (!Array.isArray(value.savedTheorems)) return false;
+
+  return (
+    isStringArray(progress.theoryRead) &&
+    isStringArray(progress.solvedTaskIds) &&
+    isStringArray(progress.savedTheoremIds)
+  );
+}
+
 export type NoteConflictWinner = "local" | "remote";
 
 export function isUserStateSyncing() {
@@ -230,7 +281,11 @@ function parseReadingBlockId(value: string) {
 
 function captureMigrationSeed(userId: string): MigrationSeed {
   const stageKey = key(MIGRATION_STAGE_PREFIX, userId);
-  const existing = readLocalStorageJson<MigrationSeed | null>(stageKey, null);
+  const existing = readLocalStorageJson<MigrationSeed | null>(
+    stageKey,
+    null,
+    isMigrationSeed,
+  );
   if (existing) return existing;
 
   const seed: MigrationSeed = {

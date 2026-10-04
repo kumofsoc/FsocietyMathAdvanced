@@ -26,6 +26,7 @@ import {
   ACCOUNT_CACHE_OWNER_KEY,
   collectImportantMigrationTargets,
   hydrateBootstrapSnapshot,
+  isMigrationSeed,
   planNoteMigration,
   resolveNoteConflict,
   shouldMigrateAnonymousState,
@@ -112,6 +113,27 @@ describe("authenticated user state policy", () => {
     expect(JSON.parse(localStorage.getItem("visualmath-reading-blocks-v1") ?? "[]"))
       .toEqual(["matrices::0"]);
     expect(localStorage.getItem("math-theme-name")).toBe("Nord");
+  });
+
+  it("rejects corrupted staged migration payloads before bootstrap uses them", () => {
+    expect(isMigrationSeed("corrupted")).toBe(false);
+    expect(isMigrationSeed([])).toBe(false);
+    expect(
+      isMigrationSeed({
+        progress: {
+          theoryRead: [],
+          solvedTaskIds: [],
+          savedTheoremIds: [],
+        },
+        readingBlocks: [],
+        savedTopicIds: [],
+        topicResume: {},
+        readingWidth: "normal",
+        preferences: DEFAULT_PREFERENCES,
+        preferencesDirty: false,
+        savedTheorems: [],
+      }),
+    ).toBe(true);
   });
 
   it("migrates anonymous local state once, but never into a different account cache", () => {
