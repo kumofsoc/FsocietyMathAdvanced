@@ -3,6 +3,7 @@ import type { BlockKind } from "@/entities/course/model/types";
 
 export const IMPORTANT_BLOCKS_KEY = "visualmath-important-blocks-v1";
 export const IMPORTANT_BLOCKS_EVENT = "visualmath:important-blocks-change";
+export const IMPORTANT_BLOCKS_TOMBSTONES_KEY = "visualmath-important-block-tombstones-v1";
 
 export type ImportantBlock = {
   id: string;
@@ -31,6 +32,32 @@ export function loadImportantBlocks() {
     );
 }
 
+export function loadImportantBlockTombstones() {
+  return readLocalStorageJson<Record<string, number>>(
+    IMPORTANT_BLOCKS_TOMBSTONES_KEY,
+    {},
+  );
+}
+
+export function clearImportantBlockTombstone(id: string) {
+  const current = loadImportantBlockTombstones();
+  if (!(id in current)) return true;
+  const { [id]: _removed, ...next } = current;
+  return writeLocalStorage(IMPORTANT_BLOCKS_TOMBSTONES_KEY, JSON.stringify(next));
+}
+
+function markImportantBlockTombstone(id: string, updatedAt = Date.now()) {
+  const current = loadImportantBlockTombstones();
+  return writeLocalStorage(
+    IMPORTANT_BLOCKS_TOMBSTONES_KEY,
+    JSON.stringify({ ...current, [id]: updatedAt }),
+  );
+}
+
+export function replaceImportantBlocks(items: ImportantBlock[]) {
+  return persistImportantBlocks(items);
+}
+
 export function isBlockImportant(topicId: string, blockIndex: number) {
   const id = importantBlockId(topicId, blockIndex);
   return loadImportantBlocks().some((item) => item.id === id);
@@ -57,11 +84,14 @@ export function setBlockImportant(
   const withoutCurrent = current.filter((item) => item.id !== id);
 
   if (!important) {
+    const tombstoned = markImportantBlockTombstone(id);
     return {
-      saved: persistImportantBlocks(withoutCurrent),
+      saved: persistImportantBlocks(withoutCurrent) && tombstoned,
       important: false,
     };
   }
+
+  clearImportantBlockTombstone(id);
 
   const next: ImportantBlock[] = [
     ...withoutCurrent,
