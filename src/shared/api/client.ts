@@ -32,6 +32,9 @@ const API_TIMEOUT_MS = runtimeConfig.apiTimeoutMs;
 let accessToken: string | null = null;
 let accessExpiresAt: string | null = null;
 let refreshInFlight: Promise<AuthResponseDto | null> | null = null;
+let authTransitionTail: Promise<void> = Promise.resolve();
+let explicitAuthPending = 0;
+let authGeneration = 0;
 
 export const AUTH_SESSION_EVENT = "visualmath:auth-session-change";
 
@@ -113,7 +116,10 @@ function composeSignal(
   timeoutMs: number,
 ) {
   const controller = new AbortController();
-  const timer = window.setTimeout(() => controller.abort("timeout"), timeoutMs);
+  const timer = globalThis.setTimeout(
+    () => controller.abort("timeout"),
+    timeoutMs,
+  );
 
   const onAbort = () => controller.abort(external?.reason);
   if (external) {
@@ -124,7 +130,7 @@ function composeSignal(
   return {
     signal: controller.signal,
     cleanup: () => {
-      window.clearTimeout(timer);
+      globalThis.clearTimeout(timer);
       external?.removeEventListener("abort", onAbort);
     },
   };
@@ -158,7 +164,7 @@ async function fetchResponse(
   if (init.body && !(init.body instanceof FormData) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
-  if (options.auth !== false && accessToken) {
+  if (options.auth !== false && accessToken && explicitAuthPending === 0) {
     headers.set("Authorization", "Bearer " + accessToken);
   }
 
@@ -243,28 +249,70 @@ async function rawBlobRequest(
 }
 
 async function refreshAccessToken(): Promise<AuthResponseDto | null> {
-  if (!isBackendConfigured()) return null;
+  if (!isBackendConfigured() || explicitAuthPending > 0) return null;
   if (refreshInFlight) return refreshInFlight;
 
-  refreshInFlight = rawRequest<AuthResponseDto>(
+  const generation = authGeneration;
+  const pending = rawRequest<AuthResponseDto>(
     "/api/v1/auth/refresh",
     { method: "POST" },
     { auth: false, retryAuth: false },
   )
     .then((session) => {
+      if (generation !== authGeneration || explicitAuthPending > 0) {
+        return null;
+      }
       setAccessToken(session.accessToken, session.accessTokenExpiresAt);
       return session;
     })
     .catch((error) => {
-      setAccessToken(null);
+      if (generation === authGeneration && explicitAuthPending === 0) {
+        setAccessToken(null);
+      }
       if (error instanceof ApiError && error.status === 401) return null;
       throw error;
     })
     .finally(() => {
-      refreshInFlight = null;
+      if (refreshInFlight === pending) {
+        refreshInFlight = null;
+      }
     });
 
-  return refreshInFlight;
+  refreshInFlight = pending;
+  return pending;
+}
+
+async function waitForRefreshToSettle() {
+  const pending = refreshInFlight;
+  if (!pending) return;
+
+  try {
+    await pending;
+  } catch {
+    // The explicit auth transition still needs to run and become authoritative.
+  }
+}
+
+function runExplicitAuth<T>(work: () => Promise<T>): Promise<T> {
+  authGeneration += 1;
+  explicitAuthPending += 1;
+
+  const run = authTransitionTail
+    .catch(() => undefined)
+    .then(async () => {
+      await waitForRefreshToSettle();
+      setAccessToken(null);
+      return work();
+    })
+    .finally(() => {
+      explicitAuthPending -= 1;
+    });
+
+  authTransitionTail = run.then(
+    () => undefined,
+    () => undefined,
+  );
+  return run;
 }
 
 async function request<T>(
@@ -336,36 +384,39 @@ export const api = {
       rawRequest<BackendMetaDto>("/api/v1/meta", {}, { auth: false }),
   },
   auth: {
-    register: async (body: RegisterRequest) => {
-      const session = await rawRequest<AuthResponseDto>(
-        "/api/v1/auth/register",
-        { method: "POST", body: JSON.stringify(body) },
-        { auth: false },
-      );
-      setAccessToken(session.accessToken, session.accessTokenExpiresAt);
-      return session;
-    },
-    login: async (body: LoginRequest) => {
-      const session = await rawRequest<AuthResponseDto>(
-        "/api/v1/auth/login",
-        { method: "POST", body: JSON.stringify(body) },
-        { auth: false },
-      );
-      setAccessToken(session.accessToken, session.accessTokenExpiresAt);
-      return session;
-    },
-    refresh: refreshAccessToken,
-    logout: async () => {
-      try {
-        await rawRequest<void>(
-          "/api/v1/auth/logout",
-          { method: "POST" },
-          { auth: false, retryAuth: false },
+    register: (body: RegisterRequest) =>
+      runExplicitAuth(async () => {
+        const session = await rawRequest<AuthResponseDto>(
+          "/api/v1/auth/register",
+          { method: "POST", body: JSON.stringify(body) },
+          { auth: false },
         );
-      } finally {
-        setAccessToken(null);
-      }
-    },
+        setAccessToken(session.accessToken, session.accessTokenExpiresAt);
+        return session;
+      }),
+    login: (body: LoginRequest) =>
+      runExplicitAuth(async () => {
+        const session = await rawRequest<AuthResponseDto>(
+          "/api/v1/auth/login",
+          { method: "POST", body: JSON.stringify(body) },
+          { auth: false },
+        );
+        setAccessToken(session.accessToken, session.accessTokenExpiresAt);
+        return session;
+      }),
+    refresh: refreshAccessToken,
+    logout: () =>
+      runExplicitAuth(async () => {
+        try {
+          await rawRequest<void>(
+            "/api/v1/auth/logout",
+            { method: "POST" },
+            { auth: false, retryAuth: false },
+          );
+        } finally {
+          setAccessToken(null);
+        }
+      }),
   },
   me: {
     get: () => request<UserDto>("/api/v1/me"),
