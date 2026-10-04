@@ -9,9 +9,14 @@ import type {
   BookmarkListDto,
   CreateBookmarkRequest,
   LearningProgressDto,
+  ImportantBlockDto,
+  ImportantBlockListDto,
   LoginRequest,
+  NoteDto,
+  NoteListDto,
   PreferencesDto,
   ProgressSyncRequest,
+  ReadingBlockRefDto,
   RegisterRequest,
   UpdateProfileRequest,
   UserDto,
@@ -324,6 +329,29 @@ export const api = {
         method: "POST",
         body: JSON.stringify(body),
       }),
+    setTheory: (topicId: string, completed: boolean) =>
+      request<LearningProgressDto>(
+        "/api/v1/me/theory/" + encodeURIComponent(topicId) + "/complete",
+        { method: completed ? "POST" : "DELETE" },
+      ),
+    setExercise: (taskId: string, solved: boolean) =>
+      request<LearningProgressDto>(
+        "/api/v1/me/exercises/" + encodeURIComponent(taskId) + "/solve",
+        { method: solved ? "POST" : "DELETE" },
+      ),
+    setTheorem: (theoremId: string, topicId: string | null, saved: boolean) =>
+      request<LearningProgressDto>(
+        "/api/v1/progress/theorems/" + encodeURIComponent(theoremId),
+        {
+          method: saved ? "PUT" : "DELETE",
+          body: topicId ? JSON.stringify({ topicId }) : undefined,
+        },
+      ),
+    syncReadingBlocks: (blocks: ReadingBlockRefDto[]) =>
+      request<LearningProgressDto>("/api/v1/me/reading-blocks/sync", {
+        method: "POST",
+        body: JSON.stringify({ blocks }),
+      }),
   },
   workspace: {
     get: () => request<WorkspaceDto>("/api/v1/me/workspace"),
@@ -365,6 +393,60 @@ export const api = {
       request<void>("/api/v1/me/bookmarks/" + encodeURIComponent(id), {
         method: "DELETE",
       }),
+  },
+  notes: {
+    list: (limit = 100, offset = 0) =>
+      request<NoteListDto>(
+        "/api/v1/me/notes?limit=" +
+          encodeURIComponent(String(limit)) +
+          "&offset=" +
+          encodeURIComponent(String(offset)),
+      ),
+    get: (topicId: string, blockIndex: number) =>
+      request<NoteDto>(
+        "/api/v1/me/notes/" +
+          encodeURIComponent(topicId) +
+          "/" +
+          encodeURIComponent(String(blockIndex)),
+      ),
+    put: (topicId: string, blockIndex: number, text: string) =>
+      request<NoteDto | null>(
+        "/api/v1/me/notes/" +
+          encodeURIComponent(topicId) +
+          "/" +
+          encodeURIComponent(String(blockIndex)),
+        {
+          method: "PUT",
+          body: JSON.stringify({ text }),
+        },
+      ),
+    remove: (topicId: string, blockIndex: number) =>
+      request<void>(
+        "/api/v1/me/notes/" +
+          encodeURIComponent(topicId) +
+          "/" +
+          encodeURIComponent(String(blockIndex)),
+        { method: "DELETE" },
+      ),
+  },
+  importantBlocks: {
+    list: () => request<ImportantBlockListDto>("/api/v1/me/important-blocks"),
+    put: (topicId: string, blockIndex: number) =>
+      request<ImportantBlockDto>(
+        "/api/v1/me/important-blocks/" +
+          encodeURIComponent(topicId) +
+          "/" +
+          encodeURIComponent(String(blockIndex)),
+        { method: "PUT" },
+      ),
+    remove: (topicId: string, blockIndex: number) =>
+      request<void>(
+        "/api/v1/me/important-blocks/" +
+          encodeURIComponent(topicId) +
+          "/" +
+          encodeURIComponent(String(blockIndex)),
+        { method: "DELETE" },
+      ),
   },
   activity: {
     heatmap: (year?: number) =>
