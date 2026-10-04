@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { reportClientError } from "@/shared/observability/clientObservability";
 
 interface Props {
   children: ReactNode;
@@ -16,7 +17,12 @@ export class AppErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("[VisualMath] render failure", error, info);
+    reportClientError(error, {
+      source: "react.error-boundary",
+      extra: {
+        componentStack: info.componentStack?.slice(0, 8000) ?? null,
+      },
+    });
   }
 
   render() {
