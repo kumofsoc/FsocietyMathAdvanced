@@ -15,6 +15,7 @@ import {
 } from "@/features/important-blocks/model/importantBlocks";
 import { buildBlockHash } from "@/shared/lib/blockDeepLink";
 import type { BlockKind } from "@/entities/course/model/types";
+import "@/styles/my-marks.css";
 
 type MarksFilter = "all" | "notes" | "important";
 

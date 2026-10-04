@@ -1,3 +1,11 @@
+import "@/styles/topic-outline.css";
+import "@/styles/topic-search.css";
+import "@/styles/topic-copy.css";
+import "@/styles/topic-proof-collapse.css";
+import "@/styles/reading-width.css";
+import "@/styles/reading-focus.css";
+import "@/styles/block-notes.css";
+import "@/styles/important-blocks.css";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { chapters, topicMeta } from "@/data/courseMeta";
 import { loadCourseTopic } from "@/data/course/topicLoaders";
