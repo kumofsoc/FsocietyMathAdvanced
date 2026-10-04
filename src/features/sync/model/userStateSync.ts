@@ -361,12 +361,13 @@ async function createMissingTheoremBookmarks(
   localTheorems: SavedTheorem[],
   bookmarks: BookmarkDto[],
 ) {
-  const byContentId = new Map(
-    bookmarks.map((item) => [item.contentBlockId, item]),
+  const byKindAndContentId = new Map(
+    bookmarks.map((item) => [item.kind + "::" + item.contentBlockId, item]),
   );
 
   for (const theorem of localTheorems) {
-    if (!theorem.id || !theorem.topicId || byContentId.has(theorem.id)) continue;
+    const key = "theorem::" + theorem.id;
+    if (!theorem.id || !theorem.topicId || byKindAndContentId.has(key)) continue;
     const created = await api.bookmarks.create({
       topicId: theorem.topicId,
       contentBlockId: theorem.id,
@@ -374,7 +375,7 @@ async function createMissingTheoremBookmarks(
       title: theorem.title || theorem.id,
     });
     bookmarks.push(created);
-    byContentId.set(created.contentBlockId, created);
+    byKindAndContentId.set(created.kind + "::" + created.contentBlockId, created);
   }
   return bookmarks;
 }
@@ -578,10 +579,15 @@ async function migrateNotes(userId: string, includeLocal: boolean) {
       );
       if (saved) canonical.set(saved.id, saved);
     }
-    clearPendingBlockNoteMutation(note.topicId, note.blockIndex);
+    const latest = loadPendingBlockNoteMutations()[note.id];
+    if (latest && latest.updatedAt <= note.updatedAt) {
+      clearPendingBlockNoteMutation(note.topicId, note.blockIndex);
+    }
   }
 
-  hydrateBlockNotes([...canonical.values()].map(toNoteEntry));
+  await syncPendingBlockNotes(userId, includeLocal);
+  const finalRemote = await listAllNotes();
+  hydrateBlockNotes(finalRemote.map(toNoteEntry));
   markMigrationComplete(NOTES_MIGRATION_PREFIX, userId);
   return includeLocal;
 }
@@ -614,7 +620,10 @@ async function migrateImportantBlocks(
       );
       remoteIds.add(saved.id);
     }
-    clearPendingImportantBlockMutation(item.topicId, item.blockIndex);
+    const latest = loadPendingImportantBlockMutations()[item.id];
+    if (latest && latest.updatedAt <= item.updatedAt) {
+      clearPendingImportantBlockMutation(item.topicId, item.blockIndex);
+    }
   }
 
   const bookmarks =
@@ -627,6 +636,7 @@ async function migrateImportantBlocks(
     await api.bookmarks.remove(bookmark.id);
   }
 
+  await syncPendingImportantBlocks(userId, includeLocal);
   const canonical = await api.importantBlocks.list();
   hydrateImportantBlocks(canonical.blocks.map(toImportantBlock));
   markMigrationComplete(IMPORTANT_MIGRATION_PREFIX, userId);
@@ -685,9 +695,18 @@ async function performSync(
     let notesMigrated = false;
     let importantBlocksMigrated = false;
 
+    const includeNotesLocal =
+      includeAnonymousLocal ||
+      (!migrationComplete(NOTES_MIGRATION_PREFIX, userId) &&
+        previousOwner === userId);
+    const includeImportantLocal =
+      includeAnonymousLocal ||
+      (!migrationComplete(IMPORTANT_MIGRATION_PREFIX, userId) &&
+        previousOwner === userId);
+
     const [notesResult, importantResult] = await Promise.allSettled([
-      migrateNotes(userId, includeAnonymousLocal),
-      migrateImportantBlocks(userId, includeAnonymousLocal, bookmarks),
+      migrateNotes(userId, includeNotesLocal),
+      migrateImportantBlocks(userId, includeImportantLocal, bookmarks),
     ]);
 
     if (notesResult.status === "fulfilled") {
