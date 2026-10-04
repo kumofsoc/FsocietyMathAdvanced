@@ -1,5 +1,21 @@
+import { lazy, Suspense } from "react";
 import type { HomeMotionTier } from "../model/homeExperience";
-import { HomeMathField3D } from "../visual/HomeMathField3D";
+
+const HomeMathField3D = lazy(() =>
+  import("../visual/HomeMathField3D").then((module) => ({
+    default: module.HomeMathField3D,
+  })),
+);
+
+function HomeMathFieldFallback() {
+  return (
+    <div className="math-field-runtime" aria-hidden="true">
+      <div className="math-field-fallback">
+        <i /><i /><i /><span>∇</span>
+      </div>
+    </div>
+  );
+}
 
 export function HomeMotionLab({ motionTier }: { motionTier: HomeMotionTier }) {
   return (
@@ -13,7 +29,13 @@ export function HomeMotionLab({ motionTier }: { motionTier: HomeMotionTier }) {
       </div>
 
       <div className="motion-lab-stage" data-parallax>
-        <HomeMathField3D tier={motionTier}/>
+        {motionTier === "cinematic" ? (
+          <Suspense fallback={<HomeMathFieldFallback />}>
+            <HomeMathField3D tier={motionTier} />
+          </Suspense>
+        ) : (
+          <HomeMathFieldFallback />
+        )}
         <div className="motion-coordinate x">X</div>
         <div className="motion-coordinate y">Y</div>
         <div className="motion-coordinate z">Z</div>
