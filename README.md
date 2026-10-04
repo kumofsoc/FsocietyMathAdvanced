@@ -9,7 +9,7 @@
 - Интерактивная 3D-геометрия и математические сцены
 - XYFlow для интерактивной карты курса
 - KaTeX для формул
-- localStorage для локального прогресса и персонализации
+- local-first browser cache + authenticated Go backend sync
 
 ## Текущее состояние курса
 
@@ -55,13 +55,16 @@
 
 ## Backend-ready frontend
 
-Frontend остаётся local-first, но transport boundary уже выделен:
+Frontend остаётся local-first, но уже соответствует фактическому Go API:
 
-- `src/types/api.ts` — DTO;
-- `src/lib/api.ts` — typed HTTP client;
-- `src/lib/progressSync.ts` — сбор текущего прогресса для синхронизации;
-- `.env.example` с `VITE_API_BASE_URL`;
-- контракт будущих Go endpoints описан в `docs/backend-contract.md`.
+- `src/shared/api/types.ts` — typed DTO;
+- `src/shared/api/client.ts` — единая transport/auth boundary;
+- `src/features/auth/model/authSession.ts` — session bootstrap/login/register/logout;
+- `src/features/sync/model/userStateSync.ts` — merge + canonical hydration;
+- `src/features/sync/model/autoSync.ts` — debounced background sync;
+- `docs/backend-contract.md` — текущий контракт frontend ↔ Go backend;
+- `docs/production-readiness.md` — release/staging/security gate;
+- Playwright smoke запускается в CI на production bundle.
 
 ## Что уже есть
 
@@ -97,15 +100,17 @@ pnpm dev
 Production-проверка:
 
 ```bash
-pnpm typecheck
+pnpm test
 pnpm build
+pnpm exec playwright install chromium
+pnpm test:e2e
 ```
 
 ## Архитектурный принцип
 
 Контент отделён от UI: структура курса и практика лежат в `src/data`, общая логика обучения — в `src/lib`, интерактивные представления — в `src/components`.
 
-Прогресс, тема, курсор, сохранённые теоремы и последняя тема сохраняются локально. Карта курса строится детерминированно из prerequisite-связей и не хранит ручное положение карточек. Бэкенд для базового режима обучения не требуется.
+Прогресс и персонализация работают local-first. При настроенном backend и авторизации learning/workspace/preferences синхронизируются с аккаунтом, а серверный canonical snapshot гидратит локальный cache. Базовый режим обучения по-прежнему не требует backend.
 
 ## Контент
 
