@@ -2,7 +2,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { CURSOR_EVENT, CURSOR_KEY, type CursorMode } from "@/features/personalization/ui/CustomCursor";
 import { LEARNING_EVENT, loadSavedTheorems, saveTheorems } from "@/lib/learning";
 import { MusicSettings } from "@/features/background-music/ui/MusicSettings";
-import { readLocalStorage, readLocalStorageJson, writeLocalStorage } from "@/shared/lib/browserStorage";
+import { readLocalStorage, readLocalStorageJson } from "@/shared/lib/browserStorage";
+import {
+  MOTION_KEY,
+  THEME_CUSTOM_KEY,
+  THEME_NAME_KEY,
+  saveCursorPreference,
+  saveCustomThemePreference,
+  saveMotionPreference,
+  saveThemeNamePreference,
+} from "@/features/personalization/model/preferences";
 import {
   MOTION_KEY,
   PREFERENCES_EVENT,
@@ -120,7 +129,7 @@ export function SettingsPanel() {
   }, [activeTheme]);
 
   useEffect(() => {
-    writeLocalStorage(THEME_NAME_KEY, themeName);
+    saveThemeNamePreference(themeName as Parameters<typeof saveThemeNamePreference>[0]);
     emitPreferencesChange();
   }, [themeName]);
 
@@ -181,8 +190,8 @@ export function SettingsPanel() {
   };
 
   const saveCustomTheme = () => {
-    writeLocalStorage(THEME_CUSTOM_KEY, JSON.stringify(custom));
-    writeLocalStorage(THEME_NAME_KEY, "Custom");
+    saveCustomThemePreference(custom as Parameters<typeof saveCustomThemePreference>[0]);
+    saveThemeNamePreference("Custom");
     setThemeName("Custom");
     setCustomDirty(false);
     setCustomSaved(true);
@@ -197,7 +206,7 @@ export function SettingsPanel() {
   };
 
   const chooseCursor = (next: CursorMode) => {
-    writeLocalStorage(CURSOR_KEY, next);
+    saveCursorPreference(next);
     setCursor(next);
     window.dispatchEvent(new CustomEvent(CURSOR_EVENT));
     emitPreferencesChange();
