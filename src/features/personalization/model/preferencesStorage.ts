@@ -139,6 +139,39 @@ export function localPreferencesAreDirty() {
   return readLocalStorage(PREFERENCES_DIRTY_KEY) === "1";
 }
 
+export function saveThemeNamePreference(value: PreferencesDto["themeName"]) {
+  const saved = writeLocalStorage(THEME_NAME_KEY, value);
+  if (saved) emitPreferencesChange();
+  return saved;
+}
+
+export function saveCustomThemePreference(value: ThemeTokensDto) {
+  const saved = writeLocalStorage(
+    THEME_CUSTOM_KEY,
+    JSON.stringify(normalizeTheme(value)),
+  );
+  if (saved) emitPreferencesChange();
+  return saved;
+}
+
+export function saveCursorPreference(value: CursorModeDto) {
+  const saved = writeLocalStorage(CURSOR_KEY, value);
+  if (saved) emitPreferencesChange();
+  return saved;
+}
+
+export function saveMotionPreference(value: MotionProfileDto) {
+  const saved = writeLocalStorage(MOTION_KEY, value);
+  if (saved) emitPreferencesChange();
+  return saved;
+}
+
+export function saveSidebarCollapsedPreference(value: boolean) {
+  const saved = writeLocalStorage(SIDEBAR_COLLAPSED_KEY, value ? "1" : "0");
+  if (saved) emitPreferencesChange();
+  return saved;
+}
+
 export function hydrateLocalPreferences(value: PreferencesDto) {
   const normalized: PreferencesDto = {
     ...value,
