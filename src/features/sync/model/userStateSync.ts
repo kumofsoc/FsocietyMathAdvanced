@@ -12,20 +12,24 @@ import {
   syncProgressToBackend,
 } from "@/features/learning/model/progressSync";
 import {
+  clearLearningMutation,
+  loadLearningMutations,
   loadReadingBlocks,
   loadSavedTheorems,
 } from "@/features/learning/model/learning";
 import {
   loadSavedTopicIds,
   replaceSavedTopicIds,
+  savedTopicsAreDirty,
 } from "@/features/saved-topics/model/savedTopics";
 import {
   loadTopicResumeState,
   replaceTopicResumeState,
 } from "@/features/learning/model/topicResume";
 import {
+  hydrateReadingWidth,
   loadReadingWidth,
-  saveReadingWidth,
+  readingWidthIsDirty,
 } from "@/features/reading-width/model/readingWidth";
 import {
   clearBlockNoteTombstone,
@@ -45,6 +49,7 @@ import {
   hydrateLocalPreferences,
   isDefaultPreferences,
   loadLocalPreferences,
+  localPreferencesAreDirty,
 } from "@/features/personalization/model/preferencesStorage";
 import { useAppShellStore } from "@/app/store/useAppShellStore";
 
@@ -77,6 +82,7 @@ export type UserStateSyncResult = {
   readingBlocksSynced: boolean;
   workspaceSynced: boolean;
   bookmarksSynced: boolean;
+  learningMutationsSynced: boolean;
   notesSynced: boolean;
   importantBlocksSynced: boolean;
   preferencesSynced: boolean;
@@ -120,10 +126,22 @@ async function syncWorkspace(userId: string) {
 
   let remote = await api.workspace.get();
   const remoteWasPristine = isPristineWorkspace(remote);
+  const reconcileSavedTopics =
+    savedTopicsAreDirty() || (!migrated && remoteWasPristine);
 
-  if (!migrated && remoteWasPristine) {
-    for (const topicId of localSaved) {
-      remote = await api.workspace.saveTopic(topicId, true);
+  if (reconcileSavedTopics) {
+    const localSet = new Set(localSaved);
+    const remoteSet = new Set(remote.savedTopicIds);
+
+    for (const topicId of localSet) {
+      if (!remoteSet.has(topicId)) {
+        remote = await api.workspace.saveTopic(topicId, true);
+      }
+    }
+    for (const topicId of remoteSet) {
+      if (!localSet.has(topicId)) {
+        remote = await api.workspace.saveTopic(topicId, false);
+      }
     }
   }
 
@@ -134,13 +152,15 @@ async function syncWorkspace(userId: string) {
     }
   }
 
-  if (!migrated && remoteWasPristine && localWidth !== remote.readingWidth) {
+  const shouldPushReadingWidth =
+    readingWidthIsDirty() || (!migrated && remoteWasPristine);
+  if (shouldPushReadingWidth && localWidth !== remote.readingWidth) {
     remote = await api.workspace.setReadingWidth(localWidth);
   }
 
   replaceSavedTopicIds(remote.savedTopicIds);
   replaceTopicResumeState(remote.topicResume);
-  saveReadingWidth(remote.readingWidth);
+  hydrateReadingWidth(remote.readingWidth);
   writeLocalStorage(migrationKey(userId), "1");
 
   return {
@@ -156,6 +176,31 @@ async function syncReadingBlocks() {
   });
   if (!refs.length) return null;
   return api.progress.syncReadingBlocks(refs);
+}
+
+async function syncLearningMutations() {
+  const queue = loadLearningMutations();
+
+  for (const [topicId, completed] of Object.entries(queue.theory)) {
+    await api.progress.setTheory(topicId, completed);
+    clearLearningMutation("theory", topicId);
+  }
+
+  for (const [taskId, solved] of Object.entries(queue.solved)) {
+    await api.progress.setExercise(taskId, solved);
+    clearLearningMutation("solved", taskId);
+  }
+
+  for (const [theoremId, mutation] of Object.entries(queue.theorems)) {
+    await api.progress.setTheorem(
+      theoremId,
+      mutation.topicId,
+      mutation.saved,
+    );
+    clearLearningMutation("theorems", theoremId);
+  }
+
+  return true;
 }
 
 async function createLocalTheoremBookmarks() {
@@ -303,7 +348,10 @@ async function syncPreferences(userId: string) {
   const local = loadLocalPreferences();
   let remote = await api.preferences.get();
 
-  if (!migrated && isDefaultPreferences(remote)) {
+  if (
+    localPreferencesAreDirty() ||
+    (!migrated && isDefaultPreferences(remote))
+  ) {
     remote = await api.preferences.replace(local);
   }
 
@@ -320,6 +368,7 @@ async function performSync(userId: string): Promise<UserStateSyncResult> {
       readingBlocksSynced: false,
       workspaceSynced: false,
       bookmarksSynced: false,
+      learningMutationsSynced: false,
       notesSynced: false,
       importantBlocksSynced: false,
       preferencesSynced: false,
@@ -330,6 +379,7 @@ async function performSync(userId: string): Promise<UserStateSyncResult> {
   syncing = true;
   try {
     const progress = await syncProgressToBackend();
+    await syncLearningMutations();
     const readingSnapshot = await syncReadingBlocks();
     const workspace = await syncWorkspace(userId);
     const bookmarks = await syncBookmarks();
@@ -347,6 +397,7 @@ async function performSync(userId: string): Promise<UserStateSyncResult> {
       readingBlocksSynced: Boolean(readingSnapshot),
       workspaceSynced: true,
       bookmarksSynced: true,
+      learningMutationsSynced: true,
       notesSynced: true,
       importantBlocksSynced: true,
       preferencesSynced: true,
