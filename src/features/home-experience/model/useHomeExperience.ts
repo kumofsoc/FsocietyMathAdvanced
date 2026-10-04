@@ -28,9 +28,22 @@ export function useHomeExperience(root: RefObject<HTMLDivElement | null>) {
   const [motionEpoch, setMotionEpoch] = useState(0);
 
   useLayoutEffect(() => {
-    const onMotionChange = () => setMotionEpoch((value) => value + 1);
-    window.addEventListener("fsociety-motion-change", onMotionChange);
-    return () => window.removeEventListener("fsociety-motion-change", onMotionChange);
+    const onEnvironmentChange = () => setMotionEpoch((value) => value + 1);
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const mobile = window.matchMedia("(max-width: 820px)");
+    const coarsePointer = window.matchMedia("(pointer: coarse)");
+
+    window.addEventListener("fsociety-motion-change", onEnvironmentChange);
+    reducedMotion.addEventListener("change", onEnvironmentChange);
+    mobile.addEventListener("change", onEnvironmentChange);
+    coarsePointer.addEventListener("change", onEnvironmentChange);
+
+    return () => {
+      window.removeEventListener("fsociety-motion-change", onEnvironmentChange);
+      reducedMotion.removeEventListener("change", onEnvironmentChange);
+      mobile.removeEventListener("change", onEnvironmentChange);
+      coarsePointer.removeEventListener("change", onEnvironmentChange);
+    };
   }, []);
 
   useLayoutEffect(() => {
@@ -171,9 +184,10 @@ export function useHomeExperience(root: RefObject<HTMLDivElement | null>) {
     };
     if (usePointer) window.addEventListener("pointermove", onPointerMove, { passive: true });
 
-    requestAnimationFrame(() => ScrollTrigger.refresh());
+    const refreshFrame = requestAnimationFrame(() => ScrollTrigger.refresh());
 
     return () => {
+      cancelAnimationFrame(refreshFrame);
       cancelAnimationFrame(pointerFrame);
       window.removeEventListener("pointermove", onPointerMove);
       ctx.revert();
