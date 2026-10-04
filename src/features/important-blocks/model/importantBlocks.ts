@@ -1,4 +1,4 @@
-import { readLocalStorageJson, writeLocalStorage } from "@/shared/lib/browserStorage";
+import { readLocalStorage, readLocalStorageJson, writeLocalStorage } from "@/shared/lib/browserStorage";
 import type { BlockKind } from "@/entities/course/model/types";
 
 export const IMPORTANT_BLOCKS_KEY = "visualmath-important-blocks-v1";
@@ -20,6 +20,7 @@ export type PendingImportantBlockMutation = {
   blockIndex: number;
   important: boolean;
   updatedAt: number;
+  ownerId: string | null;
 };
 
 export type ImportantBlocksEventDetail = {
@@ -150,6 +151,7 @@ export function setBlockImportant(
         blockIndex: input.blockIndex,
         important: false,
         updatedAt,
+        ownerId: readLocalStorage("visualmath-account-cache-owner-v1"),
       });
     }
     return {
@@ -178,6 +180,7 @@ export function setBlockImportant(
       blockIndex: input.blockIndex,
       important: true,
       updatedAt,
+      ownerId: readLocalStorage("visualmath-account-cache-owner-v1"),
     });
   }
 
