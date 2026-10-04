@@ -64,6 +64,7 @@ import {
   localPreferencesAreDirty,
 } from "@/features/personalization/model/preferencesStorage";
 import { useAppShellStore } from "@/app/store/useAppShellStore";
+import { useAuthStore } from "@/features/auth/model/authSession";
 
 const MIGRATION_VERSION = 2;
 const CORE_MIGRATION_PREFIX =
@@ -80,6 +81,38 @@ export const ACCOUNT_CACHE_OWNER_KEY = "visualmath-account-cache-owner-v1";
 const syncInFlightByUser = new Map<string, Promise<UserStateSyncResult>>();
 let syncChain: Promise<void> = Promise.resolve();
 let syncing = false;
+
+class SyncSupersededError extends Error {
+  constructor(userId: string) {
+    super("Authenticated sync no longer belongs to " + userId);
+    this.name = "SyncSupersededError";
+  }
+}
+
+const EMPTY_SYNC_RESULT: UserStateSyncResult = {
+  bootstrapHydrated: false,
+  coreMigrated: false,
+  notesMigrated: false,
+  importantBlocksMigrated: false,
+};
+
+function assertSyncUser(userId: string) {
+  const state = useAuthStore.getState();
+
+  // Unit-level sync helpers can run before the auth store is bootstrapped.
+  if (state.status === "booting" && !state.user) return;
+
+  if (state.status !== "authenticated" || state.user?.id !== userId) {
+    throw new SyncSupersededError(userId);
+  }
+}
+
+async function forSyncUser<T>(userId: string, request: () => Promise<T>) {
+  assertSyncUser(userId);
+  const result = await request();
+  assertSyncUser(userId);
+  return result;
+}
 
 export type UserStateSyncResult = {
   bootstrapHydrated: boolean;
@@ -241,12 +274,12 @@ function toImportantBlock(item: ImportantBlockDto): ImportantBlock {
   };
 }
 
-async function listAllNotes() {
+async function listAllNotes(userId: string) {
   const notes: BlockNoteDto[] = [];
   let offset = 0;
 
   for (;;) {
-    const page = await api.notes.list(100, offset);
+    const page = await forSyncUser(userId, () => api.notes.list(100, offset));
     notes.push(...page.notes);
     if (!page.hasMore) return notes;
     offset += page.notes.length;
@@ -357,6 +390,7 @@ function restoreMigrationSeedLocally(seed: MigrationSeed, snapshot: BootstrapDto
 }
 
 async function createMissingTheoremBookmarks(
+  userId: string,
   localTheorems: SavedTheorem[],
   bookmarks: BookmarkDto[],
 ) {
@@ -367,12 +401,14 @@ async function createMissingTheoremBookmarks(
   for (const theorem of localTheorems) {
     const key = "theorem::" + theorem.id;
     if (!theorem.id || !theorem.topicId || byKindAndContentId.has(key)) continue;
-    const created = await api.bookmarks.create({
-      topicId: theorem.topicId,
-      contentBlockId: theorem.id,
-      kind: "theorem",
-      title: theorem.title || theorem.id,
-    });
+    const created = await forSyncUser(userId, () =>
+      api.bookmarks.create({
+        topicId: theorem.topicId,
+        contentBlockId: theorem.id,
+        kind: "theorem",
+        title: theorem.title || theorem.id,
+      }),
+    );
     bookmarks.push(created);
     byKindAndContentId.set(created.kind + "::" + created.contentBlockId, created);
   }
@@ -384,9 +420,11 @@ async function migrateCore(
   snapshot: BootstrapDto,
   seed: MigrationSeed,
 ) {
-  let progress = await api.progress.sync(seed.progress);
+  let progress = await forSyncUser(userId, () => api.progress.sync(seed.progress));
   if (seed.readingBlocks.length) {
-    progress = await api.progress.syncReadingBlocks(seed.readingBlocks);
+    progress = await forSyncUser(userId, () =>
+      api.progress.syncReadingBlocks(seed.readingBlocks),
+    );
   }
 
   let workspace = snapshot.workspace;
@@ -394,14 +432,18 @@ async function migrateCore(
 
   for (const topicId of seed.savedTopicIds) {
     if (!workspace.savedTopicIds.includes(topicId)) {
-      workspace = await api.workspace.saveTopic(topicId, true);
+      workspace = await forSyncUser(userId, () =>
+        api.workspace.saveTopic(topicId, true),
+      );
     }
   }
 
   for (const [topicId, localEntry] of Object.entries(seed.topicResume)) {
     const remoteEntry = workspace.topicResume[topicId];
     if (!remoteEntry || localEntry.updatedAt > remoteEntry.updatedAt) {
-      workspace = await api.workspace.setResume(topicId, localEntry.blockIndex);
+      workspace = await forSyncUser(userId, () =>
+        api.workspace.setResume(topicId, localEntry.blockIndex),
+      );
     }
   }
 
@@ -409,7 +451,9 @@ async function migrateCore(
     remoteWasPristine &&
     seed.readingWidth !== snapshot.workspace.readingWidth
   ) {
-    workspace = await api.workspace.setReadingWidth(seed.readingWidth);
+    workspace = await forSyncUser(userId, () =>
+      api.workspace.setReadingWidth(seed.readingWidth),
+    );
   }
 
   let preferences = snapshot.preferences;
@@ -418,11 +462,13 @@ async function migrateCore(
     (isDefaultPreferences(preferences) &&
       !isDefaultPreferences(seed.preferences))
   ) {
-    preferences = await api.preferences.replace(seed.preferences);
+    preferences = await forSyncUser(userId, () =>
+      api.preferences.replace(seed.preferences),
+    );
   }
 
-  let bookmarks = (await api.bookmarks.list()).bookmarks;
-  bookmarks = await createMissingTheoremBookmarks(seed.savedTheorems, bookmarks);
+  let bookmarks = (await forSyncUser(userId, () => api.bookmarks.list())).bookmarks;
+  bookmarks = await createMissingTheoremBookmarks(userId, seed.savedTheorems, bookmarks);
 
   hydrateCanonicalProgress(progress, bookmarks);
   replaceReadingBlocks(progress.readingBlockIds ?? []);
@@ -445,13 +491,15 @@ async function hydrateOrdinaryCore(
   let preferences = snapshot.preferences;
 
   if (preferencesWereDirty) {
-    preferences = await api.preferences.replace(localPreferences);
+    preferences = await forSyncUser(userId, () =>
+      api.preferences.replace(localPreferences),
+    );
     hydratePreferencesSnapshot(preferences);
   }
 
   let bookmarks: BookmarkDto[] = [];
   if (snapshot.learning.savedTheoremIds.length) {
-    bookmarks = (await api.bookmarks.list()).bookmarks;
+    bookmarks = (await forSyncUser(userId, () => api.bookmarks.list())).bookmarks;
     hydrateCanonicalProgress(snapshot.learning, bookmarks);
   }
 
@@ -478,7 +526,9 @@ export async function syncPendingBlockNotes(
 
   for (const mutation of pending) {
     if (mutation.text === null) {
-      await api.notes.remove(mutation.topicId, mutation.blockIndex);
+      await forSyncUser(userId, () =>
+        api.notes.remove(mutation.topicId, mutation.blockIndex),
+      );
       const latest = loadPendingBlockNoteMutations()[
         mutation.topicId + "::" + mutation.blockIndex
       ];
@@ -493,10 +543,12 @@ export async function syncPendingBlockNotes(
       continue;
     }
 
-    const canonical = await api.notes.put(
-      mutation.topicId,
-      mutation.blockIndex,
-      mutation.text,
+    const canonical = await forSyncUser(userId, () =>
+      api.notes.put(
+        mutation.topicId,
+        mutation.blockIndex,
+        mutation.text,
+      ),
     );
     const latest = loadPendingBlockNoteMutations()[
       mutation.topicId + "::" + mutation.blockIndex
@@ -518,9 +570,11 @@ export async function syncPendingImportantBlocks(
 
   for (const mutation of pending) {
     if (mutation.important) {
-      const canonical = await api.importantBlocks.put(
-        mutation.topicId,
-        mutation.blockIndex,
+      const canonical = await forSyncUser(userId, () =>
+        api.importantBlocks.put(
+          mutation.topicId,
+          mutation.blockIndex,
+        ),
       );
       const latest = loadPendingImportantBlockMutations()[
         mutation.topicId + "::" + mutation.blockIndex
@@ -535,9 +589,11 @@ export async function syncPendingImportantBlocks(
       continue;
     }
 
-    await api.importantBlocks.remove(
-      mutation.topicId,
-      mutation.blockIndex,
+    await forSyncUser(userId, () =>
+      api.importantBlocks.remove(
+        mutation.topicId,
+        mutation.blockIndex,
+      ),
     );
     const latest = loadPendingImportantBlockMutations()[
       mutation.topicId + "::" + mutation.blockIndex
@@ -559,22 +615,24 @@ export async function syncPendingImportantBlocks(
 async function migrateNotes(userId: string, includeLocal: boolean) {
   if (migrationComplete(NOTES_MIGRATION_PREFIX, userId)) {
     await syncPendingBlockNotes(userId);
-    const remote = await listAllNotes();
+    const remote = await listAllNotes(userId);
     hydrateBlockNotes(remote.map(toNoteEntry));
     return false;
   }
 
   const local = includeLocal ? loadBlockNoteEntries() : [];
-  const remote = await listAllNotes();
+  const remote = await listAllNotes(userId);
   const canonical = new Map(remote.map((item) => [item.id, item]));
 
   const toUpload = new Set(planNoteMigration(local, remote).map((note) => note.id));
   for (const note of local) {
     if (toUpload.has(note.id)) {
-      const saved = await api.notes.put(
-        note.topicId,
-        note.blockIndex,
-        note.text,
+      const saved = await forSyncUser(userId, () =>
+        api.notes.put(
+          note.topicId,
+          note.blockIndex,
+          note.text,
+        ),
       );
       if (saved) canonical.set(saved.id, saved);
     }
@@ -585,7 +643,7 @@ async function migrateNotes(userId: string, includeLocal: boolean) {
   }
 
   await syncPendingBlockNotes(userId, includeLocal);
-  const finalRemote = await listAllNotes();
+  const finalRemote = await listAllNotes(userId);
   hydrateBlockNotes(finalRemote.map(toNoteEntry));
   markMigrationComplete(NOTES_MIGRATION_PREFIX, userId);
   return includeLocal;
@@ -602,20 +660,22 @@ async function migrateImportantBlocks(
 ) {
   if (migrationComplete(IMPORTANT_MIGRATION_PREFIX, userId)) {
     await syncPendingImportantBlocks(userId);
-    const remote = await api.importantBlocks.list();
+    const remote = await forSyncUser(userId, () => api.importantBlocks.list());
     hydrateImportantBlocks(remote.blocks.map(toImportantBlock));
     return false;
   }
 
   const local = includeLocal ? loadImportantBlocks() : [];
-  const remote = await api.importantBlocks.list();
+  const remote = await forSyncUser(userId, () => api.importantBlocks.list());
   const remoteIds = new Set(remote.blocks.map((item) => item.id));
 
   for (const item of local) {
     if (!remoteIds.has(item.id)) {
-      const saved = await api.importantBlocks.put(
-        item.topicId,
-        item.blockIndex,
+      const saved = await forSyncUser(userId, () =>
+        api.importantBlocks.put(
+          item.topicId,
+          item.blockIndex,
+        ),
       );
       remoteIds.add(saved.id);
     }
@@ -626,17 +686,20 @@ async function migrateImportantBlocks(
   }
 
   const bookmarks =
-    initialBookmarks ?? (await api.bookmarks.list()).bookmarks;
+    initialBookmarks ??
+    (await forSyncUser(userId, () => api.bookmarks.list())).bookmarks;
   for (const bookmark of bookmarks.filter(isLegacyImportantBookmark)) {
     const address = parseContentBlockId(bookmark.contentBlockId);
     if (!address) continue;
 
-    await api.importantBlocks.put(address.topicId, address.blockIndex);
-    await api.bookmarks.remove(bookmark.id);
+    await forSyncUser(userId, () =>
+      api.importantBlocks.put(address.topicId, address.blockIndex),
+    );
+    await forSyncUser(userId, () => api.bookmarks.remove(bookmark.id));
   }
 
   await syncPendingImportantBlocks(userId, includeLocal);
-  const canonical = await api.importantBlocks.list();
+  const canonical = await forSyncUser(userId, () => api.importantBlocks.list());
   hydrateImportantBlocks(canonical.blocks.map(toImportantBlock));
   markMigrationComplete(IMPORTANT_MIGRATION_PREFIX, userId);
   return includeLocal || bookmarks.some(isLegacyImportantBookmark);
@@ -655,6 +718,7 @@ async function performSync(
     };
   }
 
+  assertSyncUser(userId);
   syncing = true;
   const previousOwner = readLocalStorage(ACCOUNT_CACHE_OWNER_KEY);
   const includeAnonymousLocal = shouldMigrateAnonymousState(userId);
@@ -676,7 +740,9 @@ async function performSync(
         bookmarks = await migrateCore(userId, snapshot, seed);
         coreMigrated = true;
       } catch (error) {
-        restoreMigrationSeedLocally(seed, snapshot);
+        if (!(error instanceof SyncSupersededError)) {
+          restoreMigrationSeedLocally(seed, snapshot);
+        }
         throw error;
       }
     } else {
@@ -690,6 +756,8 @@ async function performSync(
         markMigrationComplete(CORE_MIGRATION_PREFIX, userId);
       }
     }
+
+    assertSyncUser(userId);
 
     let notesMigrated = false;
     let importantBlocksMigrated = false;
@@ -723,6 +791,7 @@ async function performSync(
       );
     }
 
+    assertSyncUser(userId);
     writeLocalStorage(ACCOUNT_CACHE_OWNER_KEY, userId);
 
     return {
@@ -745,7 +814,13 @@ export function syncAuthenticatedUserState(
 
   const run = syncChain
     .catch(() => undefined)
-    .then(() => performSync(userId, snapshot));
+    .then(() => performSync(userId, snapshot))
+    .catch((error) => {
+      if (error instanceof SyncSupersededError) {
+        return { ...EMPTY_SYNC_RESULT };
+      }
+      throw error;
+    });
 
   let tracked!: Promise<UserStateSyncResult>;
   tracked = run.finally(() => {

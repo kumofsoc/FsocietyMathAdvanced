@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "@/shared/api/client";
 import type { BootstrapDto } from "@/shared/api/types";
 import { DEFAULT_PREFERENCES } from "@/features/personalization/model/preferencesStorage";
+import { useAuthStore } from "@/features/auth/model/authSession";
 import {
   BLOCK_NOTES_PENDING_KEY,
   loadBlockNote,
@@ -37,6 +38,11 @@ describe("authenticated user state policy", () => {
   let store: Map<string, string>;
 
   beforeEach(() => {
+    useAuthStore.setState({
+      status: "booting",
+      user: null,
+      error: null,
+    });
     store = new Map();
     vi.stubGlobal("localStorage", {
       getItem: (key: string) => store.get(key) ?? null,
@@ -365,6 +371,102 @@ describe("authenticated user state policy", () => {
     expect(loadBlockNote("rank", 1)?.text).toBe(
       "retained after partial migration",
     );
+  });
+
+  it("stops stale sync when authenticated account changes during an await", async () => {
+    const makeSnapshot = (userId: string, savedTopicId: string): BootstrapDto => ({
+      version: 1,
+      generatedAt: "2026-10-04T08:00:00Z",
+      user: {
+        id: userId,
+        email: userId + "@example.com",
+        profile: {
+          displayName: userId,
+          handle: userId,
+          bio: "",
+          avatarUrl: null,
+          joinedAt: "2026-10-04T08:00:00Z",
+          updatedAt: "2026-10-04T08:00:00Z",
+        },
+      },
+      preferences: DEFAULT_PREFERENCES,
+      workspace: {
+        savedTopicIds: [savedTopicId],
+        topicResume: {},
+        readingWidth: "normal",
+      },
+      learning: {
+        revision: 1,
+        theoryRead: [],
+        solvedTaskIds: [],
+        savedTheoremIds: [],
+        reading: {},
+        readingProgress: {},
+        readingBlockIds: [],
+        lastTopicId: null,
+        updatedAt: "2026-10-04T08:00:00Z",
+      },
+      capabilities: { mediaAudio: false },
+    });
+
+    for (const userId of ["user-1", "user-2"]) {
+      localStorage.setItem("visualmath-backend-migration-v2::" + userId, "1");
+      localStorage.setItem("visualmath-notes-migration-v2::" + userId, "1");
+      localStorage.setItem(
+        "visualmath-important-blocks-migration-v2::" + userId,
+        "1",
+      );
+    }
+    localStorage.setItem(ACCOUNT_CACHE_OWNER_KEY, "user-1");
+
+    const firstSnapshot = makeSnapshot("user-1", "matrices");
+    const secondSnapshot = makeSnapshot("user-2", "rank");
+    useAuthStore.setState({
+      status: "authenticated",
+      user: firstSnapshot.user,
+    });
+
+    let firstStarted!: () => void;
+    const started = new Promise<void>((resolve) => {
+      firstStarted = resolve;
+    });
+    let releaseFirst!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      releaseFirst = resolve;
+    });
+    const observedUsers: string[] = [];
+
+    vi.spyOn(api.notes, "list").mockImplementation(async () => {
+      observedUsers.push(useAuthStore.getState().user?.id ?? "none");
+      if (observedUsers.length === 1) {
+        firstStarted();
+        await gate;
+      }
+      return { notes: [], limit: 100, offset: 0, hasMore: false };
+    });
+    vi.spyOn(api.importantBlocks, "list").mockImplementation(async () => ({
+      blocks: [],
+    }));
+
+    const first = syncAuthenticatedUserState("user-1", firstSnapshot);
+    await started;
+
+    useAuthStore.setState({
+      status: "authenticated",
+      user: secondSnapshot.user,
+    });
+    const second = syncAuthenticatedUserState("user-2", secondSnapshot);
+    releaseFirst();
+
+    const [firstResult, secondResult] = await Promise.all([first, second]);
+
+    expect(firstResult.bootstrapHydrated).toBe(false);
+    expect(secondResult.bootstrapHydrated).toBe(true);
+    expect(observedUsers).toEqual(["user-1", "user-2"]);
+    expect(localStorage.getItem(ACCOUNT_CACHE_OWNER_KEY)).toBe("user-2");
+    expect(
+      JSON.parse(localStorage.getItem("visualmath-saved-topics-v1") ?? "[]"),
+    ).toEqual(["rank"]);
   });
 
   it("serializes overlapping account hydration instead of dropping the second account", async () => {
