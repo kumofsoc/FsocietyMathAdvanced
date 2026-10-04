@@ -139,6 +139,10 @@ export function localPreferencesAreDirty() {
   return readLocalStorage(PREFERENCES_DIRTY_KEY) === "1";
 }
 
+export function clearLocalPreferencesDirty() {
+  return writeLocalStorage(PREFERENCES_DIRTY_KEY, "0");
+}
+
 export function saveThemeNamePreference(value: PreferencesDto["themeName"]) {
   const saved = writeLocalStorage(THEME_NAME_KEY, value);
   if (saved) emitPreferencesChange();
