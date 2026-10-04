@@ -33,6 +33,23 @@ jobs:
             --build-arg VITE_API_TIMEOUT_MS=12000 \
             --build-arg VITE_APP_RELEASE=ci \
             --tag visualmath-frontend-ci .
+      - name: Smoke production frontend image
+        run: |
+          docker run -d --rm --name visualmath-frontend-ci-smoke -p 127.0.0.1:18080:8080 visualmath-frontend-ci
+          trap 'docker stop visualmath-frontend-ci-smoke >/dev/null 2>&1 || true' EXIT
+          for attempt in {1..20}; do
+            if curl -fsS http://127.0.0.1:18080/healthz >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:18080/healthz
+          headers="$(curl -fsSI http://127.0.0.1:18080/)"
+          printf '%s\n' "$headers"
+          grep -qi '^X-Content-Type-Options: nosniff' <<<"$headers"
+          grep -qi '^X-Frame-Options: DENY' <<<"$headers"
+          grep -qi '^Referrer-Policy: strict-origin-when-cross-origin' <<<"$headers"
+          grep -qi '^Cross-Origin-Opener-Policy: same-origin' <<<"$headers"
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
