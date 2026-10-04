@@ -83,6 +83,8 @@ VISUALMATH_E2E_API_BASE_URL=http://127.0.0.1:8080 pnpm test:e2e:backend
 
 The integrated backend must match the current release-gate contract. The frontend suite must not invent or mock replacement endpoints for this gate.
 
+PR CI contains a separate `Backend E2E` workflow. It runs this suite only when the repository variable `VISUALMATH_E2E_API_BASE_URL` is configured with an accessible release-gate/staging backend URL. When the variable is absent, the workflow emits an explicit notice and skips the real-backend job. Therefore, frontend CI success by itself must not be reported as proof that the backend-integrated suite executed.
+
 ## Auth/security acceptance
 
 - access token exists only in JavaScript memory;
