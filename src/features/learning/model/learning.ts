@@ -4,6 +4,7 @@ export const SAVED_THEOREMS_KEY = "fsociety-saved-theorems-v1";
 export const READING_PROGRESS_KEY = "visualmath-reading-progress-v1";
 export const READING_BLOCKS_KEY = "visualmath-reading-blocks-v1";
 export const LEARNING_EVENT = "fsociety-learning-change";
+export const LEARNING_MUTATIONS_KEY = "visualmath-learning-mutations-v1";
 
 export interface SavedTheorem {
   id: string;
@@ -12,6 +13,65 @@ export interface SavedTheorem {
   title: string;
   body: string;
   formula?: string;
+}
+
+export type LearningMutationQueue = {
+  theory: Record<string, boolean>;
+  solved: Record<string, boolean>;
+  theorems: Record<string, { saved: boolean; topicId: string | null }>;
+};
+
+function emptyLearningMutations(): LearningMutationQueue {
+  return { theory: {}, solved: {}, theorems: {} };
+}
+
+export function loadLearningMutations(): LearningMutationQueue {
+  try {
+    const parsed = JSON.parse(
+      localStorage.getItem(LEARNING_MUTATIONS_KEY) || "{}",
+    ) as Partial<LearningMutationQueue>;
+    return {
+      theory: parsed.theory ?? {},
+      solved: parsed.solved ?? {},
+      theorems: parsed.theorems ?? {},
+    };
+  } catch {
+    return emptyLearningMutations();
+  }
+}
+
+function persistLearningMutations(queue: LearningMutationQueue) {
+  try {
+    localStorage.setItem(LEARNING_MUTATIONS_KEY, JSON.stringify(queue));
+  } catch (error) {
+    console.warn("[VisualMath] could not persist learning mutation queue", error);
+  }
+}
+
+function queueSetDiff(
+  key: string,
+  previous: Set<string>,
+  next: Set<string>,
+) {
+  if (key !== THEORY_KEY && key !== SOLVED_KEY) return;
+  const queue = loadLearningMutations();
+  const target = key === THEORY_KEY ? queue.theory : queue.solved;
+
+  for (const id of new Set([...previous, ...next])) {
+    const before = previous.has(id);
+    const after = next.has(id);
+    if (before !== after) target[id] = after;
+  }
+  persistLearningMutations(queue);
+}
+
+export function clearLearningMutation(
+  kind: "theory" | "solved" | "theorems",
+  id: string,
+) {
+  const queue = loadLearningMutations();
+  delete queue[kind][id];
+  persistLearningMutations(queue);
 }
 
 export function loadSet(key: string): Set<string> {
@@ -23,11 +83,13 @@ export function loadSet(key: string): Set<string> {
 }
 
 export function saveSet(key: string, value: Set<string>) {
+  const previous = loadSet(key);
   try {
     localStorage.setItem(key, JSON.stringify([...value]));
   } catch (error) {
     console.warn("[FsocietyMath] could not persist learning set", error);
   }
+  queueSetDiff(key, previous, value);
   window.dispatchEvent(new CustomEvent(LEARNING_EVENT));
 }
 
@@ -40,11 +102,26 @@ export function loadSavedTheorems(): SavedTheorem[] {
 }
 
 export function saveTheorems(value: SavedTheorem[]) {
+  const previous = loadSavedTheorems();
   try {
     localStorage.setItem(SAVED_THEOREMS_KEY, JSON.stringify(value));
   } catch (error) {
     console.warn("[FsocietyMath] could not persist saved theorems", error);
   }
+
+  const previousById = new Map(previous.map((item) => [item.id, item]));
+  const nextById = new Map(value.map((item) => [item.id, item]));
+  const queue = loadLearningMutations();
+  for (const id of new Set([...previousById.keys(), ...nextById.keys()])) {
+    const before = previousById.get(id);
+    const after = nextById.get(id);
+    if (Boolean(before) === Boolean(after)) continue;
+    queue.theorems[id] = {
+      saved: Boolean(after),
+      topicId: after?.topicId ?? before?.topicId ?? null,
+    };
+  }
+  persistLearningMutations(queue);
   window.dispatchEvent(new CustomEvent(LEARNING_EVENT));
 }
 
