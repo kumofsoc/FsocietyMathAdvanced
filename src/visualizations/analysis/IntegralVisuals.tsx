@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 
-type P2=[number,number];
 
 const W=480,H=340,CX=240,CY=170,SX=54,SY=34;
 const sx=(x:number)=>CX+x*SX;
@@ -86,7 +85,6 @@ function SubstitutionPartsLab(){
 function PartialFractionsLab(){
   const [a,setA]=useState(1);
   const [b,setB]=useState(-2);
-  const denom=(x:number)=>(x-a)*(x-b);
   const A=1/(a-b);
   const B=1/(b-a);
   return <section className="integral-lab">

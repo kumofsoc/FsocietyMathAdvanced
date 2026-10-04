@@ -194,7 +194,6 @@ function FunctionStudyLab() {
   const [a,setA]=useState(3);
   const fn=(x:number)=>x*x*x-a*x;
   const der=(x:number)=>3*x*x-a;
-  const second=(x:number)=>6*x;
   const c=a>0?Math.sqrt(a/3):0;
   const xMin=-3,xMax=3,yMin=-8,yMax=8;
   const curve=Array.from({length:260},(_,i):Point=>{

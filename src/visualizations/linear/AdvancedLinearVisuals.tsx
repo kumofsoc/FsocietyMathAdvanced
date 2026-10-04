@@ -106,7 +106,7 @@ function JordanChainLab() {
       <div className="jordan-layout">
         <div className="jordan-stage">
           <div className="jordan-chain">
-            {Array.from({ length: size }, (_, i) => size - i).map((index, i) => (
+            {Array.from({ length: size }, (_, i) => size - i).map((index) => (
               <div className="jordan-chain-fragment" key={index}>
                 <div className={"jordan-node " + (index === 1 ? "eigen" : "")}>
                   <small>{index === 1 ? "СОБСТВЕННЫЙ" : "ПРИСОЕДИНЁННЫЙ"}</small>

@@ -8,16 +8,6 @@ const S=58;
 
 function xy([x,y]:V2):V2{return [CX+x*S,CY-y*S];}
 
-function Arrow2({v,className,label}:{v:V2;className:string;label:string}){
-  const a=xy([0,0]),b=xy(v);
-  const angle=Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI;
-  return <g className={className}>
-    <line x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]}/>
-    <polygon points="-8,-4 0,0 -8,4" transform={"translate("+b[0]+" "+b[1]+") rotate("+angle+")"}/>
-    <text x={b[0]+7} y={b[1]-7}>{label}</text>
-  </g>;
-}
-
 function Axes2(){
   return <g className="multi-axes"><line x1="28" y1={CY} x2="492" y2={CY}/><line x1={CX} y1="24" x2={CX} y2="336"/></g>;
 }
@@ -78,8 +68,6 @@ function DifferentialLab(){
 
   const base=xy([x,y]);
   const moved=xy([x+dx,y+dy]);
-  const vx:[number,number]=[dx,0];
-  const vy:[number,number]=[0,dy];
 
   return <section className="multi-lab">
     <header>

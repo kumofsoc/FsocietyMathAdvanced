@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import "@/styles/series.css";
 
-type Point = [number, number];
 
 const W = 560;
 const H = 310;
