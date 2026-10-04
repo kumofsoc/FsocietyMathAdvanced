@@ -5,20 +5,15 @@ import { MusicSettings } from "@/features/background-music/ui/MusicSettings";
 import { readLocalStorage, readLocalStorageJson } from "@/shared/lib/browserStorage";
 import {
   MOTION_KEY,
-  THEME_CUSTOM_KEY,
-  THEME_NAME_KEY,
-  saveCursorPreference,
-  saveCustomThemePreference,
-  saveMotionPreference,
-  saveThemeNamePreference,
-} from "@/features/personalization/model/preferences";
-import {
-  MOTION_KEY,
   PREFERENCES_EVENT,
   THEME_CUSTOM_KEY,
   THEME_NAME_KEY,
   emitPreferencesChange,
   loadLocalPreferences,
+  saveCursorPreference,
+  saveCustomThemePreference,
+  saveMotionPreference,
+  saveThemeNamePreference,
 } from "@/features/personalization/model/preferencesStorage";
 import "@/features/personalization/styles/system-config.css";
 
@@ -99,9 +94,8 @@ function applyTheme(theme: Theme) {
 
 function applyMotion(profile: MotionProfile) {
   document.documentElement.dataset.motionProfile = profile;
-  writeLocalStorage(MOTION_KEY, profile);
+  saveMotionPreference(profile);
   window.dispatchEvent(new CustomEvent("fsociety-motion-change"));
-  emitPreferencesChange();
 }
 
 export function SettingsPanel() {
@@ -130,7 +124,6 @@ export function SettingsPanel() {
 
   useEffect(() => {
     saveThemeNamePreference(themeName as Parameters<typeof saveThemeNamePreference>[0]);
-    emitPreferencesChange();
   }, [themeName]);
 
   useEffect(() => {
@@ -190,12 +183,11 @@ export function SettingsPanel() {
   };
 
   const saveCustomTheme = () => {
-    saveCustomThemePreference(custom as Parameters<typeof saveCustomThemePreference>[0]);
+    saveCustomThemePreference(custom as unknown as Parameters<typeof saveCustomThemePreference>[0]);
     saveThemeNamePreference("Custom");
     setThemeName("Custom");
     setCustomDirty(false);
     setCustomSaved(true);
-    emitPreferencesChange();
   };
 
   const restoreCustomTheme = () => {
