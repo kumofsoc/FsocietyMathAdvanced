@@ -17,7 +17,11 @@ import {
   loadReadingWidth,
   saveReadingWidth,
 } from "@/features/reading-width/model/readingWidth";
-import { loadSavedTheorems } from "@/features/learning/model/learning";
+import {
+  loadReadingBlocks,
+  loadSavedTheorems,
+  replaceReadingBlocks,
+} from "@/features/learning/model/learning";
 import {
   loadImportantBlocks,
   setBlockImportant,
@@ -107,25 +111,42 @@ async function syncWorkspace(userId: string) {
   };
 }
 
-async function createLocalBookmarks() {
+async function createMissingLocalBookmarks(remote: BookmarkDto[]) {
+  const remoteKeys = new Set(
+    remote.map((item) => item.kind + "::" + item.contentBlockId),
+  );
+
   for (const theorem of loadSavedTheorems()) {
     if (!theorem.topicId || !theorem.id) continue;
-    await api.bookmarks.create({
+    const key = "theorem::" + theorem.id;
+    if (remoteKeys.has(key)) continue;
+
+    const created = await api.bookmarks.create({
       topicId: theorem.topicId,
       contentBlockId: theorem.id,
       kind: "theorem",
       title: theorem.title || theorem.id,
     });
+    remote.push(created);
+    remoteKeys.add(key);
   }
 
   for (const item of loadImportantBlocks()) {
-    await api.bookmarks.create({
+    const kind = "important:" + item.kind;
+    const key = kind + "::" + item.id;
+    if (remoteKeys.has(key)) continue;
+
+    const created = await api.bookmarks.create({
       topicId: item.topicId,
       contentBlockId: item.id,
-      kind: "important:" + item.kind,
+      kind,
       title: item.blockTitle,
     });
+    remote.push(created);
+    remoteKeys.add(key);
   }
+
+  return remote;
 }
 
 function hydrateImportantBookmarks(bookmarks: BookmarkDto[]) {
@@ -150,10 +171,34 @@ function hydrateImportantBookmarks(bookmarks: BookmarkDto[]) {
 }
 
 async function syncBookmarks() {
-  await createLocalBookmarks();
   const response = await api.bookmarks.list();
-  hydrateImportantBookmarks(response.bookmarks);
-  return response.bookmarks;
+  const merged = await createMissingLocalBookmarks([...response.bookmarks]);
+  hydrateImportantBookmarks(merged);
+  return merged;
+}
+
+function parseReadingBlockId(value: string) {
+  const separator = value.lastIndexOf("::");
+  if (separator <= 0) return null;
+  const topicId = value.slice(0, separator);
+  const blockIndex = Number(value.slice(separator + 2));
+  if (!topicId || !Number.isInteger(blockIndex) || blockIndex < 0) return null;
+  return { topicId, blockIndex };
+}
+
+async function syncReadingBlocks() {
+  const localBlocks = [...loadReadingBlocks()]
+    .map(parseReadingBlockId)
+    .filter(
+      (item): item is { topicId: string; blockIndex: number } => Boolean(item),
+    );
+
+  const snapshot = localBlocks.length
+    ? await api.progress.syncReadingBlocks(localBlocks)
+    : await api.progress.get();
+
+  replaceReadingBlocks(snapshot.readingBlockIds ?? []);
+  return snapshot;
 }
 
 async function syncPreferences(userId: string) {
@@ -186,6 +231,7 @@ async function performSync(userId: string): Promise<UserStateSyncResult> {
   syncing = true;
   try {
     const progress = await syncProgressToBackend();
+    await syncReadingBlocks();
     const workspace = await syncWorkspace(userId);
     const bookmarks = await syncBookmarks();
     await syncPreferences(userId);
