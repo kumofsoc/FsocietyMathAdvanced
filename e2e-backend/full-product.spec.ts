@@ -70,7 +70,7 @@ async function createLocalMarks(page: Page) {
 
 async function setNordTheme(page: Page) {
   await page.getByRole("button", { name: /Настройки/ }).click();
-  await page.getByRole("button", { name: "Темы" }).click();
+  await page.getByRole("button", { name: "Темы", exact: true }).click();
   await page.getByRole("button", { name: "Nord" }).click();
   await page.getByRole("button", { name: "Закрыть настройки" }).click();
 }
