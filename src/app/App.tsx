@@ -27,6 +27,7 @@ import { useAppShellStore } from "@/app/store/useAppShellStore";
 import { loadSavedTopicIds, SAVED_TOPICS_EVENT, SAVED_TOPICS_KEY, setTopicSaved } from "@/features/saved-topics/model/savedTopics";
 import { parseVisualMathHash } from "@/shared/lib/blockDeepLink";
 import { installAuthSessionListener, useAuthStore } from "@/features/auth/model/authSession";
+import { installUserStateAutoSync } from "@/features/sync/model/autoSync";
 import { installUserDataSyncListeners, syncAuthenticatedUserData } from "@/features/sync/model/userDataSync";
 
 const LAST_TOPIC_KEY = "fsociety-last-topic-v1";
@@ -233,6 +234,7 @@ export default function App() {
 
   useEffect(() => {
     installAuthSessionListener();
+    installUserStateAutoSync();
     void bootstrapAuth();
   }, [bootstrapAuth]);
 
