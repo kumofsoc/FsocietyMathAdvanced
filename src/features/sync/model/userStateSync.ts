@@ -25,6 +25,7 @@ import {
 
 const MIGRATION_VERSION = 1;
 const MIGRATION_PREFIX = "visualmath-backend-migration-v" + MIGRATION_VERSION + "::";
+const PREFERENCES_MIGRATION_PREFIX = "visualmath-preferences-migration-v1::";
 
 let syncInFlight: Promise<UserStateSyncResult> | null = null;
 let syncing = false;
@@ -33,6 +34,7 @@ export type UserStateSyncResult = {
   progressSynced: boolean;
   workspaceSynced: boolean;
   bookmarksSynced: boolean;
+  preferencesSynced: boolean;
   migratedAnonymousState: boolean;
 };
 
@@ -148,12 +150,29 @@ async function syncBookmarks() {
   return response.bookmarks;
 }
 
+async function syncPreferences(userId: string) {
+  const key = PREFERENCES_MIGRATION_PREFIX + userId;
+  const migrated = readLocalStorage(key) === "1";
+  const local = loadLocalPreferences();
+  let remote = await api.preferences.get();
+
+  if (!migrated && isDefaultPreferences(remote)) {
+    remote = await api.preferences.replace(local);
+  }
+
+  hydrateLocalPreferences(remote);
+  useAppShellStore.getState().setSidebarCollapsed(remote.sidebarCollapsed);
+  writeLocalStorage(key, "1");
+  return remote;
+}
+
 async function performSync(userId: string): Promise<UserStateSyncResult> {
   if (!isBackendConfigured()) {
     return {
       progressSynced: false,
       workspaceSynced: false,
       bookmarksSynced: false,
+      preferencesSynced: false,
       migratedAnonymousState: false,
     };
   }
@@ -163,6 +182,7 @@ async function performSync(userId: string): Promise<UserStateSyncResult> {
     const progress = await syncProgressToBackend();
     const workspace = await syncWorkspace(userId);
     const bookmarks = await syncBookmarks();
+    await syncPreferences(userId);
 
     if (progress) {
       const canonical = await api.progress.get();
@@ -173,6 +193,7 @@ async function performSync(userId: string): Promise<UserStateSyncResult> {
       progressSynced: Boolean(progress),
       workspaceSynced: true,
       bookmarksSynced: true,
+      preferencesSynced: true,
       migratedAnonymousState: workspace.migratedAnonymousState,
     };
   } finally {
