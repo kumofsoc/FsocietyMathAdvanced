@@ -20,6 +20,7 @@ import {
   planNoteMigration,
   resolveNoteConflict,
   shouldMigrateAnonymousState,
+  syncAuthenticatedUserState,
   syncPendingBlockNotes,
   syncPendingImportantBlocks,
 } from "./userStateSync";
@@ -275,4 +276,83 @@ describe("authenticated user state policy", () => {
     expect(loadPendingImportantBlockMutations()).toEqual({});
     expect(loadImportantBlocks()[0]?.updatedAt).toBe(900);
   });
+  it("serializes overlapping account hydration instead of dropping the second account", async () => {
+    const makeSnapshot = (userId: string, savedTopicId: string): BootstrapDto => ({
+      version: 1,
+      generatedAt: "2026-10-04T08:00:00Z",
+      user: {
+        id: userId,
+        email: userId + "@example.com",
+        profile: {
+          displayName: userId,
+          handle: userId,
+          bio: "",
+          avatarUrl: null,
+          joinedAt: "2026-10-04T08:00:00Z",
+          updatedAt: "2026-10-04T08:00:00Z",
+        },
+      },
+      preferences: DEFAULT_PREFERENCES,
+      workspace: {
+        savedTopicIds: [savedTopicId],
+        topicResume: {},
+        readingWidth: "normal",
+      },
+      learning: {
+        revision: 1,
+        theoryRead: [],
+        solvedTaskIds: [],
+        savedTheoremIds: [],
+        reading: {},
+        readingProgress: {},
+        readingBlockIds: [],
+        lastTopicId: null,
+        updatedAt: "2026-10-04T08:00:00Z",
+      },
+      capabilities: { mediaAudio: false },
+    });
+
+    for (const userId of ["user-1", "user-2"]) {
+      localStorage.setItem("visualmath-backend-migration-v2::" + userId, "1");
+      localStorage.setItem("visualmath-notes-migration-v2::" + userId, "1");
+      localStorage.setItem(
+        "visualmath-important-blocks-migration-v2::" + userId,
+        "1",
+      );
+    }
+    localStorage.setItem(ACCOUNT_CACHE_OWNER_KEY, "user-1");
+
+    let releaseFirst!: () => void;
+    const firstGate = new Promise<void>((resolve) => {
+      releaseFirst = resolve;
+    });
+
+    const notes = vi.spyOn(api.notes, "list");
+    notes
+      .mockImplementationOnce(async () => {
+        await firstGate;
+        return { notes: [], limit: 100, offset: 0, hasMore: false };
+      })
+      .mockResolvedValue({ notes: [], limit: 100, offset: 0, hasMore: false });
+    vi.spyOn(api.importantBlocks, "list").mockResolvedValue({ blocks: [] });
+
+    const first = syncAuthenticatedUserState(
+      "user-1",
+      makeSnapshot("user-1", "matrices"),
+    );
+    const second = syncAuthenticatedUserState(
+      "user-2",
+      makeSnapshot("user-2", "rank"),
+    );
+
+    releaseFirst();
+    await Promise.all([first, second]);
+
+    expect(localStorage.getItem(ACCOUNT_CACHE_OWNER_KEY)).toBe("user-2");
+    expect(
+      JSON.parse(localStorage.getItem("visualmath-saved-topics-v1") ?? "[]"),
+    ).toEqual(["rank"]);
+    expect(notes).toHaveBeenCalledTimes(2);
+  });
+
 });
