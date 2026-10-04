@@ -69,6 +69,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           user: session.user,
           error: null,
         });
+        void import("@/features/sync/model/userStateSync")
+          .then(({ syncAuthenticatedUserState }) =>
+            syncAuthenticatedUserState(session.user.id),
+          )
+          .catch((error) => {
+            console.warn("[VisualMath] initial backend state sync failed", error);
+          });
       } catch (error) {
         set({
           status: "unavailable",
@@ -86,12 +93,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   login: async (input) => {
     const session = await api.auth.login(input);
     set({ status: "authenticated", user: session.user, error: null });
+    void import("@/features/sync/model/userStateSync")
+      .then(({ syncAuthenticatedUserState }) =>
+        syncAuthenticatedUserState(session.user.id),
+      )
+      .catch((error) => {
+        console.warn("[VisualMath] login state sync failed", error);
+      });
     return session.user;
   },
 
   register: async (input) => {
     const session = await api.auth.register(input);
     set({ status: "authenticated", user: session.user, error: null });
+    void import("@/features/sync/model/userStateSync")
+      .then(({ syncAuthenticatedUserState }) =>
+        syncAuthenticatedUserState(session.user.id),
+      )
+      .catch((error) => {
+        console.warn("[VisualMath] registration state sync failed", error);
+      });
     return session.user;
   },
 
