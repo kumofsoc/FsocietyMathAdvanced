@@ -38,7 +38,7 @@ let accessToken: string | null = null;
 let accessExpiresAt: string | null = null;
 let refreshInFlight: Promise<AuthResponseDto | null> | null = null;
 const AUTH_COOKIE_LOCK_NAME = "visualmath-auth-cookie-v1";
-const LOGOUT_PENDING_KEY = "visualmath-auth-logout-pending-v1";
+export const AUTH_AUTH_LOGOUT_PENDING_KEY = "visualmath-auth-logout-pending-v1";
 let authTransitionTail: Promise<void> = Promise.resolve();
 let explicitAuthPending = 0;
 let authGeneration = 0;
@@ -106,15 +106,15 @@ export function getAccessTokenSnapshot() {
 }
 
 function hasPendingLogout() {
-  return readLocalStorage(LOGOUT_PENDING_KEY) === "1";
+  return readLocalStorage(AUTH_LOGOUT_PENDING_KEY) === "1";
 }
 
 function markPendingLogout() {
-  writeLocalStorage(LOGOUT_PENDING_KEY, "1");
+  writeLocalStorage(AUTH_LOGOUT_PENDING_KEY, "1");
 }
 
 function clearPendingLogout() {
-  removeLocalStorage(LOGOUT_PENDING_KEY);
+  removeLocalStorage(AUTH_LOGOUT_PENDING_KEY);
 }
 
 function backendUrl(path: string) {

@@ -2,9 +2,11 @@ import { create } from "zustand";
 import {
   api,
   ApiError,
+  AUTH_LOGOUT_PENDING_KEY,
   AUTH_SESSION_EVENT,
   bootstrapBackendSession,
   isBackendConfigured,
+  setAccessToken,
 } from "@/shared/api/client";
 import type {
   BootstrapCapabilitiesDto,
@@ -245,6 +247,15 @@ export function installAuthSessionListener() {
         bootstrapVersion: null,
         bootstrapGeneratedAt: null,
       });
+    }
+  });
+
+  window.addEventListener("storage", (event) => {
+    if (
+      event.key === AUTH_LOGOUT_PENDING_KEY &&
+      event.newValue === "1"
+    ) {
+      setAccessToken(null);
     }
   });
 }
