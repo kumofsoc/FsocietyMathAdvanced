@@ -22,13 +22,11 @@ import type {
   UserDto,
   WorkspaceDto,
 } from "@/shared/api/types";
+import { runtimeConfig } from "@/shared/config/runtime";
+import { reportClientError } from "@/shared/observability/clientObservability";
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
-const configuredTimeout = Number(import.meta.env.VITE_API_TIMEOUT_MS ?? 12000);
-const API_TIMEOUT_MS =
-  Number.isFinite(configuredTimeout) && configuredTimeout >= 1000
-    ? configuredTimeout
-    : 12000;
+const API_BASE_URL = runtimeConfig.apiBaseUrl;
+const API_TIMEOUT_MS = runtimeConfig.apiTimeoutMs;
 
 let accessToken: string | null = null;
 let accessExpiresAt: string | null = null;
@@ -70,7 +68,7 @@ export class ApiError extends Error {
 }
 
 export function isBackendConfigured() {
-  return Boolean(API_BASE_URL);
+  return runtimeConfig.backendConfigured;
 }
 
 export function getApiBaseUrl() {
@@ -114,7 +112,10 @@ function composeSignal(
   timeoutMs: number,
 ) {
   const controller = new AbortController();
-  const timer = window.setTimeout(() => controller.abort("timeout"), timeoutMs);
+  const timer = globalThis.setTimeout(
+    () => controller.abort("timeout"),
+    timeoutMs,
+  );
 
   const onAbort = () => controller.abort(external?.reason);
   if (external) {
@@ -125,7 +126,7 @@ function composeSignal(
   return {
     signal: controller.signal,
     cleanup: () => {
-      window.clearTimeout(timer);
+      globalThis.clearTimeout(timer);
       external?.removeEventListener("abort", onAbort);
     },
   };
@@ -147,7 +148,7 @@ async function rawRequest<T>(
   init: RequestInit = {},
   options: RequestOptions = {},
 ): Promise<T> {
-  if (!API_BASE_URL) {
+  if (!runtimeConfig.backendConfigured) {
     throw new ApiError(0, {
       code: "backend_not_configured",
       message: "VITE_API_BASE_URL is not configured.",
@@ -177,13 +178,18 @@ async function rawRequest<T>(
   } catch (error) {
     cleanup();
     const timedOut = signal.aborted && signal.reason === "timeout";
-    throw new ApiError(0, {
+    const apiError = new ApiError(0, {
       code: timedOut ? "request_timeout" : "network_error",
       message: timedOut
         ? "Backend request timed out."
         : "Backend request could not be completed.",
       cause: error,
     });
+    reportClientError(apiError, {
+      source: "api.network",
+      extra: { path, method: init.method ?? "GET" },
+    });
+    throw apiError;
   }
   cleanup();
 
@@ -197,13 +203,23 @@ async function rawRequest<T>(
     const error = normalizeErrorBody(
       payload && typeof payload === "object" ? (payload as ApiErrorBody) : null,
     );
-    throw new ApiError(response.status, {
+    const apiError = new ApiError(response.status, {
       ...error,
       message:
         error.message ||
-        (typeof payload === "string" ? payload : "Request failed with status " + response.status),
+        (typeof payload === "string"
+          ? payload
+          : "Request failed with status " + response.status),
       requestId,
     });
+    if (response.status >= 500) {
+      reportClientError(apiError, {
+        source: "api.server",
+        requestId,
+        extra: { path, method: init.method ?? "GET", status: response.status },
+      });
+    }
+    throw apiError;
   }
 
   if (
