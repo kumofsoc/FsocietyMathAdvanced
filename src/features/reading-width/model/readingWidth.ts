@@ -5,6 +5,11 @@ export type ReadingWidth = "narrow" | "normal" | "wide";
 export const READING_WIDTH_KEY = "visualmath-reading-width-v1";
 export const READING_WIDTH_EVENT = "visualmath:reading-width-change";
 
+export type ReadingWidthEventDetail = {
+  source: "local" | "hydrate";
+  value: ReadingWidth;
+};
+
 export const readingWidthOptions: Array<{
   id: ReadingWidth;
   label: string;
@@ -22,10 +27,19 @@ export function loadReadingWidth(): ReadingWidth {
     : "normal";
 }
 
-export function saveReadingWidth(value: ReadingWidth) {
+export function saveReadingWidth(
+  value: ReadingWidth,
+  source: ReadingWidthEventDetail["source"] = "local",
+) {
   const saved = writeLocalStorage(READING_WIDTH_KEY, value);
   if (saved && typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent(READING_WIDTH_EVENT, { detail: value }));
+    window.dispatchEvent(new CustomEvent<ReadingWidthEventDetail>(READING_WIDTH_EVENT, {
+      detail: { source, value },
+    }));
   }
   return saved;
+}
+
+export function hydrateReadingWidth(value: ReadingWidth) {
+  return saveReadingWidth(value, "hydrate");
 }

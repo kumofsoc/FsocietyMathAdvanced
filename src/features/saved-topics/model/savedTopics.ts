@@ -3,16 +3,24 @@ import { readLocalStorageJson, writeLocalStorage } from "@/shared/lib/browserSto
 export const SAVED_TOPICS_KEY = "visualmath-saved-topics-v1";
 export const SAVED_TOPICS_EVENT = "visualmath:saved-topics-change";
 
+export type SavedTopicsEventDetail = {
+  source: "local" | "hydrate";
+  topicId?: string;
+  saved?: boolean;
+};
+
 export function loadSavedTopicIds() {
   return readLocalStorageJson<string[]>(SAVED_TOPICS_KEY, []).filter(
     (id, index, list) => typeof id === "string" && id.length > 0 && list.indexOf(id) === index,
   );
 }
 
-function persistSavedTopicIds(ids: string[]) {
+function persistSavedTopicIds(ids: string[], detail: SavedTopicsEventDetail) {
   const saved = writeLocalStorage(SAVED_TOPICS_KEY, JSON.stringify(ids));
   if (saved && typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent(SAVED_TOPICS_EVENT, { detail: ids }));
+    window.dispatchEvent(new CustomEvent<SavedTopicsEventDetail>(SAVED_TOPICS_EVENT, {
+      detail,
+    }));
   }
   return saved;
 }
@@ -25,7 +33,7 @@ export function setTopicSaved(topicId: string, saved: boolean) {
       : [...current, topicId]
     : current.filter((id) => id !== topicId);
 
-  persistSavedTopicIds(next);
+  persistSavedTopicIds(next, { source: "local", topicId, saved });
   return next;
 }
 
@@ -38,11 +46,10 @@ export function toggleSavedTopic(topicId: string) {
   };
 }
 
-
 export function replaceSavedTopicIds(ids: string[]) {
   const normalized = ids.filter(
     (id, index, list) => typeof id === "string" && id.length > 0 && list.indexOf(id) === index,
   );
-  persistSavedTopicIds(normalized);
+  persistSavedTopicIds(normalized, { source: "hydrate" });
   return normalized;
 }
