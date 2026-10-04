@@ -1,4 +1,7 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
+import { chapters, topicMeta } from "../src/data/courseMeta";
+import { courseSearchIndex } from "../src/data/courseSearchIndex";
+import { practiceTaskIdsByTopic } from "../src/data/practiceMeta";
 
 const apiBaseUrl = (
   process.env.VISUALMATH_E2E_API_BASE_URL ??
@@ -126,6 +129,115 @@ async function newLoggedInPage(browser: Browser) {
 }
 
 test.describe.serial("VisualMath real backend MVP", () => {
+test("backend catalog matches bundled frontend stable contract", async ({ request }) => {
+  const summaryResponse = await request.get(apiBaseUrl + "/api/v1/course");
+  expect(summaryResponse.ok()).toBeTruthy();
+  const summary = (await summaryResponse.json()) as {
+    chapterCount: number;
+    topicCount: number;
+    exerciseCount: number;
+    contentBlockCount: number;
+  };
+
+  const expectedExerciseCount = Object.values(practiceTaskIdsByTopic).reduce(
+    (total, ids) => total + ids.length,
+    0,
+  );
+  expect(summary).toMatchObject({
+    chapterCount: chapters.length,
+    topicCount: Object.keys(topicMeta).length,
+    exerciseCount: expectedExerciseCount,
+    contentBlockCount: courseSearchIndex.length,
+  });
+
+  const chaptersResponse = await request.get(apiBaseUrl + "/api/v1/course/chapters");
+  expect(chaptersResponse.ok()).toBeTruthy();
+  const backendChapters = (await chaptersResponse.json()) as Array<{
+    id: string;
+    number: string;
+    title: string;
+    topicIds: string[];
+  }>;
+  expect(backendChapters).toEqual(
+    chapters.map(({ id, number, title, topicIds }) => ({
+      id,
+      number,
+      title,
+      topicIds,
+    })),
+  );
+
+  const blocksByTopic = new Map<
+    string,
+    Array<{ id: string; index: number; title: string; kind: string }>
+  >();
+  for (const block of courseSearchIndex) {
+    const blocks = blocksByTopic.get(block.topicId) ?? [];
+    blocks.push({
+      id: block.topicId + "::" + block.index,
+      index: block.index,
+      title: block.title,
+      kind: block.kind,
+    });
+    blocksByTopic.set(block.topicId, blocks);
+  }
+
+  const topicIds = Object.keys(topicMeta);
+  const backendTopics = new Map<string, Record<string, unknown>>();
+  for (let offset = 0; offset < topicIds.length; offset += 12) {
+    const batch = topicIds.slice(offset, offset + 12);
+    const responses = await Promise.all(
+      batch.map((topicId) =>
+        request.get(
+          apiBaseUrl + "/api/v1/course/topics/" + encodeURIComponent(topicId),
+        ),
+      ),
+    );
+
+    for (let index = 0; index < batch.length; index += 1) {
+      const response = responses[index];
+      expect(response.ok(), "catalog topic " + batch[index]).toBeTruthy();
+      backendTopics.set(batch[index], await response.json());
+    }
+  }
+
+  for (const topicId of topicIds) {
+    const expected = topicMeta[topicId];
+    const actual = backendTopics.get(topicId) as {
+      id: string;
+      number: string;
+      title: string;
+      chapterId: string;
+      summary: string;
+      prerequisiteIds: string[];
+      isStub: boolean;
+      exerciseIds: string[];
+      contentBlocks: Array<{
+        id: string;
+        index: number;
+        title: string;
+        kind: string;
+      }>;
+    };
+
+    expect(actual.id).toBe(expected.id);
+    expect(actual.number).toBe(expected.number);
+    expect(actual.title).toBe(expected.title);
+    expect(actual.chapterId).toBe(expected.chapterId);
+    expect(actual.summary).toBe(expected.summary);
+    expect(actual.prerequisiteIds).toEqual(expected.prerequisites);
+    expect(actual.isStub).toBe(Boolean(expected.isStub));
+    expect([...actual.exerciseIds].sort()).toEqual(
+      [...(practiceTaskIdsByTopic[topicId] ?? [])].sort(),
+    );
+    expect(actual.contentBlocks).toEqual(
+      [...(blocksByTopic.get(topicId) ?? [])].sort(
+        (left, right) => left.index - right.index,
+      ),
+    );
+  }
+});
+
   test("anonymous migration -> bootstrap -> account state -> reload/logout/login/cross-device", async ({
     page,
     browser,
