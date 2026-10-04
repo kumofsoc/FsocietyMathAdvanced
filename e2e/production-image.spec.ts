@@ -1,0 +1,29 @@
+import { expect, test } from "@playwright/test";
+
+test("production image renders under its Content-Security-Policy", async ({ page }) => {
+  const cspViolations: string[] = [];
+
+  page.on("console", (message) => {
+    if (
+      message.type() === "error" &&
+      /content security policy|refused to (load|execute|apply|connect)/i.test(
+        message.text(),
+      )
+    ) {
+      cspViolations.push(message.text());
+    }
+  });
+
+  const response = await page.goto("/");
+  expect(response?.status()).toBe(200);
+  expect(response?.headers()["content-security-policy"]).toContain(
+    "default-src 'self'",
+  );
+  await expect(page.locator(".app-shell")).toBeVisible();
+  await expect(page.locator("body")).toContainText("VisualMath");
+
+  await page.goto("/#map");
+  await expect(page.locator(".knowledge-map-page")).toBeVisible();
+
+  expect(cspViolations).toEqual([]);
+});

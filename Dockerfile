@@ -26,6 +26,7 @@ RUN node -e 'const raw=(process.env.VITE_API_BASE_URL||"").trim(); let u; try { 
 FROM nginxinc/nginx-unprivileged:stable-alpine3.24
 
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
+COPY deploy/security-headers.conf /etc/nginx/security-headers.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 8080

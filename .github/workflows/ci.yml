@@ -58,6 +58,9 @@ jobs:
           grep -qi '^X-Frame-Options: DENY' <<<"$headers"
           grep -qi '^Referrer-Policy: strict-origin-when-cross-origin' <<<"$headers"
           grep -qi '^Cross-Origin-Opener-Policy: same-origin' <<<"$headers"
+          grep -qi '^Content-Security-Policy:' <<<"$headers"
+      - name: Browser smoke production frontend image
+        run: PLAYWRIGHT_BASE_URL=http://127.0.0.1:18080 pnpm exec playwright test e2e/production-image.spec.ts
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
