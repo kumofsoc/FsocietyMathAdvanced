@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   blockNoteId,
   BLOCK_NOTES_KEY,
+  BLOCK_NOTES_PENDING_KEY,
   deleteBlockNote,
   loadBlockNote,
   loadBlockNoteEntries,
@@ -36,6 +37,20 @@ describe("block notes", () => {
     expect(deleteBlockNote("rank", 2)).toBe(true);
     expect(loadBlockNote("rank", 2)).toBeNull();
     expect(JSON.parse(localStorage.getItem(BLOCK_NOTES_KEY) ?? "{}")).toEqual({});
+  });
+
+  it("rolls back optimistic state when the durable pending write fails", () => {
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        if (key === BLOCK_NOTES_PENDING_KEY) throw new Error("quota");
+        store.set(key, value);
+      },
+      removeItem: (key: string) => store.delete(key),
+    });
+
+    expect(saveBlockNote("rank", 9, "must stay durable")).toBe(false);
+    expect(loadBlockNote("rank", 9)).toBeNull();
   });
 
   it("normalizes windows line endings", () => {
