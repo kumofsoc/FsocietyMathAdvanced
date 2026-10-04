@@ -91,7 +91,8 @@ PR CI contains a separate `Backend E2E` workflow. It runs this suite only when t
 - access token exists only in JavaScript memory;
 - refresh token is HttpOnly and never read by JavaScript;
 - protected calls use bearer Authorization;
-- exactly one refresh is serialized when concurrent requests hit 401;
+- exactly one refresh is serialized when concurrent requests hit 401 inside a tab;
+- refresh-cookie rotation is additionally serialized across tabs through the Web Locks API when available, preventing normal multi-tab use from triggering backend reuse detection;
 - the original protected request is retried once;
 - logout removes the authenticated session state;
 - no auth token is persisted to localStorage/sessionStorage/IndexedDB;

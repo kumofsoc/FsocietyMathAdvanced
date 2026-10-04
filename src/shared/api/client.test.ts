@@ -142,3 +142,75 @@ describe("API auth transition serialization", () => {
     await login;
   });
 });
+
+
+describe("API cross-tab refresh serialization", () => {
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("serializes refresh-cookie rotation across isolated module instances", async () => {
+    let lockTail: Promise<unknown> = Promise.resolve();
+    const locks = {
+      request: vi.fn(
+        <T,>(
+          _name: string,
+          _options: { mode: "exclusive" },
+          callback: () => Promise<T>,
+        ) => {
+          const run = lockTail.then(callback, callback);
+          lockTail = run.then(
+            () => undefined,
+            () => undefined,
+          );
+          return run;
+        },
+      ),
+    };
+    vi.stubGlobal("navigator", { locks });
+
+    const firstGate = deferred<Response>();
+    const calls: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        calls.push(new URL(url).pathname);
+        if (!url.endsWith("/api/v1/auth/refresh")) {
+          throw new Error("unexpected fetch " + url);
+        }
+        if (calls.length === 1) return firstGate.promise;
+        return jsonResponse(session("user-a", "token-2"));
+      }),
+    );
+
+    const firstClient = await import("./client");
+    const firstRefresh = firstClient.api.auth.refresh();
+    await vi.waitFor(() => expect(calls).toEqual(["/api/v1/auth/refresh"]));
+
+    vi.resetModules();
+    const secondClient = await import("./client");
+    const secondRefresh = secondClient.api.auth.refresh();
+
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(calls).toEqual(["/api/v1/auth/refresh"]);
+
+    firstGate.resolve(jsonResponse(session("user-a", "token-1")));
+    expect((await firstRefresh)?.accessToken).toBe("token-1");
+
+    await vi.waitFor(() =>
+      expect(calls).toEqual([
+        "/api/v1/auth/refresh",
+        "/api/v1/auth/refresh",
+      ]),
+    );
+    expect((await secondRefresh)?.accessToken).toBe("token-2");
+    expect(locks.request).toHaveBeenCalledTimes(2);
+  });
+});

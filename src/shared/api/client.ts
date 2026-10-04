@@ -32,6 +32,7 @@ const API_TIMEOUT_MS = runtimeConfig.apiTimeoutMs;
 let accessToken: string | null = null;
 let accessExpiresAt: string | null = null;
 let refreshInFlight: Promise<AuthResponseDto | null> | null = null;
+const AUTH_COOKIE_LOCK_NAME = "visualmath-auth-cookie-v1";
 let authTransitionTail: Promise<void> = Promise.resolve();
 let explicitAuthPending = 0;
 let authGeneration = 0;
@@ -248,15 +249,32 @@ async function rawBlobRequest(
   return response.blob();
 }
 
+async function withAuthCookieLock<T>(work: () => Promise<T>): Promise<T> {
+  if (
+    typeof navigator !== "undefined" &&
+    navigator.locks &&
+    typeof navigator.locks.request === "function"
+  ) {
+    return navigator.locks.request(
+      AUTH_COOKIE_LOCK_NAME,
+      { mode: "exclusive" },
+      () => work(),
+    );
+  }
+  return work();
+}
+
 async function refreshAccessToken(): Promise<AuthResponseDto | null> {
   if (!isBackendConfigured() || explicitAuthPending > 0) return null;
   if (refreshInFlight) return refreshInFlight;
 
   const generation = authGeneration;
-  const pending = rawRequest<AuthResponseDto>(
-    "/api/v1/auth/refresh",
-    { method: "POST" },
-    { auth: false, retryAuth: false },
+  const pending = withAuthCookieLock(() =>
+    rawRequest<AuthResponseDto>(
+      "/api/v1/auth/refresh",
+      { method: "POST" },
+      { auth: false, retryAuth: false },
+    ),
   )
     .then((session) => {
       if (generation !== authGeneration || explicitAuthPending > 0) {
@@ -302,7 +320,7 @@ function runExplicitAuth<T>(work: () => Promise<T>): Promise<T> {
     .then(async () => {
       await waitForRefreshToSettle();
       setAccessToken(null);
-      return work();
+      return withAuthCookieLock(work);
     })
     .finally(() => {
       explicitAuthPending -= 1;
