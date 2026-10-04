@@ -116,24 +116,45 @@ describe("authenticated user state policy", () => {
   });
 
   it("rejects corrupted staged migration payloads before bootstrap uses them", () => {
+    const validSeed = {
+      progress: {
+        theoryRead: [],
+        solvedTaskIds: [],
+        savedTheoremIds: [],
+        reading: {},
+        readingProgress: {},
+        clientUpdatedAt: "2026-10-04T08:00:00Z",
+      },
+      readingBlocks: [],
+      savedTopicIds: [],
+      topicResume: {},
+      readingWidth: "normal",
+      preferences: DEFAULT_PREFERENCES,
+      preferencesDirty: false,
+      savedTheorems: [],
+    };
+
     expect(isMigrationSeed("corrupted")).toBe(false);
     expect(isMigrationSeed([])).toBe(false);
+    expect(isMigrationSeed(validSeed)).toBe(true);
     expect(
       isMigrationSeed({
-        progress: {
-          theoryRead: [],
-          solvedTaskIds: [],
-          savedTheoremIds: [],
-        },
-        readingBlocks: [],
-        savedTopicIds: [],
-        topicResume: {},
-        readingWidth: "normal",
-        preferences: DEFAULT_PREFERENCES,
-        preferencesDirty: false,
-        savedTheorems: [],
+        ...validSeed,
+        topicResume: { rank: null },
       }),
-    ).toBe(true);
+    ).toBe(false);
+    expect(
+      isMigrationSeed({
+        ...validSeed,
+        preferences: { ...DEFAULT_PREFERENCES, motionProfile: "turbo" },
+      }),
+    ).toBe(false);
+    expect(
+      isMigrationSeed({
+        ...validSeed,
+        savedTheorems: [{ id: "matrices::1" }],
+      }),
+    ).toBe(false);
   });
 
   it("migrates anonymous local state once, but never into a different account cache", () => {

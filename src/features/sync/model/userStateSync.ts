@@ -140,6 +140,97 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
 }
 
+function isNumberRecord(value: unknown) {
+  return (
+    isRecord(value) &&
+    Object.values(value).every(
+      (item) =>
+        typeof item === "number" &&
+        Number.isFinite(item) &&
+        item >= 0 &&
+        item <= 1,
+    )
+  );
+}
+
+function isTopicResumeRecord(value: unknown) {
+  return (
+    isRecord(value) &&
+    Object.values(value).every(
+      (entry) =>
+        isRecord(entry) &&
+        Number.isInteger(entry.blockIndex) &&
+        Number(entry.blockIndex) >= 0 &&
+        typeof entry.updatedAt === "number" &&
+        Number.isFinite(entry.updatedAt),
+    )
+  );
+}
+
+function isThemeTokens(value: unknown) {
+  if (!isRecord(value)) return false;
+  const keys = [
+    "bg",
+    "surface",
+    "elevated",
+    "text",
+    "muted",
+    "accent",
+    "accent2",
+    "border",
+    "definition",
+    "theorem",
+    "proof",
+    "formula",
+  ];
+  return keys.every(
+    (key) =>
+      typeof value[key] === "string" &&
+      /^#[0-9a-fA-F]{6}$/.test(String(value[key])),
+  );
+}
+
+function isPreferences(value: unknown) {
+  if (!isRecord(value)) return false;
+  const themes = new Set([
+    "Black",
+    "White",
+    "Catppuccin Mocha",
+    "Catppuccin Latte",
+    "Neovim",
+    "Tokyo Night",
+    "Gruvbox",
+    "Nord",
+    "Custom",
+  ]);
+  const cursors = new Set(["native", "halo", "minimal", "crosshair", "comet"]);
+  const motions = new Set(["full", "balanced", "eco", "off"]);
+  return (
+    typeof value.themeName === "string" &&
+    themes.has(value.themeName) &&
+    isThemeTokens(value.customTheme) &&
+    typeof value.cursorMode === "string" &&
+    cursors.has(value.cursorMode) &&
+    typeof value.motionProfile === "string" &&
+    motions.has(value.motionProfile) &&
+    typeof value.sidebarCollapsed === "boolean"
+  );
+}
+
+function isSavedTheoremSeed(value: unknown) {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.id === "string" &&
+    value.id.length > 0 &&
+    typeof value.topicId === "string" &&
+    value.topicId.length > 0 &&
+    typeof value.topicTitle === "string" &&
+    typeof value.title === "string" &&
+    typeof value.body === "string" &&
+    (value.formula === undefined || typeof value.formula === "string")
+  );
+}
+
 export function isMigrationSeed(
   value: unknown,
 ): value is MigrationSeed | null {
@@ -164,7 +255,7 @@ export function isMigrationSeed(
   }
 
   if (!isStringArray(value.savedTopicIds)) return false;
-  if (!isRecord(value.topicResume)) return false;
+  if (!isTopicResumeRecord(value.topicResume)) return false;
   if (
     value.readingWidth !== "narrow" &&
     value.readingWidth !== "normal" &&
@@ -172,14 +263,26 @@ export function isMigrationSeed(
   ) {
     return false;
   }
-  if (!isRecord(value.preferences)) return false;
+  if (!isPreferences(value.preferences)) return false;
   if (typeof value.preferencesDirty !== "boolean") return false;
-  if (!Array.isArray(value.savedTheorems)) return false;
+  if (
+    !Array.isArray(value.savedTheorems) ||
+    !value.savedTheorems.every(isSavedTheoremSeed)
+  ) {
+    return false;
+  }
 
   return (
     isStringArray(progress.theoryRead) &&
     isStringArray(progress.solvedTaskIds) &&
-    isStringArray(progress.savedTheoremIds)
+    isStringArray(progress.savedTheoremIds) &&
+    (progress.reading === undefined || isNumberRecord(progress.reading)) &&
+    (progress.readingProgress === undefined ||
+      isNumberRecord(progress.readingProgress)) &&
+    (progress.lastTopicId === undefined ||
+      progress.lastTopicId === null ||
+      typeof progress.lastTopicId === "string") &&
+    typeof progress.clientUpdatedAt === "string"
   );
 }
 

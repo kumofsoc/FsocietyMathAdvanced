@@ -78,9 +78,28 @@ export function saveSet(key: string, value: Set<string>) {
   });
 }
 
+function isSavedTheorem(value: unknown): value is SavedTheorem {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const item = value as Record<string, unknown>;
+  return (
+    typeof item.id === "string" &&
+    item.id.length > 0 &&
+    typeof item.topicId === "string" &&
+    item.topicId.length > 0 &&
+    typeof item.topicTitle === "string" &&
+    typeof item.title === "string" &&
+    typeof item.body === "string" &&
+    (item.formula === undefined || typeof item.formula === "string")
+  );
+}
+
 export function loadSavedTheorems(): SavedTheorem[] {
   try {
-    return JSON.parse(localStorage.getItem(SAVED_THEOREMS_KEY) || "[]");
+    const parsed = JSON.parse(
+      localStorage.getItem(SAVED_THEOREMS_KEY) || "[]",
+    ) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isSavedTheorem);
   } catch {
     return [];
   }
