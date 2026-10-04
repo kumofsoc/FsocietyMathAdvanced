@@ -252,8 +252,13 @@ test.describe.serial("VisualMath real backend MVP", () => {
     const contentRequest = page.waitForRequest((request) =>
       /\/api\/v1\/me\/media\/audio\/.+\/content$/.test(request.url()),
     );
-    await page.locator(".music-playlist article").first().locator(".music-track-select").click();
-    await contentRequest;
+    await page
+      .locator(".music-playlist article")
+      .nth(1)
+      .locator(".music-track-select")
+      .click();
+    const content = await contentRequest;
+    expect(content.url()).not.toContain("accessToken");
 
     page.once("dialog", async (dialog) => {
       await dialog.accept("e2e-renamed.wav");
