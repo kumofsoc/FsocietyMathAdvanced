@@ -78,7 +78,8 @@ const MIGRATION_STAGE_PREFIX =
 
 export const ACCOUNT_CACHE_OWNER_KEY = "visualmath-account-cache-owner-v1";
 
-let syncInFlight: Promise<UserStateSyncResult> | null = null;
+const syncInFlightByUser = new Map<string, Promise<UserStateSyncResult>>();
+let syncChain: Promise<void> = Promise.resolve();
 let syncing = false;
 
 export type UserStateSyncResult = {
@@ -721,9 +722,25 @@ export function syncAuthenticatedUserState(
   userId: string,
   snapshot: BootstrapDto,
 ) {
-  if (syncInFlight) return syncInFlight;
-  syncInFlight = performSync(userId, snapshot).finally(() => {
-    syncInFlight = null;
+  const existing = syncInFlightByUser.get(userId);
+  if (existing) return existing;
+
+  const run = syncChain
+    .catch(() => undefined)
+    .then(() => performSync(userId, snapshot));
+
+  let tracked!: Promise<UserStateSyncResult>;
+  tracked = run.finally(() => {
+    if (syncInFlightByUser.get(userId) === tracked) {
+      syncInFlightByUser.delete(userId);
+    }
   });
-  return syncInFlight;
+
+  syncInFlightByUser.set(userId, tracked);
+  syncChain = tracked.then(
+    () => undefined,
+    () => undefined,
+  );
+
+  return tracked;
 }
