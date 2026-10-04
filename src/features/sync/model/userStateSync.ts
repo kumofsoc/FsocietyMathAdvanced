@@ -1,10 +1,20 @@
 import { api, isBackendConfigured } from "@/shared/api/client";
-import type { BookmarkDto, WorkspaceDto } from "@/shared/api/types";
+import type {
+  BookmarkDto,
+  ImportantBlockDto,
+  NoteDto,
+  WorkspaceDto,
+} from "@/shared/api/types";
+import type { BlockKind } from "@/entities/course/model/types";
 import { readLocalStorage, writeLocalStorage } from "@/shared/lib/browserStorage";
 import {
   hydrateCanonicalProgress,
   syncProgressToBackend,
 } from "@/features/learning/model/progressSync";
+import {
+  loadReadingBlocks,
+  loadSavedTheorems,
+} from "@/features/learning/model/learning";
 import {
   loadSavedTopicIds,
   replaceSavedTopicIds,
@@ -17,10 +27,19 @@ import {
   loadReadingWidth,
   saveReadingWidth,
 } from "@/features/reading-width/model/readingWidth";
-import { loadSavedTheorems } from "@/features/learning/model/learning";
 import {
+  clearBlockNoteTombstone,
+  loadBlockNoteEntries,
+  loadBlockNoteTombstones,
+  replaceBlockNoteEntries,
+  type BlockNoteEntry,
+} from "@/features/block-notes/model/blockNotes";
+import {
+  clearImportantBlockTombstone,
   loadImportantBlocks,
-  setBlockImportant,
+  loadImportantBlockTombstones,
+  replaceImportantBlocks,
+  type ImportantBlock,
 } from "@/features/important-blocks/model/importantBlocks";
 import {
   hydrateLocalPreferences,
@@ -29,17 +48,37 @@ import {
 } from "@/features/personalization/model/preferencesStorage";
 import { useAppShellStore } from "@/app/store/useAppShellStore";
 
-const MIGRATION_VERSION = 1;
-const MIGRATION_PREFIX = "visualmath-backend-migration-v" + MIGRATION_VERSION + "::";
+const MIGRATION_VERSION = 2;
+const MIGRATION_PREFIX =
+  "visualmath-backend-migration-v" + MIGRATION_VERSION + "::";
 const PREFERENCES_MIGRATION_PREFIX = "visualmath-preferences-migration-v1::";
 
 let syncInFlight: Promise<UserStateSyncResult> | null = null;
 let syncing = false;
 
+const blockKinds = new Set<BlockKind>([
+  "definition",
+  "concepts",
+  "property",
+  "theorem",
+  "proof",
+  "corollary",
+  "formula",
+  "example",
+  "solution",
+  "note",
+  "algorithm",
+  "geometry",
+  "summary",
+]);
+
 export type UserStateSyncResult = {
   progressSynced: boolean;
+  readingBlocksSynced: boolean;
   workspaceSynced: boolean;
   bookmarksSynced: boolean;
+  notesSynced: boolean;
+  importantBlocksSynced: boolean;
   preferencesSynced: boolean;
   migratedAnonymousState: boolean;
 };
@@ -69,6 +108,10 @@ function parseContentBlockId(contentBlockId: string) {
   return { topicId, blockIndex };
 }
 
+function toBlockKind(value: string): BlockKind {
+  return blockKinds.has(value as BlockKind) ? (value as BlockKind) : "note";
+}
+
 async function syncWorkspace(userId: string) {
   const localSaved = loadSavedTopicIds();
   const localResume = loadTopicResumeState();
@@ -78,11 +121,10 @@ async function syncWorkspace(userId: string) {
   let remote = await api.workspace.get();
   const remoteWasPristine = isPristineWorkspace(remote);
 
-  const missingSaved = localSaved.filter(
-    (topicId) => !remote.savedTopicIds.includes(topicId),
-  );
-  for (const topicId of missingSaved) {
-    remote = await api.workspace.saveTopic(topicId, true);
+  if (!migrated && remoteWasPristine) {
+    for (const topicId of localSaved) {
+      remote = await api.workspace.saveTopic(topicId, true);
+    }
   }
 
   for (const [topicId, localEntry] of Object.entries(localResume)) {
@@ -107,7 +149,16 @@ async function syncWorkspace(userId: string) {
   };
 }
 
-async function createLocalBookmarks() {
+async function syncReadingBlocks() {
+  const refs = [...loadReadingBlocks()].flatMap((id) => {
+    const parsed = parseContentBlockId(id);
+    return parsed ? [parsed] : [];
+  });
+  if (!refs.length) return null;
+  return api.progress.syncReadingBlocks(refs);
+}
+
+async function createLocalTheoremBookmarks() {
   for (const theorem of loadSavedTheorems()) {
     if (!theorem.topicId || !theorem.id) continue;
     await api.bookmarks.create({
@@ -117,43 +168,133 @@ async function createLocalBookmarks() {
       title: theorem.title || theorem.id,
     });
   }
-
-  for (const item of loadImportantBlocks()) {
-    await api.bookmarks.create({
-      topicId: item.topicId,
-      contentBlockId: item.id,
-      kind: "important:" + item.kind,
-      title: item.blockTitle,
-    });
-  }
-}
-
-function hydrateImportantBookmarks(bookmarks: BookmarkDto[]) {
-  for (const bookmark of bookmarks) {
-    if (!bookmark.kind.startsWith("important:")) continue;
-    const parsed = parseContentBlockId(bookmark.contentBlockId);
-    if (!parsed) continue;
-
-    setBlockImportant(
-      {
-        topicId: parsed.topicId,
-        blockIndex: parsed.blockIndex,
-        topicTitle: bookmark.topicId ?? parsed.topicId,
-        blockTitle: bookmark.title,
-        kind: bookmark.kind.slice("important:".length) as Parameters<
-          typeof setBlockImportant
-        >[0]["kind"],
-      },
-      true,
-    );
-  }
 }
 
 async function syncBookmarks() {
-  await createLocalBookmarks();
-  const response = await api.bookmarks.list();
-  hydrateImportantBookmarks(response.bookmarks);
-  return response.bookmarks;
+  await createLocalTheoremBookmarks();
+  return (await api.bookmarks.list()).bookmarks;
+}
+
+async function listAllRemoteNotes() {
+  const out: NoteDto[] = [];
+  let offset = 0;
+  while (true) {
+    const page = await api.notes.list(100, offset);
+    out.push(...page.notes);
+    if (!page.hasMore) return out;
+    offset += page.notes.length;
+    if (!page.notes.length) return out;
+  }
+}
+
+function noteEntry(item: NoteDto): BlockNoteEntry {
+  return {
+    id: item.id,
+    topicId: item.topicId,
+    blockIndex: item.blockIndex,
+    text: item.text,
+    updatedAt: item.updatedAt,
+  };
+}
+
+async function syncNotes() {
+  const local = new Map(loadBlockNoteEntries().map((item) => [item.id, item]));
+  const tombstones = loadBlockNoteTombstones();
+  let remote = await listAllRemoteNotes();
+  let remoteById = new Map(remote.map((item) => [item.id, item]));
+
+  for (const [id, deletedAt] of Object.entries(tombstones)) {
+    const item = remoteById.get(id);
+    const parsed = parseContentBlockId(id);
+    if (!parsed) {
+      clearBlockNoteTombstone(id);
+      continue;
+    }
+    if (!item || deletedAt >= item.updatedAt) {
+      if (item) await api.notes.remove(parsed.topicId, parsed.blockIndex);
+      clearBlockNoteTombstone(id);
+    } else {
+      clearBlockNoteTombstone(id);
+    }
+  }
+
+  for (const item of local.values()) {
+    const server = remoteById.get(item.id);
+    if (!server || item.updatedAt > server.updatedAt) {
+      await api.notes.put(item.topicId, item.blockIndex, item.text);
+    }
+  }
+
+  remote = await listAllRemoteNotes();
+  remoteById = new Map(remote.map((item) => [item.id, item]));
+
+  const canonical = new Map<string, BlockNoteEntry>();
+  for (const item of remote) canonical.set(item.id, noteEntry(item));
+  for (const item of local.values()) {
+    const server = remoteById.get(item.id);
+    if (!server || item.updatedAt > server.updatedAt) {
+      canonical.set(item.id, item);
+    }
+  }
+  replaceBlockNoteEntries([...canonical.values()]);
+  return [...canonical.values()];
+}
+
+function importantEntry(item: ImportantBlockDto): ImportantBlock {
+  return {
+    id: item.id,
+    topicId: item.topicId,
+    blockIndex: item.blockIndex,
+    topicTitle: item.topicTitle,
+    blockTitle: item.blockTitle,
+    kind: toBlockKind(item.kind),
+    updatedAt: item.updatedAt,
+  };
+}
+
+async function syncImportantBlocks() {
+  const local = new Map(loadImportantBlocks().map((item) => [item.id, item]));
+  const tombstones = loadImportantBlockTombstones();
+  let remote = (await api.importantBlocks.list()).blocks;
+  let remoteById = new Map(remote.map((item) => [item.id, item]));
+
+  for (const [id, deletedAt] of Object.entries(tombstones)) {
+    const item = remoteById.get(id);
+    const parsed = parseContentBlockId(id);
+    if (!parsed) {
+      clearImportantBlockTombstone(id);
+      continue;
+    }
+    if (!item || deletedAt >= item.updatedAt) {
+      if (item) {
+        await api.importantBlocks.remove(parsed.topicId, parsed.blockIndex);
+      }
+      clearImportantBlockTombstone(id);
+    } else {
+      clearImportantBlockTombstone(id);
+    }
+  }
+
+  for (const item of local.values()) {
+    const server = remoteById.get(item.id);
+    if (!server || item.updatedAt > server.updatedAt) {
+      await api.importantBlocks.put(item.topicId, item.blockIndex);
+    }
+  }
+
+  remote = (await api.importantBlocks.list()).blocks;
+  remoteById = new Map(remote.map((item) => [item.id, item]));
+
+  const canonical = new Map<string, ImportantBlock>();
+  for (const item of remote) canonical.set(item.id, importantEntry(item));
+  for (const item of local.values()) {
+    const server = remoteById.get(item.id);
+    if (!server || item.updatedAt > server.updatedAt) {
+      canonical.set(item.id, item);
+    }
+  }
+  replaceImportantBlocks([...canonical.values()]);
+  return [...canonical.values()];
 }
 
 async function syncPreferences(userId: string) {
@@ -176,8 +317,11 @@ async function performSync(userId: string): Promise<UserStateSyncResult> {
   if (!isBackendConfigured()) {
     return {
       progressSynced: false,
+      readingBlocksSynced: false,
       workspaceSynced: false,
       bookmarksSynced: false,
+      notesSynced: false,
+      importantBlocksSynced: false,
       preferencesSynced: false,
       migratedAnonymousState: false,
     };
@@ -186,19 +330,25 @@ async function performSync(userId: string): Promise<UserStateSyncResult> {
   syncing = true;
   try {
     const progress = await syncProgressToBackend();
+    const readingSnapshot = await syncReadingBlocks();
     const workspace = await syncWorkspace(userId);
     const bookmarks = await syncBookmarks();
+    await syncNotes();
+    await syncImportantBlocks();
     await syncPreferences(userId);
 
-    if (progress) {
+    if (progress || readingSnapshot) {
       const canonical = await api.progress.get();
       hydrateCanonicalProgress(canonical, bookmarks);
     }
 
     return {
       progressSynced: Boolean(progress),
+      readingBlocksSynced: Boolean(readingSnapshot),
       workspaceSynced: true,
       bookmarksSynced: true,
+      notesSynced: true,
+      importantBlocksSynced: true,
       preferencesSynced: true,
       migratedAnonymousState: workspace.migratedAnonymousState,
     };
