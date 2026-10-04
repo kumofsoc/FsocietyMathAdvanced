@@ -35,7 +35,14 @@ jobs:
             --tag visualmath-frontend-ci .
       - name: Smoke production frontend image
         run: |
-          docker run -d --rm --name visualmath-frontend-ci-smoke -p 127.0.0.1:18080:8080 visualmath-frontend-ci
+          docker run -d --rm \
+            --name visualmath-frontend-ci-smoke \
+            --read-only \
+            --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+            --security-opt no-new-privileges:true \
+            --cap-drop ALL \
+            -p 127.0.0.1:18080:8080 \
+            visualmath-frontend-ci
           trap 'docker stop visualmath-frontend-ci-smoke >/dev/null 2>&1 || true' EXIT
           for attempt in {1..20}; do
             if curl -fsS http://127.0.0.1:18080/healthz >/dev/null; then
@@ -44,6 +51,7 @@ jobs:
             sleep 1
           done
           curl -fsS http://127.0.0.1:18080/healthz
+          test "$(docker exec visualmath-frontend-ci-smoke id -u)" -ne 0
           headers="$(curl -fsSI http://127.0.0.1:18080/)"
           printf '%s\n' "$headers"
           grep -qi '^X-Content-Type-Options: nosniff' <<<"$headers"
