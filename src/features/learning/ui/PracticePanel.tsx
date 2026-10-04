@@ -285,16 +285,10 @@ export function PracticePanel({ topicId }: { topicId: string }) {
     );
   }
 
-  return <PracticePanelContent key={topicId} topicId={topicId} tasks={tasks} />;
+  return <PracticePanelContent key={topicId} tasks={tasks} />;
 }
 
-function PracticePanelContent({
-  topicId,
-  tasks,
-}: {
-  topicId: string;
-  tasks: PracticeTask[];
-}) {
+function PracticePanelContent({ tasks }: { tasks: PracticeTask[] }) {
   const [solved, setSolved] = useState<Set<string>>(() => loadSet(SOLVED_KEY));
   const [difficulty, setDifficulty] = useState<DifficultyFilter>("all");
   const [skill, setSkill] = useState<SkillFilter>("all");

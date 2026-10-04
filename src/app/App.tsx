@@ -20,7 +20,6 @@ import {
   getLearningSnapshot,
   getTopicProgress,
   isTrackedChapter,
-  isTrackedTopic,
 } from "@/features/learning/model/progress";
 import type { Chapter } from "@/entities/course/model/types";
 import { useAppShellStore } from "@/app/store/useAppShellStore";
@@ -169,7 +168,6 @@ function SidebarProgressItem({
 export default function App() {
   const [route, setRoute] = useState(routeFromHash);
   const bootstrapAuth = useAuthStore((state) => state.bootstrap);
-  const authStatus = useAuthStore((state) => state.status);
   const sidebarOpen = useAppShellStore((state) => state.sidebarOpen);
   const sidebarCollapsed = useAppShellStore((state) => state.sidebarCollapsed);
   const readingFocusMode = useAppShellStore((state) => state.readingFocusMode);

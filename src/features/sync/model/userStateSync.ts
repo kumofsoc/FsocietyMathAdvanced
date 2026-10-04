@@ -4,7 +4,6 @@ import type {
   BookmarkDto,
   BootstrapDto,
   ImportantBlockDto,
-  LearningProgressDto,
   PreferencesDto,
   ProgressSyncRequest,
   WorkspaceDto,
