@@ -90,16 +90,21 @@ export function clearPendingBlockNoteMutation(topicId: string, blockIndex: numbe
   return writeLocalStorage(BLOCK_NOTES_PENDING_KEY, JSON.stringify(next));
 }
 
+function emitBlockNotes(detail: BlockNotesEventDetail) {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(
+      new CustomEvent<BlockNotesEventDetail>(BLOCK_NOTES_EVENT, { detail }),
+    );
+  }
+}
+
 function persistBlockNotes(
   state: BlockNotesState,
   detail: BlockNotesEventDetail,
+  emit = true,
 ) {
   const saved = writeLocalStorage(BLOCK_NOTES_KEY, JSON.stringify(state));
-  if (saved && typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent<BlockNotesEventDetail>(BLOCK_NOTES_EVENT, {
-      detail,
-    }));
-  }
+  if (saved && emit) emitBlockNotes(detail);
   return saved;
 }
 
@@ -164,62 +169,49 @@ export function saveBlockNote(topicId: string, blockIndex: number, text: string)
   const state = loadBlockNotes();
   const clean = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   const updatedAt = Date.now();
+  const detail: BlockNotesEventDetail = {
+    source: "local",
+    topicId,
+    blockIndex,
+  };
 
-  if (!clean.trim()) {
-    if (!(id in state)) {
-      persistPendingBlockNoteMutation({
-        topicId,
-        blockIndex,
-        text: null,
-        updatedAt,
-        ownerId: readLocalStorage("visualmath-account-cache-owner-v1"),
-      });
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent<BlockNotesEventDetail>(BLOCK_NOTES_EVENT, {
-          detail: { source: "local", topicId, blockIndex },
-        }));
+  const pending = {
+    topicId,
+    blockIndex,
+    text: clean.trim() ? clean : null,
+    updatedAt,
+    ownerId: readLocalStorage("visualmath-account-cache-owner-v1"),
+  } satisfies PendingBlockNoteMutation;
+
+  if (!clean.trim() && !(id in state)) {
+    const pendingSaved = persistPendingBlockNoteMutation(pending);
+    if (pendingSaved) emitBlockNotes(detail);
+    return pendingSaved;
+  }
+
+  const next = clean.trim()
+    ? {
+        ...state,
+        [id]: {
+          text: clean,
+          updatedAt,
+        },
       }
-      return true;
-    }
-    const { [id]: _removed, ...next } = state;
-    const saved = persistBlockNotes(next, {
-      source: "local",
-      topicId,
-      blockIndex,
-    });
-    if (saved) {
-      persistPendingBlockNoteMutation({
-        topicId,
-        blockIndex,
-        text: null,
-        updatedAt,
-        ownerId: readLocalStorage("visualmath-account-cache-owner-v1"),
-      });
-    }
-    return saved;
+    : Object.fromEntries(
+        Object.entries(state).filter(([candidateId]) => candidateId !== id),
+      );
+
+  const localSaved = persistBlockNotes(next, detail, false);
+  if (!localSaved) return false;
+
+  const pendingSaved = persistPendingBlockNoteMutation(pending);
+  if (!pendingSaved) {
+    writeLocalStorage(BLOCK_NOTES_KEY, JSON.stringify(state));
+    return false;
   }
 
-  const saved = persistBlockNotes(
-    {
-      ...state,
-      [id]: {
-        text: clean,
-        updatedAt,
-      },
-    },
-    { source: "local", topicId, blockIndex },
-  );
-
-  if (saved) {
-    persistPendingBlockNoteMutation({
-      topicId,
-      blockIndex,
-      text: clean,
-      updatedAt,
-      ownerId: readLocalStorage("visualmath-account-cache-owner-v1"),
-    });
-  }
-  return saved;
+  emitBlockNotes(detail);
+  return true;
 }
 
 export function deleteBlockNote(topicId: string, blockIndex: number) {
