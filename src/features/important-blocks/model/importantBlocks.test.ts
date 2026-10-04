@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   importantBlockId,
   IMPORTANT_BLOCKS_KEY,
+  IMPORTANT_BLOCKS_PENDING_KEY,
   isBlockImportant,
   loadImportantBlocks,
   setBlockImportant,
@@ -45,6 +46,20 @@ describe("important blocks", () => {
     expect(toggleImportantBlock(block).important).toBe(false);
     expect(isBlockImportant("rank", 3)).toBe(false);
     expect(JSON.parse(localStorage.getItem(IMPORTANT_BLOCKS_KEY) ?? "[]")).toEqual([]);
+  });
+
+  it("rolls back optimistic state when the durable pending write fails", () => {
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        if (key === IMPORTANT_BLOCKS_PENDING_KEY) throw new Error("quota");
+        store.set(key, value);
+      },
+      removeItem: (key: string) => store.delete(key),
+    });
+
+    expect(setBlockImportant(block, true).saved).toBe(false);
+    expect(isBlockImportant("rank", 3)).toBe(false);
   });
 
   it("deduplicates repeated ids from stored state", () => {
