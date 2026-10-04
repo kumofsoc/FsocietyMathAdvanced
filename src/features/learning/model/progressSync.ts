@@ -75,6 +75,7 @@ export function hydrateCanonicalProgress(
     solvedTaskIds: snapshot.solvedTaskIds,
     savedTheorems,
     readingProgress: snapshot.readingProgress ?? snapshot.reading ?? {},
+    readingBlocks: snapshot.readingBlockIds ?? [],
   });
 
   try {
