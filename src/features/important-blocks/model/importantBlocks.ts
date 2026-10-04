@@ -84,18 +84,23 @@ export function isBlockImportant(topicId: string, blockIndex: number) {
   return loadImportantBlocks().some((item) => item.id === id);
 }
 
-function persistImportantBlocks(
-  items: ImportantBlock[],
-  detail: ImportantBlocksEventDetail,
-) {
-  const saved = writeLocalStorage(IMPORTANT_BLOCKS_KEY, JSON.stringify(items));
-  if (saved && typeof window !== "undefined") {
+function emitImportantBlocks(detail: ImportantBlocksEventDetail) {
+  if (typeof window !== "undefined") {
     window.dispatchEvent(
       new CustomEvent<ImportantBlocksEventDetail>(IMPORTANT_BLOCKS_EVENT, {
         detail,
       }),
     );
   }
+}
+
+function persistImportantBlocks(
+  items: ImportantBlock[],
+  detail: ImportantBlocksEventDetail,
+  emit = true,
+) {
+  const saved = writeLocalStorage(IMPORTANT_BLOCKS_KEY, JSON.stringify(items));
+  if (saved && emit) emitImportantBlocks(detail);
   return saved;
 }
 
@@ -138,55 +143,44 @@ export function setBlockImportant(
   const current = loadImportantBlocks();
   const withoutCurrent = current.filter((item) => item.id !== id);
   const updatedAt = Date.now();
-
-  if (!important) {
-    const saved = persistImportantBlocks(withoutCurrent, {
-      source: "local",
-      topicId: input.topicId,
-      blockIndex: input.blockIndex,
-    });
-    if (saved) {
-      persistPendingImportantBlockMutation({
-        topicId: input.topicId,
-        blockIndex: input.blockIndex,
-        important: false,
-        updatedAt,
-        ownerId: readLocalStorage("visualmath-account-cache-owner-v1"),
-      });
-    }
-    return {
-      saved,
-      important: false,
-    };
-  }
-
-  const next: ImportantBlock[] = [
-    ...withoutCurrent,
-    {
-      ...input,
-      id,
-      updatedAt,
-    },
-  ];
-
-  const saved = persistImportantBlocks(next, {
+  const detail: ImportantBlocksEventDetail = {
     source: "local",
     topicId: input.topicId,
     blockIndex: input.blockIndex,
-  });
-  if (saved) {
-    persistPendingImportantBlockMutation({
-      topicId: input.topicId,
-      blockIndex: input.blockIndex,
-      important: true,
-      updatedAt,
-      ownerId: readLocalStorage("visualmath-account-cache-owner-v1"),
-    });
+  };
+  const next: ImportantBlock[] = important
+    ? [
+        ...withoutCurrent,
+        {
+          ...input,
+          id,
+          updatedAt,
+        },
+      ]
+    : withoutCurrent;
+
+  const localSaved = persistImportantBlocks(next, detail, false);
+  if (!localSaved) {
+    return { saved: false, important };
   }
 
+  const pendingSaved = persistPendingImportantBlockMutation({
+    topicId: input.topicId,
+    blockIndex: input.blockIndex,
+    important,
+    updatedAt,
+    ownerId: readLocalStorage("visualmath-account-cache-owner-v1"),
+  });
+
+  if (!pendingSaved) {
+    writeLocalStorage(IMPORTANT_BLOCKS_KEY, JSON.stringify(current));
+    return { saved: false, important: isBlockImportant(input.topicId, input.blockIndex) };
+  }
+
+  emitImportantBlocks(detail);
   return {
-    saved,
-    important: true,
+    saved: true,
+    important,
   };
 }
 
