@@ -18,6 +18,7 @@ import type {
   UserProfileDto,
 } from "@/shared/api/types";
 import "@/features/account-experience/styles/account-experience.css";
+import "@/styles/account-production.css";
 
 const PROFILE_KEY = "visualmath-local-profile-v1";
 
