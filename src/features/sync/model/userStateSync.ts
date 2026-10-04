@@ -138,6 +138,50 @@ export function resolveNoteConflict(
   return local.updatedAt > remote.updatedAt ? "local" : "remote";
 }
 
+export function planNoteMigration(
+  local: BlockNoteEntry[],
+  remote: BlockNoteDto[],
+) {
+  const remoteById = new Map(remote.map((item) => [item.id, item]));
+  return local.filter((note) => {
+    const serverNote = remoteById.get(note.id);
+    return (
+      !serverNote ||
+      resolveNoteConflict(note, serverNote) === "local"
+    );
+  });
+}
+
+export function collectImportantMigrationTargets(
+  local: ImportantBlock[],
+  remote: ImportantBlockDto[],
+  bookmarks: BookmarkDto[],
+) {
+  const remoteIds = new Set(remote.map((item) => item.id));
+  const targets = new Map<string, { topicId: string; blockIndex: number }>();
+
+  for (const item of local) {
+    if (!remoteIds.has(item.id)) {
+      targets.set(item.id, {
+        topicId: item.topicId,
+        blockIndex: item.blockIndex,
+      });
+    }
+  }
+
+  for (const bookmark of bookmarks) {
+    if (!bookmark.kind.startsWith("important:")) continue;
+    const address = parseContentBlockId(bookmark.contentBlockId);
+    if (!address) continue;
+    targets.set(
+      address.topicId + "::" + String(address.blockIndex),
+      address,
+    );
+  }
+
+  return [...targets.values()];
+}
+
 export function parseContentBlockId(contentBlockId: string) {
   const separator = contentBlockId.lastIndexOf("::");
   if (separator <= 0) return null;
@@ -523,12 +567,9 @@ async function migrateNotes(userId: string, includeLocal: boolean) {
   const remote = await listAllNotes();
   const canonical = new Map(remote.map((item) => [item.id, item]));
 
+  const toUpload = new Set(planNoteMigration(local, remote).map((note) => note.id));
   for (const note of local) {
-    const serverNote = canonical.get(note.id);
-    if (
-      !serverNote ||
-      resolveNoteConflict(note, serverNote) === "local"
-    ) {
+    if (toUpload.has(note.id)) {
       const saved = await api.notes.put(
         note.topicId,
         note.blockIndex,
