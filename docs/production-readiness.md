@@ -6,7 +6,7 @@ Backend contract target for the current MVP integration:
 
 ```text
 kumofsoc/FsocietyMathAdvancedBackend
-809eb92876259caed3c4ad87801851ae167da512
+4f2082b1cd0f82bdba3887de4cb328ac2014da33
 ```
 
 ## Current status
@@ -38,8 +38,8 @@ Production additionally requires infrastructure/runtime validation that cannot b
 - production CORS and cookie behavior;
 - deployed PostgreSQL migrations/backups;
 - error ingestion/monitoring;
-- storage quota/capacity monitoring for media;
-- edge security headers/CSP;
+- storage capacity monitoring/backups for media (application quota is already enforced);
+- final Content-Security-Policy validation;
 - live staging/production smoke.
 
 ## Frontend runtime variables
@@ -69,6 +69,7 @@ The API base is an origin only. Do not append `/api`.
 Required frontend commands:
 
 ```bash
+pnpm lint
 pnpm test
 pnpm typecheck
 pnpm build
@@ -178,6 +179,7 @@ X-Content-Type-Options: nosniff
 Referrer-Policy: strict-origin-when-cross-origin
 Permissions-Policy: camera=(), microphone=(), geolocation=()
 Cross-Origin-Opener-Policy: same-origin
+X-Frame-Options: DENY
 ```
 
 Use a CSP appropriate for the final deployment. At minimum restrict:
@@ -204,8 +206,8 @@ Even after frontend MVP merge, production still needs:
 3. configure backend `CORS_ALLOWED_ORIGINS` for the exact origin;
 4. verify Secure/HttpOnly refresh cookie behavior on the deployed topology;
 5. configure migrations/backups/restore drill;
-6. configure backend/runtime logs, metrics and alerts;
-7. configure media disk/object storage capacity controls;
-8. configure CDN/reverse-proxy CSP/security headers;
-9. run the same backend-integrated Playwright suite against staging;
-10. set `VITE_APP_RELEASE` to the deployed git SHA and verify error reporting.
+6. configure runtime metrics/alerts and error ingestion;
+7. configure PostgreSQL/media backup retention and capacity monitoring;
+8. validate and enable the final CSP at the reverse proxy;
+9. run the backend-integrated Playwright suite against staging/production topology;
+10. set `VITE_APP_RELEASE` to the deployed git SHA and verify release-tagged error reporting.

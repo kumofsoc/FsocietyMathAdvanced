@@ -132,6 +132,7 @@ pnpm dev
 ## Release gate
 
 ```bash
+pnpm lint
 pnpm test
 pnpm typecheck
 pnpm build
@@ -147,11 +148,11 @@ VISUALMATH_E2E_API_BASE_URL=http://127.0.0.1:8080 pnpm test:e2e:backend
 
 PR CI also contains a separate `Backend E2E` workflow. It executes the same suite when the repository variable `VISUALMATH_E2E_API_BASE_URL` points to an accessible release-gate/staging backend. If the variable is not configured, the workflow reports that the real-backend job is skipped; a green frontend CI alone is not evidence that the backend-integrated suite ran.
 
-Backend contract target for the current integration:
+Backend contract baseline verified by the current frontend integration:
 
 ```text
 kumofsoc/FsocietyMathAdvancedBackend
-809eb92876259caed3c4ad87801851ae167da512
+4f2082b1cd0f82bdba3887de4cb328ac2014da33
 ```
 
 ## Основные routes продукта
