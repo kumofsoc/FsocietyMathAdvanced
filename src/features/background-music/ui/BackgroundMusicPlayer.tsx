@@ -25,7 +25,9 @@ export function BackgroundMusicPlayer() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const objectUrlRef = useRef<string | null>(null);
   const autoPlayRef = useRef(false);
+  const refreshGenerationRef = useRef(0);
   const authStatus = useAuthStore((state) => state.status);
+  const authUserId = useAuthStore((state) => state.user?.id ?? null);
   const mediaAudio = useAuthStore((state) => state.capabilities.mediaAudio);
   const [tracks, setTracks] = useState<StoredBackgroundTrack[]>([]);
   const [storageMode, setStorageMode] =
@@ -84,11 +86,14 @@ export function BackgroundMusicPlayer() {
   ]);
 
   const refreshTracks = useCallback(async () => {
+    const generation = ++refreshGenerationRef.current;
     const playlist = await loadBackgroundPlaylist().catch(() => ({
       tracks: [],
       storageMode: "local" as const,
       localImportCount: 0,
     }));
+    if (generation !== refreshGenerationRef.current) return;
+
     setTracks(playlist.tracks);
     setStorageMode(playlist.storageMode);
     setLocalImportCount(playlist.localImportCount);
@@ -105,8 +110,19 @@ export function BackgroundMusicPlayer() {
   }, []);
 
   useEffect(() => {
+    refreshGenerationRef.current += 1;
+    setReady(false);
+    setTracks([]);
+    setLocalImportCount(0);
     void refreshTracks();
-  }, [refreshTracks, authStatus, mediaAudio]);
+  }, [refreshTracks, authStatus, authUserId, mediaAudio]);
+
+  useEffect(
+    () => () => {
+      refreshGenerationRef.current += 1;
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!ready) return;
