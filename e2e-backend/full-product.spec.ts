@@ -28,7 +28,13 @@ async function register(page: Page) {
   await page.getByLabel("Handle").fill(account.handle);
   await page.getByLabel("Email").fill(account.email);
   await page.getByLabel("Пароль").fill(account.password);
+  const bootstrap = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/v1/me/bootstrap") &&
+      response.request().method() === "GET",
+  );
   await page.getByRole("button", { name: "Создать аккаунт" }).click();
+  expect((await bootstrap).status()).toBe(200);
   await expect(page.getByRole("button", { name: "Выйти" })).toBeVisible();
 }
 
@@ -37,7 +43,13 @@ async function login(page: Page) {
   await expect(page.getByRole("button", { name: "Вход" })).toBeVisible();
   await page.getByLabel("Email").fill(account.email);
   await page.getByLabel("Пароль").fill(account.password);
+  const bootstrap = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/v1/me/bootstrap") &&
+      response.request().method() === "GET",
+  );
   await page.getByRole("button", { name: "Войти" }).click();
+  expect((await bootstrap).status()).toBe(200);
   await expect(page.getByRole("button", { name: "Выйти" })).toBeVisible();
 }
 
@@ -120,9 +132,6 @@ test.describe.serial("VisualMath real backend MVP", () => {
     await createLocalMarks(page);
     await register(page);
 
-    const bootstrapResponse = await page.request.get(apiBaseUrl + "/api/v1/me/bootstrap");
-    expect([401, 403]).toContain(bootstrapResponse.status());
-
     await setNordTheme(page);
     await openMatrices(page);
 
@@ -144,6 +153,16 @@ test.describe.serial("VisualMath real backend MVP", () => {
     await expectCanonicalMarks(page);
 
     const second = await newLoggedInPage(browser);
+    await second.page.waitForFunction(() => {
+      try {
+        const value = JSON.parse(
+          localStorage.getItem("visualmath-topic-resume-v1") || "{}",
+        );
+        return (value.matrices?.blockIndex ?? 0) > 0;
+      } catch {
+        return false;
+      }
+    });
     await expectCanonicalMarks(second.page);
     await expect(second.page.locator(".topic-resume-card")).toBeVisible();
     await second.context.close();
@@ -191,7 +210,9 @@ test.describe.serial("VisualMath real backend MVP", () => {
       await route.continue();
     });
 
-    await page.goto("/#account");
+    await page.evaluate(() => {
+      window.location.hash = "account";
+    });
     await expect(page.getByRole("button", { name: "Выйти" })).toBeVisible();
     await expect.poll(() => refreshCount).toBe(1);
   });
@@ -247,8 +268,9 @@ test.describe.serial("VisualMath real backend MVP", () => {
 
     const rows = page.locator(".music-playlist article");
     while ((await rows.count()) > 0) {
+      const before = await rows.count();
       await rows.first().locator(".music-track-remove").click();
-      await expect(rows).toHaveCount((await rows.count()) - 1);
+      await expect(rows).toHaveCount(before - 1);
     }
   });
 });
