@@ -423,11 +423,9 @@ async function flushPendingLogout() {
 
 export async function bootstrapBackendSession() {
   if (hasPendingLogout()) {
-    const cleared = await flushPendingLogout();
-    if (!cleared) {
-      setAccessToken(null);
-      return null;
-    }
+    await flushPendingLogout();
+    setAccessToken(null);
+    return null;
   }
 
   const session = await refreshAccessToken();
