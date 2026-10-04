@@ -19,6 +19,9 @@ test("production image renders under its Content-Security-Policy", async ({ page
   expect(response?.headers()["content-security-policy"]).toContain(
     "default-src 'self'",
   );
+  const csp = response?.headers()["content-security-policy"] ?? "";
+  expect(csp).toContain("connect-src 'self' https://visualmath.invalid");
+  expect(csp).not.toContain("connect-src 'self' https:;");
   await expect(page.locator(".app-shell")).toBeVisible();
   await expect(page.locator("body")).toContainText("VisualMath");
 
