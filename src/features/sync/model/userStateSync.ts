@@ -210,13 +210,13 @@ async function listAllNotes() {
   }
 }
 
-function hydrateWorkspace(workspace: WorkspaceDto) {
+export function hydrateWorkspaceSnapshot(workspace: WorkspaceDto) {
   replaceSavedTopicIds(workspace.savedTopicIds);
   replaceTopicResumeState(workspace.topicResume);
   hydrateReadingWidth(workspace.readingWidth);
 }
 
-function hydratePreferences(preferences: PreferencesDto) {
+export function hydratePreferencesSnapshot(preferences: PreferencesDto) {
   hydrateLocalPreferences(preferences);
   useAppShellStore.setState({
     sidebarCollapsed: preferences.sidebarCollapsed,
@@ -229,8 +229,8 @@ export function hydrateBootstrapSnapshot(
 ) {
   hydrateCanonicalProgress(snapshot.learning, bookmarks);
   replaceReadingBlocks(snapshot.learning.readingBlockIds ?? []);
-  hydrateWorkspace(snapshot.workspace);
-  hydratePreferences(snapshot.preferences);
+  hydrateWorkspaceSnapshot(snapshot.workspace);
+  hydratePreferencesSnapshot(snapshot.preferences);
 }
 
 function union<T>(a: T[], b: T[]) {
@@ -308,7 +308,7 @@ function restoreMigrationSeedLocally(seed: MigrationSeed, snapshot: BootstrapDto
   );
 
   if (seed.preferencesDirty) {
-    hydratePreferences(seed.preferences);
+    hydratePreferencesSnapshot(seed.preferences);
   }
 }
 
@@ -381,8 +381,8 @@ async function migrateCore(
 
   hydrateCanonicalProgress(progress, bookmarks);
   replaceReadingBlocks(progress.readingBlockIds ?? []);
-  hydrateWorkspace(workspace);
-  hydratePreferences(preferences);
+  hydrateWorkspaceSnapshot(workspace);
+  hydratePreferencesSnapshot(preferences);
   clearLocalPreferencesDirty();
 
   markMigrationComplete(CORE_MIGRATION_PREFIX, userId);
@@ -401,7 +401,7 @@ async function hydrateOrdinaryCore(
 
   if (preferencesWereDirty) {
     preferences = await api.preferences.replace(localPreferences);
-    hydratePreferences(preferences);
+    hydratePreferencesSnapshot(preferences);
   }
 
   let bookmarks: BookmarkDto[] = [];
