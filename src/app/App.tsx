@@ -187,6 +187,8 @@ export default function App() {
     }
   });
   const routeRef = useRef(route);
+  const mainContentRef = useRef<HTMLElement>(null);
+  const routeFocusReadyRef = useRef(false);
   const [topbarVisible, setTopbarVisible] = useState(true);
   const topbarHideTimer = useRef<number | null>(null);
   const lastScrollY = useRef(0);
@@ -442,6 +444,19 @@ export default function App() {
               ? "academy"
               : "home";
 
+  useEffect(() => {
+    document.title = routeContext.current + " · VisualMath";
+    if (!routeFocusReadyRef.current) {
+      routeFocusReadyRef.current = true;
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      mainContentRef.current?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [route, routeContext.current]);
+
   return (
     <div
       className={
@@ -450,6 +465,12 @@ export default function App() {
         (readingFocusMode && topic && !topic.isStub ? "reading-focus-mode" : "")
       }
     >
+      <a className="skip-to-content" href="#visualmath-main-content">
+        Перейти к содержимому
+      </a>
+      <div className="route-announcer" aria-live="polite" aria-atomic="true">
+        {routeContext.current}
+      </div>
       <ScrollProgress />
       <BackToTop />
       <MathBackdrop />
@@ -678,7 +699,12 @@ export default function App() {
           <SettingsPanel />
         </header>
 
-        <main className="main-content">
+        <main
+          id="visualmath-main-content"
+          ref={mainContentRef}
+          className="main-content"
+          tabIndex={-1}
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={route}
