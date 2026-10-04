@@ -6,7 +6,7 @@ Backend contract target for the current MVP integration:
 
 ```text
 kumofsoc/FsocietyMathAdvancedBackend
-4f2082b1cd0f82bdba3887de4cb328ac2014da33
+315d097bf1e6669b4f69a6470867dfda753335ed
 ```
 
 ## Current status
@@ -36,11 +36,12 @@ Production additionally requires infrastructure/runtime validation that cannot b
 
 - final HTTPS frontend/backend origin;
 - production CORS and cookie behavior;
-- deployed PostgreSQL migrations/backups;
-- error ingestion/monitoring;
+- deployed PostgreSQL migration execution plus scheduled off-host backup retention/restore drills;
+- runtime metrics/alerts and external error ingestion;
 - storage capacity monitoring/backups for media (application quota is already enforced);
-- final Content-Security-Policy validation;
-- live staging/production smoke.
+- live staging/production smoke against the final public origin.
+
+The repository-level production image now ships and browser-tests a concrete CSP, and the backend ships PostgreSQL backup/restore tooling. Those controls still need to be exercised in the real deployment environment.
 
 ## Frontend runtime variables
 
@@ -206,9 +207,9 @@ Even after frontend MVP merge, production still needs:
 2. deploy frontend + backend + PostgreSQL;
 3. configure backend `CORS_ALLOWED_ORIGINS` for the exact origin;
 4. verify Secure/HttpOnly refresh cookie behavior on the deployed topology;
-5. configure migrations/backups/restore drill;
+5. schedule the shipped PostgreSQL backup job, replicate backups off-host, and perform a restore drill;
 6. configure runtime metrics/alerts and error ingestion;
-7. configure PostgreSQL/media backup retention and capacity monitoring;
-8. validate and enable the final CSP at the reverse proxy;
+7. configure media backup retention and capacity monitoring;
+8. verify the shipped CSP against the final public origin and any configured error-ingestion endpoint;
 9. run the backend-integrated Playwright suite against staging/production topology;
 10. set `VITE_APP_RELEASE` to the deployed git SHA and verify release-tagged error reporting.

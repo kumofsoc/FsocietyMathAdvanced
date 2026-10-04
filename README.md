@@ -152,7 +152,7 @@ Backend contract baseline verified by the current frontend integration:
 
 ```text
 kumofsoc/FsocietyMathAdvancedBackend
-4f2082b1cd0f82bdba3887de4cb328ac2014da33
+315d097bf1e6669b4f69a6470867dfda753335ed
 ```
 
 ## Основные routes продукта
