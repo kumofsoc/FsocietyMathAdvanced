@@ -13,6 +13,14 @@ import {
   loadPendingImportantBlockMutations,
   setBlockImportant,
 } from "@/features/important-blocks/model/importantBlocks";
+vi.mock("@/shared/api/client", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/shared/api/client")>();
+  return {
+    ...actual,
+    isBackendConfigured: () => true,
+  };
+});
+
 import {
   ACCOUNT_CACHE_OWNER_KEY,
   collectImportantMigrationTargets,
