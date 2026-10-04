@@ -8,7 +8,6 @@ import {
   PREFERENCES_EVENT,
   THEME_CUSTOM_KEY,
   THEME_NAME_KEY,
-  emitPreferencesChange,
   loadLocalPreferences,
   saveCursorPreference,
   saveCustomThemePreference,
@@ -94,7 +93,6 @@ function applyTheme(theme: Theme) {
 
 function applyMotion(profile: MotionProfile) {
   document.documentElement.dataset.motionProfile = profile;
-  saveMotionPreference(profile);
   window.dispatchEvent(new CustomEvent("fsociety-motion-change"));
 }
 
@@ -121,10 +119,6 @@ export function SettingsPanel() {
   useEffect(() => {
     applyTheme(activeTheme);
   }, [activeTheme]);
-
-  useEffect(() => {
-    saveThemeNamePreference(themeName as Parameters<typeof saveThemeNamePreference>[0]);
-  }, [themeName]);
 
   useEffect(() => {
     applyMotion(motion);
@@ -201,7 +195,6 @@ export function SettingsPanel() {
     saveCursorPreference(next);
     setCursor(next);
     window.dispatchEvent(new CustomEvent(CURSOR_EVENT));
-    emitPreferencesChange();
   };
 
   const removeSaved = (id: string) => {
@@ -276,6 +269,9 @@ export function SettingsPanel() {
                           key={name}
                           className={themeName === name ? "active" : ""}
                           onClick={() => {
+                            saveThemeNamePreference(
+                              name as Parameters<typeof saveThemeNamePreference>[0],
+                            );
                             setThemeName(name);
                             setCustomSaved(false);
                           }}
@@ -364,7 +360,11 @@ export function SettingsPanel() {
                       <button
                         key={id}
                         className={motion === id ? "active" : ""}
-                        onClick={() => setMotion(id as MotionProfile)}
+                        onClick={() => {
+                        const next = id as MotionProfile;
+                        saveMotionPreference(next);
+                        setMotion(next);
+                      }}
                       >
                         <strong>{title}</strong>
                         <small>{copy}</small>

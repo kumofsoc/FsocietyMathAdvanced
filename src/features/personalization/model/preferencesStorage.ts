@@ -128,10 +128,17 @@ export function isDefaultPreferences(value: PreferencesDto) {
   return preferencesEqual(value, DEFAULT_PREFERENCES);
 }
 
-export function emitPreferencesChange(markDirty = true) {
+export type PreferencesEventDetail = {
+  source: "local" | "hydrate";
+};
+
+export function emitPreferencesChange(
+  markDirty = true,
+  source: PreferencesEventDetail["source"] = "local",
+) {
   if (markDirty) writeLocalStorage(PREFERENCES_DIRTY_KEY, "1");
   if (typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent(PREFERENCES_EVENT));
+    window.dispatchEvent(new CustomEvent<PreferencesEventDetail>(PREFERENCES_EVENT, { detail: { source } }));
   }
 }
 
@@ -197,7 +204,7 @@ export function hydrateLocalPreferences(value: PreferencesDto) {
   if (saved) {
     writeLocalStorage(PREFERENCES_DIRTY_KEY, "0");
     if (typeof window !== "undefined") {
-      emitPreferencesChange(false);
+      emitPreferencesChange(false, "hydrate");
       window.dispatchEvent(new CustomEvent("fsociety-cursor-change"));
       window.dispatchEvent(new CustomEvent("fsociety-motion-change"));
     }

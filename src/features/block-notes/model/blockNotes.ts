@@ -1,6 +1,7 @@
-import { readLocalStorageJson, writeLocalStorage } from "@/shared/lib/browserStorage";
+import { readLocalStorage, readLocalStorageJson, writeLocalStorage } from "@/shared/lib/browserStorage";
 
 export const BLOCK_NOTES_KEY = "visualmath-block-notes-v1";
+export const BLOCK_NOTES_PENDING_KEY = "visualmath-block-notes-pending-v1";
 export const BLOCK_NOTES_EVENT = "visualmath:block-notes-change";
 
 export type BlockNote = {
@@ -15,6 +16,22 @@ export type BlockNoteEntry = BlockNote & {
   topicId: string;
   blockIndex: number;
 };
+
+export type PendingBlockNoteMutation = {
+  topicId: string;
+  blockIndex: number;
+  text: string | null;
+  updatedAt: number;
+  ownerId: string | null;
+};
+
+export type BlockNotesEventDetail = {
+  source: "local" | "hydrate";
+  topicId?: string;
+  blockIndex?: number;
+};
+
+type PendingBlockNotesState = Record<string, PendingBlockNoteMutation>;
 
 export function blockNoteId(topicId: string, blockIndex: number) {
   return topicId + "::" + Math.max(0, Math.trunc(blockIndex));
@@ -50,32 +67,159 @@ export function loadBlockNoteEntries(): BlockNoteEntry[] {
   });
 }
 
-function persistBlockNotes(state: BlockNotesState) {
+export function loadPendingBlockNoteMutations(): PendingBlockNotesState {
+  return readLocalStorageJson<PendingBlockNotesState>(BLOCK_NOTES_PENDING_KEY, {});
+}
+
+function persistPendingBlockNoteMutation(mutation: PendingBlockNoteMutation) {
+  const state = loadPendingBlockNoteMutations();
+  return writeLocalStorage(
+    BLOCK_NOTES_PENDING_KEY,
+    JSON.stringify({
+      ...state,
+      [blockNoteId(mutation.topicId, mutation.blockIndex)]: mutation,
+    }),
+  );
+}
+
+export function clearPendingBlockNoteMutation(topicId: string, blockIndex: number) {
+  const id = blockNoteId(topicId, blockIndex);
+  const state = loadPendingBlockNoteMutations();
+  if (!(id in state)) return true;
+  const { [id]: _removed, ...next } = state;
+  return writeLocalStorage(BLOCK_NOTES_PENDING_KEY, JSON.stringify(next));
+}
+
+function persistBlockNotes(
+  state: BlockNotesState,
+  detail: BlockNotesEventDetail,
+) {
   const saved = writeLocalStorage(BLOCK_NOTES_KEY, JSON.stringify(state));
   if (saved && typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent(BLOCK_NOTES_EVENT));
+    window.dispatchEvent(new CustomEvent<BlockNotesEventDetail>(BLOCK_NOTES_EVENT, {
+      detail,
+    }));
   }
   return saved;
+}
+
+export function hydrateBlockNotes(entries: BlockNoteEntry[]) {
+  const state = Object.fromEntries(
+    entries
+      .filter(
+        (entry) =>
+          entry &&
+          typeof entry.topicId === "string" &&
+          Number.isInteger(entry.blockIndex) &&
+          entry.blockIndex >= 0 &&
+          typeof entry.text === "string" &&
+          entry.text.trim(),
+      )
+      .map((entry) => [
+        blockNoteId(entry.topicId, entry.blockIndex),
+        {
+          text: entry.text.replace(/\r\n/g, "\n").replace(/\r/g, "\n"),
+          updatedAt: Number.isFinite(entry.updatedAt) ? entry.updatedAt : 0,
+        },
+      ]),
+  );
+  return persistBlockNotes(state, { source: "hydrate" });
+}
+
+export function applyCanonicalBlockNote(entry: BlockNoteEntry | null, topicId?: string, blockIndex?: number) {
+  const state = loadBlockNotes();
+  const resolvedTopicId = entry?.topicId ?? topicId;
+  const resolvedBlockIndex = entry?.blockIndex ?? blockIndex;
+  if (!resolvedTopicId || resolvedBlockIndex === undefined) return false;
+  const id = blockNoteId(resolvedTopicId, resolvedBlockIndex);
+
+  if (!entry) {
+    if (!(id in state)) return true;
+    const { [id]: _removed, ...next } = state;
+    return persistBlockNotes(next, {
+      source: "hydrate",
+      topicId: resolvedTopicId,
+      blockIndex: resolvedBlockIndex,
+    });
+  }
+
+  return persistBlockNotes(
+    {
+      ...state,
+      [id]: {
+        text: entry.text,
+        updatedAt: entry.updatedAt,
+      },
+    },
+    {
+      source: "hydrate",
+      topicId: resolvedTopicId,
+      blockIndex: resolvedBlockIndex,
+    },
+  );
 }
 
 export function saveBlockNote(topicId: string, blockIndex: number, text: string) {
   const id = blockNoteId(topicId, blockIndex);
   const state = loadBlockNotes();
-  const clean = text.replace(/\r\n/g, "\n");
+  const clean = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  const updatedAt = Date.now();
 
   if (!clean.trim()) {
-    if (!(id in state)) return true;
+    if (!(id in state)) {
+      persistPendingBlockNoteMutation({
+        topicId,
+        blockIndex,
+        text: null,
+        updatedAt,
+        ownerId: readLocalStorage("visualmath-account-cache-owner-v1"),
+      });
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent<BlockNotesEventDetail>(BLOCK_NOTES_EVENT, {
+          detail: { source: "local", topicId, blockIndex },
+        }));
+      }
+      return true;
+    }
     const { [id]: _removed, ...next } = state;
-    return persistBlockNotes(next);
+    const saved = persistBlockNotes(next, {
+      source: "local",
+      topicId,
+      blockIndex,
+    });
+    if (saved) {
+      persistPendingBlockNoteMutation({
+        topicId,
+        blockIndex,
+        text: null,
+        updatedAt,
+        ownerId: readLocalStorage("visualmath-account-cache-owner-v1"),
+      });
+    }
+    return saved;
   }
 
-  return persistBlockNotes({
-    ...state,
-    [id]: {
-      text: clean,
-      updatedAt: Date.now(),
+  const saved = persistBlockNotes(
+    {
+      ...state,
+      [id]: {
+        text: clean,
+        updatedAt,
+      },
     },
-  });
+    { source: "local", topicId, blockIndex },
+  );
+
+  if (saved) {
+    persistPendingBlockNoteMutation({
+      topicId,
+      blockIndex,
+      text: clean,
+      updatedAt,
+      ownerId: readLocalStorage("visualmath-account-cache-owner-v1"),
+    });
+  }
+  return saved;
 }
 
 export function deleteBlockNote(topicId: string, blockIndex: number) {

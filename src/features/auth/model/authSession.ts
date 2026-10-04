@@ -7,6 +7,8 @@ import {
   isBackendConfigured,
 } from "@/shared/api/client";
 import type {
+  BootstrapCapabilitiesDto,
+  BootstrapDto,
   LoginRequest,
   RegisterRequest,
   UpdateProfileRequest,
@@ -20,9 +22,16 @@ export type AuthStatus =
   | "authenticated"
   | "unavailable";
 
+const EMPTY_CAPABILITIES: BootstrapCapabilitiesDto = {
+  mediaAudio: false,
+};
+
 type AuthState = {
   status: AuthStatus;
   user: UserDto | null;
+  capabilities: BootstrapCapabilitiesDto;
+  bootstrapVersion: number | null;
+  bootstrapGeneratedAt: string | null;
   error: string | null;
   bootstrap: () => Promise<void>;
   login: (input: LoginRequest) => Promise<UserDto>;
@@ -44,14 +53,34 @@ function messageFromError(error: unknown) {
   return error instanceof Error ? error.message : "Неизвестная ошибка backend.";
 }
 
+function startUserStateHydration(snapshot: BootstrapDto) {
+  void import("@/features/sync/model/userStateSync")
+    .then(({ syncAuthenticatedUserState }) =>
+      syncAuthenticatedUserState(snapshot.user.id, snapshot),
+    )
+    .catch((error) => {
+      console.warn("[VisualMath] authenticated state hydration failed", error);
+    });
+}
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   status: isBackendConfigured() ? "booting" : "local",
   user: null,
+  capabilities: EMPTY_CAPABILITIES,
+  bootstrapVersion: null,
+  bootstrapGeneratedAt: null,
   error: null,
 
   bootstrap: async () => {
     if (!isBackendConfigured()) {
-      set({ status: "local", user: null, error: null });
+      set({
+        status: "local",
+        user: null,
+        capabilities: EMPTY_CAPABILITIES,
+        bootstrapVersion: null,
+        bootstrapGeneratedAt: null,
+        error: null,
+      });
       return;
     }
     if (bootstrapPromise) return bootstrapPromise;
@@ -59,27 +88,36 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     bootstrapPromise = (async () => {
       set({ status: "booting", error: null });
       try {
-        const session = await bootstrapBackendSession();
-        if (!session) {
-          set({ status: "anonymous", user: null, error: null });
+        const restored = await bootstrapBackendSession();
+        if (!restored) {
+          set({
+            status: "anonymous",
+            user: null,
+            capabilities: EMPTY_CAPABILITIES,
+            bootstrapVersion: null,
+            bootstrapGeneratedAt: null,
+            error: null,
+          });
           return;
         }
+
+        const snapshot = restored.bootstrap;
         set({
           status: "authenticated",
-          user: session.user,
+          user: snapshot.user,
+          capabilities: snapshot.capabilities,
+          bootstrapVersion: snapshot.version,
+          bootstrapGeneratedAt: snapshot.generatedAt,
           error: null,
         });
-        void import("@/features/sync/model/userStateSync")
-          .then(({ syncAuthenticatedUserState }) =>
-            syncAuthenticatedUserState(session.user.id),
-          )
-          .catch((error) => {
-            console.warn("[VisualMath] initial backend state sync failed", error);
-          });
+        startUserStateHydration(snapshot);
       } catch (error) {
         set({
           status: "unavailable",
           user: null,
+          capabilities: EMPTY_CAPABILITIES,
+          bootstrapVersion: null,
+          bootstrapGeneratedAt: null,
           error: messageFromError(error),
         });
       }
@@ -92,33 +130,88 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   login: async (input) => {
     const session = await api.auth.login(input);
-    set({ status: "authenticated", user: session.user, error: null });
-    void import("@/features/sync/model/userStateSync")
-      .then(({ syncAuthenticatedUserState }) =>
-        syncAuthenticatedUserState(session.user.id),
-      )
-      .catch((error) => {
-        console.warn("[VisualMath] login state sync failed", error);
+    set({
+      status: "authenticated",
+      user: session.user,
+      capabilities: EMPTY_CAPABILITIES,
+      bootstrapVersion: null,
+      bootstrapGeneratedAt: null,
+      error: null,
+    });
+
+    try {
+      const snapshot = await api.me.bootstrap();
+      set({
+        status: "authenticated",
+        user: snapshot.user,
+        capabilities: snapshot.capabilities,
+        bootstrapVersion: snapshot.version,
+        bootstrapGeneratedAt: snapshot.generatedAt,
+        error: null,
       });
-    return session.user;
+      startUserStateHydration(snapshot);
+      return snapshot.user;
+    } catch (error) {
+      set({
+        status: "authenticated",
+        user: session.user,
+        capabilities: EMPTY_CAPABILITIES,
+        bootstrapVersion: null,
+        bootstrapGeneratedAt: null,
+        error: messageFromError(error),
+      });
+      console.warn("[VisualMath] login bootstrap failed; keeping local cache", error);
+      return session.user;
+    }
   },
 
   register: async (input) => {
     const session = await api.auth.register(input);
-    set({ status: "authenticated", user: session.user, error: null });
-    void import("@/features/sync/model/userStateSync")
-      .then(({ syncAuthenticatedUserState }) =>
-        syncAuthenticatedUserState(session.user.id),
-      )
-      .catch((error) => {
-        console.warn("[VisualMath] registration state sync failed", error);
+    set({
+      status: "authenticated",
+      user: session.user,
+      capabilities: EMPTY_CAPABILITIES,
+      bootstrapVersion: null,
+      bootstrapGeneratedAt: null,
+      error: null,
+    });
+
+    try {
+      const snapshot = await api.me.bootstrap();
+      set({
+        status: "authenticated",
+        user: snapshot.user,
+        capabilities: snapshot.capabilities,
+        bootstrapVersion: snapshot.version,
+        bootstrapGeneratedAt: snapshot.generatedAt,
+        error: null,
       });
-    return session.user;
+      startUserStateHydration(snapshot);
+      return snapshot.user;
+    } catch (error) {
+      set({
+        status: "authenticated",
+        user: session.user,
+        capabilities: EMPTY_CAPABILITIES,
+        bootstrapVersion: null,
+        bootstrapGeneratedAt: null,
+        error: messageFromError(error),
+      });
+      console.warn("[VisualMath] registration bootstrap failed; keeping local cache", error);
+      return session.user;
+    }
   },
 
   logout: async () => {
     await api.auth.logout();
-    set({ status: "anonymous", user: null, error: null });
+    set({
+      status: "anonymous",
+      user: null,
+      capabilities: EMPTY_CAPABILITIES,
+      bootstrapVersion: null,
+      bootstrapGeneratedAt: null,
+      error: null,
+    });
   },
 
   updateProfile: async (input) => {
@@ -148,6 +241,9 @@ export function installAuthSessionListener() {
       useAuthStore.setState({
         status: "anonymous",
         user: null,
+        capabilities: EMPTY_CAPABILITIES,
+        bootstrapVersion: null,
+        bootstrapGeneratedAt: null,
       });
     }
   });

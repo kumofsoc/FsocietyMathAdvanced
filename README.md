@@ -5,90 +5,122 @@
 ## Стек
 
 - React 19 + TypeScript + Vite
-- Плавная навигация и адаптивные переходы
-- Интерактивная 3D-геометрия и математические сцены
-- XYFlow для интерактивной карты курса
-- KaTeX для формул
-- local-first browser cache + authenticated Go backend sync
+- Framer Motion / GSAP
+- Three.js / React Three Fiber
+- KaTeX
+- G6 / интерактивная карта курса
+- local-first browser cache + authenticated Go backend
 
 ## Текущее состояние курса
 
-- **87 / 87 тем READY** — текущий roadmap больше не содержит контентных заглушек.
-- **551 задача** в общем банке практики, с уникальными глобальными ID.
-- Прогресс каждой темы: **50% теория + 50% практика**.
-- Deep search индексирует темы и внутренние учебные блоки: определения, свойства, теоремы, доказательства, формулы, примеры и решения.
-- Интерактивные лаборатории покрывают линейную алгебру, векторы, геометрию, анализ, интегралы, ОДУ, ряды, степенные ряды, Фурье, теорию поля, комплексный анализ и преобразование Лапласа.
-- Тяжёлые страницы, практика и visual-модули загружаются лениво.
+- **87 / 87 тем READY**
+- **551 задача** в общем банке практики
+- Linear Academy PRO для углублённого линала/геометрии
+- Review Mode для сухого повторения
+- интерактивные лаборатории и математические визуализации
+- bundled course content: чтение курса не требует backend
 
-## Linear Academy PRO
+## Local-first + account sync
 
-Главы 01–09 (линейная алгебра, векторная и аналитическая геометрия, преобразования, абстрактный линал, евклидовы/унитарные и аффинные пространства, тензорная алгебра) имеют отдельный углублённый слой:
+VisualMath работает без backend и без аккаунта.
 
-- **32 темы** в Academy-track;
-- **160 дополнительных блоков**: conceptual core → theorem + proof → worked example → interactive visual → pitfall/counterexample;
-- **125 дополнительных Academy-задач**: 64 checkpoint + 32 topic-exam + 9 chapter-capstone + 20 proof-seminar задач;
-- отдельные режимы **Academy PRO**, **Academy Exam** и **Proof Seminar** в банке задач; proof-задачи и chapter-capstone решаются открытым ответом с последующей сверкой по solution sketch/rubric;
-- отдельный **Linear Academy Hub** (`#academy`) с 9 главами, 32 темами, mastery, PROOF/CAPSTONE badges и Continue Academy;
-- специализированные интерактивы для rank-nullity, eigen dynamics, Jordan blocks, Gram–Schmidt, SVD, level sets, line distance, cross/mixed products, dual spaces, quadratic geometry, affine geometry, complex phase и exterior algebra;
-- отдельный слой контрпримеров/типичных ошибок для всех 32 Academy-тем;
-- Academy-блоки индексируются глобальным deep search и учитываются в общей теории темы.
+После авторизации backend становится canonical account-scoped storage, а существующие browser-модели остаются optimistic cache/UI boundary.
 
-## Review Mode
+Session start использует:
 
-Отдельный route `#review` для быстрого повторения:
+```text
+GET /api/v1/me/bootstrap
+```
 
-- 87 тем в сухом книжном формате;
-- определения / свойства / теоремы / формулы / алгоритмы без длинного storytelling;
-- поиск и фильтр по разделам;
-- режим «только формулы»;
-- формулы рендерятся через KaTeX;
-- быстрый переход из краткого конспекта в полную тему.
+Bootstrap одним read model гидратирует user, preferences, workspace, learning/progress и runtime capabilities.
+
+Access token хранится только в памяти. Refresh token остаётся HttpOnly cookie и никогда не читается из JavaScript.
+
+## Account-scoped ресурсы
+
+После авторизации синхронизируются:
+
+- learning/progress;
+- exact reading blocks;
+- saved theorem/bookmarks;
+- saved topics;
+- topic resume;
+- reading width;
+- themes/cursor/motion/sidebar preferences;
+- block notes;
+- Important Blocks;
+- activity;
+- background audio playlist, если `bootstrap.capabilities.mediaAudio === true`.
+
+Первая anonymous -> account migration выполняется один раз на user ID. После неё server state является canonical.
+
+## Notes
+
+Block Notes используют dedicated backend API:
+
+```text
+GET    /api/v1/me/notes
+GET    /api/v1/me/notes/{topicId}/{blockIndex}
+PUT    /api/v1/me/notes/{topicId}/{blockIndex}
+DELETE /api/v1/me/notes/{topicId}/{blockIndex}
+```
+
+Anonymous notes остаются localStorage-only.
+
+Authenticated note сохраняется optimistic локально, затем write-through на backend. При network failure текст остаётся локально и pending mutation повторяется позже.
+
+## Important Blocks
+
+Important Blocks используют отдельный resource:
+
+```text
+GET    /api/v1/me/important-blocks
+PUT    /api/v1/me/important-blocks/{topicId}/{blockIndex}
+DELETE /api/v1/me/important-blocks/{topicId}/{blockIndex}
+```
+
+Новые Important marks больше не создаются как `important:*` bookmarks.
+
+Legacy `important:*` bookmarks мигрируются один раз и удаляются только после успешного dedicated PUT.
 
 ## Background Music
 
-- локальная загрузка своего аудиофайла;
-- play / pause / volume / loop;
-- файл сохраняется в IndexedDB браузера и переживает перезапуск;
-- музыка работает поверх переходов между страницами;
-- локальный трек не отправляется на backend по умолчанию;
-- media storage изолирован интерфейсом `BackgroundTrackStorage`; готов отдельный HTTP-adapter под Go backend.
+Anonymous или media capability disabled:
 
-## Backend-ready frontend
+- IndexedDB playlist;
+- play/pause/volume/loop;
+- локальные файлы переживают перезапуск.
 
-Frontend остаётся local-first, но уже соответствует фактическому Go API:
+Authenticated + `mediaAudio === true`:
 
-- `src/shared/api/types.ts` — typed DTO;
-- `src/shared/api/client.ts` — единая transport/auth boundary;
-- `src/features/auth/model/authSession.ts` — session bootstrap/login/register/logout;
-- `src/features/sync/model/userStateSync.ts` — merge + canonical hydration;
-- `src/features/sync/model/autoSync.ts` — debounced background sync;
-- `docs/backend-contract.md` — текущий контракт frontend ↔ Go backend;
-- `docs/production-readiness.md` — release/staging/security gate;
-- Playwright smoke запускается в CI на production bundle.
+- server upload/list;
+- rename;
+- reorder;
+- delete;
+- private authenticated playback.
 
-## Что уже есть
+Audio content загружается Authorization-fetch -> Blob/ObjectURL. Access token не попадает в URL.
 
-- связанный курс из глав и тем с prerequisites
-- определения, свойства, теоремы, доказательства, следствия, формулы, примеры и решения
-- практика с реальным прогрессом: 50% теория + 50% задачи
-- интерактивные математические визуализации и лаборатории
-- knowledge map курса с автоматической раскладкой по prerequisite-уровням; chapter-карты используют стабильные flow-bands, strict prerequisite и отдельные dashed study-flow связи
-- inspector выбранной темы: prerequisites, следующие темы, mastery и быстрый переход в материал
-- раскрываемый sidebar с прогрессом по разделам и возможностью полностью его скрыть
-- настройки закрываются по любому клику вне панели
-- глобальный слой читаемости с увеличенными micro-label/body размерами
-- глобальный поиск по курсу через Ctrl/Cmd + K, включая переход прямо к теореме/свойству/примеру
-- активное оглавление темы, которое следует за текущим блоком при чтении
-- общий course mastery в topbar и на главной
-- Continue Learning по последней открытой теме
-- practice bank с фильтрами сложности, режимом «только нерешённые» и Focus Mode
-- история навигации назад / вперёд
-- сохранённые теоремы
-- Black, White, Catppuccin, Neovim, Tokyo Night, Gruvbox, Nord и Custom theme
-- несколько режимов курсора
-- профили анимаций Full / Balanced / Eco / Off
-- recovery boundary: ошибка отдельного рендера не оставляет пользователя на пустом экране
-- lazy-loading тяжёлых route-модулей и vendor chunking
+Существующие IndexedDB blobs не удаляются автоматически. Если включён account media, UI предлагает явный импорт локальных треков.
+
+## Runtime config
+
+Local:
+
+```env
+VITE_API_BASE_URL=http://localhost:8080
+VITE_API_TIMEOUT_MS=12000
+```
+
+Production:
+
+```env
+VITE_API_BASE_URL=https://<final-visualmath-origin>
+VITE_API_TIMEOUT_MS=12000
+VITE_APP_RELEASE=<git-sha>
+```
+
+Не добавляй `/api` к `VITE_API_BASE_URL`.
 
 ## Запуск
 
@@ -97,36 +129,54 @@ pnpm install
 pnpm dev
 ```
 
-Production-проверка:
+## Release gate
 
 ```bash
 pnpm test
+pnpm typecheck
 pnpm build
 pnpm exec playwright install chromium
 pnpm test:e2e
 ```
 
-## Архитектурный принцип
+Real-backend E2E:
 
-Контент отделён от UI: структура курса и практика лежат в `src/data`, общая логика обучения — в `src/lib`, интерактивные представления — в `src/components`.
-
-Прогресс и персонализация работают local-first. При настроенном backend и авторизации learning/workspace/preferences синхронизируются с аккаунтом, а серверный canonical snapshot гидратит локальный cache. Базовый режим обучения по-прежнему не требует backend.
-
-## Контент
-
-Материал организован как самостоятельный курс:
-
-```
-prerequisites
-→ определения
-→ основные понятия
-→ свойства
-→ доказательства
-→ теоремы
-→ следствия
-→ примеры
-→ визуализации
-→ практика
+```bash
+VISUALMATH_E2E_API_BASE_URL=http://127.0.0.1:8080 pnpm test:e2e:backend
 ```
 
-Цель проекта — не быть плоским каталогом формул, а давать связную карту математики, где теория, геометрическая интуиция и практика работают вместе.
+PR CI also contains a separate `Backend E2E` workflow. It executes the same suite when the repository variable `VISUALMATH_E2E_API_BASE_URL` points to an accessible release-gate/staging backend. If the variable is not configured, the workflow reports that the real-backend job is skipped; a green frontend CI alone is not evidence that the backend-integrated suite ran.
+
+Backend contract target for the current integration:
+
+```text
+kumofsoc/FsocietyMathAdvancedBackend
+809eb92876259caed3c4ad87801851ae167da512
+```
+
+## Основные routes продукта
+
+- `#home` — главная
+- `#map` — карта курса
+- `#academy` — Linear Academy PRO
+- `#review` — краткий конспект
+- `#marks` — заметки + Important Blocks
+- `#account` — аккаунт
+- `#<topicId>` — тема курса
+
+## Архитектура
+
+Контент курса остаётся bundled/static и отделён от account storage.
+
+Ключевые integration layers:
+
+- `src/shared/api/types.ts` — DTO;
+- `src/shared/api/client.ts` — HTTP/auth/session boundary;
+- `src/features/auth/model/authSession.ts` — bootstrap/login/register/logout;
+- `src/features/sync/model/userStateSync.ts` — first migration + canonical hydration;
+- `src/features/sync/model/autoSync.ts` — resource-specific debounced mutations;
+- `src/features/block-notes/model/blockNotes.ts` — local cache + pending notes;
+- `src/features/important-blocks/model/importantBlocks.ts` — local cache + pending Important markers;
+- `src/features/background-music/model/backgroundAudio.ts` — IndexedDB/server media adapters.
+
+Подробности: `docs/backend-contract.md` и `docs/production-readiness.md`.

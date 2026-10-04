@@ -6,11 +6,18 @@ import type {
   AuthResponseDto,
   BackendHealthDto,
   BackendMetaDto,
+  BlockNoteDto,
+  BlockNoteListDto,
   BookmarkDto,
   BookmarkListDto,
+  BootstrapDto,
   CreateBookmarkRequest,
+  ImportantBlockDto,
+  ImportantBlockListDto,
   LearningProgressDto,
   LoginRequest,
+  MediaAudioTrackDto,
+  MediaAudioTrackListDto,
   PreferencesDto,
   ProgressSyncRequest,
   RegisterRequest,
@@ -134,11 +141,11 @@ async function parsePayload(response: Response) {
   }
 }
 
-async function rawRequest<T>(
+async function fetchResponse(
   path: string,
   init: RequestInit = {},
   options: RequestOptions = {},
-): Promise<T> {
+) {
   if (!API_BASE_URL) {
     throw new ApiError(0, {
       code: "backend_not_configured",
@@ -158,16 +165,14 @@ async function rawRequest<T>(
   const timeoutMs = options.timeoutMs ?? API_TIMEOUT_MS;
   const { signal, cleanup } = composeSignal(init.signal, timeoutMs);
 
-  let response: Response;
   try {
-    response = await fetch(backendUrl(path), {
+    return await fetch(backendUrl(path), {
       ...init,
       headers,
       signal,
       credentials: "include",
     });
   } catch (error) {
-    cleanup();
     const timedOut = signal.aborted && signal.reason === "timeout";
     throw new ApiError(0, {
       code: timedOut ? "request_timeout" : "network_error",
@@ -176,26 +181,41 @@ async function rawRequest<T>(
         : "Backend request could not be completed.",
       cause: error,
     });
+  } finally {
+    cleanup();
   }
-  cleanup();
+}
 
-  const payload = await parsePayload(response);
+async function throwResponseError(response: Response, payload?: unknown): Promise<never> {
+  const parsed = payload === undefined ? await parsePayload(response) : payload;
   const requestId =
     response.headers.get("X-Request-ID") ??
     response.headers.get("X-Request-Id") ??
     undefined;
+  const error = normalizeErrorBody(
+    parsed && typeof parsed === "object" ? (parsed as ApiErrorBody) : null,
+  );
 
+  throw new ApiError(response.status, {
+    ...error,
+    message:
+      error.message ||
+      (typeof parsed === "string"
+        ? parsed
+        : "Request failed with status " + response.status),
+    requestId,
+  });
+}
+
+async function rawRequest<T>(
+  path: string,
+  init: RequestInit = {},
+  options: RequestOptions = {},
+): Promise<T> {
+  const response = await fetchResponse(path, init, options);
+  const payload = await parsePayload(response);
   if (!response.ok) {
-    const error = normalizeErrorBody(
-      payload && typeof payload === "object" ? (payload as ApiErrorBody) : null,
-    );
-    throw new ApiError(response.status, {
-      ...error,
-      message:
-        error.message ||
-        (typeof payload === "string" ? payload : "Request failed with status " + response.status),
-      requestId,
-    });
+    return throwResponseError(response, payload);
   }
 
   if (
@@ -208,6 +228,18 @@ async function rawRequest<T>(
   }
 
   return payload as T;
+}
+
+async function rawBlobRequest(
+  path: string,
+  init: RequestInit = {},
+  options: RequestOptions = {},
+) {
+  const response = await fetchResponse(path, init, options);
+  if (!response.ok) {
+    return throwResponseError(response);
+  }
+  return response.blob();
 }
 
 async function refreshAccessToken(): Promise<AuthResponseDto | null> {
@@ -261,8 +293,37 @@ async function request<T>(
   }
 }
 
+async function requestBlob(
+  path: string,
+  init: RequestInit = {},
+  options: RequestOptions = {},
+): Promise<Blob> {
+  try {
+    return await rawBlobRequest(path, init, options);
+  } catch (error) {
+    if (
+      error instanceof ApiError &&
+      error.status === 401 &&
+      options.auth !== false &&
+      options.retryAuth !== false
+    ) {
+      const refreshed = await refreshAccessToken();
+      if (refreshed) {
+        return rawBlobRequest(path, init, {
+          ...options,
+          retryAuth: false,
+        });
+      }
+    }
+    throw error;
+  }
+}
+
 export async function bootstrapBackendSession() {
-  return refreshAccessToken();
+  const session = await refreshAccessToken();
+  if (!session) return null;
+  const bootstrap = await request<BootstrapDto>("/api/v1/me/bootstrap");
+  return { session, bootstrap };
 }
 
 export const api = {
@@ -308,6 +369,7 @@ export const api = {
   },
   me: {
     get: () => request<UserDto>("/api/v1/me"),
+    bootstrap: () => request<BootstrapDto>("/api/v1/me/bootstrap"),
     updateProfile: (body: UpdateProfileRequest) =>
       request<UserDto>("/api/v1/me/profile", {
         method: "PATCH",
@@ -321,6 +383,58 @@ export const api = {
         method: "POST",
         body: JSON.stringify(body),
       }),
+    patchTopic: (
+      topicId: string,
+      body: { readingRatio?: number; theoryComplete?: true },
+    ) =>
+      request<LearningProgressDto>(
+        "/api/v1/me/progress/topics/" + encodeURIComponent(topicId),
+        {
+          method: "PUT",
+          body: JSON.stringify(body),
+        },
+      ),
+    completeTheory: (topicId: string) =>
+      request<LearningProgressDto>(
+        "/api/v1/me/theory/" + encodeURIComponent(topicId) + "/complete",
+        { method: "POST" },
+      ),
+    uncompleteTheory: (topicId: string) =>
+      request<LearningProgressDto>(
+        "/api/v1/me/theory/" + encodeURIComponent(topicId) + "/complete",
+        { method: "DELETE" },
+      ),
+    solveExercise: (exerciseId: string) =>
+      request<LearningProgressDto>(
+        "/api/v1/me/exercises/" + encodeURIComponent(exerciseId) + "/solve",
+        { method: "POST" },
+      ),
+    unsolveExercise: (exerciseId: string) =>
+      request<LearningProgressDto>(
+        "/api/v1/me/exercises/" + encodeURIComponent(exerciseId) + "/solve",
+        { method: "DELETE" },
+      ),
+    setResume: (lastTopicId: string) =>
+      request<{ lastTopicId: string | null; revision: number; updatedAt: string }>(
+        "/api/v1/me/resume",
+        {
+          method: "PUT",
+          body: JSON.stringify({ lastTopicId }),
+        },
+      ),
+    removeTheorem: (theoremId: string) =>
+      request<LearningProgressDto>(
+        "/api/v1/progress/theorems/" + encodeURIComponent(theoremId),
+        { method: "DELETE" },
+      ),
+    markReadingBlock: (topicId: string, blockIndex: number) =>
+      request<LearningProgressDto>(
+        "/api/v1/me/reading-blocks/" +
+          encodeURIComponent(topicId) +
+          "/" +
+          encodeURIComponent(String(blockIndex)),
+        { method: "PUT" },
+      ),
     syncReadingBlocks: (blocks: Array<{ topicId: string; blockIndex: number }>) =>
       request<LearningProgressDto>("/api/v1/me/reading-blocks/sync", {
         method: "POST",
@@ -367,6 +481,94 @@ export const api = {
       request<void>("/api/v1/me/bookmarks/" + encodeURIComponent(id), {
         method: "DELETE",
       }),
+  },
+  notes: {
+    list: (limit = 100, offset = 0) =>
+      request<BlockNoteListDto>(
+        "/api/v1/me/notes?limit=" +
+          encodeURIComponent(String(limit)) +
+          "&offset=" +
+          encodeURIComponent(String(offset)),
+      ),
+    get: (topicId: string, blockIndex: number) =>
+      request<BlockNoteDto>(
+        "/api/v1/me/notes/" +
+          encodeURIComponent(topicId) +
+          "/" +
+          encodeURIComponent(String(blockIndex)),
+      ),
+    put: (topicId: string, blockIndex: number, text: string) =>
+      request<BlockNoteDto | null>(
+        "/api/v1/me/notes/" +
+          encodeURIComponent(topicId) +
+          "/" +
+          encodeURIComponent(String(blockIndex)),
+        {
+          method: "PUT",
+          body: JSON.stringify({ text }),
+        },
+      ),
+    remove: (topicId: string, blockIndex: number) =>
+      request<void>(
+        "/api/v1/me/notes/" +
+          encodeURIComponent(topicId) +
+          "/" +
+          encodeURIComponent(String(blockIndex)),
+        { method: "DELETE" },
+      ),
+  },
+  importantBlocks: {
+    list: () =>
+      request<ImportantBlockListDto>("/api/v1/me/important-blocks"),
+    put: (topicId: string, blockIndex: number) =>
+      request<ImportantBlockDto>(
+        "/api/v1/me/important-blocks/" +
+          encodeURIComponent(topicId) +
+          "/" +
+          encodeURIComponent(String(blockIndex)),
+        { method: "PUT" },
+      ),
+    remove: (topicId: string, blockIndex: number) =>
+      request<void>(
+        "/api/v1/me/important-blocks/" +
+          encodeURIComponent(topicId) +
+          "/" +
+          encodeURIComponent(String(blockIndex)),
+        { method: "DELETE" },
+      ),
+  },
+  media: {
+    listAudio: () =>
+      request<MediaAudioTrackListDto>("/api/v1/me/media/audio"),
+    uploadAudio: (file: File) => {
+      const body = new FormData();
+      body.set("file", file, file.name);
+      return request<MediaAudioTrackDto>("/api/v1/me/media/audio", {
+        method: "POST",
+        body,
+      });
+    },
+    renameAudio: (id: string, name: string) =>
+      request<MediaAudioTrackDto>(
+        "/api/v1/me/media/audio/" + encodeURIComponent(id),
+        {
+          method: "PATCH",
+          body: JSON.stringify({ name }),
+        },
+      ),
+    reorderAudio: (trackIds: string[]) =>
+      request<MediaAudioTrackListDto>("/api/v1/me/media/audio/order", {
+        method: "PUT",
+        body: JSON.stringify({ trackIds }),
+      }),
+    deleteAudio: (id: string) =>
+      request<void>("/api/v1/me/media/audio/" + encodeURIComponent(id), {
+        method: "DELETE",
+      }),
+    audioContent: (id: string) =>
+      requestBlob(
+        "/api/v1/me/media/audio/" + encodeURIComponent(id) + "/content",
+      ),
   },
   activity: {
     heatmap: (year?: number) =>

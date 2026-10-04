@@ -134,6 +134,20 @@ export interface PreferencesDto {
   sidebarCollapsed: boolean;
 }
 
+export interface BootstrapCapabilitiesDto {
+  mediaAudio: boolean;
+}
+
+export interface BootstrapDto {
+  version: number;
+  generatedAt: string;
+  user: UserDto;
+  preferences: PreferencesDto;
+  workspace: WorkspaceDto;
+  learning: LearningProgressDto;
+  capabilities: BootstrapCapabilitiesDto;
+}
+
 export interface BookmarkDto {
   id: string;
   topicId: string | null;
@@ -153,6 +167,50 @@ export interface CreateBookmarkRequest {
   contentBlockId: string;
   kind: string;
   title: string;
+}
+
+export interface BlockNoteDto {
+  id: string;
+  topicId: string;
+  blockIndex: number;
+  text: string;
+  updatedAt: number;
+}
+
+export interface BlockNoteListDto {
+  notes: BlockNoteDto[];
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}
+
+export interface ImportantBlockDto {
+  id: string;
+  topicId: string;
+  blockIndex: number;
+  topicTitle: string;
+  blockTitle: string;
+  kind: string;
+  updatedAt: number;
+}
+
+export interface ImportantBlockListDto {
+  blocks: ImportantBlockDto[];
+}
+
+export interface MediaAudioTrackDto {
+  id: string;
+  name: string;
+  type: string;
+  sizeBytes: number;
+  position: number;
+  contentUrl: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MediaAudioTrackListDto {
+  tracks: MediaAudioTrackDto[];
 }
 
 export interface ActivityHeatmapDayDto {

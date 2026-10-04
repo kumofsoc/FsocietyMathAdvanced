@@ -14,6 +14,46 @@ export interface SavedTheorem {
   formula?: string;
 }
 
+export type LearningEventDetail =
+  | {
+      source: "local";
+      kind: "set";
+      key: string;
+      added: string[];
+      removed: string[];
+    }
+  | {
+      source: "local";
+      kind: "theorems";
+      added: SavedTheorem[];
+      removed: SavedTheorem[];
+    }
+  | {
+      source: "local";
+      kind: "reading-progress";
+      topicId: string;
+      ratio: number;
+    }
+  | {
+      source: "local";
+      kind: "reading-block";
+      topicId: string;
+      blockIndex: number;
+      ratio: number;
+    }
+  | {
+      source: "hydrate";
+      kind: "snapshot";
+    };
+
+function emitLearning(detail: LearningEventDetail) {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent<LearningEventDetail>(LEARNING_EVENT, {
+      detail,
+    }));
+  }
+}
+
 export function loadSet(key: string): Set<string> {
   try {
     return new Set(JSON.parse(localStorage.getItem(key) || "[]"));
@@ -23,12 +63,19 @@ export function loadSet(key: string): Set<string> {
 }
 
 export function saveSet(key: string, value: Set<string>) {
+  const previous = loadSet(key);
   try {
     localStorage.setItem(key, JSON.stringify([...value]));
   } catch (error) {
-    console.warn("[FsocietyMath] could not persist learning set", error);
+    console.warn("[VisualMath] could not persist learning set", error);
   }
-  window.dispatchEvent(new CustomEvent(LEARNING_EVENT));
+  emitLearning({
+    source: "local",
+    kind: "set",
+    key,
+    added: [...value].filter((item) => !previous.has(item)),
+    removed: [...previous].filter((item) => !value.has(item)),
+  });
 }
 
 export function loadSavedTheorems(): SavedTheorem[] {
@@ -40,14 +87,21 @@ export function loadSavedTheorems(): SavedTheorem[] {
 }
 
 export function saveTheorems(value: SavedTheorem[]) {
+  const previous = loadSavedTheorems();
+  const previousById = new Map(previous.map((item) => [item.id, item]));
+  const nextById = new Map(value.map((item) => [item.id, item]));
   try {
     localStorage.setItem(SAVED_THEOREMS_KEY, JSON.stringify(value));
   } catch (error) {
-    console.warn("[FsocietyMath] could not persist saved theorems", error);
+    console.warn("[VisualMath] could not persist saved theorems", error);
   }
-  window.dispatchEvent(new CustomEvent(LEARNING_EVENT));
+  emitLearning({
+    source: "local",
+    kind: "theorems",
+    added: value.filter((item) => !previousById.has(item.id)),
+    removed: previous.filter((item) => !nextById.has(item.id)),
+  });
 }
-
 
 export function loadReadingProgress(): Record<string, number> {
   try {
@@ -62,7 +116,7 @@ export function loadReadingProgress(): Record<string, number> {
   }
 }
 
-export function saveReadingProgress(topicId: string, ratio: number) {
+function persistReadingProgress(topicId: string, ratio: number) {
   const nextRatio = Math.min(1, Math.max(0, ratio));
   const current = loadReadingProgress();
   const previous = current[topicId] ?? 0;
@@ -74,10 +128,22 @@ export function saveReadingProgress(topicId: string, ratio: number) {
   } catch (error) {
     console.warn("[VisualMath] could not persist reading progress", error);
   }
-  window.dispatchEvent(new CustomEvent(LEARNING_EVENT));
   return nextRatio;
 }
 
+export function saveReadingProgress(topicId: string, ratio: number) {
+  const previous = loadReadingProgress()[topicId] ?? 0;
+  const nextRatio = persistReadingProgress(topicId, ratio);
+  if (nextRatio > previous) {
+    emitLearning({
+      source: "local",
+      kind: "reading-progress",
+      topicId,
+      ratio: nextRatio,
+    });
+  }
+  return nextRatio;
+}
 
 export function getReadingCoverageFromBlocks(
   topicId: string,
@@ -104,23 +170,37 @@ export function replaceReadingBlocks(blockIds: string[]) {
     console.warn("[VisualMath] could not hydrate reading blocks", error);
     return false;
   }
-  window.dispatchEvent(new CustomEvent(LEARNING_EVENT));
+  emitLearning({ source: "hydrate", kind: "snapshot" });
   return true;
 }
 
 export function markReadingBlock(topicId: string, blockIndex: number, totalBlocks: number) {
   const current = loadReadingBlocks();
   const key = topicId + "::" + blockIndex;
-  if (!current.has(key)) {
+  const isNew = !current.has(key);
+  if (isNew) {
     current.add(key);
-    saveSet(READING_BLOCKS_KEY, current);
+    try {
+      localStorage.setItem(READING_BLOCKS_KEY, JSON.stringify([...current]));
+    } catch (error) {
+      console.warn("[VisualMath] could not persist reading block", error);
+    }
   }
 
   const ratio = getReadingCoverageFromBlocks(topicId, totalBlocks, current);
-  saveReadingProgress(topicId, ratio);
+  persistReadingProgress(topicId, ratio);
+
+  if (isNew) {
+    emitLearning({
+      source: "local",
+      kind: "reading-block",
+      topicId,
+      blockIndex,
+      ratio,
+    });
+  }
   return ratio;
 }
-
 
 export type CanonicalLearningCache = {
   theoryRead: string[];
@@ -146,6 +226,6 @@ export function replaceLearningCache(snapshot: CanonicalLearningCache) {
     return false;
   }
 
-  window.dispatchEvent(new CustomEvent(LEARNING_EVENT));
+  emitLearning({ source: "hydrate", kind: "snapshot" });
   return true;
 }

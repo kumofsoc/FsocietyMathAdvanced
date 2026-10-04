@@ -10,6 +10,12 @@ export type TopicResumeEntry = {
 
 type TopicResumeState = Record<string, TopicResumeEntry>;
 
+export type TopicResumeEventDetail = {
+  source: "local" | "hydrate";
+  topicId?: string;
+  blockIndex?: number;
+};
+
 export function loadTopicResumeState(): TopicResumeState {
   return readLocalStorageJson<TopicResumeState>(TOPIC_RESUME_KEY, {});
 }
@@ -36,7 +42,9 @@ export function saveTopicResume(topicId: string, blockIndex: number) {
 
   const saved = writeLocalStorage(TOPIC_RESUME_KEY, JSON.stringify(next));
   if (saved && typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent(TOPIC_RESUME_EVENT));
+    window.dispatchEvent(new CustomEvent<TopicResumeEventDetail>(TOPIC_RESUME_EVENT, {
+      detail: { source: "local", topicId, blockIndex },
+    }));
   }
   return saved;
 }
@@ -53,7 +61,9 @@ export function replaceTopicResumeState(state: TopicResumeState) {
   );
   const saved = writeLocalStorage(TOPIC_RESUME_KEY, JSON.stringify(normalized));
   if (saved && typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent(TOPIC_RESUME_EVENT));
+    window.dispatchEvent(new CustomEvent<TopicResumeEventDetail>(TOPIC_RESUME_EVENT, {
+      detail: { source: "hydrate" },
+    }));
   }
   return saved;
 }

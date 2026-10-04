@@ -1,0 +1,55 @@
+name: Backend E2E
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.backend.outputs.enabled }}
+    steps:
+      - id: backend
+        env:
+          API_BASE_URL: ${{ vars.VISUALMATH_E2E_API_BASE_URL }}
+        run: |
+          if [ -n "$API_BASE_URL" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "Real-backend E2E is enabled for this repository."
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::VISUALMATH_E2E_API_BASE_URL is not configured; real-backend Playwright is skipped."
+          fi
+
+  backend-e2e:
+    needs: gate
+    if: needs.gate.outputs.enabled == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Run real-backend product E2E
+        run: pnpm test:e2e:backend
+        env:
+          VISUALMATH_E2E_API_BASE_URL: ${{ vars.VISUALMATH_E2E_API_BASE_URL }}
+      - name: Upload backend Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-backend
+          path: |
+            playwright-report-backend/
+            test-results/
+          retention-days: 7
