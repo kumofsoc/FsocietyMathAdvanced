@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { chapters } from "@/data/courseMeta";
 import {
   getChapterProgress,
@@ -263,7 +263,7 @@ function CourseProgress({
 }: {
   snapshot: LearningSnapshot;
 }) {
-  const tracked = chapters.filter(isTrackedChapter);
+  const tracked = chapters.filter((chapter) => isTrackedChapter(chapter.id));
   return (
     <section className="account-panel account-course-panel">
       <header>
@@ -276,7 +276,7 @@ function CourseProgress({
 
       <div className="account-course-list">
         {tracked.map((chapter) => {
-          const progress = getChapterProgress(chapter, snapshot);
+          const progress = getChapterProgress(chapter.id, snapshot);
           return (
             <button
               key={chapter.id}
@@ -314,7 +314,7 @@ function LocalAccount({
     bio: profile.bio,
   });
 
-  const theoryCount = snapshot.theoryRead.size;
+  const theoryCount = snapshot.theory.size;
   const solvedCount = snapshot.solved.size;
   const savedCount = loadSavedTheorems().length;
 
@@ -632,15 +632,6 @@ export function AccountPage({
   snapshot: LearningSnapshot;
 }) {
   const status = useAuthStore((state) => state.status);
-
-  const localStats = useMemo(
-    () => ({
-      theory: snapshot.theoryRead.size,
-      solved: snapshot.solved.size,
-    }),
-    [snapshot],
-  );
-  void localStats;
 
   if (status === "local") {
     return <LocalAccount progress={progress} snapshot={snapshot} />;
