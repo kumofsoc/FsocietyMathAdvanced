@@ -1,4 +1,4 @@
-import { readLocalStorageJson, writeLocalStorage } from "@/shared/lib/browserStorage";
+import { readLocalStorage, readLocalStorageJson, writeLocalStorage } from "@/shared/lib/browserStorage";
 
 export const SAVED_TOPICS_KEY = "visualmath-saved-topics-v1";
 export const SAVED_TOPICS_EVENT = "visualmath:saved-topics-change";
@@ -54,5 +54,5 @@ export function replaceSavedTopicIds(ids: string[]) {
 
 
 export function savedTopicsAreDirty() {
-  return readLocalStorageJson<string>(SAVED_TOPICS_DIRTY_KEY, "0") === "1";
+  return readLocalStorage(SAVED_TOPICS_DIRTY_KEY) === "1";
 }
