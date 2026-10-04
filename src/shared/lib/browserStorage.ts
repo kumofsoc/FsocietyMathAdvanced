@@ -27,12 +27,27 @@ export function removeLocalStorage(key: string): boolean {
   }
 }
 
+function matchesFallbackShape(value: unknown, fallback: unknown) {
+  if (fallback === null) return true;
+
+  if (Array.isArray(fallback)) {
+    return Array.isArray(value);
+  }
+
+  if (typeof fallback === "object") {
+    return value !== null && typeof value === "object" && !Array.isArray(value);
+  }
+
+  return typeof value === typeof fallback;
+}
+
 export function readLocalStorageJson<T>(key: string, fallback: T): T {
   const raw = readLocalStorage(key);
   if (raw === null) return fallback;
 
   try {
-    return JSON.parse(raw) as T;
+    const parsed = JSON.parse(raw) as unknown;
+    return matchesFallbackShape(parsed, fallback) ? (parsed as T) : fallback;
   } catch {
     return fallback;
   }
