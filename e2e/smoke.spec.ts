@@ -7,6 +7,27 @@ test.describe("VisualMath production smoke", () => {
     await expect(page.locator("body")).toContainText("VisualMath");
   });
 
+  test("command palette traps keyboard focus and restores it on close", async ({ page }) => {
+    await page.goto("/");
+
+    const trigger = page.getByRole("button", { name: /Поиск/i });
+    await trigger.focus();
+    await trigger.click();
+
+    const dialog = page.getByRole("dialog", { name: "Поиск по курсу" });
+    const input = dialog.getByRole("textbox", { name: "Поиск по курсу" });
+    await expect(input).toBeFocused();
+
+    const footerButtons = dialog.locator(".command-footer button");
+    await footerButtons.last().focus();
+    await page.keyboard.press("Tab");
+    await expect(input).toBeFocused();
+
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    await expect(trigger).toBeFocused();
+  });
+
   test("semantic topic deep link resolves to the requested block", async ({ page }) => {
     await page.goto("/#matrices/block/1");
     await expect(page.locator(".topic-page")).toBeVisible();

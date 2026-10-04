@@ -38,6 +38,9 @@ export function CommandPalette() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [deepIndex, setDeepIndex] = useState<CourseSearchEntry[]>([]);
   const [deepIndexReady, setDeepIndexReady] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -58,8 +61,19 @@ export function CommandPalette() {
     if (!open) {
       setQuery("");
       setActiveIndex(0);
+      if (previousFocusRef.current) {
+        const target = previousFocusRef.current;
+        previousFocusRef.current = null;
+        const frame = requestAnimationFrame(() => target.focus());
+        return () => cancelAnimationFrame(frame);
+      }
       return;
     }
+
+    previousFocusRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : triggerRef.current;
     const frame = requestAnimationFrame(() => inputRef.current?.focus());
     return () => cancelAnimationFrame(frame);
   }, [open]);
@@ -181,6 +195,31 @@ export function CommandPalette() {
     setOpen(false);
   };
 
+  const onDialogKeyDown = (event: ReactKeyboardEvent<HTMLElement>) => {
+    if (event.key !== "Tab") return;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    const focusable = [...dialog.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+    )].filter((element) => !element.hasAttribute("hidden"));
+
+    if (!focusable.length) {
+      event.preventDefault();
+      return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
   const onSearchKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
     if (!results.length) return;
 
@@ -202,7 +241,15 @@ export function CommandPalette() {
 
   return (
     <>
-      <button className="command-trigger" onClick={() => setOpen(true)} data-cursor="active">
+      <button
+        ref={triggerRef}
+        className="command-trigger"
+        onClick={() => setOpen(true)}
+        data-cursor="active"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-controls="visualmath-command-palette"
+      >
         <span>⌕</span>
         <strong>Поиск</strong>
         <kbd>Ctrl K</kbd>
@@ -218,12 +265,15 @@ export function CommandPalette() {
             onMouseDown={() => setOpen(false)}
           >
             <motion.section
+              id="visualmath-command-palette"
+              ref={dialogRef}
               className="command-palette"
               initial={{ opacity: 0, y: -12, scale: 0.985 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -8, scale: 0.99 }}
               transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
               onMouseDown={(event) => event.stopPropagation()}
+              onKeyDown={onDialogKeyDown}
               role="dialog"
               aria-modal="true"
               aria-label="Поиск по курсу"
