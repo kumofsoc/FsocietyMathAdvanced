@@ -65,12 +65,17 @@ export function selectBackgroundStorageMode(
   return authenticated && mediaAudio ? "server" : "local";
 }
 
-export function getBackgroundStorageMode(): "local" | "server" {
+function currentServerMediaUserId() {
   const state = useAuthStore.getState();
-  return selectBackgroundStorageMode(
-    state.status === "authenticated",
-    state.capabilities.mediaAudio,
-  );
+  return state.status === "authenticated" &&
+    state.user &&
+    state.capabilities.mediaAudio
+    ? state.user.id
+    : null;
+}
+
+export function getBackgroundStorageMode(): "local" | "server" {
+  return currentServerMediaUserId() ? "server" : "local";
 }
 
 function openMediaDb(): Promise<IDBDatabase> {
@@ -268,13 +273,22 @@ async function saveLocalBackgroundTracks(files: File[]): Promise<StoredBackgroun
 
 export async function saveBackgroundTracks(files: File[]): Promise<StoredBackgroundTrack[]> {
   if (!files.length) return [];
-  if (getBackgroundStorageMode() !== "server") {
+
+  const serverUserId = currentServerMediaUserId();
+  if (!serverUserId) {
     return saveLocalBackgroundTracks(files);
   }
 
   const created: StoredBackgroundTrack[] = [];
   const localFallback: File[] = [];
   for (const file of files) {
+    if (currentServerMediaUserId() !== serverUserId) {
+      console.warn(
+        "[VisualMath] audio upload batch stopped because the active account changed",
+      );
+      break;
+    }
+
     try {
       created.push(fromRemoteTrack(await api.media.uploadAudio(file)));
     } catch (error) {
@@ -301,7 +315,8 @@ export async function importLocalBackgroundTracksToServer() {
     return { imported: 0, failed: 0 };
   }
 
-  const alreadyImported = importedLocalIds(state.user.id);
+  const userId = state.user.id;
+  const alreadyImported = importedLocalIds(userId);
   const local = (await loadLocalBackgroundTracks()).filter(
     (track) => !alreadyImported.has(track.id),
   );
@@ -309,6 +324,10 @@ export async function importLocalBackgroundTracksToServer() {
   let failed = 0;
 
   for (const track of local) {
+    if (currentServerMediaUserId() !== userId) {
+      break;
+    }
+
     if (!track.blob) {
       failed += 1;
       continue;
@@ -320,7 +339,7 @@ export async function importLocalBackgroundTracksToServer() {
         { type: track.type || track.blob.type || "audio/mpeg" },
       );
       await api.media.uploadAudio(file);
-      markImportedLocalId(state.user.id, track.id);
+      markImportedLocalId(userId, track.id);
       imported += 1;
     } catch {
       failed += 1;
