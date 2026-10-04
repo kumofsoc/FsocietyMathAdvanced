@@ -111,6 +111,24 @@ export function hydrateImportantBlocks(items: ImportantBlock[]) {
   return persistImportantBlocks(normalized, { source: "hydrate" });
 }
 
+export function applyCanonicalImportantBlock(
+  item: ImportantBlock | null,
+  topicId?: string,
+  blockIndex?: number,
+) {
+  const resolvedTopicId = item?.topicId ?? topicId;
+  const resolvedBlockIndex = item?.blockIndex ?? blockIndex;
+  if (!resolvedTopicId || resolvedBlockIndex === undefined) return false;
+  const id = importantBlockId(resolvedTopicId, resolvedBlockIndex);
+  const current = loadImportantBlocks().filter((candidate) => candidate.id !== id);
+  const next = item ? [...current, item] : current;
+  return persistImportantBlocks(next, {
+    source: "hydrate",
+    topicId: resolvedTopicId,
+    blockIndex: resolvedBlockIndex,
+  });
+}
+
 export function setBlockImportant(
   input: Omit<ImportantBlock, "id" | "updatedAt">,
   important: boolean,

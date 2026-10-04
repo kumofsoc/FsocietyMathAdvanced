@@ -414,6 +414,14 @@ export const api = {
         "/api/v1/me/exercises/" + encodeURIComponent(exerciseId) + "/solve",
         { method: "DELETE" },
       ),
+    setResume: (lastTopicId: string) =>
+      request<{ lastTopicId: string | null; revision: number; updatedAt: string }>(
+        "/api/v1/me/resume",
+        {
+          method: "PUT",
+          body: JSON.stringify({ lastTopicId }),
+        },
+      ),
     removeTheorem: (theoremId: string) =>
       request<LearningProgressDto>(
         "/api/v1/progress/theorems/" + encodeURIComponent(theoremId),

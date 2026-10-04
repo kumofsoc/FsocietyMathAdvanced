@@ -125,6 +125,39 @@ export function hydrateBlockNotes(entries: BlockNoteEntry[]) {
   return persistBlockNotes(state, { source: "hydrate" });
 }
 
+export function applyCanonicalBlockNote(entry: BlockNoteEntry | null, topicId?: string, blockIndex?: number) {
+  const state = loadBlockNotes();
+  const resolvedTopicId = entry?.topicId ?? topicId;
+  const resolvedBlockIndex = entry?.blockIndex ?? blockIndex;
+  if (!resolvedTopicId || resolvedBlockIndex === undefined) return false;
+  const id = blockNoteId(resolvedTopicId, resolvedBlockIndex);
+
+  if (!entry) {
+    if (!(id in state)) return true;
+    const { [id]: _removed, ...next } = state;
+    return persistBlockNotes(next, {
+      source: "hydrate",
+      topicId: resolvedTopicId,
+      blockIndex: resolvedBlockIndex,
+    });
+  }
+
+  return persistBlockNotes(
+    {
+      ...state,
+      [id]: {
+        text: entry.text,
+        updatedAt: entry.updatedAt,
+      },
+    },
+    {
+      source: "hydrate",
+      topicId: resolvedTopicId,
+      blockIndex: resolvedBlockIndex,
+    },
+  );
+}
+
 export function saveBlockNote(topicId: string, blockIndex: number, text: string) {
   const id = blockNoteId(topicId, blockIndex);
   const state = loadBlockNotes();
