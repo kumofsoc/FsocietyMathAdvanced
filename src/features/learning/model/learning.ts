@@ -113,6 +113,7 @@ export type CanonicalLearningCache = {
   solvedTaskIds: string[];
   savedTheorems: SavedTheorem[];
   readingProgress: Record<string, number>;
+  readingBlocks?: string[];
 };
 
 export function replaceLearningCache(snapshot: CanonicalLearningCache) {
@@ -120,6 +121,12 @@ export function replaceLearningCache(snapshot: CanonicalLearningCache) {
     localStorage.setItem(THEORY_KEY, JSON.stringify([...new Set(snapshot.theoryRead)]));
     localStorage.setItem(SOLVED_KEY, JSON.stringify([...new Set(snapshot.solvedTaskIds)]));
     localStorage.setItem(SAVED_THEOREMS_KEY, JSON.stringify(snapshot.savedTheorems));
+    if (snapshot.readingBlocks) {
+      localStorage.setItem(
+        READING_BLOCKS_KEY,
+        JSON.stringify([...new Set(snapshot.readingBlocks)]),
+      );
+    }
 
     const reading = Object.fromEntries(
       Object.entries(snapshot.readingProgress)
