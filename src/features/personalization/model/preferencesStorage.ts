@@ -140,34 +140,38 @@ export function localPreferencesAreDirty() {
 }
 
 export function saveThemeNamePreference(value: PreferencesDto["themeName"]) {
+  if (readLocalStorage(THEME_NAME_KEY) === value) return true;
   const saved = writeLocalStorage(THEME_NAME_KEY, value);
   if (saved) emitPreferencesChange();
   return saved;
 }
 
 export function saveCustomThemePreference(value: ThemeTokensDto) {
-  const saved = writeLocalStorage(
-    THEME_CUSTOM_KEY,
-    JSON.stringify(normalizeTheme(value)),
-  );
+  const serialized = JSON.stringify(normalizeTheme(value));
+  if (readLocalStorage(THEME_CUSTOM_KEY) === serialized) return true;
+  const saved = writeLocalStorage(THEME_CUSTOM_KEY, serialized);
   if (saved) emitPreferencesChange();
   return saved;
 }
 
 export function saveCursorPreference(value: CursorModeDto) {
+  if (readLocalStorage(CURSOR_KEY) === value) return true;
   const saved = writeLocalStorage(CURSOR_KEY, value);
   if (saved) emitPreferencesChange();
   return saved;
 }
 
 export function saveMotionPreference(value: MotionProfileDto) {
+  if (readLocalStorage(MOTION_KEY) === value) return true;
   const saved = writeLocalStorage(MOTION_KEY, value);
   if (saved) emitPreferencesChange();
   return saved;
 }
 
 export function saveSidebarCollapsedPreference(value: boolean) {
-  const saved = writeLocalStorage(SIDEBAR_COLLAPSED_KEY, value ? "1" : "0");
+  const serialized = value ? "1" : "0";
+  if (readLocalStorage(SIDEBAR_COLLAPSED_KEY) === serialized) return true;
+  const saved = writeLocalStorage(SIDEBAR_COLLAPSED_KEY, serialized);
   if (saved) emitPreferencesChange();
   return saved;
 }
