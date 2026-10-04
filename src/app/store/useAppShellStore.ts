@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import {
   SIDEBAR_COLLAPSED_KEY,
-  emitPreferencesChange,
+  saveSidebarCollapsedPreference,
 } from "@/features/personalization/model/preferencesStorage";
 
 type BooleanSetter = boolean | ((current: boolean) => boolean);
@@ -37,15 +37,6 @@ function readSidebarCollapsed() {
     return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1";
   } catch {
     return false;
-  }
-}
-
-function persistSidebarCollapsed(value: boolean) {
-  try {
-    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, value ? "1" : "0");
-    emitPreferencesChange();
-  } catch {
-    // Persistence is optional in private/strict browser contexts.
   }
 }
 
