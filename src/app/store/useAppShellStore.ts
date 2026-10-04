@@ -63,7 +63,7 @@ export const useAppShellStore = create<AppShellState>((set) => ({
     set((state) => {
       const sidebarCollapsed =
         typeof next === "function" ? next(state.sidebarCollapsed) : next;
-      persistSidebarCollapsed(sidebarCollapsed);
+      saveSidebarCollapsedPreference(sidebarCollapsed);
       return { sidebarCollapsed };
     }),
   setReadingFocusMode: (next) =>
