@@ -19,9 +19,11 @@ ENV VITE_API_TIMEOUT_MS=${VITE_API_TIMEOUT_MS}
 ENV VITE_ERROR_REPORTING_URL=${VITE_ERROR_REPORTING_URL}
 ENV VITE_APP_RELEASE=${VITE_APP_RELEASE}
 
-RUN test -n "$VITE_API_BASE_URL"     && pnpm typecheck     && pnpm build
+RUN node -e 'const raw=(process.env.VITE_API_BASE_URL||"").trim(); let u; try { u=new URL(raw) } catch { process.exit(1) } if (!["http:","https:"].includes(u.protocol) || u.username || u.password || u.pathname !== "/" || u.search || u.hash) process.exit(1)' \
+    && pnpm typecheck \
+    && pnpm build
 
-FROM nginxinc/nginx-unprivileged:1.27-alpine
+FROM nginxinc/nginx-unprivileged:stable-alpine3.24
 
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
