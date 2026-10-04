@@ -1,9 +1,10 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
 
-const apiBaseUrl =
+const apiBaseUrl = (
   process.env.VISUALMATH_E2E_API_BASE_URL ??
   process.env.VITE_API_BASE_URL ??
-  "";
+  ""
+).replace(/\/+$/, "");
 
 const password = "VisualMath!2026#E2E";
 const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
