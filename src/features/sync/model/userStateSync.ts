@@ -543,11 +543,12 @@ export async function syncPendingBlockNotes(
       continue;
     }
 
+    const text = mutation.text;
     const canonical = await forSyncUser(userId, () =>
       api.notes.put(
         mutation.topicId,
         mutation.blockIndex,
-        mutation.text,
+        text,
       ),
     );
     const latest = loadPendingBlockNoteMutations()[
