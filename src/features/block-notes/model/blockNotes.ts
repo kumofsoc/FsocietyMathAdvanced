@@ -2,6 +2,7 @@ import { readLocalStorageJson, writeLocalStorage } from "@/shared/lib/browserSto
 
 export const BLOCK_NOTES_KEY = "visualmath-block-notes-v1";
 export const BLOCK_NOTES_EVENT = "visualmath:block-notes-change";
+export const BLOCK_NOTES_TOMBSTONES_KEY = "visualmath-block-note-tombstones-v1";
 
 export type BlockNote = {
   text: string;
@@ -9,6 +10,7 @@ export type BlockNote = {
 };
 
 type BlockNotesState = Record<string, BlockNote>;
+type BlockNoteTombstones = Record<string, number>;
 
 export type BlockNoteEntry = BlockNote & {
   id: string;
@@ -50,6 +52,37 @@ export function loadBlockNoteEntries(): BlockNoteEntry[] {
   });
 }
 
+export function loadBlockNoteTombstones(): BlockNoteTombstones {
+  return readLocalStorageJson<BlockNoteTombstones>(BLOCK_NOTES_TOMBSTONES_KEY, {});
+}
+
+export function clearBlockNoteTombstone(id: string) {
+  const current = loadBlockNoteTombstones();
+  if (!(id in current)) return true;
+  const { [id]: _removed, ...next } = current;
+  return writeLocalStorage(BLOCK_NOTES_TOMBSTONES_KEY, JSON.stringify(next));
+}
+
+function markBlockNoteTombstone(id: string, updatedAt = Date.now()) {
+  const current = loadBlockNoteTombstones();
+  return writeLocalStorage(
+    BLOCK_NOTES_TOMBSTONES_KEY,
+    JSON.stringify({ ...current, [id]: updatedAt }),
+  );
+}
+
+export function replaceBlockNoteEntries(entries: BlockNoteEntry[]) {
+  const next: BlockNotesState = {};
+  for (const entry of entries) {
+    if (!entry.text.trim()) continue;
+    next[entry.id] = {
+      text: entry.text,
+      updatedAt: entry.updatedAt,
+    };
+  }
+  return persistBlockNotes(next);
+}
+
 function persistBlockNotes(state: BlockNotesState) {
   const saved = writeLocalStorage(BLOCK_NOTES_KEY, JSON.stringify(state));
   if (saved && typeof window !== "undefined") {
@@ -64,11 +97,13 @@ export function saveBlockNote(topicId: string, blockIndex: number, text: string)
   const clean = text.replace(/\r\n/g, "\n");
 
   if (!clean.trim()) {
-    if (!(id in state)) return true;
+    const tombstoned = markBlockNoteTombstone(id);
+    if (!(id in state)) return tombstoned;
     const { [id]: _removed, ...next } = state;
-    return persistBlockNotes(next);
+    return persistBlockNotes(next) && tombstoned;
   }
 
+  clearBlockNoteTombstone(id);
   return persistBlockNotes({
     ...state,
     [id]: {
