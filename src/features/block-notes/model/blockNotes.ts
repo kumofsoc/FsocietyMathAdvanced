@@ -1,4 +1,4 @@
-import { readLocalStorageJson, writeLocalStorage } from "@/shared/lib/browserStorage";
+import { readLocalStorage, readLocalStorageJson, writeLocalStorage } from "@/shared/lib/browserStorage";
 
 export const BLOCK_NOTES_KEY = "visualmath-block-notes-v1";
 export const BLOCK_NOTES_PENDING_KEY = "visualmath-block-notes-pending-v1";
@@ -22,6 +22,7 @@ export type PendingBlockNoteMutation = {
   blockIndex: number;
   text: string | null;
   updatedAt: number;
+  ownerId: string | null;
 };
 
 export type BlockNotesEventDetail = {
@@ -171,6 +172,7 @@ export function saveBlockNote(topicId: string, blockIndex: number, text: string)
         blockIndex,
         text: null,
         updatedAt,
+        ownerId: readLocalStorage("visualmath-account-cache-owner-v1"),
       });
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent<BlockNotesEventDetail>(BLOCK_NOTES_EVENT, {
@@ -191,6 +193,7 @@ export function saveBlockNote(topicId: string, blockIndex: number, text: string)
         blockIndex,
         text: null,
         updatedAt,
+        ownerId: readLocalStorage("visualmath-account-cache-owner-v1"),
       });
     }
     return saved;
@@ -213,6 +216,7 @@ export function saveBlockNote(topicId: string, blockIndex: number, text: string)
       blockIndex,
       text: clean,
       updatedAt,
+      ownerId: readLocalStorage("visualmath-account-cache-owner-v1"),
     });
   }
   return saved;
