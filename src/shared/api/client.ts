@@ -324,6 +324,11 @@ export const api = {
         method: "POST",
         body: JSON.stringify(body),
       }),
+    syncReadingBlocks: (blocks: Array<{ topicId: string; blockIndex: number }>) =>
+      request<LearningProgressDto>("/api/v1/me/reading-blocks/sync", {
+        method: "POST",
+        body: JSON.stringify({ blocks }),
+      }),
   },
   workspace: {
     get: () => request<WorkspaceDto>("/api/v1/me/workspace"),
