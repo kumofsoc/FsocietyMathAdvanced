@@ -4,7 +4,7 @@ import { SAVED_TOPICS_EVENT } from "@/features/saved-topics/model/savedTopics";
 import { TOPIC_RESUME_EVENT } from "@/features/learning/model/topicResume";
 import { READING_WIDTH_EVENT } from "@/features/reading-width/model/readingWidth";
 import { IMPORTANT_BLOCKS_EVENT } from "@/features/important-blocks/model/importantBlocks";
-import { PREFERENCES_EVENT } from "@/features/personalization/model/preferences";
+import { PREFERENCES_EVENT } from "@/features/personalization/model/preferencesStorage";
 import {
   isUserStateSyncing,
   syncAuthenticatedUserState,
