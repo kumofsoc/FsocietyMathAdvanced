@@ -392,5 +392,42 @@ test("backend catalog matches bundled frontend stable contract", async ({ reques
       await rows.first().locator(".music-track-remove").click();
       await expect(rows).toHaveCount(before - 1);
     }
+
+
+  test("password change revokes the current session and old credentials", async ({
+    page,
+  }) => {
+    await login(page);
+    await page.goto("/#account");
+
+    await page.getByRole("button", { name: "Сменить пароль", exact: true }).click();
+    await page.getByLabel("Текущий пароль").fill(account.password);
+    await page.getByLabel("Новый пароль", { exact: true }).fill("VisualMath!2026#Rotated");
+    await page.getByLabel("Повтори новый пароль").fill("VisualMath!2026#Rotated");
+
+    const changed = page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/api/v1/me/password") &&
+        response.request().method() === "PUT",
+    );
+    await page.getByRole("button", { name: "Сменить и выйти" }).click();
+    expect((await changed).status()).toBe(204);
+    await expect(page.getByRole("button", { name: "Вход" })).toBeVisible();
+
+    await page.getByLabel("Email").fill(account.email);
+    await page.getByLabel("Пароль").fill(account.password);
+    await page.getByRole("button", { name: "Войти" }).click();
+    await expect(page.locator(".account-auth-error")).toBeVisible();
+
+    await page.getByLabel("Пароль").fill("VisualMath!2026#Rotated");
+    const bootstrap = page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/api/v1/me/bootstrap") &&
+        response.request().method() === "GET",
+    );
+    await page.getByRole("button", { name: "Войти" }).click();
+    expect((await bootstrap).status()).toBe(200);
+    await expect(page.getByRole("button", { name: "Выйти" })).toBeVisible();
+  });
   });
 });
