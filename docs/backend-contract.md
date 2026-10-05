@@ -139,6 +139,8 @@ Examples:
 
 Offline/network failures keep optimistic local state and durable pending mutations where needed.
 
+On confirmed logout or confirmed session absence, the frontend clears the visible browser cache only when it is marked as account-owned. Durable pending mutations stay user-bound and are not reclassified as anonymous state, so unsent account edits can retry when that same user logs back in without leaking their cached content to anonymous mode.
+
 ## Learning/progress
 
 Canonical endpoints used by the frontend include:

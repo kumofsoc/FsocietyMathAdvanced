@@ -105,6 +105,8 @@ For an actual release there is a separate `Release Gate` workflow. It runs manua
 - refresh-cookie rotation is additionally serialized across tabs through the Web Locks API when available, preventing normal multi-tab use from triggering backend reuse detection;
 - the original protected request is retried once;
 - logout removes the authenticated session state;
+- after confirmed logout/session loss, account-derived visible caches (progress, workspace, notes, Important marks and preferences) are cleared before anonymous mode is shown;
+- account-bound durable pending mutations are retained for retry on that same user's next login instead of being exposed as anonymous content;
 - no auth token is persisted to localStorage/sessionStorage/IndexedDB;
 - no token is placed in an audio/content URL.
 
@@ -178,7 +180,8 @@ The real-backend Playwright suite verifies:
 13. different account does not receive the first account's state;
 14. forced 401 -> exactly one refresh -> retry;
 15. backend offline -> bundled UI remains usable;
-16. media upload/content/rename/reorder/delete when the capability flag is true.
+16. media upload/content/rename/reorder/delete when the capability flag is true;
+17. logout -> account-derived local cache is no longer visible to anonymous mode.
 
 ## Security headers
 
