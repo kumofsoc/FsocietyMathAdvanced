@@ -22,6 +22,9 @@ export interface BackendMetaDto {
   service: string;
   apiVersion: string;
   environment: string;
+  capabilities?: {
+    passwordReset?: boolean;
+  };
 }
 
 export interface UserProfileDto {

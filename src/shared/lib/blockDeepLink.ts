@@ -10,9 +10,11 @@ export function parseVisualMathHash(hash: string): BlockDeepLink {
     return { route: "home", topicId: null, blockIndex: null };
   }
 
-  const match = raw.match(/^([^/]+)\/block\/(\d+)$/);
+  const queryIndex = raw.indexOf("?");
+  const path = queryIndex >= 0 ? raw.slice(0, queryIndex) : raw;
+  const match = path.match(/^([^/]+)\/block\/(\d+)$/);
   if (!match) {
-    return { route: decodeURIComponent(raw), topicId: null, blockIndex: null };
+    return { route: decodeURIComponent(path), topicId: null, blockIndex: null };
   }
 
   const topicId = decodeURIComponent(match[1]);
@@ -42,4 +44,12 @@ export function buildBlockDeepLink(
   const url = new URL(currentUrl);
   url.hash = buildBlockHash(topicId, blockIndex);
   return url.toString();
+}
+
+
+export function visualMathHashParam(hash: string, key: string) {
+  const raw = hash.replace(/^#/, "").trim();
+  const queryIndex = raw.indexOf("?");
+  if (queryIndex < 0) return null;
+  return new URLSearchParams(raw.slice(queryIndex + 1)).get(key);
 }

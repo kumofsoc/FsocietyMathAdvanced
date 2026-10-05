@@ -545,3 +545,52 @@ describe("account lifecycle API", () => {
     expect(localStorage.getItem(AUTH_SESSION_INVALIDATED_KEY)).toMatch(/^\d+$/);
   });
 });
+
+
+describe("password reset API", () => {
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("uses unauthenticated request and confirm endpoints", async () => {
+    const calls: Array<{ path: string; init?: RequestInit }> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        calls.push({ path: new URL(String(input)).pathname, init });
+        return new Response(null, {
+          status: calls.length === 1 ? 202 : 204,
+        });
+      }),
+    );
+
+    const { api } = await import("./client");
+    await api.auth.requestPasswordReset("user@example.com");
+    await api.auth.confirmPasswordReset(
+      "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG",
+      "VisualMath!2026",
+    );
+
+    expect(calls.map((call) => call.path)).toEqual([
+      "/api/v1/auth/password-reset/request",
+      "/api/v1/auth/password-reset/confirm",
+    ]);
+    expect(calls[0].init?.body).toBe(
+      JSON.stringify({ email: "user@example.com" }),
+    );
+    expect(calls[1].init?.body).toBe(
+      JSON.stringify({
+        token: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG",
+        newPassword: "VisualMath!2026",
+      }),
+    );
+    for (const call of calls) {
+      expect(new Headers(call.init?.headers).get("Authorization")).toBeNull();
+    }
+  });
+});

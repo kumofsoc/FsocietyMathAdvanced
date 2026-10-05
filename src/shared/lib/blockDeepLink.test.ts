@@ -3,6 +3,7 @@ import {
   buildBlockDeepLink,
   buildBlockHash,
   parseVisualMathHash,
+  visualMathHashParam,
 } from "./blockDeepLink";
 
 describe("block deep links", () => {
@@ -12,6 +13,17 @@ describe("block deep links", () => {
       topicId: null,
       blockIndex: null,
     });
+  });
+
+  it("keeps fragment query parameters out of route matching", () => {
+    expect(parseVisualMathHash("#account?reset=opaque-token")).toEqual({
+      route: "account",
+      topicId: null,
+      blockIndex: null,
+    });
+    expect(
+      visualMathHashParam("#account?reset=opaque-token", "reset"),
+    ).toBe("opaque-token");
   });
 
   it("extracts topic route and block target from deep links", () => {
