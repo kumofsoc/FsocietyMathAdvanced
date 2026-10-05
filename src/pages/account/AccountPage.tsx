@@ -13,6 +13,7 @@ import {
   writeLocalStorage,
 } from "@/shared/lib/browserStorage";
 import type {
+  AccountSessionDto,
   ActivityHeatmapDto,
   ActivityStatsDto,
   UserProfileDto,
@@ -427,6 +428,7 @@ function BackendAccount({
   const user = useAuthStore((state) => state.user);
   const updateProfile = useAuthStore((state) => state.updateProfile);
   const logout = useAuthStore((state) => state.logout);
+  const revokeSession = useAuthStore((state) => state.revokeSession);
   const changePassword = useAuthStore((state) => state.changePassword);
   const deleteAccount = useAuthStore((state) => state.deleteAccount);
   const [editing, setEditing] = useState(false);
@@ -438,6 +440,10 @@ function BackendAccount({
   const [heatmap, setHeatmap] = useState<ActivityHeatmapDto | null>(null);
   const [stats, setStats] = useState<ActivityStatsDto | null>(null);
   const [activityError, setActivityError] = useState<string | null>(null);
+  const [sessions, setSessions] = useState<AccountSessionDto[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [sessionsError, setSessionsError] = useState<string | null>(null);
+  const [revokingSessionId, setRevokingSessionId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [passwordOpen, setPasswordOpen] = useState(false);
@@ -484,6 +490,28 @@ function BackendAccount({
     };
   }, [user?.id]);
 
+  useEffect(() => {
+    let cancelled = false;
+    setSessionsLoading(true);
+    api.me
+      .sessions()
+      .then((response) => {
+        if (cancelled) return;
+        setSessions(response.sessions);
+        setSessionsError(null);
+        setSessionsLoading(false);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setSessionsError(errorMessage(error));
+        setSessionsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
   const serverProfile: UserProfileDto | null = user?.profile ?? null;
   if (!user || !serverProfile) return null;
 
@@ -502,6 +530,24 @@ function BackendAccount({
       setProfileError(errorMessage(error));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const revokeAccountSession = async (session: AccountSessionDto) => {
+    if (revokingSessionId) return;
+    setRevokingSessionId(session.id);
+    setSessionsError(null);
+    try {
+      await revokeSession(session.id, session.current);
+      if (!session.current) {
+        setSessions((current) =>
+          current.filter((item) => item.id !== session.id),
+        );
+        setRevokingSessionId(null);
+      }
+    } catch (error) {
+      setSessionsError(errorMessage(error));
+      setRevokingSessionId(null);
     }
   };
 
@@ -706,6 +752,72 @@ function BackendAccount({
       </div>
 
       <CourseProgress snapshot={snapshot} />
+
+      <section className="account-sessions-zone">
+        <header>
+          <div>
+            <span>ACCOUNT / SESSIONS</span>
+            <h2>Активные устройства</h2>
+          </div>
+          <b>{sessions.length} ACTIVE</b>
+        </header>
+        <p>
+          Здесь только metadata активных backend-сессий. Токены не показываются.
+          Можно завершить отдельную сессию; завершение текущей сразу вернёт экран
+          входа.
+        </p>
+
+        {sessionsLoading ? (
+          <div className="account-session-empty">Загружаю активные сессии…</div>
+        ) : sessions.length === 0 ? (
+          <div className="account-session-empty">Активные сессии не найдены.</div>
+        ) : (
+          <div className="account-session-list">
+            {sessions.map((session) => (
+              <article
+                key={session.id}
+                className={
+                  "account-session-row" + (session.current ? " current" : "")
+                }
+              >
+                <div>
+                  <div className="account-session-title">
+                    <strong>
+                      {session.current
+                        ? "Это устройство"
+                        : session.userAgent || "Неизвестное устройство"}
+                    </strong>
+                    {session.current && <span>CURRENT</span>}
+                  </div>
+                  {session.current && session.userAgent && (
+                    <em>{session.userAgent}</em>
+                  )}
+                  <small>
+                    IP {session.ipAddress || "—"} · активность{" "}
+                    {new Date(session.lastSeenAt).toLocaleString("ru-RU")} ·
+                    истекает{" "}
+                    {new Date(session.expiresAt).toLocaleString("ru-RU")}
+                  </small>
+                </div>
+                <button
+                  type="button"
+                  disabled={Boolean(revokingSessionId)}
+                  onClick={() => void revokeAccountSession(session)}
+                >
+                  {revokingSessionId === session.id
+                    ? "Завершаю…"
+                    : session.current
+                      ? "Выйти здесь"
+                      : "Завершить"}
+                </button>
+              </article>
+            ))}
+          </div>
+        )}
+        {sessionsError && (
+          <div className="account-auth-error">{sessionsError}</div>
+        )}
+      </section>
 
       <section className="account-security-zone">
         <header>
