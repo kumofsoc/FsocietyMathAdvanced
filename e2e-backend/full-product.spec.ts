@@ -392,7 +392,7 @@ test("backend catalog matches bundled frontend stable contract", async ({ reques
       await rows.first().locator(".music-track-remove").click();
       await expect(rows).toHaveCount(before - 1);
     }
-
+  });
 
   test("session management revokes another device without ending the current one", async ({
     page,
@@ -451,7 +451,8 @@ test("backend catalog matches bundled frontend stable contract", async ({ reques
     await page.getByRole("button", { name: "Войти" }).click();
     await expect(page.locator(".account-auth-error")).toBeVisible();
 
-    await page.getByLabel("Пароль").fill("VisualMath!2026#Rotated");
+    const rotatedPassword = "VisualMath!2026#Rotated";
+    await page.getByLabel("Пароль").fill(rotatedPassword);
     const bootstrap = page.waitForResponse(
       (response) =>
         response.url().endsWith("/api/v1/me/bootstrap") &&
@@ -460,6 +461,69 @@ test("backend catalog matches bundled frontend stable contract", async ({ reques
     await page.getByRole("button", { name: "Войти" }).click();
     expect((await bootstrap).status()).toBe(200);
     await expect(page.getByRole("button", { name: "Выйти" })).toBeVisible();
+    account.password = rotatedPassword;
   });
+
+  test("account export downloads canonical server snapshot without secrets", async ({
+    page,
+  }) => {
+    await login(page);
+    await page.goto("/#account");
+
+    const exported = page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/api/v1/me/account/export") &&
+        response.request().method() === "GET",
+    );
+    const download = page.waitForEvent("download");
+    await page
+      .getByRole("button", { name: "Скачать данные аккаунта" })
+      .click();
+
+    const response = await exported;
+    expect(response.status()).toBe(200);
+    const payload = await response.json();
+    const serialized = JSON.stringify(payload);
+    expect(serialized).toContain(account.email);
+    expect(serialized).toContain('"learning"');
+    expect(serialized).toContain('"activity"');
+    expect(serialized).not.toContain("password_hash");
+    expect(serialized).not.toContain("object_key");
+    expect(serialized).not.toContain(account.password);
+
+    const file = await download;
+    expect(file.suggestedFilename()).toMatch(
+      /^visualmath-account-\d{4}-\d{2}-\d{2}\.json$/,
+    );
+  });
+
+  test("self deletion invalidates the account and all credentials", async ({
+    page,
+  }) => {
+    await login(page);
+    await page.goto("/#account");
+
+    await page
+      .getByRole("button", { name: "Открыть удаление аккаунта" })
+      .click();
+    await page
+      .locator(".account-delete-confirm")
+      .getByLabel("Текущий пароль")
+      .fill(account.password);
+    await page.getByLabel("Напиши УДАЛИТЬ").fill("УДАЛИТЬ");
+
+    const deleted = page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/api/v1/me/account") &&
+        response.request().method() === "DELETE",
+    );
+    await page.getByRole("button", { name: "Удалить навсегда" }).click();
+    expect((await deleted).status()).toBe(204);
+    await expect(page.getByRole("button", { name: "Вход" })).toBeVisible();
+
+    await page.getByLabel("Email").fill(account.email);
+    await page.getByLabel("Пароль").fill(account.password);
+    await page.getByRole("button", { name: "Войти" }).click();
+    await expect(page.locator(".account-auth-error")).toBeVisible();
   });
 });
