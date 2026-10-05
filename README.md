@@ -34,7 +34,7 @@ GET /api/v1/me/bootstrap
 
 Bootstrap одним read model гидратирует user, preferences, workspace, learning/progress и runtime capabilities.
 
-Access token хранится только в памяти. Refresh token остаётся HttpOnly cookie и никогда не читается из JavaScript.
+Bearer-копия access token, которой пользуется JavaScript API-клиент, хранится только в памяти. Refresh token остаётся HttpOnly cookie и никогда не читается из JavaScript. Для нативного server-audio backend дополнительно выставляет короткоживущую HttpOnly-копию access token, ограниченную путём `/api/v1/me/media/audio`; она не используется остальными API и не попадает в URL.
 
 ## Account-scoped ресурсы
 
