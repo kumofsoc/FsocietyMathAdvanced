@@ -23,6 +23,18 @@ const VOLUME_KEY = "fsociety-background-music-volume-v1";
 const LOOP_PLAYLIST_KEY = "visualmath-background-music-loop-playlist-v1";
 const CURRENT_TRACK_KEY = "visualmath-background-music-current-v1";
 
+async function refreshMediaAccessIfNeeded() {
+  const session = getAccessTokenSnapshot();
+  const expiresAt = Date.parse(session.accessExpiresAt ?? "");
+  const fresh =
+    Boolean(session.accessToken) &&
+    Number.isFinite(expiresAt) &&
+    expiresAt - Date.now() > 60_000;
+  if (!fresh) {
+    await api.auth.refresh();
+  }
+}
+
 export function BackgroundMusicPlayer() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const objectUrlRef = useRef<string | null>(null);
@@ -155,7 +167,16 @@ export function BackgroundMusicPlayer() {
 
     const streamUrl = resolveBackgroundTrackStreamUrl(track);
     if (streamUrl) {
-      setTrackUrl(streamUrl);
+      void refreshMediaAccessIfNeeded()
+        .then(() => {
+          if (!cancelled) setTrackUrl(streamUrl);
+        })
+        .catch((error) => {
+          if (cancelled) return;
+          console.warn("[VisualMath] media session could not be refreshed", error);
+          setPlaying(false);
+          setTrackUrl(null);
+        });
       return () => {
         cancelled = true;
       };
@@ -225,6 +246,15 @@ export function BackgroundMusicPlayer() {
     };
   }, [authStatus, currentTrackId, playing, tracks]);
 
+  const playCurrent = useCallback(async () => {
+    const track =
+      tracks.find((item) => item.id === currentTrackId) ?? null;
+    if (track?.source === "server" && authStatus === "authenticated") {
+      await refreshMediaAccessIfNeeded();
+    }
+    await audioRef.current?.play();
+  }, [authStatus, currentTrackId, tracks]);
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -237,10 +267,10 @@ export function BackgroundMusicPlayer() {
     if (!trackUrl || !autoPlayRef.current) return;
     autoPlayRef.current = false;
     const frame = requestAnimationFrame(() => {
-      void audioRef.current?.play().catch(() => undefined);
+      void playCurrent().catch(() => undefined);
     });
     return () => cancelAnimationFrame(frame);
-  }, [trackUrl]);
+  }, [playCurrent, trackUrl]);
 
   const selectByIndex = useCallback(
     (index: number, autoplay = true) => {
@@ -280,10 +310,10 @@ export function BackgroundMusicPlayer() {
       } else if (command.type === "toggle") {
         const audio = audioRef.current;
         if (!audio) return;
-        if (audio.paused) void audio.play().catch(() => undefined);
+        if (audio.paused) void playCurrent().catch(() => undefined);
         else audio.pause();
       } else if (command.type === "play") {
-        void audioRef.current?.play().catch(() => undefined);
+        void playCurrent().catch(() => undefined);
       } else if (command.type === "pause") {
         audioRef.current?.pause();
       } else if (command.type === "next") {
@@ -304,7 +334,7 @@ export function BackgroundMusicPlayer() {
 
     window.addEventListener(MUSIC_COMMAND_EVENT, onCommand);
     return () => window.removeEventListener(MUSIC_COMMAND_EVENT, onCommand);
-  }, [emitState, next, previous, refreshTracks, tracks]);
+  }, [emitState, next, playCurrent, previous, refreshTracks, tracks]);
 
   return (
     <audio
