@@ -99,7 +99,7 @@ Authenticated + `mediaAudio === true`:
 - delete;
 - private authenticated playback.
 
-Audio content загружается Authorization-fetch -> Blob/ObjectURL. Access token не попадает в URL.
+Server audio воспроизводится напрямую через native `<audio>` по приватному content URL. Перед playback frontend обновляет короткоживущий media-access credential при необходимости, а браузер использует authenticated HTTP Range для metadata/seek/resume. Access token не попадает в URL; Blob/ObjectURL остаётся только для локальных IndexedDB-треков.
 
 Существующие IndexedDB blobs не удаляются автоматически. Если включён account media, UI предлагает явный импорт локальных треков.
 
@@ -154,7 +154,7 @@ Backend contract baseline verified by the current frontend integration:
 
 ```text
 kumofsoc/FsocietyMathAdvancedBackend
-5b33e893d913593d0042f8932e902f5f6225e0ed
+99ef32393833dd10cc88714b66c15eda314f2fb9
 ```
 
 ## Основные routes продукта

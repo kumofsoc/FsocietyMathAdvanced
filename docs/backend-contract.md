@@ -8,7 +8,7 @@ Backend release gate used for this integration:
 
 ```text
 kumofsoc/FsocietyMathAdvancedBackend
-5b33e893d913593d0042f8932e902f5f6225e0ed
+99ef32393833dd10cc88714b66c15eda314f2fb9
 ```
 
 ## Runtime configuration
@@ -51,7 +51,8 @@ Security rules:
 - access token lives **only in memory**;
 - refresh token is never read by JavaScript;
 - refresh remains the backend-owned HttpOnly cookie;
-- media content is fetched with Authorization headers and converted to Blob/ObjectURL;
+- normal protected JSON/API calls use Authorization headers;
+- native server audio uses the narrow HttpOnly media-access cookie on the existing private content URL;
 - auth tokens are never embedded in media URLs.
 
 ## Session bootstrap
@@ -257,7 +258,7 @@ Authenticated and `mediaAudio === true`:
 - `DELETE /api/v1/me/media/audio/{id}`
 - `GET /api/v1/me/media/audio/{id}/content` (Bearer or narrow HttpOnly media-access cookie; byte-range capable for native playback)
 
-Playback uses authenticated fetch -> Blob -> ObjectURL. Object URLs are revoked when the selected track changes or the player unmounts.
+Server playback assigns the authenticated content URL directly to native `<audio>`. Before assigning/resuming that URL, the frontend refreshes the short-lived media-access credential when the in-memory access session is near expiry. Native HTTP Range requests handle metadata, seek and resume without buffering the entire server track into a Blob. Blob/ObjectURL playback remains only for local IndexedDB tracks; local object URLs are revoked when the selected track changes or the player unmounts.
 
 If server media becomes unavailable, the player can fall back to the local IndexedDB playlist. Existing local blobs are never silently deleted.
 
