@@ -5,6 +5,7 @@ import {
   writeLocalStorage,
 } from "@/shared/lib/browserStorage";
 import type {
+  AccountSessionListDto,
   ActivityHeatmapDto,
   ActivityStatsDto,
   ApiErrorBody,
@@ -499,6 +500,13 @@ export const api = {
         method: "PATCH",
         body: JSON.stringify(body),
       }),
+    sessions: () =>
+      request<AccountSessionListDto>("/api/v1/me/sessions"),
+    revokeSession: (sessionId: string) =>
+      request<void>(
+        "/api/v1/me/sessions/" + encodeURIComponent(sessionId),
+        { method: "DELETE" },
+      ),
     exportAccount: () =>
       requestBlob("/api/v1/me/account/export"),
     changePassword: async (currentPassword: string, newPassword: string) => {

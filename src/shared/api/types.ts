@@ -229,3 +229,18 @@ export interface ActivityStatsDto {
   currentStreak: number;
   longestStreak: number;
 }
+
+
+export interface AccountSessionDto {
+  id: string;
+  userAgent: string;
+  ipAddress: string;
+  createdAt: string;
+  lastSeenAt: string;
+  expiresAt: string;
+  current: boolean;
+}
+
+export interface AccountSessionListDto {
+  sessions: AccountSessionDto[];
+}

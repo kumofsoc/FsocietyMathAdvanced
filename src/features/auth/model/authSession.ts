@@ -44,6 +44,7 @@ type AuthState = {
   login: (input: LoginRequest) => Promise<UserDto>;
   register: (input: RegisterRequest) => Promise<UserDto>;
   logout: () => Promise<void>;
+  revokeSession: (sessionId: string, current: boolean) => Promise<void>;
   changePassword: (
     currentPassword: string,
     newPassword: string,
@@ -217,6 +218,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     await api.auth.logout();
+    clearVisibleAccountCacheIfOwned();
+    set({
+      status: "anonymous",
+      user: null,
+      capabilities: EMPTY_CAPABILITIES,
+      bootstrapVersion: null,
+      bootstrapGeneratedAt: null,
+      error: null,
+    });
+  },
+
+  revokeSession: async (sessionId, current) => {
+    await api.me.revokeSession(sessionId);
+    if (!current) return;
+
+    setAccessToken(null);
     clearVisibleAccountCacheIfOwned();
     set({
       status: "anonymous",
