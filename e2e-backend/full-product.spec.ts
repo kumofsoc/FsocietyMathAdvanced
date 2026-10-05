@@ -362,16 +362,18 @@ test("backend catalog matches bundled frontend stable contract", async ({ reques
 
     await expect(page.locator(".music-playlist article")).toHaveCount(2);
 
-    const contentRequest = page.waitForRequest((request) =>
-      /\/api\/v1\/me\/media\/audio\/.+\/content$/.test(request.url()),
+    const contentResponse = page.waitForResponse((response) =>
+      /\/api\/v1\/me\/media\/audio\/.+\/content$/.test(response.url()),
     );
     await page
       .locator(".music-playlist article")
       .nth(1)
       .locator(".music-track-select")
       .click();
-    const content = await contentRequest;
+    const content = await contentResponse;
+    expect([200, 206]).toContain(content.status());
     expect(content.url()).not.toContain("accessToken");
+    expect(content.request().headers().authorization).toBeUndefined();
 
     page.once("dialog", async (dialog) => {
       await dialog.accept("e2e-renamed.wav");
