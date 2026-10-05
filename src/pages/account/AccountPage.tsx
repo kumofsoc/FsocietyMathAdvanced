@@ -439,6 +439,8 @@ function BackendAccount({
   const [activityError, setActivityError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
   const [deletePhrase, setDeletePhrase] = useState("");
@@ -493,6 +495,30 @@ function BackendAccount({
       setProfileError(errorMessage(error));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const exportCurrentAccount = async () => {
+    if (exporting) return;
+    setExporting(true);
+    setExportError(null);
+    try {
+      const blob = await api.me.exportAccount();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download =
+        "visualmath-account-" +
+        new Date().toISOString().slice(0, 10) +
+        ".json";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      setExportError(errorMessage(error));
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -652,6 +678,34 @@ function BackendAccount({
       </div>
 
       <CourseProgress snapshot={snapshot} />
+
+      <section className="account-export-zone">
+        <header>
+          <div>
+            <span>ACCOUNT / PORTABILITY</span>
+            <h2>Экспорт данных</h2>
+          </div>
+          <b>JSON</b>
+        </header>
+        <p>
+          Скачай канонический серверный snapshot аккаунта перед удалением:
+          профиль, настройки, workspace, прогресс, заметки, важные блоки,
+          закладки, историю активности и metadata загруженного аудио.
+          Пароль, session/refresh secrets и внутренние storage keys в экспорт
+          не входят.
+        </p>
+        <button
+          type="button"
+          className="account-export-button"
+          onClick={() => void exportCurrentAccount()}
+          disabled={exporting}
+        >
+          {exporting ? "Готовлю экспорт…" : "Скачать данные аккаунта"}
+        </button>
+        {exportError && (
+          <div className="account-auth-error">{exportError}</div>
+        )}
+      </section>
 
       <section className="account-danger-zone">
         <header>

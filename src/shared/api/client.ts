@@ -499,6 +499,8 @@ export const api = {
         method: "PATCH",
         body: JSON.stringify(body),
       }),
+    exportAccount: () =>
+      requestBlob("/api/v1/me/account/export"),
     deleteAccount: async (password: string) => {
       await request<void>("/api/v1/me/account", {
         method: "DELETE",
