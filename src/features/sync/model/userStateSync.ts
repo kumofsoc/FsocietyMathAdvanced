@@ -66,6 +66,7 @@ import {
 import { useAppShellStore } from "@/app/store/useAppShellStore";
 import { useAuthStore } from "@/features/auth/model/authSession";
 import { ACCOUNT_CACHE_OWNER_KEY } from "@/features/sync/model/accountCache";
+export { ACCOUNT_CACHE_OWNER_KEY } from "@/features/sync/model/accountCache";
 
 const MIGRATION_VERSION = 2;
 const CORE_MIGRATION_PREFIX =
