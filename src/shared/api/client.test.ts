@@ -429,6 +429,42 @@ describe("account lifecycle API", () => {
     );
   });
 
+  it("changes the password, clears the access token and broadcasts invalidation", async () => {
+    const calls: Array<{ url: string; init?: RequestInit }> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        calls.push({ url: String(input), init });
+        return new Response(null, { status: 204 });
+      }),
+    );
+
+    const {
+      api,
+      setAccessToken,
+      getAccessTokenSnapshot,
+      AUTH_SESSION_INVALIDATED_KEY,
+    } = await import("./client");
+    setAccessToken("token-a", "2026-10-05T16:00:00Z");
+
+    await api.me.changePassword("CurrentPass!2026", "NextPass!2026");
+
+    expect(calls).toHaveLength(1);
+    expect(new URL(calls[0].url).pathname).toBe("/api/v1/me/password");
+    expect(calls[0].init?.method).toBe("PUT");
+    expect(calls[0].init?.body).toBe(
+      JSON.stringify({
+        currentPassword: "CurrentPass!2026",
+        newPassword: "NextPass!2026",
+      }),
+    );
+    expect(new Headers(calls[0].init?.headers).get("Authorization")).toBe(
+      "Bearer token-a",
+    );
+    expect(getAccessTokenSnapshot().accessToken).toBeNull();
+    expect(localStorage.getItem(AUTH_SESSION_INVALIDATED_KEY)).toMatch(/^\d+$/);
+  });
+
   it("deletes the account, clears the access token and broadcasts invalidation", async () => {
     const calls: Array<{ url: string; init?: RequestInit }> = [];
     vi.stubGlobal(

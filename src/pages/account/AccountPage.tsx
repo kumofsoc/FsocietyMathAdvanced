@@ -427,6 +427,7 @@ function BackendAccount({
   const user = useAuthStore((state) => state.user);
   const updateProfile = useAuthStore((state) => state.updateProfile);
   const logout = useAuthStore((state) => state.logout);
+  const changePassword = useAuthStore((state) => state.changePassword);
   const deleteAccount = useAuthStore((state) => state.deleteAccount);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<EditableProfile>({
@@ -439,6 +440,12 @@ function BackendAccount({
   const [activityError, setActivityError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
+  const [passwordOpen, setPasswordOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -495,6 +502,27 @@ function BackendAccount({
       setProfileError(errorMessage(error));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const changeCurrentPassword = async () => {
+    if (changingPassword) return;
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Новые пароли не совпадают.");
+      return;
+    }
+    if (newPassword.length < 10) {
+      setPasswordError("Новый пароль должен содержать минимум 10 символов.");
+      return;
+    }
+
+    setChangingPassword(true);
+    setPasswordError(null);
+    try {
+      await changePassword(currentPassword, newPassword);
+    } catch (error) {
+      setPasswordError(errorMessage(error));
+      setChangingPassword(false);
     }
   };
 
@@ -678,6 +706,102 @@ function BackendAccount({
       </div>
 
       <CourseProgress snapshot={snapshot} />
+
+      <section className="account-security-zone">
+        <header>
+          <div>
+            <span>ACCOUNT / SECURITY</span>
+            <h2>Сменить пароль</h2>
+          </div>
+          <b>REVOKE ALL</b>
+        </header>
+        <p>
+          После смены пароля backend отзовёт все активные сессии и refresh
+          tokens, включая эту вкладку. Затем нужно будет войти снова уже с новым
+          паролем.
+        </p>
+
+        {!passwordOpen ? (
+          <button
+            type="button"
+            className="account-security-button"
+            onClick={() => {
+              setPasswordOpen(true);
+              setPasswordError(null);
+            }}
+          >
+            Сменить пароль
+          </button>
+        ) : (
+          <div className="account-password-form">
+            <label>
+              <span>Текущий пароль</span>
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(event) => setCurrentPassword(event.target.value)}
+                autoComplete="current-password"
+                disabled={changingPassword}
+              />
+            </label>
+            <label>
+              <span>Новый пароль</span>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+                autoComplete="new-password"
+                minLength={10}
+                maxLength={256}
+                disabled={changingPassword}
+              />
+            </label>
+            <label>
+              <span>Повтори новый пароль</span>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                autoComplete="new-password"
+                minLength={10}
+                maxLength={256}
+                disabled={changingPassword}
+              />
+            </label>
+            {passwordError && (
+              <div className="account-auth-error">{passwordError}</div>
+            )}
+            <div className="account-password-actions">
+              <button
+                type="button"
+                onClick={() => {
+                  setPasswordOpen(false);
+                  setCurrentPassword("");
+                  setNewPassword("");
+                  setConfirmPassword("");
+                  setPasswordError(null);
+                }}
+                disabled={changingPassword}
+              >
+                Отмена
+              </button>
+              <button
+                type="button"
+                className="security"
+                disabled={
+                  changingPassword ||
+                  !currentPassword ||
+                  newPassword.length < 10 ||
+                  newPassword !== confirmPassword
+                }
+                onClick={() => void changeCurrentPassword()}
+              >
+                {changingPassword ? "Меняю…" : "Сменить и выйти"}
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
 
       <section className="account-export-zone">
         <header>

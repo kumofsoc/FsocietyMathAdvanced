@@ -44,6 +44,10 @@ type AuthState = {
   login: (input: LoginRequest) => Promise<UserDto>;
   register: (input: RegisterRequest) => Promise<UserDto>;
   logout: () => Promise<void>;
+  changePassword: (
+    currentPassword: string,
+    newPassword: string,
+  ) => Promise<void>;
   deleteAccount: (password: string) => Promise<void>;
   updateProfile: (input: UpdateProfileRequest) => Promise<UserDto>;
   refreshUser: () => Promise<UserDto | null>;
@@ -213,6 +217,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     await api.auth.logout();
+    clearVisibleAccountCacheIfOwned();
+    set({
+      status: "anonymous",
+      user: null,
+      capabilities: EMPTY_CAPABILITIES,
+      bootstrapVersion: null,
+      bootstrapGeneratedAt: null,
+      error: null,
+    });
+  },
+
+  changePassword: async (currentPassword, newPassword) => {
+    await api.me.changePassword(currentPassword, newPassword);
     clearVisibleAccountCacheIfOwned();
     set({
       status: "anonymous",

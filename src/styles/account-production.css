@@ -507,3 +507,131 @@
     display:grid;
   }
 }
+
+
+.account-security-zone{
+  display:grid;
+  gap:16px;
+  margin-top:22px;
+  padding:22px;
+  border:1px solid color-mix(in srgb,var(--formula) 34%,var(--border));
+  border-radius:16px;
+  background:color-mix(in srgb,var(--formula) 4%,var(--surface));
+}
+
+.account-security-zone>header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+}
+
+.account-security-zone>header span{
+  color:var(--formula);
+  font:750 var(--font-xs)/1 var(--font-mono);
+  letter-spacing:.1em;
+}
+
+.account-security-zone>header h2{
+  margin:7px 0 0;
+}
+
+.account-security-zone>header>b{
+  color:var(--formula);
+  font:750 var(--font-xs)/1 var(--font-mono);
+}
+
+.account-security-zone>p{
+  max-width:820px;
+  margin:0;
+  color:var(--muted);
+  line-height:1.65;
+}
+
+.account-security-button,
+.account-password-actions button{
+  min-height:42px;
+  padding:0 13px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:transparent;
+  color:var(--text);
+  font-weight:750;
+  cursor:pointer;
+}
+
+.account-security-button{
+  justify-self:start;
+  border-color:color-mix(in srgb,var(--formula) 48%,var(--border));
+}
+
+.account-password-form{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+
+.account-password-form label{
+  display:grid;
+  gap:7px;
+}
+
+.account-password-form label>span{
+  color:var(--muted);
+  font-size:var(--font-xs);
+  font-weight:650;
+}
+
+.account-password-form input{
+  min-height:44px;
+  padding:0 11px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  outline:0;
+  background:var(--bg);
+  color:var(--text);
+}
+
+.account-password-form input:focus{
+  border-color:var(--formula);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--formula) 8%,transparent);
+}
+
+.account-password-form .account-auth-error,
+.account-password-actions{
+  grid-column:1/-1;
+}
+
+.account-password-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+}
+
+.account-password-actions button.security{
+  border-color:var(--formula);
+  background:color-mix(in srgb,var(--formula) 10%,var(--surface));
+}
+
+.account-password-actions button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+@media(max-width:760px){
+  .account-security-zone>header{
+    display:grid;
+  }
+
+  .account-password-form{
+    grid-template-columns:1fr;
+  }
+
+  .account-password-actions{
+    justify-content:stretch;
+  }
+
+  .account-password-actions button{
+    flex:1;
+  }
+}

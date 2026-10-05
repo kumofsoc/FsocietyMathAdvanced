@@ -501,6 +501,13 @@ export const api = {
       }),
     exportAccount: () =>
       requestBlob("/api/v1/me/account/export"),
+    changePassword: async (currentPassword: string, newPassword: string) => {
+      await request<void>("/api/v1/me/password", {
+        method: "PUT",
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      invalidateAuthenticatedSession();
+    },
     deleteAccount: async (password: string) => {
       await request<void>("/api/v1/me/account", {
         method: "DELETE",
