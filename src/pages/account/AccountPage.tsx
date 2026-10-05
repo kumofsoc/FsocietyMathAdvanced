@@ -413,83 +413,6 @@ function LocalAccount({
 
       <CourseProgress snapshot={snapshot} />
 
-      <section className="account-danger-zone">
-        <header>
-          <div>
-            <span>ACCOUNT / DANGER ZONE</span>
-            <h2>Удалить аккаунт</h2>
-          </div>
-          <b>НЕОБРАТИМО</b>
-        </header>
-        <p>
-          Сервер удалит профиль, прогресс, заметки, отметки, сессии и загруженное
-          account-аудио. Локальные anonymous-файлы в IndexedDB не удаляются.
-        </p>
-
-        {!deleteOpen ? (
-          <button
-            type="button"
-            className="account-delete-open"
-            onClick={() => {
-              setDeleteOpen(true);
-              setDeleteError(null);
-            }}
-          >
-            Открыть удаление аккаунта
-          </button>
-        ) : (
-          <div className="account-delete-confirm">
-            <label>
-              <span>Текущий пароль</span>
-              <input
-                type="password"
-                value={deletePassword}
-                onChange={(event) => setDeletePassword(event.target.value)}
-                autoComplete="current-password"
-                disabled={deleting}
-              />
-            </label>
-            <label>
-              <span>Напиши УДАЛИТЬ</span>
-              <input
-                value={deletePhrase}
-                onChange={(event) => setDeletePhrase(event.target.value)}
-                autoComplete="off"
-                disabled={deleting}
-              />
-            </label>
-            {deleteError && (
-              <div className="account-auth-error">{deleteError}</div>
-            )}
-            <div className="account-delete-actions">
-              <button
-                type="button"
-                onClick={() => {
-                  setDeleteOpen(false);
-                  setDeletePassword("");
-                  setDeletePhrase("");
-                  setDeleteError(null);
-                }}
-                disabled={deleting}
-              >
-                Отмена
-              </button>
-              <button
-                type="button"
-                className="danger"
-                disabled={
-                  deleting ||
-                  !deletePassword ||
-                  deletePhrase.trim().toUpperCase() !== "УДАЛИТЬ"
-                }
-                onClick={() => void deleteCurrentAccount()}
-              >
-                {deleting ? "Удаляю…" : "Удалить навсегда"}
-              </button>
-            </div>
-          </div>
-        )}
-      </section>
     </section>
   );
 }
@@ -729,6 +652,84 @@ function BackendAccount({
       </div>
 
       <CourseProgress snapshot={snapshot} />
+
+      <section className="account-danger-zone">
+        <header>
+          <div>
+            <span>ACCOUNT / DANGER ZONE</span>
+            <h2>Удалить аккаунт</h2>
+          </div>
+          <b>НЕОБРАТИМО</b>
+        </header>
+        <p>
+          Сервер удалит профиль, прогресс, заметки, отметки, сессии и загруженное
+          account-аудио. Локальные anonymous-файлы в IndexedDB не удаляются.
+        </p>
+
+        {!deleteOpen ? (
+          <button
+            type="button"
+            className="account-delete-open"
+            onClick={() => {
+              setDeleteOpen(true);
+              setDeleteError(null);
+            }}
+          >
+            Открыть удаление аккаунта
+          </button>
+        ) : (
+          <div className="account-delete-confirm">
+            <label>
+              <span>Текущий пароль</span>
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={(event) => setDeletePassword(event.target.value)}
+                autoComplete="current-password"
+                disabled={deleting}
+              />
+            </label>
+            <label>
+              <span>Напиши УДАЛИТЬ</span>
+              <input
+                value={deletePhrase}
+                onChange={(event) => setDeletePhrase(event.target.value)}
+                autoComplete="off"
+                disabled={deleting}
+              />
+            </label>
+            {deleteError && (
+              <div className="account-auth-error">{deleteError}</div>
+            )}
+            <div className="account-delete-actions">
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteOpen(false);
+                  setDeletePassword("");
+                  setDeletePhrase("");
+                  setDeleteError(null);
+                }}
+                disabled={deleting}
+              >
+                Отмена
+              </button>
+              <button
+                type="button"
+                className="danger"
+                disabled={
+                  deleting ||
+                  !deletePassword ||
+                  deletePhrase.trim().toUpperCase() !== "УДАЛИТЬ"
+                }
+                onClick={() => void deleteCurrentAccount()}
+              >
+                {deleting ? "Удаляю…" : "Удалить навсегда"}
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
     </section>
   );
 }
