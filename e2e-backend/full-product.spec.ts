@@ -394,6 +394,38 @@ test("backend catalog matches bundled frontend stable contract", async ({ reques
     }
 
 
+  test("session management revokes another device without ending the current one", async ({
+    page,
+    browser,
+  }) => {
+    await login(page);
+    const second = await newLoggedInPage(browser);
+
+    await page.goto("/#account");
+    await expect(page.locator(".account-session-row")).toHaveCount(2);
+    await expect(page.locator(".account-session-row.current")).toHaveCount(1);
+
+    const remoteRow = page
+      .locator(".account-session-row")
+      .filter({ has: page.getByRole("button", { name: "Завершить", exact: true }) })
+      .first();
+    await expect(remoteRow).toBeVisible();
+
+    const revoke = page.waitForResponse(
+      (response) =>
+        /\/api\/v1\/me\/sessions\/[0-9a-f-]+$/i.test(response.url()) &&
+        response.request().method() === "DELETE",
+    );
+    await remoteRow.getByRole("button", { name: "Завершить", exact: true }).click();
+    expect((await revoke).status()).toBe(204);
+    await expect(page.locator(".account-session-row")).toHaveCount(1);
+    await expect(page.getByRole("button", { name: "Выйти" })).toBeVisible();
+
+    await second.page.goto("/#account");
+    await expect(second.page.getByRole("button", { name: "Вход" })).toBeVisible();
+    await second.context.close();
+  });
+
   test("password change revokes the current session and old credentials", async ({
     page,
   }) => {

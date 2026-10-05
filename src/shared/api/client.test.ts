@@ -429,6 +429,53 @@ describe("account lifecycle API", () => {
     );
   });
 
+  it("lists and revokes account sessions through the authenticated boundary", async () => {
+    const calls: Array<{ url: string; init?: RequestInit }> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        calls.push({ url: String(input), init });
+        if ((init?.method ?? "GET") === "DELETE") {
+          return new Response(null, { status: 204 });
+        }
+        return jsonResponse({
+          sessions: [
+            {
+              id: "10000000-0000-4000-8000-000000000001",
+              userAgent: "Browser",
+              ipAddress: "203.0.113.10",
+              createdAt: "2026-10-05T12:00:00Z",
+              lastSeenAt: "2026-10-05T13:00:00Z",
+              expiresAt: "2026-11-04T12:00:00Z",
+              current: true,
+            },
+          ],
+        });
+      }),
+    );
+
+    const { api, setAccessToken } = await import("./client");
+    setAccessToken("token-a", "2026-10-05T16:00:00Z");
+
+    const listed = await api.me.sessions();
+    expect(listed.sessions).toHaveLength(1);
+    expect(listed.sessions[0].current).toBe(true);
+
+    await api.me.revokeSession("10000000-0000-4000-8000-000000000001");
+
+    expect(calls).toHaveLength(2);
+    expect(new URL(calls[0].url).pathname).toBe("/api/v1/me/sessions");
+    expect(new URL(calls[1].url).pathname).toBe(
+      "/api/v1/me/sessions/10000000-0000-4000-8000-000000000001",
+    );
+    expect(calls[1].init?.method).toBe("DELETE");
+    for (const call of calls) {
+      expect(new Headers(call.init?.headers).get("Authorization")).toBe(
+        "Bearer token-a",
+      );
+    }
+  });
+
   it("changes the password, clears the access token and broadcasts invalidation", async () => {
     const calls: Array<{ url: string; init?: RequestInit }> = [];
     vi.stubGlobal(
