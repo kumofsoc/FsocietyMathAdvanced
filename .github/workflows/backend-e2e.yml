@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      api_base_url:
+        description: "HTTPS staging/release backend origin"
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -18,7 +23,7 @@ jobs:
     steps:
       - id: backend
         env:
-          API_BASE_URL: ${{ vars.VISUALMATH_E2E_API_BASE_URL }}
+          API_BASE_URL: ${{ inputs.api_base_url || vars.VISUALMATH_E2E_API_BASE_URL }}
         run: |
           if [ -n "$API_BASE_URL" ]; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
@@ -49,7 +54,7 @@ jobs:
       - name: Run real-backend product E2E
         run: pnpm test:e2e:backend
         env:
-          VISUALMATH_E2E_API_BASE_URL: ${{ vars.VISUALMATH_E2E_API_BASE_URL }}
+          VISUALMATH_E2E_API_BASE_URL: ${{ inputs.api_base_url || vars.VISUALMATH_E2E_API_BASE_URL }}
       - name: Upload backend Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
