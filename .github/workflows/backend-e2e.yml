@@ -25,7 +25,11 @@ jobs:
             echo "Real-backend E2E is enabled for this repository."
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::VISUALMATH_E2E_API_BASE_URL is not configured; real-backend Playwright is skipped."
+            echo "::notice::VISUALMATH_E2E_API_BASE_URL is not configured; real-backend Playwright is skipped for this automatic run."
+            if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+              echo "::error::Manual Backend E2E runs require VISUALMATH_E2E_API_BASE_URL."
+              exit 1
+            fi
           fi
 
   backend-e2e:
