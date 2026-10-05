@@ -1,5 +1,6 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
+import type { PluginOption } from "vite";
 
 const LAZY_ONLY_CHUNK_PREFIXES = [
   "graph-",
@@ -9,22 +10,11 @@ const LAZY_ONLY_CHUNK_PREFIXES = [
   "courseSearchIndex-",
 ];
 
-function initialChunkBoundaryPlugin() {
+function initialChunkBoundaryPlugin(): PluginOption {
   return {
     name: "visualmath-initial-chunk-boundary",
-    apply: "build" as const,
-    generateBundle(
-      _options: unknown,
-      bundle: Record<
-        string,
-        {
-          type: string;
-          fileName: string;
-          isEntry?: boolean;
-          imports?: string[];
-        }
-      >,
-    ) {
+    apply: "build",
+    generateBundle(_options, bundle) {
       const chunks = new Map(
         Object.values(bundle)
           .filter((item) => item.type === "chunk")
