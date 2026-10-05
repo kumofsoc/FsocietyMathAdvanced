@@ -223,7 +223,6 @@ async function executeGeneralMutation(mutation: PendingGeneralMutation) {
         mutation.topicId,
         mutation.blockIndex,
       );
-      await api.progress.setResume(mutation.topicId);
       return;
 
     case "reading-progress":

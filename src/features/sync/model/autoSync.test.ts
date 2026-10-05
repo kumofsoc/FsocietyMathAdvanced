@@ -112,3 +112,68 @@ describe("durable account-bound auto sync", () => {
     ).toHaveProperty("user-1::saved-topic:rank");
   });
 });
+
+
+describe("learning mutation request economy", () => {
+  let store: Map<string, string>;
+
+  beforeEach(() => {
+    store = new Map();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        store.set(key, value);
+      },
+      removeItem: (key: string) => {
+        store.delete(key);
+      },
+    });
+    useAuthStore.setState({
+      status: "authenticated",
+      user: {
+        id: "user-1",
+        email: "user-1@example.com",
+        profile: {
+          displayName: "User 1",
+          handle: "user_1",
+          bio: "",
+          avatarUrl: null,
+          joinedAt: "2026-10-04T08:00:00Z",
+          updatedAt: "2026-10-04T08:00:00Z",
+        },
+      },
+      error: null,
+    });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("marks an exact reading block without duplicating the resume mutation", async () => {
+    const storageKey = "user-1::reading-block:rank:3";
+    localStorage.setItem(
+      GENERAL_SYNC_PENDING_KEY,
+      JSON.stringify({
+        [storageKey]: {
+          userId: "user-1",
+          updatedAt: 1,
+          kind: "reading-block",
+          topicId: "rank",
+          blockIndex: 3,
+        },
+      }),
+    );
+
+    const markReadingBlock = vi
+      .spyOn(api.progress, "markReadingBlock")
+      .mockResolvedValue({} as never);
+    const setResume = vi.spyOn(api.progress, "setResume");
+
+    await flushPendingGeneralMutations("user-1");
+
+    expect(markReadingBlock).toHaveBeenCalledWith("rank", 3);
+    expect(setResume).not.toHaveBeenCalled();
+  });
+});
