@@ -19,11 +19,12 @@ import {
 } from "@/features/learning/model/learning";
 import { SAVED_TOPICS_KEY } from "@/features/saved-topics/model/savedTopics";
 import { TOPIC_RESUME_KEY } from "@/features/learning/model/topicResume";
-import { GENERAL_SYNC_PENDING_KEY } from "./autoSync";
 import {
   PREFERENCES_DIRTY_KEY,
   THEME_NAME_KEY,
 } from "@/features/personalization/model/preferencesStorage";
+
+const GENERAL_SYNC_PENDING_KEY = "visualmath-general-sync-pending-v1";
 
 describe("account cache privacy boundary", () => {
   let values: Map<string, string>;
