@@ -412,6 +412,84 @@ function LocalAccount({
       </div>
 
       <CourseProgress snapshot={snapshot} />
+
+      <section className="account-danger-zone">
+        <header>
+          <div>
+            <span>ACCOUNT / DANGER ZONE</span>
+            <h2>Удалить аккаунт</h2>
+          </div>
+          <b>НЕОБРАТИМО</b>
+        </header>
+        <p>
+          Сервер удалит профиль, прогресс, заметки, отметки, сессии и загруженное
+          account-аудио. Локальные anonymous-файлы в IndexedDB не удаляются.
+        </p>
+
+        {!deleteOpen ? (
+          <button
+            type="button"
+            className="account-delete-open"
+            onClick={() => {
+              setDeleteOpen(true);
+              setDeleteError(null);
+            }}
+          >
+            Открыть удаление аккаунта
+          </button>
+        ) : (
+          <div className="account-delete-confirm">
+            <label>
+              <span>Текущий пароль</span>
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={(event) => setDeletePassword(event.target.value)}
+                autoComplete="current-password"
+                disabled={deleting}
+              />
+            </label>
+            <label>
+              <span>Напиши УДАЛИТЬ</span>
+              <input
+                value={deletePhrase}
+                onChange={(event) => setDeletePhrase(event.target.value)}
+                autoComplete="off"
+                disabled={deleting}
+              />
+            </label>
+            {deleteError && (
+              <div className="account-auth-error">{deleteError}</div>
+            )}
+            <div className="account-delete-actions">
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteOpen(false);
+                  setDeletePassword("");
+                  setDeletePhrase("");
+                  setDeleteError(null);
+                }}
+                disabled={deleting}
+              >
+                Отмена
+              </button>
+              <button
+                type="button"
+                className="danger"
+                disabled={
+                  deleting ||
+                  !deletePassword ||
+                  deletePhrase.trim().toUpperCase() !== "УДАЛИТЬ"
+                }
+                onClick={() => void deleteCurrentAccount()}
+              >
+                {deleting ? "Удаляю…" : "Удалить навсегда"}
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
     </section>
   );
 }
@@ -426,6 +504,7 @@ function BackendAccount({
   const user = useAuthStore((state) => state.user);
   const updateProfile = useAuthStore((state) => state.updateProfile);
   const logout = useAuthStore((state) => state.logout);
+  const deleteAccount = useAuthStore((state) => state.deleteAccount);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<EditableProfile>({
     displayName: user?.profile.displayName ?? "",
@@ -437,6 +516,11 @@ function BackendAccount({
   const [activityError, setActivityError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deletePhrase, setDeletePhrase] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -486,6 +570,25 @@ function BackendAccount({
       setProfileError(errorMessage(error));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const deleteCurrentAccount = async () => {
+    if (
+      deleting ||
+      !deletePassword ||
+      deletePhrase.trim().toUpperCase() !== "УДАЛИТЬ"
+    ) {
+      return;
+    }
+
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteAccount(deletePassword);
+    } catch (error) {
+      setDeleteError(errorMessage(error));
+      setDeleting(false);
     }
   };
 

@@ -40,6 +40,8 @@ let accessExpiresAt: string | null = null;
 let refreshInFlight: Promise<AuthResponseDto | null> | null = null;
 const AUTH_COOKIE_LOCK_NAME = "visualmath-auth-cookie-v1";
 export const AUTH_LOGOUT_PENDING_KEY = "visualmath-auth-logout-pending-v1";
+export const AUTH_SESSION_INVALIDATED_KEY =
+  "visualmath-auth-session-invalidated-v1";
 let authTransitionTail: Promise<void> = Promise.resolve();
 let explicitAuthPending = 0;
 let authGeneration = 0;
@@ -116,6 +118,11 @@ function markPendingLogout() {
 
 function clearPendingLogout() {
   removeLocalStorage(AUTH_LOGOUT_PENDING_KEY);
+}
+
+function invalidateAuthenticatedSession() {
+  writeLocalStorage(AUTH_SESSION_INVALIDATED_KEY, String(Date.now()));
+  setAccessToken(null);
 }
 
 function backendUrl(path: string) {
@@ -492,6 +499,13 @@ export const api = {
         method: "PATCH",
         body: JSON.stringify(body),
       }),
+    deleteAccount: async (password: string) => {
+      await request<void>("/api/v1/me/account", {
+        method: "DELETE",
+        body: JSON.stringify({ password }),
+      });
+      invalidateAuthenticatedSession();
+    },
   },
   progress: {
     get: () => request<LearningProgressDto>("/api/v1/me/learning"),

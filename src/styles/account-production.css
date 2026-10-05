@@ -313,3 +313,134 @@
     gap:5px;
   }
 }
+
+
+.account-danger-zone{
+  display:grid;
+  gap:16px;
+  margin-top:22px;
+  padding:22px;
+  border:1px solid color-mix(in srgb,#ff5d68 44%,var(--border));
+  border-radius:16px;
+  background:color-mix(in srgb,#ff5d68 5%,var(--surface));
+}
+
+.account-danger-zone>header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+}
+
+.account-danger-zone>header span{
+  color:#ff7a83;
+  font:750 var(--font-xs)/1 var(--font-mono);
+  letter-spacing:.1em;
+}
+
+.account-danger-zone>header h2{
+  margin:7px 0 0;
+}
+
+.account-danger-zone>header>b{
+  color:#ff7a83;
+  font:750 var(--font-xs)/1 var(--font-mono);
+}
+
+.account-danger-zone>p{
+  max-width:760px;
+  margin:0;
+  color:var(--muted);
+  line-height:1.65;
+}
+
+.account-delete-open,
+.account-delete-actions button{
+  min-height:42px;
+  padding:0 13px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:transparent;
+  color:var(--text);
+  font-weight:750;
+  cursor:pointer;
+}
+
+.account-delete-open{
+  justify-self:start;
+  border-color:color-mix(in srgb,#ff5d68 48%,var(--border));
+  color:#ff9da5;
+}
+
+.account-delete-confirm{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  padding-top:4px;
+}
+
+.account-delete-confirm label{
+  display:grid;
+  gap:7px;
+}
+
+.account-delete-confirm label>span{
+  color:var(--muted);
+  font-size:var(--font-xs);
+  font-weight:650;
+}
+
+.account-delete-confirm input{
+  min-height:44px;
+  padding:0 11px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  outline:0;
+  background:var(--bg);
+  color:var(--text);
+}
+
+.account-delete-confirm input:focus{
+  border-color:#ff7a83;
+  box-shadow:0 0 0 3px color-mix(in srgb,#ff5d68 8%,transparent);
+}
+
+.account-delete-confirm .account-auth-error,
+.account-delete-actions{
+  grid-column:1/-1;
+}
+
+.account-delete-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+}
+
+.account-delete-actions button.danger{
+  border-color:#ff5d68;
+  background:color-mix(in srgb,#ff5d68 12%,var(--surface));
+  color:#ffb0b6;
+}
+
+.account-delete-actions button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+@media(max-width:620px){
+  .account-danger-zone>header{
+    display:grid;
+  }
+
+  .account-delete-confirm{
+    grid-template-columns:1fr;
+  }
+
+  .account-delete-actions{
+    justify-content:stretch;
+  }
+
+  .account-delete-actions button{
+    flex:1;
+  }
+}

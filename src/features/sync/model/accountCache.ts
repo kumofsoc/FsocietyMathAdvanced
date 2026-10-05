@@ -39,7 +39,9 @@ import {
 import { useAppShellStore } from "@/app/store/useAppShellStore";
 import {
   readLocalStorage,
+  readLocalStorageJson,
   removeLocalStorage,
+  writeLocalStorage,
 } from "@/shared/lib/browserStorage";
 
 export const ACCOUNT_CACHE_OWNER_KEY = "visualmath-account-cache-owner-v1";
@@ -112,4 +114,45 @@ export function clearVisibleAccountCacheIfOwned() {
   });
 
   return true;
+}
+
+
+const GENERAL_SYNC_PENDING_KEY = "visualmath-general-sync-pending-v1";
+const deletionScopedPrefixes = [
+  "visualmath-backend-migration-v2::",
+  "visualmath-notes-migration-v2::",
+  "visualmath-important-blocks-migration-v2::",
+  "visualmath-backend-migration-stage-v2::",
+  "visualmath-media-imported-v1::",
+] as const;
+
+function removePendingOwnedBy(
+  key: string,
+  ownerField: "userId" | "ownerId",
+  userId: string,
+) {
+  const state = readLocalStorageJson<Record<string, Record<string, unknown>>>(
+    key,
+    {},
+  );
+  const next = Object.fromEntries(
+    Object.entries(state).filter(([, value]) => value?.[ownerField] !== userId),
+  );
+  return writeLocalStorage(key, JSON.stringify(next));
+}
+
+export function clearDeletedAccountState(userId: string) {
+  if (!userId) return false;
+
+  const visibleCleared = clearVisibleAccountCacheIfOwned();
+
+  removePendingOwnedBy(GENERAL_SYNC_PENDING_KEY, "userId", userId);
+  removePendingOwnedBy("visualmath-block-notes-pending-v1", "ownerId", userId);
+  removePendingOwnedBy("visualmath-important-blocks-pending-v1", "ownerId", userId);
+
+  for (const prefix of deletionScopedPrefixes) {
+    removeLocalStorage(prefix + userId);
+  }
+
+  return visibleCleared;
 }

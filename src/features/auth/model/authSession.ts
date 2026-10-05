@@ -4,11 +4,15 @@ import {
   ApiError,
   AUTH_LOGOUT_PENDING_KEY,
   AUTH_SESSION_EVENT,
+  AUTH_SESSION_INVALIDATED_KEY,
   bootstrapBackendSession,
   isBackendConfigured,
   setAccessToken,
 } from "@/shared/api/client";
-import { clearVisibleAccountCacheIfOwned } from "@/features/sync/model/accountCache";
+import {
+  clearDeletedAccountState,
+  clearVisibleAccountCacheIfOwned,
+} from "@/features/sync/model/accountCache";
 import type {
   BootstrapCapabilitiesDto,
   BootstrapDto,
@@ -40,6 +44,7 @@ type AuthState = {
   login: (input: LoginRequest) => Promise<UserDto>;
   register: (input: RegisterRequest) => Promise<UserDto>;
   logout: () => Promise<void>;
+  deleteAccount: (password: string) => Promise<void>;
   updateProfile: (input: UpdateProfileRequest) => Promise<UserDto>;
   refreshUser: () => Promise<UserDto | null>;
 };
@@ -219,6 +224,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     });
   },
 
+  deleteAccount: async (password) => {
+    const userId = get().user?.id;
+    if (!userId) {
+      throw new Error("Authenticated user is missing.");
+    }
+
+    await api.me.deleteAccount(password);
+    clearDeletedAccountState(userId);
+    set({
+      status: "anonymous",
+      user: null,
+      capabilities: EMPTY_CAPABILITIES,
+      bootstrapVersion: null,
+      bootstrapGeneratedAt: null,
+      error: null,
+    });
+  },
+
   updateProfile: async (input) => {
     const user = await api.me.updateProfile(input);
     set({ user, status: "authenticated", error: null });
@@ -256,8 +279,8 @@ export function installAuthSessionListener() {
 
   window.addEventListener("storage", (event) => {
     if (
-      event.key === AUTH_LOGOUT_PENDING_KEY &&
-      event.newValue === "1"
+      (event.key === AUTH_LOGOUT_PENDING_KEY && event.newValue === "1") ||
+      event.key === AUTH_SESSION_INVALIDATED_KEY
     ) {
       setAccessToken(null);
     }

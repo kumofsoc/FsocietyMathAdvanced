@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ACCOUNT_CACHE_OWNER_KEY,
+  clearDeletedAccountState,
   clearVisibleAccountCacheIfOwned,
 } from "./accountCache";
 import {
@@ -95,6 +96,56 @@ describe("account cache privacy boundary", () => {
     expect(localStorage.getItem(GENERAL_SYNC_PENDING_KEY)).not.toBeNull();
     expect(localStorage.getItem(BLOCK_NOTES_PENDING_KEY)).not.toBeNull();
     expect(localStorage.getItem(IMPORTANT_BLOCKS_PENDING_KEY)).not.toBeNull();
+  });
+
+  it("deletes only pending mutations and markers owned by the deleted account", () => {
+    localStorage.setItem(ACCOUNT_CACHE_OWNER_KEY, "user-1");
+    localStorage.setItem(
+      GENERAL_SYNC_PENDING_KEY,
+      JSON.stringify({
+        one: { userId: "user-1", kind: "reading-block" },
+        two: { userId: "user-2", kind: "saved-topic" },
+      }),
+    );
+    localStorage.setItem(
+      BLOCK_NOTES_PENDING_KEY,
+      JSON.stringify({
+        one: { ownerId: "user-1", text: "delete me" },
+        two: { ownerId: "user-2", text: "keep me" },
+      }),
+    );
+    localStorage.setItem(
+      IMPORTANT_BLOCKS_PENDING_KEY,
+      JSON.stringify({
+        one: { ownerId: "user-1", important: true },
+        two: { ownerId: "user-2", important: true },
+      }),
+    );
+    localStorage.setItem("visualmath-backend-migration-v2::user-1", "1");
+    localStorage.setItem("visualmath-notes-migration-v2::user-1", "1");
+    localStorage.setItem("visualmath-important-blocks-migration-v2::user-1", "1");
+    localStorage.setItem("visualmath-backend-migration-stage-v2::user-1", "{}");
+    localStorage.setItem("visualmath-media-imported-v1::user-1", "[]");
+    localStorage.setItem("visualmath-backend-migration-v2::user-2", "1");
+
+    clearDeletedAccountState("user-1");
+
+    expect(
+      JSON.parse(localStorage.getItem(GENERAL_SYNC_PENDING_KEY) ?? "{}"),
+    ).toEqual({ two: { userId: "user-2", kind: "saved-topic" } });
+    expect(
+      JSON.parse(localStorage.getItem(BLOCK_NOTES_PENDING_KEY) ?? "{}"),
+    ).toEqual({ two: { ownerId: "user-2", text: "keep me" } });
+    expect(
+      JSON.parse(localStorage.getItem(IMPORTANT_BLOCKS_PENDING_KEY) ?? "{}"),
+    ).toEqual({ two: { ownerId: "user-2", important: true } });
+
+    expect(localStorage.getItem("visualmath-backend-migration-v2::user-1")).toBeNull();
+    expect(localStorage.getItem("visualmath-notes-migration-v2::user-1")).toBeNull();
+    expect(localStorage.getItem("visualmath-important-blocks-migration-v2::user-1")).toBeNull();
+    expect(localStorage.getItem("visualmath-backend-migration-stage-v2::user-1")).toBeNull();
+    expect(localStorage.getItem("visualmath-media-imported-v1::user-1")).toBeNull();
+    expect(localStorage.getItem("visualmath-backend-migration-v2::user-2")).toBe("1");
   });
 
   it("does not erase anonymous caches when no account owns them", () => {
