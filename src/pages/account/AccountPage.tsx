@@ -8,7 +8,8 @@ import {
 import { loadSavedTheorems } from "@/features/learning/model/learning";
 import { useAuthStore } from "@/features/auth/model/authSession";
 import { AccountSecurityControls } from "@/features/account-security/ui/AccountSecurityControls";
-import { api, ApiError } from "@/shared/api/client";
+import { api } from "@/shared/api/client";
+import { apiErrorMessage } from "@/shared/api/errorPresentation";
 import {
   readLocalStorageJson,
   writeLocalStorage,
@@ -58,14 +59,6 @@ function loadLocalProfile(): LocalProfile {
   return profile;
 }
 
-function errorMessage(error: unknown) {
-  if (error instanceof ApiError) {
-    if (error.code === "network_error") return "Backend сейчас недоступен.";
-    if (error.code === "request_timeout") return "Backend не ответил вовремя.";
-    return error.message;
-  }
-  return error instanceof Error ? error.message : "Неизвестная ошибка.";
-}
 
 function initials(value: string) {
   const parts = value.trim().split(/\s+/).filter(Boolean);
@@ -140,7 +133,7 @@ function AccountAuthGate() {
                 });
 
           void action
-            .catch((nextError) => setFormError(errorMessage(nextError)))
+            .catch((nextError) => setFormError(apiErrorMessage(nextError)))
             .finally(() => setBusy(false));
         }}
       >
@@ -463,7 +456,7 @@ function BackendAccount({
         setActivityError(null);
       })
       .catch((error) => {
-        if (!cancelled) setActivityError(errorMessage(error));
+        if (!cancelled) setActivityError(apiErrorMessage(error));
       });
 
     return () => {
@@ -486,7 +479,7 @@ function BackendAccount({
       });
       setEditing(false);
     } catch (error) {
-      setProfileError(errorMessage(error));
+      setProfileError(apiErrorMessage(error));
     } finally {
       setSaving(false);
     }

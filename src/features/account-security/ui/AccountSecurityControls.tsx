@@ -1,16 +1,9 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/features/auth/model/authSession";
-import { api, ApiError } from "@/shared/api/client";
+import { api } from "@/shared/api/client";
+import { apiErrorMessage } from "@/shared/api/errorPresentation";
 import type { AccountSessionDto } from "@/shared/api/types";
 
-function errorMessage(error: unknown) {
-  if (error instanceof ApiError) {
-    if (error.code === "network_error") return "Backend сейчас недоступен.";
-    if (error.code === "request_timeout") return "Backend не ответил вовремя.";
-    return error.message;
-  }
-  return error instanceof Error ? error.message : "Неизвестная ошибка.";
-}
 
 export function AccountSecurityControls() {
   const userId = useAuthStore((state) => state.user?.id);
@@ -58,7 +51,7 @@ export function AccountSecurityControls() {
       })
       .catch((error) => {
         if (cancelled) return;
-        setSessionsError(errorMessage(error));
+        setSessionsError(apiErrorMessage(error));
         setSessionsLoading(false);
       });
 
@@ -80,7 +73,7 @@ export function AccountSecurityControls() {
         setRevokingSessionId(null);
       }
     } catch (error) {
-      setSessionsError(errorMessage(error));
+      setSessionsError(apiErrorMessage(error));
       setRevokingSessionId(null);
     }
   };
@@ -101,7 +94,7 @@ export function AccountSecurityControls() {
     try {
       await changePassword(currentPassword, newPassword);
     } catch (error) {
-      setPasswordError(errorMessage(error));
+      setPasswordError(apiErrorMessage(error));
       setChangingPassword(false);
     }
   };
@@ -124,7 +117,7 @@ export function AccountSecurityControls() {
       anchor.remove();
       URL.revokeObjectURL(url);
     } catch (error) {
-      setExportError(errorMessage(error));
+      setExportError(apiErrorMessage(error));
     } finally {
       setExporting(false);
     }
@@ -144,7 +137,7 @@ export function AccountSecurityControls() {
     try {
       await deleteAccount(deletePassword);
     } catch (error) {
-      setDeleteError(errorMessage(error));
+      setDeleteError(apiErrorMessage(error));
       setDeleting(false);
     }
   };

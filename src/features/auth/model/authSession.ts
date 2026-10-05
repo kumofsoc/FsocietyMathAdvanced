@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import {
   api,
-  ApiError,
   AUTH_LOGOUT_PENDING_KEY,
   AUTH_SESSION_EVENT,
   AUTH_SESSION_INVALIDATED_KEY,
@@ -9,6 +8,7 @@ import {
   isBackendConfigured,
   setAccessToken,
 } from "@/shared/api/client";
+import { apiErrorMessage } from "@/shared/api/errorPresentation";
 import {
   clearDeletedAccountState,
   clearVisibleAccountCacheIfOwned,
@@ -57,14 +57,6 @@ type AuthState = {
 let bootstrapPromise: Promise<void> | null = null;
 let listenerInstalled = false;
 
-function messageFromError(error: unknown) {
-  if (error instanceof ApiError) {
-    if (error.code === "request_timeout") return "Backend не ответил вовремя.";
-    if (error.code === "network_error") return "Backend сейчас недоступен.";
-    return error.message;
-  }
-  return error instanceof Error ? error.message : "Неизвестная ошибка backend.";
-}
 
 function startUserStateHydration(snapshot: BootstrapDto) {
   void import("@/features/sync/model/userStateSync")
@@ -132,7 +124,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           capabilities: EMPTY_CAPABILITIES,
           bootstrapVersion: null,
           bootstrapGeneratedAt: null,
-          error: messageFromError(error),
+          error: apiErrorMessage(error),
         });
       }
     })().finally(() => {
@@ -172,7 +164,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         capabilities: EMPTY_CAPABILITIES,
         bootstrapVersion: null,
         bootstrapGeneratedAt: null,
-        error: messageFromError(error),
+        error: apiErrorMessage(error),
       });
       console.warn("[VisualMath] login bootstrap failed; keeping local cache", error);
       return session.user;
@@ -209,7 +201,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         capabilities: EMPTY_CAPABILITIES,
         bootstrapVersion: null,
         bootstrapGeneratedAt: null,
-        error: messageFromError(error),
+        error: apiErrorMessage(error),
       });
       console.warn("[VisualMath] registration bootstrap failed; keeping local cache", error);
       return session.user;
