@@ -65,7 +65,6 @@ import { useAuthStore } from "@/features/auth/model/authSession";
 import { ACCOUNT_CACHE_OWNER_KEY } from "@/features/sync/model/accountCache";
 export { ACCOUNT_CACHE_OWNER_KEY } from "@/features/sync/model/accountCache";
 import {
-  collectImportantMigrationTargets,
   isMigrationSeed,
   isPristineWorkspace,
   mergeReading,
