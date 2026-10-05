@@ -378,3 +378,87 @@ describe("native media playback URL", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 });
+
+
+describe("account lifecycle API", () => {
+  let values: Map<string, string>;
+
+  beforeEach(() => {
+    vi.resetModules();
+    values = new Map();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        values.set(key, String(value));
+      },
+      removeItem: (key: string) => {
+        values.delete(key);
+      },
+    });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("downloads the canonical account export with bearer authentication", async () => {
+    const calls: Array<{ url: string; init?: RequestInit }> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        calls.push({ url: String(input), init });
+        return new Response('{"version":1}', {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }),
+    );
+
+    const { api, setAccessToken } = await import("./client");
+    setAccessToken("token-a", "2026-10-05T16:00:00Z");
+
+    const blob = await api.me.exportAccount();
+
+    expect(await blob.text()).toBe('{"version":1}');
+    expect(calls).toHaveLength(1);
+    expect(new URL(calls[0].url).pathname).toBe("/api/v1/me/account/export");
+    expect(calls[0].init?.method ?? "GET").toBe("GET");
+    expect(new Headers(calls[0].init?.headers).get("Authorization")).toBe(
+      "Bearer token-a",
+    );
+  });
+
+  it("deletes the account, clears the access token and broadcasts invalidation", async () => {
+    const calls: Array<{ url: string; init?: RequestInit }> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        calls.push({ url: String(input), init });
+        return new Response(null, { status: 204 });
+      }),
+    );
+
+    const {
+      api,
+      setAccessToken,
+      getAccessTokenSnapshot,
+      AUTH_SESSION_INVALIDATED_KEY,
+    } = await import("./client");
+    setAccessToken("token-a", "2026-10-05T16:00:00Z");
+
+    await api.me.deleteAccount("VisualMath!2026");
+
+    expect(calls).toHaveLength(1);
+    expect(new URL(calls[0].url).pathname).toBe("/api/v1/me/account");
+    expect(calls[0].init?.method).toBe("DELETE");
+    expect(calls[0].init?.body).toBe(
+      JSON.stringify({ password: "VisualMath!2026" }),
+    );
+    expect(new Headers(calls[0].init?.headers).get("Authorization")).toBe(
+      "Bearer token-a",
+    );
+    expect(getAccessTokenSnapshot().accessToken).toBeNull();
+    expect(localStorage.getItem(AUTH_SESSION_INVALIDATED_KEY)).toMatch(/^\d+$/);
+  });
+});
