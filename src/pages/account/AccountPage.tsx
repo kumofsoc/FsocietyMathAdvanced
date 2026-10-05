@@ -14,6 +14,7 @@ import {
   readLocalStorageJson,
   writeLocalStorage,
 } from "@/shared/lib/browserStorage";
+import { visualMathHashParam } from "@/shared/lib/blockDeepLink";
 import type {
   ActivityHeatmapDto,
   ActivityStatsDto,
@@ -66,6 +67,127 @@ function initials(value: string) {
   return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join("");
 }
 
+function PasswordRecoveryPanel({
+  token,
+  onClose,
+}: {
+  token: string | null;
+  onClose: () => void;
+}) {
+  const [email, setEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  return (
+    <form
+      className="account-auth-form"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (busy) return;
+        setFormError(null);
+
+        if (!token) {
+          setBusy(true);
+          void api.auth
+            .requestPasswordReset(email.trim())
+            .then(() => {
+              setMessage(
+                "Если такой активный аккаунт существует, инструкция для восстановления отправлена.",
+              );
+            })
+            .catch((nextError) => setFormError(apiErrorMessage(nextError)))
+            .finally(() => setBusy(false));
+          return;
+        }
+
+        if (newPassword !== confirmPassword) {
+          setFormError("Пароли не совпадают.");
+          return;
+        }
+
+        setBusy(true);
+        void api.auth
+          .confirmPasswordReset(token, newPassword)
+          .then(() => {
+            setMessage("Пароль изменён. Все старые сессии отозваны.");
+            window.location.hash = "account";
+          })
+          .catch((nextError) => setFormError(apiErrorMessage(nextError)))
+          .finally(() => setBusy(false));
+      }}
+    >
+      <div className="account-auth-recovery-heading">
+        <span>PASSWORD / RECOVERY</span>
+        <strong>{token ? "Новый пароль" : "Восстановление доступа"}</strong>
+      </div>
+
+      {!token ? (
+        <label>
+          <span>Email</span>
+          <input
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            autoComplete="email"
+            required
+          />
+        </label>
+      ) : (
+        <>
+          <label>
+            <span>Новый пароль</span>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(event) => setNewPassword(event.target.value)}
+              autoComplete="new-password"
+              minLength={10}
+              maxLength={256}
+              required
+            />
+          </label>
+          <label>
+            <span>Повтори пароль</span>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              autoComplete="new-password"
+              minLength={10}
+              maxLength={256}
+              required
+            />
+          </label>
+        </>
+      )}
+
+      {message && <div className="account-auth-notice">{message}</div>}
+      {formError && <div className="account-auth-error">{formError}</div>}
+
+      {!message && (
+        <button type="submit" disabled={busy}>
+          {busy
+            ? "Отправляю…"
+            : token
+              ? "Установить новый пароль"
+              : "Отправить инструкцию"}
+        </button>
+      )}
+      <button
+        type="button"
+        className="account-auth-secondary"
+        onClick={onClose}
+        disabled={busy}
+      >
+        Вернуться ко входу
+      </button>
+    </form>
+  );
+}
+
 function AccountAuthGate() {
   const status = useAuthStore((state) => state.status);
   const error = useAuthStore((state) => state.error);
@@ -79,6 +201,29 @@ function AccountAuthGate() {
   const [password, setPassword] = useState("");
   const [handle, setHandle] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const resetToken =
+    typeof window === "undefined"
+      ? null
+      : visualMathHashParam(window.location.hash, "reset");
+  const [recoveryOpen, setRecoveryOpen] = useState(Boolean(resetToken));
+  const [passwordResetAvailable, setPasswordResetAvailable] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    api.system
+      .meta()
+      .then((meta) => {
+        if (!cancelled) {
+          setPasswordResetAvailable(Boolean(meta.capabilities?.passwordReset));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setPasswordResetAvailable(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (status === "booting") {
     return (
@@ -99,6 +244,28 @@ function AccountAuthGate() {
         <button type="button" onClick={() => void bootstrap()}>
           Повторить подключение
         </button>
+      </section>
+    );
+  }
+
+  if (recoveryOpen || resetToken) {
+    return (
+      <section className="account-auth-shell">
+        <div className="account-auth-copy">
+          <span>VISUALMATH / RECOVERY</span>
+          <h1>{resetToken ? "Задай новый пароль." : "Верни доступ."}</h1>
+          <p>
+            Reset token хранится только во fragment URL и не отправляется в
+            access logs. После смены пароля все старые сессии будут отозваны.
+          </p>
+        </div>
+        <PasswordRecoveryPanel
+          token={resetToken}
+          onClose={() => {
+            setRecoveryOpen(false);
+            if (resetToken) window.location.hash = "account";
+          }}
+        />
       </section>
     );
   }
@@ -221,6 +388,18 @@ function AccountAuthGate() {
               ? "Войти"
               : "Создать аккаунт"}
         </button>
+        {mode === "login" && passwordResetAvailable && (
+          <button
+            type="button"
+            className="account-auth-recovery-link"
+            onClick={() => {
+              setFormError(null);
+              setRecoveryOpen(true);
+            }}
+          >
+            Забыли пароль?
+          </button>
+        )}
       </form>
     </section>
   );
