@@ -7,6 +7,7 @@ import type {
   PreferencesDto,
   WorkspaceDto,
 } from "@/shared/api/types";
+import type { BlockKind } from "@/entities/course/model/types";
 import {
   readLocalStorage,
   readLocalStorageJson,
@@ -156,66 +157,6 @@ export function shouldMigrateAnonymousState(userId: string) {
   if (migrationComplete(CORE_MIGRATION_PREFIX, userId)) return false;
   const owner = readLocalStorage(ACCOUNT_CACHE_OWNER_KEY);
   return !owner || owner === userId;
-}
-
-export function resolveNoteConflict(
-  local: Pick<BlockNoteEntry, "updatedAt">,
-  remote: Pick<BlockNoteDto, "updatedAt">,
-): NoteConflictWinner {
-  return local.updatedAt > remote.updatedAt ? "local" : "remote";
-}
-
-export function planNoteMigration(
-  local: BlockNoteEntry[],
-  remote: BlockNoteDto[],
-) {
-  const remoteById = new Map(remote.map((item) => [item.id, item]));
-  return local.filter((note) => {
-    const serverNote = remoteById.get(note.id);
-    return (
-      !serverNote ||
-      resolveNoteConflict(note, serverNote) === "local"
-    );
-  });
-}
-
-export function collectImportantMigrationTargets(
-  local: ImportantBlock[],
-  remote: ImportantBlockDto[],
-  bookmarks: BookmarkDto[],
-) {
-  const remoteIds = new Set(remote.map((item) => item.id));
-  const targets = new Map<string, { topicId: string; blockIndex: number }>();
-
-  for (const item of local) {
-    if (!remoteIds.has(item.id)) {
-      targets.set(item.id, {
-        topicId: item.topicId,
-        blockIndex: item.blockIndex,
-      });
-    }
-  }
-
-  for (const bookmark of bookmarks) {
-    if (!bookmark.kind.startsWith("important:")) continue;
-    const address = parseContentBlockId(bookmark.contentBlockId);
-    if (!address) continue;
-    targets.set(
-      address.topicId + "::" + String(address.blockIndex),
-      address,
-    );
-  }
-
-  return [...targets.values()];
-}
-
-export function parseContentBlockId(contentBlockId: string) {
-  const separator = contentBlockId.lastIndexOf("::");
-  if (separator <= 0) return null;
-  const topicId = contentBlockId.slice(0, separator);
-  const blockIndex = Number(contentBlockId.slice(separator + 2));
-  if (!topicId || !Number.isInteger(blockIndex) || blockIndex < 0) return null;
-  return { topicId, blockIndex };
 }
 
 function parseReadingBlockId(value: string) {
