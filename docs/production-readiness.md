@@ -91,7 +91,9 @@ VISUALMATH_E2E_API_BASE_URL=http://127.0.0.1:8080 pnpm test:e2e:backend
 
 The integrated backend must match the current release-gate contract. The frontend suite must not invent or mock replacement endpoints for this gate.
 
-PR CI contains a separate `Backend E2E` workflow. It runs this suite only when the repository variable `VISUALMATH_E2E_API_BASE_URL` is configured with an accessible release-gate/staging backend URL. When the variable is absent, the workflow emits an explicit notice and skips the real-backend job. Therefore, frontend CI success by itself must not be reported as proof that the backend-integrated suite executed.
+PR CI contains a separate `Backend E2E` workflow. It runs this suite only when the repository variable `VISUALMATH_E2E_API_BASE_URL` is configured with an accessible staging backend URL. When the variable is absent, that convenience workflow explicitly skips the browser job, so its green badge is not release evidence.
+
+For an actual release there is a separate `Release Gate` workflow. It runs manually or on `v*` tags, requires `VISUALMATH_E2E_API_BASE_URL`, requires that URL to use HTTPS, and fails instead of skipping when staging/release-gate backend access is not configured. A release should not be cut until this workflow is green.
 
 ## Auth/security acceptance
 

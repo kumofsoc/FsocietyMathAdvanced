@@ -148,7 +148,9 @@ Real-backend E2E:
 VISUALMATH_E2E_API_BASE_URL=http://127.0.0.1:8080 pnpm test:e2e:backend
 ```
 
-PR CI also contains a separate `Backend E2E` workflow. It executes the same suite when the repository variable `VISUALMATH_E2E_API_BASE_URL` points to an accessible release-gate/staging backend. If the variable is not configured, the workflow reports that the real-backend job is skipped; a green frontend CI alone is not evidence that the backend-integrated suite ran.
+PR CI also contains a convenience `Backend E2E` workflow. It executes the same suite when the repository variable `VISUALMATH_E2E_API_BASE_URL` points to an accessible staging backend; without that variable it skips the browser job.
+
+The separate `Release Gate` workflow is strict: manual runs and `v*` tags fail if the staging backend URL is missing or non-HTTPS, and then run the real-backend Playwright suite. Use that workflow as the integration proof before a production release.
 
 Backend contract baseline verified by the current frontend integration:
 
