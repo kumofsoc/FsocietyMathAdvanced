@@ -65,6 +65,7 @@ import {
 } from "@/features/personalization/model/preferencesStorage";
 import { useAppShellStore } from "@/app/store/useAppShellStore";
 import { useAuthStore } from "@/features/auth/model/authSession";
+import { ACCOUNT_CACHE_OWNER_KEY } from "@/features/sync/model/accountCache";
 
 const MIGRATION_VERSION = 2;
 const CORE_MIGRATION_PREFIX =
@@ -75,8 +76,6 @@ const IMPORTANT_MIGRATION_PREFIX =
   "visualmath-important-blocks-migration-v" + MIGRATION_VERSION + "::";
 const MIGRATION_STAGE_PREFIX =
   "visualmath-backend-migration-stage-v" + MIGRATION_VERSION + "::";
-
-export const ACCOUNT_CACHE_OWNER_KEY = "visualmath-account-cache-owner-v1";
 
 const syncInFlightByUser = new Map<string, Promise<UserStateSyncResult>>();
 let syncChain: Promise<void> = Promise.resolve();

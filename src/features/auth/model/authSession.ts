@@ -8,6 +8,7 @@ import {
   isBackendConfigured,
   setAccessToken,
 } from "@/shared/api/client";
+import { clearVisibleAccountCacheIfOwned } from "@/features/sync/model/accountCache";
 import type {
   BootstrapCapabilitiesDto,
   BootstrapDto,
@@ -92,6 +93,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       try {
         const restored = await bootstrapBackendSession();
         if (!restored) {
+          clearVisibleAccountCacheIfOwned();
           set({
             status: "anonymous",
             user: null,
@@ -206,6 +208,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     await api.auth.logout();
+    clearVisibleAccountCacheIfOwned();
     set({
       status: "anonymous",
       user: null,
@@ -240,6 +243,7 @@ export function installAuthSessionListener() {
     );
     const state = useAuthStore.getState();
     if (!authenticated && state.status === "authenticated") {
+      clearVisibleAccountCacheIfOwned();
       useAuthStore.setState({
         status: "anonymous",
         user: null,
