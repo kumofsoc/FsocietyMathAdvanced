@@ -23,6 +23,8 @@ jobs:
       - run: pnpm test
       - run: pnpm typecheck
       - name: Verify real-backend E2E test registration
+        env:
+          VISUALMATH_E2E_API_BASE_URL: http://127.0.0.1:65535
         run: |
           pnpm exec playwright test -c playwright.backend.config.ts --list | tee /tmp/backend-e2e-list.txt
           grep -Fq "session management revokes another device without ending the current one" /tmp/backend-e2e-list.txt
