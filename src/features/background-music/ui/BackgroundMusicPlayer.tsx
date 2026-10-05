@@ -11,6 +11,7 @@ import {
   type StoredBackgroundTrack,
 } from "@/lib/backgroundAudio";
 import { useAuthStore } from "@/features/auth/model/authSession";
+import { api, getAccessTokenSnapshot } from "@/shared/api/client";
 import {
   readLocalStorage,
   removeLocalStorage,
@@ -182,6 +183,47 @@ export function BackgroundMusicPlayer() {
       }
     };
   }, [tracks, currentTrackId]);
+
+  useEffect(() => {
+    const currentTrack =
+      tracks.find((track) => track.id === currentTrackId) ?? null;
+    if (
+      !playing ||
+      currentTrack?.source !== "server" ||
+      authStatus !== "authenticated"
+    ) {
+      return;
+    }
+
+    let cancelled = false;
+    let timer: number | null = null;
+
+    const scheduleRefresh = () => {
+      const expiresAt = Date.parse(
+        getAccessTokenSnapshot().accessExpiresAt ?? "",
+      );
+      const delay = Number.isFinite(expiresAt)
+        ? Math.max(5_000, expiresAt - Date.now() - 60_000)
+        : 5 * 60_000;
+
+      timer = window.setTimeout(() => {
+        void api.auth
+          .refresh()
+          .catch((error) => {
+            console.warn("[VisualMath] media session refresh failed", error);
+          })
+          .finally(() => {
+            if (!cancelled) scheduleRefresh();
+          });
+      }, delay);
+    };
+
+    scheduleRefresh();
+    return () => {
+      cancelled = true;
+      if (timer !== null) window.clearTimeout(timer);
+    };
+  }, [authStatus, currentTrackId, playing, tracks]);
 
   useEffect(() => {
     const audio = audioRef.current;
