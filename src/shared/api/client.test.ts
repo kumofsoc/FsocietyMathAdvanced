@@ -353,3 +353,28 @@ describe("media transfer timeout policy", () => {
     await upload;
   });
 });
+
+
+describe("native media playback URL", () => {
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("builds the audio content URL without fetching a blob", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const { api } = await import("./client");
+
+    expect(
+      api.media.audioContentUrl("10000000-0000-4000-8000-000000000101"),
+    ).toBe(
+      "https://api.example.test/api/v1/me/media/audio/10000000-0000-4000-8000-000000000101/content",
+    );
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+});

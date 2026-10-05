@@ -462,12 +462,16 @@ export async function clearBackgroundTracks(
   }
 }
 
+export function resolveBackgroundTrackStreamUrl(track: StoredBackgroundTrack) {
+  return track.source === "server" ? api.media.audioContentUrl(track.id) : null;
+}
+
 export async function resolveBackgroundTrackBlob(track: StoredBackgroundTrack) {
-  if (track.source === "local") {
-    if (!track.blob) throw new Error("Local audio blob is missing.");
-    return track.blob;
+  if (track.source !== "local") {
+    throw new Error("Server audio must use native streaming.");
   }
-  return api.media.audioContent(track.id);
+  if (!track.blob) throw new Error("Local audio blob is missing.");
+  return track.blob;
 }
 
 export function musicCommand(command: BackgroundMusicCommand) {

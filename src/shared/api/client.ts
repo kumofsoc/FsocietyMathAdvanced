@@ -686,6 +686,10 @@ export const api = {
       request<void>("/api/v1/me/media/audio/" + encodeURIComponent(id), {
         method: "DELETE",
       }),
+    audioContentUrl: (id: string) =>
+      backendUrl(
+        "/api/v1/me/media/audio/" + encodeURIComponent(id) + "/content",
+      ),
     audioContent: (id: string) =>
       requestBlob(
         "/api/v1/me/media/audio/" + encodeURIComponent(id) + "/content",

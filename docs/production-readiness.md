@@ -69,6 +69,8 @@ The API base is an origin only. Do not append `/api`.
 
 `VITE_API_BASE_URL` may be empty for a pure local-first build.
 
+For authenticated server-backed audio, auth responses also set a short-lived HttpOnly cookie scoped only to the media path. The player assigns the server content URL directly to the native `<audio>` element, so the browser can use HTTP Range requests for metadata loading and seeking instead of first downloading the whole track into a Blob. Local IndexedDB tracks continue to use Blob/ObjectURL playback.
+
 ## Release commands
 
 Required frontend commands:

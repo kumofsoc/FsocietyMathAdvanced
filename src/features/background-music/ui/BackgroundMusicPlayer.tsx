@@ -4,6 +4,7 @@ import {
   MUSIC_COMMAND_EVENT,
   MUSIC_STATE_EVENT,
   resolveBackgroundTrackBlob,
+  resolveBackgroundTrackStreamUrl,
   type BackgroundMusicCommand,
   type BackgroundMusicState,
   type BackgroundStorageMode,
@@ -150,6 +151,14 @@ export function BackgroundMusicPlayer() {
     }
 
     writeLocalStorage(CURRENT_TRACK_KEY, track.id);
+
+    const streamUrl = resolveBackgroundTrackStreamUrl(track);
+    if (streamUrl) {
+      setTrackUrl(streamUrl);
+      return () => {
+        cancelled = true;
+      };
+    }
 
     void resolveBackgroundTrackBlob(track)
       .then((blob) => {

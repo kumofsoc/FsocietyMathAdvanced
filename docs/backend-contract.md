@@ -255,7 +255,7 @@ Authenticated and `mediaAudio === true`:
 - `PUT /api/v1/me/media/audio/order`
 - `PATCH /api/v1/me/media/audio/{id}`
 - `DELETE /api/v1/me/media/audio/{id}`
-- `GET /api/v1/me/media/audio/{id}/content`
+- `GET /api/v1/me/media/audio/{id}/content` (Bearer or narrow HttpOnly media-access cookie; byte-range capable for native playback)
 
 Playback uses authenticated fetch -> Blob -> ObjectURL. Object URLs are revoked when the selected track changes or the player unmounts.
 
