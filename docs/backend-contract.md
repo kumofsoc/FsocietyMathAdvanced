@@ -8,7 +8,7 @@ Backend release gate used for this integration:
 
 ```text
 kumofsoc/FsocietyMathAdvancedBackend
-99ef32393833dd10cc88714b66c15eda314f2fb9
+a1096551363151cf5d2ac3a7ab53ce54500c4180
 ```
 
 ## Runtime configuration
@@ -54,6 +54,16 @@ Security rules:
 - normal protected JSON/API calls use Authorization headers;
 - native server audio uses the narrow HttpOnly media-access cookie on the existing private content URL;
 - auth tokens are never embedded in media URLs.
+
+## Account lifecycle
+
+Authenticated account-management endpoints:
+
+- `PUT /api/v1/me/password` — current-password-confirmed password rotation; backend revokes all sessions/tokens and the frontend clears visible account cache before returning to anonymous/login state;
+- `GET /api/v1/me/account/export` — canonical JSON portability snapshot;
+- `DELETE /api/v1/me/account` — current-password-confirmed destructive account removal.
+
+These operations use the same bearer/session boundary as the rest of `/api/v1/me`. Password rotation and deletion deliberately invalidate the current browser session instead of silently issuing replacement credentials.
 
 ## Session bootstrap
 
@@ -302,4 +312,4 @@ Real-backend mode:
 VISUALMATH_E2E_API_BASE_URL=http://127.0.0.1:8080 pnpm test:e2e:backend
 ```
 
-The backend-integrated suite covers registration, bootstrap, preferences, progress/reading, saved topic/resume, notes, Important Blocks, reload/session restore, logout/login, cross-browser account state, one 401 -> one refresh -> retry, backend outage fallback, and capability-gated media CRUD.
+The backend-integrated suite covers registration, bootstrap, preferences, progress/reading, saved topic/resume, notes, Important Blocks, reload/session restore, logout/login, cross-browser account state, one 401 -> one refresh -> retry, backend outage fallback, capability-gated media CRUD, account export/delete contracts, and password rotation with old-session/old-password invalidation.

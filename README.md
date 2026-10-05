@@ -54,6 +54,16 @@ Bearer-копия access token, которой пользуется JavaScript A
 
 Первая anonymous -> account migration выполняется один раз на user ID. После неё server state является canonical.
 
+## Account security and lifecycle
+
+Authenticated account UI now supports:
+
+- password rotation through `PUT /api/v1/me/password`; success revokes every backend session and returns the browser to login;
+- canonical JSON portability export through `GET /api/v1/me/account/export`;
+- password-confirmed self-deletion through `DELETE /api/v1/me/account`.
+
+The password-change flow never keeps a stale access token alive after success. Export is server-canonical and excludes password/session secrets and internal media object keys.
+
 ## Notes
 
 Block Notes используют dedicated backend API:
@@ -156,7 +166,7 @@ Backend contract baseline verified by the current frontend integration:
 
 ```text
 kumofsoc/FsocietyMathAdvancedBackend
-99ef32393833dd10cc88714b66c15eda314f2fb9
+a1096551363151cf5d2ac3a7ab53ce54500c4180
 ```
 
 ## Основные routes продукта
