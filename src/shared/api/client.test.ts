@@ -315,7 +315,7 @@ describe("media transfer timeout policy", () => {
   });
 
   it("does not apply the short API timeout to audio upload", async () => {
-    let signal: AbortSignal | null = null;
+    const captured = { signal: null as AbortSignal | null };
     let resolveResponse!: (response: Response) => void;
     const response = new Promise<Response>((resolve) => {
       resolveResponse = resolve;
@@ -324,7 +324,7 @@ describe("media transfer timeout policy", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
-        signal = init?.signal as AbortSignal;
+        captured.signal = init?.signal as AbortSignal;
         return response;
       }),
     );
@@ -336,7 +336,7 @@ describe("media transfer timeout policy", () => {
     );
 
     await vi.advanceTimersByTimeAsync(6000);
-    expect(signal?.aborted).toBe(false);
+    expect(captured.signal?.aborted).toBe(false);
 
     resolveResponse(
       jsonResponse({
