@@ -176,7 +176,7 @@ function AccountAuthGate() {
                 onChange={(event) => setDisplayName(event.target.value)}
                 autoComplete="name"
                 required
-                minLength={2}
+                minLength={1}
                 maxLength={80}
               />
             </label>
@@ -189,7 +189,7 @@ function AccountAuthGate() {
                 autoComplete="username"
                 required
                 minLength={3}
-                maxLength={32}
+                maxLength={30}
               />
             </label>
           </>
