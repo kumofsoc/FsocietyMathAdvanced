@@ -110,6 +110,7 @@ Local:
 ```env
 VITE_API_BASE_URL=http://localhost:8080
 VITE_API_TIMEOUT_MS=12000
+VITE_MEDIA_TRANSFER_TIMEOUT_MS=600000
 ```
 
 Production:
@@ -117,6 +118,7 @@ Production:
 ```env
 VITE_API_BASE_URL=https://<final-visualmath-origin>
 VITE_API_TIMEOUT_MS=12000
+VITE_MEDIA_TRANSFER_TIMEOUT_MS=600000
 VITE_APP_RELEASE=<git-sha>
 ```
 

@@ -50,6 +50,7 @@ Local:
 ```env
 VITE_API_BASE_URL=http://localhost:8080
 VITE_API_TIMEOUT_MS=12000
+VITE_MEDIA_TRANSFER_TIMEOUT_MS=600000
 ```
 
 Production:
@@ -57,11 +58,14 @@ Production:
 ```env
 VITE_API_BASE_URL=https://<final-visualmath-origin>
 VITE_API_TIMEOUT_MS=12000
+VITE_MEDIA_TRANSFER_TIMEOUT_MS=600000
 VITE_APP_RELEASE=<git-sha>
 VITE_ERROR_REPORTING_URL=https://<optional-error-ingestion-origin>
 ```
 
 The API base is an origin only. Do not append `/api`.
+
+`VITE_API_TIMEOUT_MS` is for normal JSON API calls. Audio upload/content transfer uses the separate `VITE_MEDIA_TRANSFER_TIMEOUT_MS` so the backend's 120 MiB media contract is not accidentally reduced to the normal 12-second client timeout.
 
 `VITE_API_BASE_URL` may be empty for a pure local-first build.
 

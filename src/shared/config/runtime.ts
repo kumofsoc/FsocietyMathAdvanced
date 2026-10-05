@@ -1,6 +1,7 @@
 export type RuntimeConfig = {
   apiBaseUrl: string;
   apiTimeoutMs: number;
+  mediaTransferTimeoutMs: number;
   errorReportingUrl: string;
   appRelease: string;
 };
@@ -17,14 +18,21 @@ function normalizeOptionalUrl(value: string | undefined) {
   }
 }
 
-function normalizeTimeout(value: string | undefined) {
-  const parsed = Number(value ?? 12000);
-  return Number.isFinite(parsed) && parsed >= 1000 ? parsed : 12000;
+function normalizeTimeout(
+  value: string | undefined,
+  fallback: number,
+) {
+  const parsed = Number(value ?? fallback);
+  return Number.isFinite(parsed) && parsed >= 1000 ? parsed : fallback;
 }
 
 export const runtimeConfig: RuntimeConfig = {
   apiBaseUrl: normalizeOptionalUrl(import.meta.env.VITE_API_BASE_URL),
-  apiTimeoutMs: normalizeTimeout(import.meta.env.VITE_API_TIMEOUT_MS),
+  apiTimeoutMs: normalizeTimeout(import.meta.env.VITE_API_TIMEOUT_MS, 12000),
+  mediaTransferTimeoutMs: normalizeTimeout(
+    import.meta.env.VITE_MEDIA_TRANSFER_TIMEOUT_MS,
+    600000,
+  ),
   errorReportingUrl: normalizeOptionalUrl(import.meta.env.VITE_ERROR_REPORTING_URL),
   appRelease: (import.meta.env.VITE_APP_RELEASE ?? "dev").trim() || "dev",
 };

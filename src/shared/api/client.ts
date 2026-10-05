@@ -33,6 +33,7 @@ import type {
 
 const API_BASE_URL = runtimeConfig.apiBaseUrl;
 const API_TIMEOUT_MS = runtimeConfig.apiTimeoutMs;
+const MEDIA_TRANSFER_TIMEOUT_MS = runtimeConfig.mediaTransferTimeoutMs;
 
 let accessToken: string | null = null;
 let accessExpiresAt: string | null = null;
@@ -659,10 +660,14 @@ export const api = {
     uploadAudio: (file: File) => {
       const body = new FormData();
       body.set("file", file, file.name);
-      return request<MediaAudioTrackDto>("/api/v1/me/media/audio", {
-        method: "POST",
-        body,
-      });
+      return request<MediaAudioTrackDto>(
+        "/api/v1/me/media/audio",
+        {
+          method: "POST",
+          body,
+        },
+        { timeoutMs: MEDIA_TRANSFER_TIMEOUT_MS },
+      );
     },
     renameAudio: (id: string, name: string) =>
       request<MediaAudioTrackDto>(
@@ -684,6 +689,8 @@ export const api = {
     audioContent: (id: string) =>
       requestBlob(
         "/api/v1/me/media/audio/" + encodeURIComponent(id) + "/content",
+        {},
+        { timeoutMs: MEDIA_TRANSFER_TIMEOUT_MS },
       ),
   },
   activity: {

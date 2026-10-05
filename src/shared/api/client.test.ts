@@ -4,6 +4,7 @@ vi.mock("@/shared/config/runtime", () => ({
   runtimeConfig: {
     apiBaseUrl: "https://api.example.test",
     apiTimeoutMs: 5000,
+    mediaTransferTimeoutMs: 600000,
     errorReportingUrl: "",
     appRelease: "test",
   },
@@ -297,5 +298,58 @@ describe("durable logout intent", () => {
     expect(loggedIn.user.id).toBe("user-b");
     expect(localStorage.getItem(logoutPendingKey)).toBeNull();
     expect(client.getAccessTokenSnapshot().accessToken).toBe("token-b");
+  });
+});
+
+
+describe("media transfer timeout policy", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("does not apply the short API timeout to audio upload", async () => {
+    let signal: AbortSignal | null = null;
+    let resolveResponse!: (response: Response) => void;
+    const response = new Promise<Response>((resolve) => {
+      resolveResponse = resolve;
+    });
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        signal = init?.signal as AbortSignal;
+        return response;
+      }),
+    );
+
+    const { api, setAccessToken } = await import("./client");
+    setAccessToken("token", "2026-10-05T14:00:00Z");
+    const upload = api.media.uploadAudio(
+      new File(["ID3audio"], "track.mp3", { type: "audio/mpeg" }),
+    );
+
+    await vi.advanceTimersByTimeAsync(6000);
+    expect(signal?.aborted).toBe(false);
+
+    resolveResponse(
+      jsonResponse({
+        id: "10000000-0000-4000-8000-000000000101",
+        name: "track.mp3",
+        type: "audio/mpeg",
+        sizeBytes: 8,
+        position: 0,
+        contentUrl: "/api/v1/me/media/audio/10000000-0000-4000-8000-000000000101/content",
+        createdAt: "2026-10-05T13:00:00Z",
+        updatedAt: "2026-10-05T13:00:00Z",
+      }),
+    );
+    await upload;
   });
 });
