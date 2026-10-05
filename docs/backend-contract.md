@@ -8,7 +8,7 @@ Backend release gate used for this integration:
 
 ```text
 kumofsoc/FsocietyMathAdvancedBackend
-a1096551363151cf5d2ac3a7ab53ce54500c4180
+7d605e5e4a5066509b7996d95d226d41871210ca
 ```
 
 ## Runtime configuration
@@ -59,6 +59,8 @@ Security rules:
 
 Authenticated account-management endpoints:
 
+- `GET /api/v1/me/sessions` — active unexpired session metadata with a current-session marker;
+- `DELETE /api/v1/me/sessions/{sessionId}` — idempotent owner-scoped revoke; self-revoke clears the current browser auth state;
 - `PUT /api/v1/me/password` — current-password-confirmed password rotation; backend revokes all sessions/tokens and the frontend clears visible account cache before returning to anonymous/login state;
 - `GET /api/v1/me/account/export` — canonical JSON portability snapshot;
 - `DELETE /api/v1/me/account` — current-password-confirmed destructive account removal.

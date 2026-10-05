@@ -58,6 +58,7 @@ Bearer-копия access token, которой пользуется JavaScript A
 
 Authenticated account UI now supports:
 
+- active-device/session review through `GET /api/v1/me/sessions` and owner-scoped revoke through `DELETE /api/v1/me/sessions/{sessionId}`;
 - password rotation through `PUT /api/v1/me/password`; success revokes every backend session and returns the browser to login;
 - canonical JSON portability export through `GET /api/v1/me/account/export`;
 - password-confirmed self-deletion through `DELETE /api/v1/me/account`.
@@ -166,7 +167,7 @@ Backend contract baseline verified by the current frontend integration:
 
 ```text
 kumofsoc/FsocietyMathAdvancedBackend
-a1096551363151cf5d2ac3a7ab53ce54500c4180
+7d605e5e4a5066509b7996d95d226d41871210ca
 ```
 
 ## Основные routes продукта

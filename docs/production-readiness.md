@@ -6,7 +6,7 @@ Backend contract target for the current MVP integration:
 
 ```text
 kumofsoc/FsocietyMathAdvancedBackend
-a1096551363151cf5d2ac3a7ab53ce54500c4180
+7d605e5e4a5066509b7996d95d226d41871210ca
 ```
 
 ## Current status
@@ -109,6 +109,8 @@ For an actual release there is a separate `Release Gate` workflow. It runs manua
 - account-bound durable pending mutations are retained for retry on that same user's next login instead of being exposed as anonymous content;
 - no auth token is persisted to localStorage/sessionStorage/IndexedDB;
 - no token is placed in an audio/content URL;
+- active-session review exposes only device/IP/timestamp metadata and owner-scoped revoke never exposes token material;
+- revoking another device preserves the current login, while self-revoke clears the local authenticated state;
 - password change requires the current password and success invalidates the local access token plus every server session;
 - account export is authenticated and downloaded as canonical server JSON without auth/storage secrets;
 - account deletion requires the current password and clears deleted-account browser state.
@@ -186,7 +188,8 @@ The real-backend Playwright suite verifies:
 16. media upload/content/rename/reorder/delete when the capability flag is true;
 17. logout -> account-derived local cache is no longer visible to anonymous mode;
 18. account export uses the authenticated canonical backend endpoint;
-19. password rotation revokes the current session, rejects the old password and accepts the new password.
+19. password rotation revokes the current session, rejects the old password and accepts the new password;
+20. two active browser sessions are listed, one can revoke the other, the current session stays active, and the revoked browser cannot restore its session.
 
 ## Security headers
 
