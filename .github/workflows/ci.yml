@@ -22,6 +22,13 @@ jobs:
       - run: pnpm lint
       - run: pnpm test
       - run: pnpm typecheck
+      - name: Verify real-backend E2E test registration
+        run: |
+          pnpm exec playwright test -c playwright.backend.config.ts --list | tee /tmp/backend-e2e-list.txt
+          grep -Fq "session management revokes another device without ending the current one" /tmp/backend-e2e-list.txt
+          grep -Fq "password change revokes the current session and old credentials" /tmp/backend-e2e-list.txt
+          grep -Fq "account export downloads canonical server snapshot without secrets" /tmp/backend-e2e-list.txt
+          grep -Fq "self deletion invalidates the account and all credentials" /tmp/backend-e2e-list.txt
       - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
