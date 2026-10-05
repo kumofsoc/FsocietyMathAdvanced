@@ -214,7 +214,8 @@ function AccountAuthGate() {
             onChange={(event) => setPassword(event.target.value)}
             autoComplete={mode === "login" ? "current-password" : "new-password"}
             required
-            minLength={8}
+            minLength={mode === "register" ? 10 : undefined}
+            maxLength={256}
           />
         </label>
 
