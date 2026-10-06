@@ -2,16 +2,23 @@ import { expect, test } from "@playwright/test";
 
 test("production image renders under its Content-Security-Policy", async ({ page }) => {
   const cspViolations: string[] = [];
+  const runtimeErrors: string[] = [];
 
+  page.on("pageerror", (error) => {
+    runtimeErrors.push(error.stack ?? error.message);
+  });
   page.on("console", (message) => {
+    if (message.type() !== "error") return;
+    const text = message.text();
     if (
-      message.type() === "error" &&
       /content security policy|refused to (load|execute|apply|connect)/i.test(
-        message.text(),
+        text,
       )
     ) {
-      cspViolations.push(message.text());
+      cspViolations.push(text);
+      return;
     }
+    runtimeErrors.push(text);
   });
 
   const response = await page.goto("/");
@@ -33,5 +40,6 @@ test("production image renders under its Content-Security-Policy", async ({ page
   await page.goto("/#map");
   await expect(page.locator(".knowledge-map-page")).toBeVisible();
 
+  expect(runtimeErrors).toEqual([]);
   expect(cspViolations).toEqual([]);
 });
