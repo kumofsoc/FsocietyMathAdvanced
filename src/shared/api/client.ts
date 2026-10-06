@@ -102,7 +102,7 @@ function invalidateAuthenticatedSession() {
   setAccessToken(null);
 }
 
-const { backendUrl, rawRequest, rawBlobRequest } = createApiTransport({
+const transport = createApiTransport({
   baseUrl: API_BASE_URL,
   timeoutMs: API_TIMEOUT_MS,
   getAuthorization: () =>
@@ -110,6 +110,24 @@ const { backendUrl, rawRequest, rawBlobRequest } = createApiTransport({
       ? "Bearer " + accessToken
       : null,
 });
+
+const backendUrl = transport.backendUrl;
+
+function rawRequest<T>(
+  path: string,
+  init: RequestInit = {},
+  options: RequestOptions = {},
+) {
+  return transport.rawRequest<T>(path, init, options);
+}
+
+function rawBlobRequest(
+  path: string,
+  init: RequestInit = {},
+  options: RequestOptions = {},
+) {
+  return transport.rawBlobRequest(path, init, options);
+}
 
 async function withAuthCookieLock<T>(work: () => Promise<T>): Promise<T> {
   if (
