@@ -11,11 +11,9 @@ import { chapters, topicMeta } from "@/data/courseMeta";
 import { loadCourseTopic } from "@/data/course/topicLoaders";
 import { practiceTaskIdsByTopic } from "@/data/practiceMeta";
 import {
-  LEARNING_EVENT,
   loadReadingBlocks,
   loadReadingProgress,
   loadSet,
-  markReadingBlock,
   saveReadingProgress,
   saveSet,
   SOLVED_KEY,
@@ -31,19 +29,20 @@ import { toLayeredTopic } from "@/entities/course/model/learning-architecture/ad
 import { linearFoundationBlueprints } from "@/data/learning-architecture/linear-foundations";
 import { TopicLabInsert, TopicVisualInsert } from "@/visualizations/registry/TopicVisualRegistry";
 import { RouteSkeleton } from "@/shared/ui/RouteSkeleton";
-import { loadTopicResume, saveTopicResume } from "@/features/learning/model/topicResume";
 import { loadSavedTopicIds, SAVED_TOPICS_EVENT, SAVED_TOPICS_KEY, toggleSavedTopic } from "@/features/saved-topics/model/savedTopics";
 import { TopicLocalSearch } from "@/features/topic-search/ui/TopicLocalSearch";
-import { parseVisualMathHash } from "@/shared/lib/blockDeepLink";
 import { ReadingWidthControl } from "@/features/reading-width/ui/ReadingWidthControl";
 import {
   CONTENT_BLOCK_LABELS,
   ContentCard,
   displayBlockTitle,
 } from "@/features/topic-content/ui/ContentCard";
-import { BLOCK_TARGET_KEY } from "@/features/topic-content/model/dependencyNavigation";
 import { useAppShellStore } from "@/app/store/useAppShellStore";
 import { loadReadingWidth, saveReadingWidth, type ReadingWidth } from "@/features/reading-width/model/readingWidth";
+import {
+  initialTopicResumeBlock,
+  useTopicReadingLifecycle,
+} from "@/features/topic-reading/model/useTopicReadingLifecycle";
 
 const PracticePanel = lazy(() =>
   import("@/features/learning/ui/PracticePanel").then((module) => ({ default: module.PracticePanel })),
@@ -264,11 +263,9 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   const theorySentinel = useRef<HTMLDivElement>(null);
   const outlineRef = useRef<HTMLDivElement>(null);
   const [activeBlock, setActiveBlock] = useState(0);
-  const [resumeBlockIndex, setResumeBlockIndex] = useState<number | null>(() => {
-    const saved = loadTopicResume(topic.id);
-    if (!saved || saved.blockIndex >= topic.blocks.length) return null;
-    return saved.blockIndex;
-  });
+  const [resumeBlockIndex, setResumeBlockIndex] = useState<number | null>(() =>
+    initialTopicResumeBlock(topic),
+  );
   const [theoryRead, setTheoryRead] = useState(() => loadSet(THEORY_KEY).has(topic.id));
   const [readingRatio, setReadingRatio] = useState(() =>
     theoryRead ? 1 : (loadReadingProgress()[topic.id] ?? 0),
@@ -300,211 +297,18 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
     };
   }, [topic.id]);
 
-  useEffect(() => {
-    let timer: number | null = null;
-
-    const scrollToIndex = (index: number, behavior: ScrollBehavior = "smooth") => {
-      if (!Number.isInteger(index) || index < 0 || index >= topic.blocks.length) return;
-      if (timer !== null) window.clearTimeout(timer);
-      timer = window.setTimeout(() => {
-        document
-          .getElementById("block-" + topic.id + "-" + index)
-          ?.scrollIntoView({ behavior, block: "start" });
-        timer = null;
-      }, 140);
-    };
-
-    const applyHashTarget = () => {
-      const parsed = parseVisualMathHash(window.location.hash);
-      if (parsed.topicId !== topic.id || parsed.blockIndex === null) return false;
-      scrollToIndex(parsed.blockIndex, "smooth");
-      return true;
-    };
-
-    if (!applyHashTarget()) {
-      const target = sessionStorage.getItem(BLOCK_TARGET_KEY);
-      if (target) {
-        const [targetTopic, rawIndex] = target.split("::");
-        if (targetTopic === topic.id) {
-          sessionStorage.removeItem(BLOCK_TARGET_KEY);
-          scrollToIndex(Number(rawIndex), "smooth");
-        }
-      }
-    }
-
-    window.addEventListener("hashchange", applyHashTarget);
-    return () => {
-      window.removeEventListener("hashchange", applyHashTarget);
-      if (timer !== null) window.clearTimeout(timer);
-    };
-  }, [topic.id, topic.blocks.length]);
-
-  useEffect(() => {
-    setActiveBlock(0);
-    let observer: IntersectionObserver | null = null;
-    let resumeTimer: number | null = null;
-    let resumeCandidate = -1;
-
-    const scheduleResumePersist = (index: number) => {
-      if (index === resumeCandidate) return;
-      resumeCandidate = index;
-
-      if (resumeTimer !== null) {
-        window.clearTimeout(resumeTimer);
-      }
-
-      resumeTimer = window.setTimeout(() => {
-        resumeTimer = null;
-        if (document.visibilityState !== "visible") return;
-        if (resumeCandidate < 0 || resumeCandidate >= topic.blocks.length) return;
-
-        if (saveTopicResume(topic.id, resumeCandidate)) {
-          setResumeBlockIndex(resumeCandidate);
-        }
-      }, 1000);
-    };
-
-    const frame = requestAnimationFrame(() => {
-      const nodes = Array.from(
-        document.querySelectorAll<HTMLElement>(
-          '[data-topic-block="' + topic.id + '"]',
-        ),
-      );
-      if (!nodes.length) return;
-
-      observer = new IntersectionObserver(
-        (entries) => {
-          const visible = entries
-            .filter((entry) => entry.isIntersecting)
-            .sort(
-              (a, b) =>
-                Math.abs(a.boundingClientRect.top) -
-                Math.abs(b.boundingClientRect.top),
-            )[0];
-          if (!visible) return;
-
-          const index = Number(
-            (visible.target as HTMLElement).dataset.blockIndex ?? "0",
-          );
-          setActiveBlock(index);
-          scheduleResumePersist(index);
-        },
-        {
-          rootMargin: "-18% 0px -64% 0px",
-          threshold: [0, 0.05, 0.2],
-        },
-      );
-
-      nodes.forEach((node) => observer?.observe(node));
-    });
-
-    return () => {
-      cancelAnimationFrame(frame);
-      observer?.disconnect();
-      if (resumeTimer !== null) {
-        window.clearTimeout(resumeTimer);
-      }
-    };
-  }, [topic.id, topic.blocks.length]);
-
-  useEffect(() => {
-    const sync = () => {
-      const complete = loadSet(THEORY_KEY).has(topic.id);
-      setTheoryRead(complete);
-      setReadingRatio(complete ? 1 : (loadReadingProgress()[topic.id] ?? 0));
-      setReadingBlocks(loadReadingBlocks());
-      setSolved(loadSet(SOLVED_KEY));
-    };
-    sync();
-
-    const refresh = () => sync();
-    window.addEventListener(LEARNING_EVENT, refresh);
-    return () => window.removeEventListener(LEARNING_EVENT, refresh);
-  }, [topic.id]);
-
-  useEffect(() => {
-    if (!tracksLearning) return;
-
-    const dwellTimers = new Map<Element, number>();
-    let observer: IntersectionObserver | null = null;
-
-    const cancelDwell = (target: Element) => {
-      const timer = dwellTimers.get(target);
-      if (timer !== undefined) {
-        window.clearTimeout(timer);
-        dwellTimers.delete(target);
-      }
-    };
-
-    const frame = requestAnimationFrame(() => {
-      const nodes = Array.from(
-        document.querySelectorAll<HTMLElement>(
-          '[data-topic-block="' + topic.id + '"]',
-        ),
-      );
-      if (!nodes.length) return;
-
-      observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            const enoughVisible =
-              entry.isIntersecting &&
-              (
-                entry.intersectionRatio >= 0.35 ||
-                entry.intersectionRect.height >= Math.min(320, window.innerHeight * 0.4)
-              );
-
-            if (!enoughVisible) {
-              cancelDwell(entry.target);
-              return;
-            }
-
-            if (dwellTimers.has(entry.target)) return;
-
-            const timer = window.setTimeout(() => {
-              dwellTimers.delete(entry.target);
-              if (document.visibilityState !== "visible") return;
-
-              const index = Number((entry.target as HTMLElement).dataset.blockIndex ?? "-1");
-              if (index < 0) return;
-
-              const ratio = markReadingBlock(topic.id, index, topic.blocks.length);
-              setReadingRatio((current) => Math.max(current, ratio));
-            }, 1200);
-
-            dwellTimers.set(entry.target, timer);
-          });
-        },
-        { threshold: [0.15, 0.35, 0.6] },
-      );
-
-      nodes.forEach((node) => observer?.observe(node));
-    });
-
-    return () => {
-      cancelAnimationFrame(frame);
-      observer?.disconnect();
-      dwellTimers.forEach((timer) => window.clearTimeout(timer));
-      dwellTimers.clear();
-    };
-  }, [topic.id, topic.blocks.length, tracksLearning]);
-
-  useEffect(() => {
-    const target = theorySentinel.current;
-    if (!tracksLearning || !target) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          setReachedTheoryEnd(true);
-        }
-      },
-      { threshold: 0.25 },
-    );
-
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, [topic.id, tracksLearning]);
+  useTopicReadingLifecycle({
+    topic,
+    tracksLearning,
+    theorySentinel,
+    setActiveBlock,
+    setResumeBlockIndex,
+    setTheoryRead,
+    setReadingRatio,
+    setReadingBlocks,
+    setSolved,
+    setReachedTheoryEnd,
+  });
 
   const taskIds = practiceTaskIdsByTopic[topic.id] ?? [];
   const progressBreakdown = useMemo(
