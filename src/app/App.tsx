@@ -182,9 +182,10 @@ export default function App() {
   });
   const {
     route,
-    routeRef,
     topbarVisible,
     openHomeAtTop,
+    revealTopbar,
+    scheduleTopbarHide,
   } = useAppNavigationLifecycle({
     readingFocusMode,
     setSidebarOpen,
