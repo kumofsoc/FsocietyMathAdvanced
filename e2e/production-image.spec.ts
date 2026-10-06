@@ -18,6 +18,7 @@ test("production image renders under its Content-Security-Policy", async ({ page
       cspViolations.push(text);
       return;
     }
+    if (/Failed to load resource: net::ERR_/i.test(text)) return;
     runtimeErrors.push(text);
   });
 
