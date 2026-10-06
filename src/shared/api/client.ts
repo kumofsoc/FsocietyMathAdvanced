@@ -1,5 +1,11 @@
 import { runtimeConfig } from "@/shared/config/runtime";
 import {
+  ApiError,
+  createApiTransport,
+  type TransportRequestOptions,
+} from "@/shared/api/transport";
+export { ApiError } from "@/shared/api/transport";
+import {
   readLocalStorage,
   removeLocalStorage,
   writeLocalStorage,
@@ -8,7 +14,6 @@ import type {
   AccountSessionListDto,
   ActivityHeatmapDto,
   ActivityStatsDto,
-  ApiErrorBody,
   AuthResponseDto,
   BackendHealthDto,
   BackendMetaDto,
@@ -49,38 +54,9 @@ let authGeneration = 0;
 
 export const AUTH_SESSION_EVENT = "visualmath:auth-session-change";
 
-type RequestOptions = {
-  auth?: boolean;
+type RequestOptions = TransportRequestOptions & {
   retryAuth?: boolean;
-  timeoutMs?: number;
 };
-
-export class ApiError extends Error {
-  status: number;
-  code?: string;
-  details?: unknown;
-  requestId?: string;
-  cause?: unknown;
-
-  constructor(
-    status: number,
-    payload: {
-      message: string;
-      code?: string;
-      details?: unknown;
-      requestId?: string;
-      cause?: unknown;
-    },
-  ) {
-    super(payload.message || "API request failed");
-    this.name = "ApiError";
-    this.status = status;
-    this.code = payload.code;
-    this.details = payload.details;
-    this.requestId = payload.requestId;
-    this.cause = payload.cause;
-  }
-}
 
 export function isBackendConfigured() {
   return Boolean(API_BASE_URL);
@@ -126,155 +102,14 @@ function invalidateAuthenticatedSession() {
   setAccessToken(null);
 }
 
-function backendUrl(path: string) {
-  return API_BASE_URL + path;
-}
-
-function normalizeErrorBody(payload: ApiErrorBody | null | undefined) {
-  const nested = payload?.error;
-  return {
-    code: nested?.code ?? payload?.code,
-    message: nested?.message ?? payload?.message ?? "API request failed",
-    details: nested?.details ?? payload?.details,
-  };
-}
-
-function composeSignal(
-  external: AbortSignal | null | undefined,
-  timeoutMs: number,
-) {
-  const controller = new AbortController();
-  const timer = globalThis.setTimeout(
-    () => controller.abort("timeout"),
-    timeoutMs,
-  );
-
-  const onAbort = () => controller.abort(external?.reason);
-  if (external) {
-    if (external.aborted) onAbort();
-    else external.addEventListener("abort", onAbort, { once: true });
-  }
-
-  return {
-    signal: controller.signal,
-    cleanup: () => {
-      globalThis.clearTimeout(timer);
-      external?.removeEventListener("abort", onAbort);
-    },
-  };
-}
-
-async function parsePayload(response: Response) {
-  if (response.status === 204) return null;
-  const text = await response.text();
-  if (!text) return null;
-  try {
-    return JSON.parse(text) as unknown;
-  } catch {
-    return text;
-  }
-}
-
-async function fetchResponse(
-  path: string,
-  init: RequestInit = {},
-  options: RequestOptions = {},
-) {
-  if (!API_BASE_URL) {
-    throw new ApiError(0, {
-      code: "backend_not_configured",
-      message: "VITE_API_BASE_URL is not configured.",
-    });
-  }
-
-  const headers = new Headers(init.headers);
-  headers.set("Accept", "application/json");
-  if (init.body && !(init.body instanceof FormData) && !headers.has("Content-Type")) {
-    headers.set("Content-Type", "application/json");
-  }
-  if (options.auth !== false && accessToken && explicitAuthPending === 0) {
-    headers.set("Authorization", "Bearer " + accessToken);
-  }
-
-  const timeoutMs = options.timeoutMs ?? API_TIMEOUT_MS;
-  const { signal, cleanup } = composeSignal(init.signal, timeoutMs);
-
-  try {
-    return await fetch(backendUrl(path), {
-      ...init,
-      headers,
-      signal,
-      credentials: "include",
-    });
-  } catch (error) {
-    const timedOut = signal.aborted && signal.reason === "timeout";
-    throw new ApiError(0, {
-      code: timedOut ? "request_timeout" : "network_error",
-      message: timedOut
-        ? "Backend request timed out."
-        : "Backend request could not be completed.",
-      cause: error,
-    });
-  } finally {
-    cleanup();
-  }
-}
-
-async function throwResponseError(response: Response, payload?: unknown): Promise<never> {
-  const parsed = payload === undefined ? await parsePayload(response) : payload;
-  const requestId =
-    response.headers.get("X-Request-ID") ??
-    response.headers.get("X-Request-Id") ??
-    undefined;
-  const error = normalizeErrorBody(
-    parsed && typeof parsed === "object" ? (parsed as ApiErrorBody) : null,
-  );
-
-  throw new ApiError(response.status, {
-    ...error,
-    message:
-      error.message ||
-      (typeof parsed === "string"
-        ? parsed
-        : "Request failed with status " + response.status),
-    requestId,
-  });
-}
-
-async function rawRequest<T>(
-  path: string,
-  init: RequestInit = {},
-  options: RequestOptions = {},
-): Promise<T> {
-  const response = await fetchResponse(path, init, options);
-  const payload = await parsePayload(response);
-  if (!response.ok) {
-    return throwResponseError(response, payload);
-  }
-
-  if (
-    payload &&
-    typeof payload === "object" &&
-    "data" in payload &&
-    (payload as { data?: unknown }).data !== undefined
-  ) {
-    return (payload as { data: T }).data;
-  }
-
-  return payload as T;
-}
-
-async function rawBlobRequest(
-  path: string,
-  init: RequestInit = {},
-  options: RequestOptions = {},
-) {
-  const response = await fetchResponse(path, init, options);
-  if (!response.ok) {
-    return throwResponseError(response);
-  }
-  return response.blob();
-}
+const { backendUrl, rawRequest, rawBlobRequest } = createApiTransport({
+  baseUrl: API_BASE_URL,
+  timeoutMs: API_TIMEOUT_MS,
+  getAuthorization: () =>
+    accessToken && explicitAuthPending === 0
+      ? "Bearer " + accessToken
+      : null,
+});
 
 async function withAuthCookieLock<T>(work: () => Promise<T>): Promise<T> {
   if (
