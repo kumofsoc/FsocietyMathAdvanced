@@ -6,7 +6,6 @@ import { CommandPalette } from "@/features/navigation/ui/CommandPalette";
 import { CustomCursor } from "@/features/personalization/ui/CustomCursor";
 import { HistoryDock } from "@/features/navigation/ui/HistoryDock";
 import { SidebarTopicToc } from "@/features/navigation/ui/SidebarTopicToc";
-import { getHistoryHotkeyDirection } from "@/features/navigation/model/historyHotkeys";
 import { MathBackdrop } from "@/shared/ui/MathBackdrop";
 import { RouteSkeleton } from "@/shared/ui/RouteSkeleton";
 import { ScrollProgress } from "@/features/navigation/ui/ScrollProgress";
@@ -24,15 +23,11 @@ import {
 import type { Chapter } from "@/entities/course/model/types";
 import { useAppShellStore } from "@/app/store/useAppShellStore";
 import { loadSavedTopicIds, SAVED_TOPICS_EVENT, SAVED_TOPICS_KEY, setTopicSaved } from "@/features/saved-topics/model/savedTopics";
-import { parseVisualMathHash } from "@/shared/lib/blockDeepLink";
 import { installAuthSessionListener, useAuthStore } from "@/features/auth/model/authSession";
 import { installUserStateAutoSync } from "@/features/sync/model/autoSync";
+import { useAppNavigationLifecycle } from "@/features/navigation/model/useAppNavigationLifecycle";
 
 const LAST_TOPIC_KEY = "fsociety-last-topic-v1";
-
-function routeFromHash() {
-  return parseVisualMathHash(window.location.hash).route;
-}
 
 const HomePage = lazy(() =>
   import("@/pages/home/HomePage").then((module) => ({ default: module.HomePage })),
@@ -166,7 +161,6 @@ function SidebarProgressItem({
 }
 
 export default function App() {
-  const [route, setRoute] = useState(routeFromHash);
   const bootstrapAuth = useAuthStore((state) => state.bootstrap);
   const sidebarOpen = useAppShellStore((state) => state.sidebarOpen);
   const sidebarCollapsed = useAppShellStore((state) => state.sidebarCollapsed);
@@ -186,50 +180,18 @@ export default function App() {
       return null;
     }
   });
-  const routeRef = useRef(route);
+  const {
+    route,
+    routeRef,
+    topbarVisible,
+    openHomeAtTop,
+  } = useAppNavigationLifecycle({
+    readingFocusMode,
+    setSidebarOpen,
+    setReadingFocusMode,
+  });
   const mainContentRef = useRef<HTMLElement>(null);
   const routeFocusReadyRef = useRef(false);
-  const [topbarVisible, setTopbarVisible] = useState(true);
-  const topbarHideTimer = useRef<number | null>(null);
-  const lastScrollY = useRef(0);
-
-  const clearTopbarHideTimer = () => {
-    if (topbarHideTimer.current === null) return;
-    window.clearTimeout(topbarHideTimer.current);
-    topbarHideTimer.current = null;
-  };
-
-  const revealTopbar = () => {
-    clearTopbarHideTimer();
-    setTopbarVisible(true);
-  };
-
-  const scheduleTopbarHide = (delay = 700) => {
-    clearTopbarHideTimer();
-    if (window.scrollY < 72 && routeRef.current !== "map") return;
-    topbarHideTimer.current = window.setTimeout(() => {
-      setTopbarVisible(false);
-      topbarHideTimer.current = null;
-    }, delay);
-  };
-
-  const openHomeAtTop = () => {
-    try {
-      const key = "fsociety-route-scroll-v1";
-      const positions = JSON.parse(sessionStorage.getItem(key) || "{}") as Record<string, number>;
-      positions.home = 0;
-      sessionStorage.setItem(key, JSON.stringify(positions));
-    } catch {
-      // Scroll restoration is optional.
-    }
-
-    if (routeRef.current === "home") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    window.location.hash = "home";
-  };
 
   useEffect(() => {
     installAuthSessionListener();
@@ -243,45 +205,6 @@ export default function App() {
     void import("@/entities/course/lib/courseIntegrity").then(({ reportCourseIntegrity }) => {
       reportCourseIntegrity();
     });
-  }, []);
-
-  useEffect(() => {
-    const key = "fsociety-route-scroll-v1";
-
-    const readPositions = (): Record<string, number> => {
-      try {
-        return JSON.parse(sessionStorage.getItem(key) || "{}");
-      } catch {
-        return {};
-      }
-    };
-
-    const onHash = () => {
-      const positions = readPositions();
-      positions[routeRef.current] = window.scrollY;
-      try {
-        sessionStorage.setItem(key, JSON.stringify(positions));
-      } catch {
-        // Scroll restoration is optional.
-      }
-
-      const next = routeFromHash();
-      const routeChanged = next !== routeRef.current;
-      setRoute(next);
-      routeRef.current = next;
-      setSidebarOpen(false);
-      if (routeChanged) {
-        setReadingFocusMode(false);
-      }
-
-      window.requestAnimationFrame(() => {
-        const y = positions[next] ?? 0;
-        window.scrollTo({ top: y, behavior: y > 0 ? "auto" : "smooth" });
-      });
-    };
-
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
   useEffect(() => {
@@ -317,64 +240,6 @@ export default function App() {
       window.removeEventListener(SAVED_TOPICS_EVENT, syncSavedTopics);
       window.removeEventListener("storage", onStorage);
     };
-  }, []);
-
-  useEffect(() => {
-    lastScrollY.current = window.scrollY;
-
-    const onScroll = () => {
-      const nextY = window.scrollY;
-      const delta = nextY - lastScrollY.current;
-
-      if (nextY < 32) {
-        revealTopbar();
-      } else if (delta > 8) {
-        clearTopbarHideTimer();
-        setTopbarVisible(false);
-      } else if (delta < -8) {
-        revealTopbar();
-        scheduleTopbarHide(1100);
-      }
-
-      lastScrollY.current = nextY;
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      clearTopbarHideTimer();
-    };
-  }, []);
-
-  useEffect(() => {
-    revealTopbar();
-    if (route === "map") {
-      scheduleTopbarHide(1200);
-    }
-  }, [route]);
-  useEffect(() => {
-    if (readingFocusMode) {
-      setSidebarOpen(false);
-      clearTopbarHideTimer();
-      setTopbarVisible(false);
-      return;
-    }
-
-    revealTopbar();
-  }, [readingFocusMode, setSidebarOpen]);
-
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      const direction = getHistoryHotkeyDirection(event);
-      if (!direction) return;
-      event.preventDefault();
-      if (direction < 0) window.history.back();
-      else window.history.forward();
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
   const learningSnapshot = useMemo(
