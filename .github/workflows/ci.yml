@@ -91,7 +91,7 @@ jobs:
           PLAYWRIGHT_BASE_URL=http://127.0.0.1:18081 pnpm exec playwright test e2e/production-image.spec.ts
       - name: Upload Playwright report
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: |
