@@ -113,7 +113,7 @@ function PasswordRecoveryPanel({
           .confirmPasswordReset(token, newPassword)
           .then(() => {
             setMessage("Пароль изменён. Все старые сессии отозваны.");
-            window.location.hash = "account";
+            window.location.replace("#account");
           })
           .catch((nextError) => setFormError(apiErrorMessage(nextError)))
           .finally(() => setBusy(false));
@@ -263,7 +263,7 @@ function AccountAuthGate() {
           token={resetToken}
           onClose={() => {
             setRecoveryOpen(false);
-            if (resetToken) window.location.hash = "account";
+            if (resetToken) window.location.replace("#account");
           }}
         />
       </section>
