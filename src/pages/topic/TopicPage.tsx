@@ -43,6 +43,10 @@ import {
   initialTopicResumeBlock,
   useTopicReadingLifecycle,
 } from "@/features/topic-reading/model/useTopicReadingLifecycle";
+import {
+  buildTopicOutline,
+  topicOutlineKey,
+} from "@/features/topic-outline/model/topicOutline";
 
 const PracticePanel = lazy(() =>
   import("@/features/learning/ui/PracticePanel").then((module) => ({ default: module.PracticePanel })),
@@ -206,56 +210,6 @@ export function TopicPage({ topicId }: { topicId: string }) {
   return <TopicPageContent key={baseTopic.id} baseTopic={baseTopic} />;
 }
 
-type TopicOutlineKey =
-  | "definition"
-  | "properties"
-  | "theorems"
-  | "methods"
-  | "examples"
-  | "geometry"
-  | "academy"
-  | "summary";
-
-const topicOutlineLabels: Record<TopicOutlineKey, string> = {
-  definition: "Определение",
-  properties: "Свойства",
-  theorems: "Теоремы",
-  methods: "Формулы и методы",
-  examples: "Примеры",
-  geometry: "Геометрия",
-  academy: "Углублённо",
-  summary: "Итог",
-};
-
-function topicOutlineKey(block: ContentBlock): TopicOutlineKey {
-  if (block.source === "academy") return "academy";
-
-  switch (block.kind) {
-    case "definition":
-    case "concepts":
-      return "definition";
-    case "property":
-      return "properties";
-    case "theorem":
-    case "proof":
-    case "corollary":
-      return "theorems";
-    case "formula":
-    case "algorithm":
-    case "note":
-      return "methods";
-    case "example":
-    case "solution":
-      return "examples";
-    case "geometry":
-      return "geometry";
-    case "summary":
-      return "summary";
-    default:
-      return "methods";
-  }
-}
-
 function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   const topic = baseTopic;
   const chapter = chapters.find((item) => item.id === topic.chapterId);
@@ -333,48 +287,10 @@ function TopicPageContent({ baseTopic }: { baseTopic: Topic }) {
   const academyProofCount = academyTaskIds.filter((id) => id.startsWith("academy-proof-")).length;
   const academyCapstoneCount = academyTaskIds.filter((id) => id.includes("capstone")).length;
 
-  const outlineItems = useMemo(() => {
-    const groups = new Map<
-      TopicOutlineKey,
-      { key: TopicOutlineKey; label: string; index: number; blockIndices: number[] }
-    >();
-
-    topic.blocks.forEach((block, index) => {
-      const key = topicOutlineKey(block);
-      const existing = groups.get(key);
-
-      if (existing) {
-        existing.blockIndices.push(index);
-        return;
-      }
-
-      groups.set(key, {
-        key,
-        label: topicOutlineLabels[key],
-        index,
-        blockIndices: [index],
-      });
-    });
-
-    return [...groups.values()].map((item) => {
-      const seenCount = item.blockIndices.filter((index) =>
-        readingBlocks.has(topic.id + "::" + index),
-      ).length;
-
-      const status: "unread" | "partial" | "complete" =
-        seenCount === 0
-          ? "unread"
-          : seenCount === item.blockIndices.length
-            ? "complete"
-            : "partial";
-
-      return {
-        ...item,
-        seenCount,
-        status,
-      };
-    });
-  }, [topic.blocks, topic.id, readingBlocks]);
+  const outlineItems = useMemo(
+    () => buildTopicOutline(topic.blocks, topic.id, readingBlocks),
+    [topic.blocks, topic.id, readingBlocks],
+  );
 
   const activeOutlineKey = topic.blocks[activeBlock]
     ? topicOutlineKey(topic.blocks[activeBlock])
