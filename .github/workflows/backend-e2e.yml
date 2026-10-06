@@ -57,7 +57,7 @@ jobs:
           VISUALMATH_E2E_API_BASE_URL: ${{ inputs.api_base_url || vars.VISUALMATH_E2E_API_BASE_URL }}
       - name: Upload backend Playwright report
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report-backend
           path: |
