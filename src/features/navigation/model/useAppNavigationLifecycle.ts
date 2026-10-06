@@ -159,8 +159,9 @@ export function useAppNavigationLifecycle({
 
   return {
     route,
-    routeRef,
     topbarVisible,
     openHomeAtTop,
+    revealTopbar,
+    scheduleTopbarHide,
   };
 }
