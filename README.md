@@ -62,6 +62,7 @@ Authenticated account UI now supports:
 - password rotation through `PUT /api/v1/me/password`; success revokes every backend session and returns the browser to login;
 - canonical JSON portability export through `GET /api/v1/me/account/export`;
 - password-confirmed self-deletion through `DELETE /api/v1/me/account`.
+- capability-gated password recovery through `POST /api/v1/auth/password-reset/request` and `POST /api/v1/auth/password-reset/confirm`; reset tokens stay in the URL fragment on the client, are removed from browser history after use, and successful reset revokes every old session.
 
 The password-change flow never keeps a stale access token alive after success. Export is server-canonical and excludes password/session secrets and internal media object keys.
 
@@ -167,7 +168,7 @@ Backend contract baseline verified by the current frontend integration:
 
 ```text
 kumofsoc/FsocietyMathAdvancedBackend
-7d605e5e4a5066509b7996d95d226d41871210ca
+ff9140117fb9cc67d247ced36956f24ae9474198
 ```
 
 ## Основные routes продукта

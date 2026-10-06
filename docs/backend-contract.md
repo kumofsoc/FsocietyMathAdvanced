@@ -8,7 +8,7 @@ Backend release gate used for this integration:
 
 ```text
 kumofsoc/FsocietyMathAdvancedBackend
-7d605e5e4a5066509b7996d95d226d41871210ca
+ff9140117fb9cc67d247ced36956f24ae9474198
 ```
 
 ## Runtime configuration
@@ -64,6 +64,8 @@ Authenticated account-management endpoints:
 - `PUT /api/v1/me/password` — current-password-confirmed password rotation; backend revokes all sessions/tokens and the frontend clears visible account cache before returning to anonymous/login state;
 - `GET /api/v1/me/account/export` — canonical JSON portability snapshot;
 - `DELETE /api/v1/me/account` — current-password-confirmed destructive account removal.
+- `POST /api/v1/auth/password-reset/request` — capability-gated, anti-enumeration reset request; returns the same accepted result for known/unknown valid emails.
+- `POST /api/v1/auth/password-reset/confirm` — one-time opaque-token confirmation; successful reset revokes all existing sessions and refresh tokens.
 
 These operations use the same bearer/session boundary as the rest of `/api/v1/me`. Password rotation and deletion deliberately invalidate the current browser session instead of silently issuing replacement credentials.
 

@@ -6,7 +6,7 @@ Backend contract target for the current MVP integration:
 
 ```text
 kumofsoc/FsocietyMathAdvancedBackend
-7d605e5e4a5066509b7996d95d226d41871210ca
+ff9140117fb9cc67d247ced36956f24ae9474198
 ```
 
 ## Current status
@@ -114,6 +114,7 @@ For an actual release there is a separate `Release Gate` workflow. It runs manua
 - password change requires the current password and success invalidates the local access token plus every server session;
 - account export is authenticated and downloaded as canonical server JSON without auth/storage secrets;
 - account deletion requires the current password and clears deleted-account browser state.
+- password recovery is shown only when `GET /api/v1/meta` reports `capabilities.passwordReset=true`; the reset token is read from the URL fragment, never persisted, and its history entry is replaced after completion/cancel.
 
 ## Data ownership
 
@@ -190,6 +191,7 @@ The real-backend Playwright suite verifies:
 18. account export uses the authenticated canonical backend endpoint;
 19. password rotation revokes the current session, rejects the old password and accepts the new password;
 20. two active browser sessions are listed, one can revoke the other, the current session stays active, and the revoked browser cannot restore its session.
+21. password-recovery capability gating and fragment-token routing preserve the normal account/login flow; the backend reset lifecycle is covered by the backend PostgreSQL/HTTP integration gate.
 
 ## Security headers
 
