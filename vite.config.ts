@@ -70,25 +70,7 @@ export default defineConfig({
           ) {
             return "three";
           }
-          if (id.includes("@antv/g6")) return "graph-g6";
-          if (
-            id.includes("@antv/layout") ||
-            id.includes("@antv/hierarchy") ||
-            id.includes("@antv/algorithm") ||
-            id.includes("@antv/graphlib")
-          ) {
-            return "graph-layout";
-          }
-          if (
-            id.includes("@antv/g-canvas") ||
-            id.includes("@antv/g-lite") ||
-            id.includes("@antv/g-math") ||
-            id.includes("@antv/g-plugin") ||
-            id.includes("/@antv/g/")
-          ) {
-            return "graph-render";
-          }
-          if (id.includes("@antv/")) return "graph-support";
+          if (id.includes("@antv/")) return "graph";
           if (id.includes("katex") || id.includes("react-katex")) return "math";
           if (id.includes("framer-motion")) return "framer";
           if (id.includes("/gsap/") || id.includes("\\gsap\\")) return "gsap";
