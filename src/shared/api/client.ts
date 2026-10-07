@@ -32,6 +32,7 @@ import type {
   PreferencesDto,
   ProgressSyncRequest,
   RegisterRequest,
+  RegisterResponseDto,
   UpdateProfileRequest,
   UserDto,
   WorkspaceDto,
@@ -308,14 +309,18 @@ export const api = {
   auth: {
     register: (body: RegisterRequest) =>
       runExplicitAuth(async () => {
-        const session = await rawRequest<AuthResponseDto>(
+        const result = await rawRequest<RegisterResponseDto>(
           "/api/v1/auth/register",
           { method: "POST", body: JSON.stringify(body) },
           { auth: false },
         );
         clearPendingLogout();
-        setAccessToken(session.accessToken, session.accessTokenExpiresAt);
-        return session;
+        if ("verificationRequired" in result) {
+          setAccessToken(null);
+          return result;
+        }
+        setAccessToken(result.accessToken, result.accessTokenExpiresAt);
+        return result;
       }),
     login: (body: LoginRequest) =>
       runExplicitAuth(async () => {
@@ -341,6 +346,21 @@ export const api = {
         {
           method: "POST",
           body: JSON.stringify({ token, newPassword }),
+        },
+        { auth: false, retryAuth: false },
+      ),
+    requestEmailVerification: (email: string) =>
+      rawRequest<void>(
+        "/api/v1/auth/email-verification/request",
+        { method: "POST", body: JSON.stringify({ email }) },
+        { auth: false, retryAuth: false },
+      ),
+    confirmEmailVerification: (token: string) =>
+      rawRequest<void>(
+        "/api/v1/auth/email-verification/confirm",
+        {
+          method: "POST",
+          body: JSON.stringify({ token }),
         },
         { auth: false, retryAuth: false },
       ),

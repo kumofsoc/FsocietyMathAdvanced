@@ -594,3 +594,83 @@ describe("password reset API", () => {
     }
   });
 });
+
+
+describe("email verification registration contract", () => {
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("keeps registration anonymous when backend requires email verification", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const path = new URL(String(input)).pathname;
+        if (path !== "/api/v1/auth/register") {
+          throw new Error("unexpected fetch " + path);
+        }
+        return jsonResponse(
+          {
+            verificationRequired: true,
+            email: "verify@example.com",
+          },
+          202,
+        );
+      }),
+    );
+
+    const { api, getAccessTokenSnapshot } = await import("./client");
+    const result = await api.auth.register({
+      email: "verify@example.com",
+      password: "VisualMath!2026",
+      handle: "verify_user",
+      displayName: "Verify User",
+    });
+
+    expect(result).toEqual({
+      verificationRequired: true,
+      email: "verify@example.com",
+    });
+    expect(getAccessTokenSnapshot().accessToken).toBeNull();
+  });
+
+  it("uses unauthenticated request and confirm verification endpoints", async () => {
+    const calls: Array<{ path: string; init?: RequestInit }> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        calls.push({ path: new URL(String(input)).pathname, init });
+        return new Response(null, {
+          status: calls.length === 1 ? 202 : 204,
+        });
+      }),
+    );
+
+    const { api } = await import("./client");
+    await api.auth.requestEmailVerification("verify@example.com");
+    await api.auth.confirmEmailVerification(
+      "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG",
+    );
+
+    expect(calls.map((call) => call.path)).toEqual([
+      "/api/v1/auth/email-verification/request",
+      "/api/v1/auth/email-verification/confirm",
+    ]);
+    expect(calls[0].init?.body).toBe(
+      JSON.stringify({ email: "verify@example.com" }),
+    );
+    expect(calls[1].init?.body).toBe(
+      JSON.stringify({
+        token: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG",
+      }),
+    );
+    for (const call of calls) {
+      expect(new Headers(call.init?.headers).get("Authorization")).toBeNull();
+    }
+  });
+});

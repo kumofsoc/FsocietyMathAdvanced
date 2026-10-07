@@ -24,6 +24,7 @@ export interface BackendMetaDto {
   environment: string;
   capabilities?: {
     passwordReset?: boolean;
+    emailVerification?: boolean;
   };
 }
 
@@ -47,6 +48,15 @@ export interface AuthResponseDto {
   accessTokenExpiresAt: string;
   user: UserDto;
 }
+
+export interface EmailVerificationRequiredDto {
+  verificationRequired: true;
+  email: string;
+}
+
+export type RegisterResponseDto =
+  | AuthResponseDto
+  | EmailVerificationRequiredDto;
 
 export interface RegisterRequest {
   email: string;

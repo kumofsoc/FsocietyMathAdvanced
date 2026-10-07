@@ -1,8 +1,59 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/features/auth/model/authSession";
-import { api } from "@/shared/api/client";
+import { api, ApiError } from "@/shared/api/client";
 import { apiErrorMessage } from "@/shared/api/errorPresentation";
 import { visualMathHashParam } from "@/shared/lib/blockDeepLink";
+
+function EmailVerificationPanel({
+  token,
+  onComplete,
+}: {
+  token: string;
+  onComplete: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  return (
+    <form
+      className="account-auth-form"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (busy || message) return;
+        setBusy(true);
+        setFormError(null);
+        void api.auth
+          .confirmEmailVerification(token)
+          .then(() => {
+            setMessage("Email подтверждён. Теперь можно войти.");
+          })
+          .catch((nextError) => setFormError(apiErrorMessage(nextError)))
+          .finally(() => setBusy(false));
+      }}
+    >
+      <div className="account-auth-recovery-heading">
+        <span>EMAIL / VERIFICATION</span>
+        <strong>Подтверждение email</strong>
+      </div>
+      {message && <div className="account-auth-notice">{message}</div>}
+      {formError && <div className="account-auth-error">{formError}</div>}
+      {!message ? (
+        <button type="submit" disabled={busy}>
+          {busy ? "Подтверждаю…" : "Подтвердить email"}
+        </button>
+      ) : (
+        <button
+          type="button"
+          className="account-auth-secondary"
+          onClick={onComplete}
+        >
+          Перейти ко входу
+        </button>
+      )}
+    </form>
+  );
+}
 
 function PasswordRecoveryPanel({
   token,
@@ -142,8 +193,17 @@ export function AccountAuthGate() {
     typeof window === "undefined"
       ? null
       : visualMathHashParam(window.location.hash, "reset");
+  const verificationToken =
+    typeof window === "undefined"
+      ? null
+      : visualMathHashParam(window.location.hash, "verify");
   const [recoveryOpen, setRecoveryOpen] = useState(Boolean(resetToken));
   const [passwordResetAvailable, setPasswordResetAvailable] = useState(false);
+  const [emailVerificationAvailable, setEmailVerificationAvailable] =
+    useState(false);
+  const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
+  const [verificationNotice, setVerificationNotice] = useState<string | null>(null);
+  const [resendingVerification, setResendingVerification] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -152,10 +212,16 @@ export function AccountAuthGate() {
       .then((meta) => {
         if (!cancelled) {
           setPasswordResetAvailable(Boolean(meta.capabilities?.passwordReset));
+          setEmailVerificationAvailable(
+            Boolean(meta.capabilities?.emailVerification),
+          );
         }
       })
       .catch(() => {
-        if (!cancelled) setPasswordResetAvailable(false);
+        if (!cancelled) {
+          setPasswordResetAvailable(false);
+          setEmailVerificationAvailable(false);
+        }
       });
     return () => {
       cancelled = true;
@@ -181,6 +247,25 @@ export function AccountAuthGate() {
         <button type="button" onClick={() => void bootstrap()}>
           Повторить подключение
         </button>
+      </section>
+    );
+  }
+
+  if (verificationToken) {
+    return (
+      <section className="account-auth-shell">
+        <div className="account-auth-copy">
+          <span>VISUALMATH / VERIFY EMAIL</span>
+          <h1>Подтверди email.</h1>
+          <p>
+            Verification token хранится только во fragment URL и отправляется
+            backend только при подтверждении.
+          </p>
+        </div>
+        <EmailVerificationPanel
+          token={verificationToken}
+          onComplete={() => window.location.replace("#account")}
+        />
       </section>
     );
   }
@@ -226,17 +311,37 @@ export function AccountAuthGate() {
           setBusy(true);
           setFormError(null);
 
-          const action =
-            mode === "login"
-              ? login({ email: email.trim(), password })
-              : register({
-                  email: email.trim(),
-                  password,
-                  handle: handle.trim().replace(/^@/, ""),
-                  displayName: displayName.trim(),
-                });
+          if (mode === "login") {
+            void login({ email: email.trim(), password })
+              .catch((nextError) => {
+                if (
+                  nextError instanceof ApiError &&
+                  nextError.code === "email_unverified"
+                ) {
+                  setVerificationEmail(email.trim());
+                }
+                setFormError(apiErrorMessage(nextError));
+              })
+              .finally(() => setBusy(false));
+            return;
+          }
 
-          void action
+          void register({
+            email: email.trim(),
+            password,
+            handle: handle.trim().replace(/^@/, ""),
+            displayName: displayName.trim(),
+          })
+            .then((result) => {
+              if (result.verificationRequired) {
+                setVerificationEmail(result.email);
+                setVerificationNotice(
+                  "Аккаунт создан. Проверь почту и подтверди email перед входом.",
+                );
+                setMode("login");
+                setPassword("");
+              }
+            })
             .catch((nextError) => setFormError(apiErrorMessage(nextError)))
             .finally(() => setBusy(false));
         }}
@@ -316,6 +421,9 @@ export function AccountAuthGate() {
           />
         </label>
 
+        {verificationNotice && (
+          <div className="account-auth-notice">{verificationNotice}</div>
+        )}
         {formError && <div className="account-auth-error">{formError}</div>}
 
         <button type="submit" disabled={busy}>
@@ -325,6 +433,35 @@ export function AccountAuthGate() {
               ? "Войти"
               : "Создать аккаунт"}
         </button>
+        {mode === "login" &&
+          emailVerificationAvailable &&
+          verificationEmail && (
+            <button
+              type="button"
+              className="account-auth-recovery-link"
+              disabled={resendingVerification}
+              onClick={() => {
+                if (resendingVerification) return;
+                setResendingVerification(true);
+                setFormError(null);
+                void api.auth
+                  .requestEmailVerification(verificationEmail)
+                  .then(() =>
+                    setVerificationNotice(
+                      "Если аккаунт ожидает подтверждения, новое письмо отправлено.",
+                    ),
+                  )
+                  .catch((nextError) =>
+                    setFormError(apiErrorMessage(nextError)),
+                  )
+                  .finally(() => setResendingVerification(false));
+              }}
+            >
+              {resendingVerification
+                ? "Отправляю письмо…"
+                : "Отправить письмо подтверждения ещё раз"}
+            </button>
+          )}
         {mode === "login" && passwordResetAvailable && (
           <button
             type="button"

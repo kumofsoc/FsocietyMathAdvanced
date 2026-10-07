@@ -29,6 +29,10 @@ export type AuthStatus =
   | "authenticated"
   | "unavailable";
 
+export type RegisterOutcome =
+  | { verificationRequired: true; email: string }
+  | { verificationRequired: false; user: UserDto };
+
 const EMPTY_CAPABILITIES: BootstrapCapabilitiesDto = {
   mediaAudio: false,
 };
@@ -42,7 +46,7 @@ type AuthState = {
   error: string | null;
   bootstrap: () => Promise<void>;
   login: (input: LoginRequest) => Promise<UserDto>;
-  register: (input: RegisterRequest) => Promise<UserDto>;
+  register: (input: RegisterRequest) => Promise<RegisterOutcome>;
   logout: () => Promise<void>;
   revokeSession: (sessionId: string, current: boolean) => Promise<void>;
   changePassword: (
@@ -172,10 +176,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   register: async (input) => {
-    const session = await api.auth.register(input);
+    const result = await api.auth.register(input);
+    if ("verificationRequired" in result) {
+      set({
+        status: "anonymous",
+        user: null,
+        capabilities: EMPTY_CAPABILITIES,
+        bootstrapVersion: null,
+        bootstrapGeneratedAt: null,
+        error: null,
+      });
+      return result;
+    }
+
     set({
       status: "authenticated",
-      user: session.user,
+      user: result.user,
       capabilities: EMPTY_CAPABILITIES,
       bootstrapVersion: null,
       bootstrapGeneratedAt: null,
@@ -193,18 +209,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         error: null,
       });
       startUserStateHydration(snapshot);
-      return snapshot.user;
+      return { verificationRequired: false, user: snapshot.user };
     } catch (error) {
       set({
         status: "authenticated",
-        user: session.user,
+        user: result.user,
         capabilities: EMPTY_CAPABILITIES,
         bootstrapVersion: null,
         bootstrapGeneratedAt: null,
         error: apiErrorMessage(error),
       });
       console.warn("[VisualMath] registration bootstrap failed; keeping local cache", error);
-      return session.user;
+      return { verificationRequired: false, user: result.user };
     }
   },
 
