@@ -8,7 +8,7 @@ Backend release gate used for this integration:
 
 ```text
 kumofsoc/FsocietyMathAdvancedBackend
-8b2116c0be6c4acbde0f957378f53ea0c373b1b2
+d9e9bde4228f57e7e82f1d7907b22051e8dcfc8f
 ```
 
 ## Runtime configuration
