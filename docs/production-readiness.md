@@ -6,7 +6,7 @@ Backend contract target for the current MVP integration:
 
 ```text
 kumofsoc/FsocietyMathAdvancedBackend
-653db9548a4f2f85ca68405cc2159623e3ad584a
+50aef09256d03dcb27791998838647f1b0bb37b6
 ```
 
 ## Current status
