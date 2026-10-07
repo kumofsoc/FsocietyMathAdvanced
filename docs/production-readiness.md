@@ -6,7 +6,7 @@ Backend contract target for the current MVP integration:
 
 ```text
 kumofsoc/FsocietyMathAdvancedBackend
-2eb2316d970d1e22bf58bd3f889db5a3c76c3d81
+653db9548a4f2f85ca68405cc2159623e3ad584a
 ```
 
 ## Current status
@@ -114,7 +114,7 @@ For an actual release there is a separate `Release Gate` workflow. It runs manua
 - password change requires the current password and success invalidates the local access token plus every server session;
 - account export is authenticated and downloaded as canonical server JSON without auth/storage secrets;
 - account deletion requires the current password and clears deleted-account browser state.
-- password recovery is shown only when `GET /api/v1/meta` reports `capabilities.passwordReset=true`; the reset token is read from the URL fragment, never persisted, and its history entry is replaced after completion/cancel.
+- email verification is activated only when `GET /api/v1/meta` reports `capabilities.emailVerification=true`; registration that requires verification remains anonymous, resend uses the generic anti-enumeration endpoint, and the verification token is read from the URL fragment without persistence;\n- password recovery is shown only when `GET /api/v1/meta` reports `capabilities.passwordReset=true`; the reset token is read from the URL fragment, never persisted, and its history entry is replaced after completion/cancel.
 
 ## Data ownership
 
