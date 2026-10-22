@@ -183,7 +183,9 @@ export function G6CourseGraph({
     selectedIdRef.current = selectedId;
     const graph = graphRef.current;
     if (!graph || !graphReadyRef.current) return;
-    void applySelectionState(graph, model, selectedId);
+    void applySelectionState(graph, model, selectedId).catch(() => {
+      // A newer map render may dispose this graph before state updates finish.
+    });
   }, [model, selectedId]);
 
   useEffect(() => {
@@ -339,7 +341,10 @@ export function G6CourseGraph({
 
     let destroyed = false;
 
-    void graph.render().then(async () => {
+    // G6 render is asynchronous. Destroying it while rendering leaves its
+    // renderer undefined (and produces "Cannot read properties of undefined").
+    const renderTask = graph.render();
+    void renderTask.then(async () => {
       if (destroyed) return;
       graphReadyRef.current = true;
       await applySelectionState(graph, model, selectedIdRef.current);
@@ -348,20 +353,21 @@ export function G6CourseGraph({
         { when: "always", direction: "both" },
         { duration: 260, easing: "ease-out" },
       );
+    }).catch((error: unknown) => {
+      if (!destroyed) console.error("[VisualMath] graph render failed", error);
     });
 
-    const resizeObserver = new ResizeObserver(() => {
-      if (destroyed) return;
-      graph.resize();
-    });
-    resizeObserver.observe(container);
-
+    // G6 already observes its container with autoResize: true. Adding another
+    // ResizeObserver calling graph.resize() recursively triggers resize loops.
     return () => {
       destroyed = true;
-      resizeObserver.disconnect();
       graphReadyRef.current = false;
-      graphRef.current = null;
-      graph.destroy();
+      if (graphRef.current === graph) graphRef.current = null;
+      // Wait until the asynchronous render finishes before releasing G6.
+      void renderTask.then(
+        () => graph.destroy(),
+        () => graph.destroy(),
+      );
     };
   }, [model, themeVersion]);
 
