@@ -55,7 +55,7 @@ export default defineConfig({
   },
   server: { host: true, port: 5173 },
   test: {
-    exclude: ["e2e/**", "e2e-backend/**", "node_modules/**", "dist/**"],
+    exclude: ["e2e/**", "e2e-backend/**", "scripts/analytics.test.mjs", "node_modules/**", "dist/**"],
   },
   build: {
     chunkSizeWarningLimit: 1200,

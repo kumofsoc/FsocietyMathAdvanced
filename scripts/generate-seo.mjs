@@ -12,6 +12,23 @@ const DEFAULT_PUBLIC_ORIGIN = "https://mathmamath.vercel.app";
 const HOME_TITLE = "MathMaMath: высшая математика, теория и задачи";
 const HOME_DESCRIPTION = "MathMaMath: бесплатный интерактивный курс высшей математики: линейная алгебра, аналитическая геометрия, математический анализ, интегралы и ряды. Теория, доказательства, примеры и практика.";
 
+// Shared opt-in analytics script. Unset by default; disabled on Preview builds.
+// A GA4 measurement ID is public and must never be confused with a secret key.
+let analyticsHeadMarkup = "";
+
+function analyticsMarkup(publishedIds) {
+  const id = (process.env.VITE_GA4_MEASUREMENT_ID || "").trim();
+  if (!id) return "";
+  if (!/^G-[A-Z0-9]{6,16}$/.test(id)) {
+    throw new Error("VITE_GA4_MEASUREMENT_ID must be a GA4 web measurement ID (G-...).");
+  }
+  if (IS_PREVIEW) return "";
+  const ids = publishedIds.filter((topicId) => /^[a-z0-9][a-z0-9-]{0,79}$/.test(topicId));
+  return '<link rel="stylesheet" href="/analytics.css">' +
+    '<script defer src="/analytics.js" data-measurement-id="' + escapeHtml(id) +
+    '" data-topic-ids="' + escapeHtml(ids.join(",")) + '"></script>';
+}
+
 function siteOrigin() {
   const raw = (
     process.env.VITE_PUBLIC_SITE_URL ||
@@ -101,6 +118,7 @@ function basePage(title, description, content, schema, url, type) {
     meta(description, title, url, type) +
     '<style>' + STYLES + '</style>' +
     '<script type="application/ld+json">' + jsonLd(schema) + '</script>' +
+    analyticsHeadMarkup +
     '</head><body>' + content + '</body></html>\n';
 }
 
@@ -163,6 +181,7 @@ async function generate() {
     const available = topicListMeta.filter((item) => !item.isStub);
     if (available.length === 0) throw new Error("No published course topics found.");
     const availableIds = new Set(available.map((item) => item.id));
+    analyticsHeadMarkup = analyticsMarkup([...availableIds]);
     const urls = ["/", "/learn/"];
 
     const catalog = chapters.map((chapter) => {
@@ -295,6 +314,7 @@ async function generate() {
       '<script type="application/ld+json">' +
         jsonLd({ "@context": "https://schema.org", "@type": "WebSite", name: "MathMaMath", description: HOME_DESCRIPTION, inLanguage: "ru", ...(origin ? { url: origin + "/" } : {}) }) +
         '</script>',
+      analyticsHeadMarkup,
     ].join("\n");
     if (!index.includes("</head>")) throw new Error("dist/index.html has no </head> tag");
     index = index.replace("</head>", rootMeta + "\n</head>");

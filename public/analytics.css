@@ -1,0 +1,12 @@
+.mathmamath-analytics-controls{position:fixed;right:12px;bottom:12px;z-index:2147483000;max-width:min(420px,calc(100vw - 24px));font:14px/1.5 system-ui,sans-serif;color:#f4f4f8}
+.mathmamath-analytics-manage{display:block;margin-left:auto;padding:6px 10px;font:12px system-ui,sans-serif;color:#e5e5f0;background:#161722;border:1px solid #6d6e83;border-radius:8px;cursor:pointer}
+.mathmamath-analytics-panel{margin-top:7px;padding:17px;background:#161722;color:#f4f4f8;border:1px solid #75758d;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.mathmamath-analytics-panel[hidden]{display:none}
+.mathmamath-analytics-panel strong{display:block;font-size:16px}
+.mathmamath-analytics-panel p{margin:8px 0;font-size:13px}
+.mathmamath-analytics-panel a{color:#bfd0ff;text-decoration:underline;font-size:12px}
+.mathmamath-analytics-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
+.mathmamath-analytics-actions button{flex:1 1 130px;padding:10px;border-radius:7px;border:1px solid #9b9dbb;background:#282939;color:#fff;cursor:pointer;font-size:13px;font-weight:600}
+.mathmamath-analytics-actions .mathmamath-analytics-accept{background:#7160ce;border-color:#afa4ff}
+.mathmamath-analytics-controls button:focus-visible,.mathmamath-analytics-controls a:focus-visible{outline:3px solid #b6a6ff;outline-offset:3px}
+@media(max-width:480px){.mathmamath-analytics-controls{right:8px;bottom:8px;max-width:calc(100vw - 16px)}}

@@ -30,8 +30,10 @@ test("production image renders under its Content-Security-Policy", async ({ page
   const csp = response?.headers()["content-security-policy"] ?? "";
   expect(csp).toContain("connect-src 'self' https://visualmath.invalid");
   expect(csp).not.toContain("connect-src 'self' https:;");
-  expect(csp).toContain("img-src 'self' data: blob:");
-  expect(csp).not.toContain("img-src 'self' data: blob: https:");
+  expect(csp).toContain("img-src 'self' data: blob: https://www.googletagmanager.com https://*.google-analytics.com;");
+  expect(csp).not.toContain("img-src 'self' data: blob: https:;");
+  expect(csp).toContain("script-src 'self' https://www.googletagmanager.com;");
+  expect(csp).toContain("connect-src 'self' https://visualmath.invalid https://www.googletagmanager.com https://*.google-analytics.com https://*.google.com;");
   expect(csp).toContain(
     "media-src 'self' blob: https://visualmath.invalid",
   );
