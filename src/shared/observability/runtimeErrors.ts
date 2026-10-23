@@ -6,42 +6,47 @@ export type RuntimeErrorContext = {
   route?: string;
 };
 
+// Only coarse diagnostic metadata is sent to telemetry. Error messages,
+// stacks and arbitrary URL fragments may contain credentials or user data.
 type ErrorPayload = {
   name: string;
-  message: string;
-  stack?: string;
   source: RuntimeErrorContext["source"];
-  componentStack?: string;
   route: string;
   release: string;
   occurredAt: string;
 };
 
-function normalizeError(error: unknown) {
-  if (error instanceof Error) return error;
-  if (typeof error === "string") return new Error(error);
+const SAFE_ERROR_NAMES = new Set([
+  "Error",
+  "TypeError",
+  "RangeError",
+  "ReferenceError",
+  "SyntaxError",
+  "URIError",
+  "EvalError",
+  "AggregateError",
+]);
 
-  try {
-    return new Error(JSON.stringify(error));
-  } catch {
-    return new Error("Unknown runtime error");
-  }
+function safeRoute(route: string): string {
+  // Password-reset and email-verification credentials live after #account?.
+  // Never upload a complete hash, URL, topic ID or user-provided route.
+  const match = /^#?(home|map|academy|review|marks|account)(?:$|[/?])/i.exec(route.trim());
+  return match ? `#${match[1].toLowerCase()}` : "#other";
 }
 
-function buildPayload(
+export function buildSafeRuntimeErrorPayload(
   error: unknown,
   context: RuntimeErrorContext,
 ): ErrorPayload {
-  const normalized = normalizeError(error);
+  const errorName = error instanceof Error ? error.name : "";
+  const rawRoute =
+    context.route ??
+    (typeof window !== "undefined" ? window.location.hash : "#unknown");
+
   return {
-    name: normalized.name || "Error",
-    message: normalized.message || "Unknown runtime error",
-    stack: normalized.stack?.slice(0, 8000),
+    name: SAFE_ERROR_NAMES.has(errorName) ? errorName : "Error",
     source: context.source,
-    componentStack: context.componentStack?.slice(0, 8000),
-    route:
-      context.route ??
-      (typeof window !== "undefined" ? window.location.hash || "#home" : "#unknown"),
+    route: safeRoute(rawRoute),
     release: runtimeConfig.appRelease,
     occurredAt: new Date().toISOString(),
   };
@@ -51,8 +56,7 @@ export function reportRuntimeError(
   error: unknown,
   context: RuntimeErrorContext,
 ) {
-  const payload = buildPayload(error, context);
-
+  const payload = buildSafeRuntimeErrorPayload(error, context);
   console.error("[VisualMath] runtime error", payload);
 
   if (!runtimeConfig.errorReportingUrl || typeof window === "undefined") {
