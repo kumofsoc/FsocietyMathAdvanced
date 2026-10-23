@@ -19,7 +19,9 @@ Generated HTML comes from canonical TypeScript course loaders, not manually copi
 
 Set `VITE_PUBLIC_SITE_URL` to the **actual publicly accessible HTTPS origin**, with no path, e.g. `https://math.example`.
 
-Vercel builds can use the system-provided `VERCEL_PROJECT_PRODUCTION_URL` as a fallback, including for previews, if system variables are exposed. This must match the origin that serves pages. For a separate Nginx/Docker deployment, pass `--build-arg VITE_PUBLIC_SITE_URL=https://math.example` to Docker build.
+Vercel deployment-specific URLs are **not** a fallback for the public origin.
+The default is always `https://mathmamath.vercel.app` unless
+`VITE_PUBLIC_SITE_URL` explicitly selects a verified custom domain. For a separate Nginx/Docker deployment, pass `--build-arg VITE_PUBLIC_SITE_URL=https://math.example` to Docker build.
 
 For this deployment the confirmed fallback origin is `https://mathmamath.vercel.app`. When the origin is known on a production build, `scripts/generate-seo.mjs` generates `sitemap.xml` with absolute canonical URLs and `robots.txt` with a Sitemap directive. On Vercel Preview it uses `noindex,nofollow` plus `robots.txt` disallow and does not create a sitemap. The fallback is the known production address, so CI now also verifies sitemap and canonical markup; a custom production domain can override it through `VITE_PUBLIC_SITE_URL`.
 
@@ -79,8 +81,10 @@ The `VITE_GA4_MEASUREMENT_ID` variable is **optional** and overrides the
 public ID on builds using the normal SEO pipeline. If the Vercel value is
 invalid, the build now warns and uses the public default ID instead of failing
 the entire website deployment. Correct the value in Vercel separately; it
-must contain only `G-CTLM64E8WF`, not a JavaScript snippet or `KEY=VALUE`. A future production
-hostname change must also update the source `data-production-host` value.
+must contain only `G-CTLM64E8WF`, not a JavaScript snippet or `KEY=VALUE`. A future verified custom
+hostname must be set as `VITE_PUBLIC_SITE_URL`. The consent code always
+recognizes `mathmamath.vercel.app` regardless of stale build-time attributes,
+but never runs on random Vercel deployment/preview URLs.
 
 On the production hostname, the site shows a Russian opt-in consent panel. Only
 clicking **Разрешить аналитику** dynamically loads the Google tag. Declining

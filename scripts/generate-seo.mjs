@@ -3,13 +3,12 @@ import path from "node:path";
 import { createServer } from "vite";
 import katex from "katex";
 import { resolveGa4MeasurementId } from "./analytics-config.mjs";
+import { resolvePublicSiteOrigin } from "./public-site-origin.mjs";
 
 const IS_PREVIEW = process.env.VERCEL_ENV === "preview";
 const ROOT = process.cwd();
 const DIST = path.join(ROOT, "dist");
 const APP_NAME = "MathMaMath";
-// Confirmed public Vercel production domain. Environment override supports custom domains.
-const DEFAULT_PUBLIC_ORIGIN = "https://mathmamath.vercel.app";
 const HOME_TITLE = "MathMaMath: высшая математика, теория и задачи";
 const HOME_DESCRIPTION = "MathMaMath: бесплатный интерактивный курс высшей математики: линейная алгебра, аналитическая геометрия, математический анализ, интегралы и ряды. Теория, доказательства, примеры и практика.";
 
@@ -28,21 +27,6 @@ function analyticsMarkup(publishedIds, origin) {
     '<script defer src="/analytics.js" data-measurement-id="' + escapeHtml(analyticsMeasurementId()) +
     '" data-production-host="' + escapeHtml(new URL(origin).hostname) +
     '" data-topic-ids="' + escapeHtml(ids.join(",")) + '"></script>';
-}
-
-function siteOrigin() {
-  const raw = (
-    process.env.VITE_PUBLIC_SITE_URL ||
-    process.env.VERCEL_PROJECT_PRODUCTION_URL ||
-    process.env.VITE_VERCEL_PROJECT_PRODUCTION_URL ||
-    DEFAULT_PUBLIC_ORIGIN
-  ).trim();
-  if (!raw) return "";
-  const url = new URL(raw.includes("://") ? raw : "https://" + raw);
-  if (url.protocol !== "https:" || url.username || url.password || url.pathname !== "/" || url.search || url.hash) {
-    throw new Error("VITE_PUBLIC_SITE_URL must be an HTTPS origin, without a path, query, or fragment.");
-  }
-  return url.origin;
 }
 
 function escapeHtml(value) {
@@ -165,7 +149,7 @@ async function writePage(relative, content) {
 }
 
 async function generate() {
-  const origin = siteOrigin();
+  const origin = resolvePublicSiteOrigin(process.env);
   // Use Vite's existing TS transform and alias resolver instead of parsing TS with regex.
   const vite = await createServer({
     configFile: false,
