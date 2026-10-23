@@ -22,7 +22,7 @@ export function HomePortalScene({ resumeTopic, onPrimary, onMap }: PortalProps) 
           <button className="future-secondary" onClick={onMap}><span>КАРТА</span><strong>ОТКРЫТЬ ↗</strong></button>
         </div>
       </div>
-      <div className="portal-footer" aria-hidden="true"><span>VISUALMATH</span><span>MATHEMATICS / INTERFACE / MOTION</span><span>VISUALMATH</span></div>
+      <div className="portal-footer" aria-hidden="true"><span>MATHMAMATH</span><span>MATHEMATICS / INTERFACE / MOTION</span><span>MATHMAMATH</span></div>
     </section>
   );
 }

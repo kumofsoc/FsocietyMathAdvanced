@@ -1,4 +1,4 @@
-# VisualMath Profile + Map / 30th-Century Design
+# MathMaMath Profile + Map / 30th-Century Design
 
 ## Goal
 
@@ -62,7 +62,7 @@ Linear Academy is treated as a professional mathematical laboratory: dense metri
 The concise review mode is treated as a future reference archive: sticky filter bus, document-like topic sheets and formula-focused surfaces.
 
 ### SYSTEM CONFIG
-Settings becomes the VisualMath operating-system configuration console. Existing theme, cursor, motion, music and saved-theorem behavior remains unchanged.
+Settings becomes the MathMaMath operating-system configuration console. Existing theme, cursor, motion, music and saved-theorem behavior remains unchanged.
 
 ### Sidebar entrances
 Linear Academy and Review receive distinct visual identities directly in the sidebar while preserving the existing navigation behavior.

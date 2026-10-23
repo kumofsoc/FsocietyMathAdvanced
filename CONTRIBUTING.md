@@ -1,6 +1,6 @@
-# Contributing to VisualMath
+# Contributing to MathMaMath
 
-MathMaMath содержит frontend приложения VisualMath. Предложения и Pull Requests приветствуются при соблюдении требований к качеству и безопасности.
+MathMaMath содержит frontend приложения MathMaMath. Предложения и Pull Requests приветствуются при соблюдении требований к качеству и безопасности.
 
 ## Разработка
 

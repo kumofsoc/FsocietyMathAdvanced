@@ -2,7 +2,7 @@
 
 ## Goal
 
-Replace the VisualMath course knowledge map renderer completely with AntV G6 5.1.1 so node geometry, automatic layout, edge routing, zoom and pan are owned by one graph engine. The rewrite must preserve the existing course-map product flow while eliminating React Flow coordinate/measurement drift.
+Replace the MathMaMath course knowledge map renderer completely with AntV G6 5.1.1 so node geometry, automatic layout, edge routing, zoom and pan are owned by one graph engine. The rewrite must preserve the existing course-map product flow while eliminating React Flow coordinate/measurement drift.
 
 ## Scope
 

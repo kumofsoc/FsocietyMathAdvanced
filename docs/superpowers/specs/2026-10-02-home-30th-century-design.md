@@ -1,8 +1,8 @@
-# VisualMath 30th-Century Home Design
+# MathMaMath 30th-Century Home Design
 
 ## Goal
 
-Rebuild the VisualMath home page as a post-modern mathematical interface from the 30th century: dense, cinematic, strange, highly animated and visually memorable, while preserving the actual product actions and keeping the experience usable on desktop, mobile and reduced-motion profiles.
+Rebuild the MathMaMath home page as a post-modern mathematical interface from the 30th century: dense, cinematic, strange, highly animated and visually memorable, while preserving the actual product actions and keeping the experience usable on desktop, mobile and reduced-motion profiles.
 
 The home page is allowed to change section order, section count and visual composition completely. The existing functional destinations remain intact: resume/start learning, open the course map, show course progress and show public user-growth data.
 
@@ -53,7 +53,7 @@ The page must not look like a generic SaaS landing page.
 The hero becomes a full-screen cinematic arrival scene.
 
 Content:
-- VisualMath identity
+- MathMaMath identity
 - primary action: continue/start
 - secondary action: open map
 - course progress
@@ -386,7 +386,7 @@ Manual/browser checks:
 
 The redesign is successful when:
 - the home page no longer resembles a conventional SaaS landing page
-- the first screen is immediately recognizable as VisualMath
+- the first screen is immediately recognizable as MathMaMath
 - every major scene has a distinct visual identity
 - the page still communicates where the real product actions are
 - decorative futuristic content cannot be mistaken for real account metrics

@@ -48,7 +48,7 @@ export const scienceCourses: CourseDefinition[] = [
     disciplineId: "mathematics",
     title: "Высшая математика",
     description:
-      "Текущий основной курс VisualMath с картой зависимостей, теорией, доказательствами, практикой и визуализациями.",
+      "Текущий основной курс MathMaMath с картой зависимостей, теорией, доказательствами, практикой и визуализациями.",
     chapterIds: chapters.map((chapter) => chapter.id),
   },
 ];

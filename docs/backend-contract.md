@@ -1,6 +1,6 @@
 # Backend contract / frontend boundary
 
-VisualMath is **local-first for anonymous/offline use** and **server-canonical after authentication**.
+MathMaMath is **local-first for anonymous/offline use** and **server-canonical after authentication**.
 
 The frontend remains usable when no backend is configured. When a user authenticates successfully, account-scoped data is hydrated from the Go backend and local feature models become an optimistic cache/write-through boundary.
 
@@ -23,7 +23,7 @@ VITE_API_TIMEOUT_MS=12000
 Production:
 
 ```env
-VITE_API_BASE_URL=https://<final-visualmath-origin>
+VITE_API_BASE_URL=https://<final-mathmamath-origin>
 VITE_API_TIMEOUT_MS=12000
 VITE_APP_RELEASE=<git-sha>
 ```
@@ -118,7 +118,7 @@ Notes, Important Blocks, bookmarks, activity and media track lists remain separa
 
 A per-user, versioned migration marker controls anonymous -> account migration.
 
-Before bootstrap hydration overwrites core local state, VisualMath captures the anonymous migration seed. Migration then:
+Before bootstrap hydration overwrites core local state, MathMaMath captures the anonymous migration seed. Migration then:
 
 - union-merges monotonic learning facts;
 - migrates exact reading blocks;
@@ -282,7 +282,7 @@ When account media is available and old local blobs exist, the Settings UI expos
 
 ## Local-first guarantees
 
-When `VITE_API_BASE_URL` is empty, VisualMath remains fully usable locally.
+When `VITE_API_BASE_URL` is empty, MathMaMath remains fully usable locally.
 
 When the user is anonymous:
 

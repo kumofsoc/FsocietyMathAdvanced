@@ -1,4 +1,4 @@
-# MathMaMath / VisualMath: Security Review
+# MathMaMath: Security Review
 
 **Дата обзора:** 2026-10-23  
 **Тип:** ограниченный обзор исходного кода frontend и конфигурации CI/CD; не независимый penetration test.  

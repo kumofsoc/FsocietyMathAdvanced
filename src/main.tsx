@@ -14,7 +14,7 @@ import { installGlobalRuntimeErrorReporting } from "@/shared/observability/runti
 installGlobalRuntimeErrorReporting();
 
 for (const warning of getRuntimeConfigWarnings()) {
-  console.warn("[VisualMath] runtime config:", warning);
+  console.warn("[MathMaMath] runtime config:", warning);
 }
 
 createRoot(document.getElementById("root")!).render(

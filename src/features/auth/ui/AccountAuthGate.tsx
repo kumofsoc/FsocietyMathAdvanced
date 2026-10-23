@@ -255,7 +255,7 @@ export function AccountAuthGate() {
     return (
       <section className="account-auth-shell">
         <div className="account-auth-copy">
-          <span>VISUALMATH / VERIFY EMAIL</span>
+          <span>MATHMAMATH / VERIFY EMAIL</span>
           <h1>Подтверди email.</h1>
           <p>
             Verification token хранится только во fragment URL и отправляется
@@ -274,7 +274,7 @@ export function AccountAuthGate() {
     return (
       <section className="account-auth-shell">
         <div className="account-auth-copy">
-          <span>VISUALMATH / RECOVERY</span>
+          <span>MATHMAMATH / RECOVERY</span>
           <h1>{resetToken ? "Задай новый пароль." : "Верни доступ."}</h1>
           <p>
             Reset token хранится только во fragment URL и не отправляется в
@@ -295,7 +295,7 @@ export function AccountAuthGate() {
   return (
     <section className="account-auth-shell">
       <div className="account-auth-copy">
-        <span>VISUALMATH / ACCOUNT</span>
+        <span>MATHMAMATH / ACCOUNT</span>
         <h1>{mode === "login" ? "Продолжить обучение." : "Создать аккаунт."}</h1>
         <p>
           Прогресс остаётся local-first. После входа локальные данные объединяются

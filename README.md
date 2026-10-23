@@ -1,4 +1,4 @@
-# VisualMath
+# MathMaMath
 
 Интерактивная среда для изучения высшей математики на React + TypeScript.
 
@@ -33,7 +33,7 @@
 
 ## Local-first + account sync
 
-VisualMath работает без backend и без аккаунта.
+MathMaMath работает без backend и без аккаунта.
 
 После авторизации backend становится canonical account-scoped storage, а существующие browser-модели остаются optimistic cache/UI boundary.
 
@@ -139,7 +139,7 @@ VITE_MEDIA_TRANSFER_TIMEOUT_MS=600000
 Production:
 
 ```env
-VITE_API_BASE_URL=https://<final-visualmath-origin>
+VITE_API_BASE_URL=https://<final-mathmamath-origin>
 VITE_API_TIMEOUT_MS=12000
 VITE_MEDIA_TRANSFER_TIMEOUT_MS=600000
 VITE_APP_RELEASE=<git-sha>

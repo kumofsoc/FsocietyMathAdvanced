@@ -1,11 +1,11 @@
-# VisualMath Learning Architecture v2
+# MathMaMath Learning Architecture v2
 
 Date: 2026-10-02
 Status: approved and executing
 
 ## Product thesis
 
-VisualMath should become arbitrarily deep academically without becoming arbitrarily hard to understand.
+MathMaMath should become arbitrarily deep academically without becoming arbitrarily hard to understand.
 
 **Clarity is mandatory. Depth is layered.**
 
@@ -82,7 +82,7 @@ Initial reference migrations: matrices, determinants, inverse-rank.
 - Medium: 2 + 2 + 1.
 - Mobile: one column.
 - Remove vertical transforms that push later cards outside the viewport.
-- Add a new “Что такое VisualMath” product overview scene covering:
+- Add a new “Что такое MathMaMath” product overview scene covering:
   - understandable higher mathematics;
   - layered academic depth;
   - knowledge map;

@@ -1,6 +1,6 @@
 # SEO: crawlable pages and metadata
 
-MathMaMath is the source repository; the site and product use the public name **VisualMath**.
+The source repository and the public product both use the name **MathMaMath**.
 
 ## What gets indexed
 

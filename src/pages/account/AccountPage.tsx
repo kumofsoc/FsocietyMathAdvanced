@@ -8,6 +8,7 @@ import {
 import { loadSavedTheorems } from "@/features/learning/model/learning";
 import { useAuthStore } from "@/features/auth/model/authSession";
 import { AccountSecurityControls } from "@/features/account-security/ui/AccountSecurityControls";
+import { normalizeLegacyProfileDisplayName } from "@/features/account/model/localProfile";
 import { AccountAuthGate } from "@/features/auth/ui/AccountAuthGate";
 import { api } from "@/shared/api/client";
 import { apiErrorMessage } from "@/shared/api/errorPresentation";
@@ -47,11 +48,17 @@ function loadLocalProfile(): LocalProfile {
     typeof stored.bio === "string" &&
     typeof stored.joinedAt === "string"
   ) {
+    const nextName = normalizeLegacyProfileDisplayName(stored.displayName);
+    if (nextName !== stored.displayName) {
+      const migrated = { ...stored, displayName: nextName };
+      writeLocalStorage(PROFILE_KEY, JSON.stringify(migrated));
+      return migrated;
+    }
     return stored;
   }
 
   const profile: LocalProfile = {
-    displayName: "VisualMath User",
+    displayName: "MathMaMath User",
     handle: "visual-learner",
     bio: "Изучаю математику через структуру, визуализацию и практику.",
     joinedAt: new Date().toISOString(),
@@ -63,7 +70,7 @@ function loadLocalProfile(): LocalProfile {
 
 function initials(value: string) {
   const parts = value.trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return "VM";
+  if (!parts.length) return "MM";
   return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join("");
 }
 
@@ -158,7 +165,7 @@ function LocalAccount({
   const save = () => {
     const next: LocalProfile = {
       ...profile,
-      displayName: draft.displayName.trim() || "VisualMath User",
+      displayName: draft.displayName.trim() || "MathMaMath User",
       handle: draft.handle.trim().replace(/^@/, "") || "visual-learner",
       bio: draft.bio.trim(),
     };
@@ -336,7 +343,7 @@ function BackendAccount({
           <div className="eyebrow">SYNCED PROFILE</div>
           <h1>{serverProfile.displayName}</h1>
           <span>@{serverProfile.handle}</span>
-          <p>{serverProfile.bio || "Профиль VisualMath"}</p>
+          <p>{serverProfile.bio || "Профиль MathMaMath"}</p>
           <small>{user.email}</small>
         </div>
         <div className="account-hero-actions">

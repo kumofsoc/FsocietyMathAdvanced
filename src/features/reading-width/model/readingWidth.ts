@@ -16,7 +16,7 @@ export const readingWidthOptions: Array<{
   description: string;
 }> = [
   { id: "narrow", label: "Узко", description: "Короткая строка для плотного чтения" },
-  { id: "normal", label: "Нормально", description: "Стандартная ширина VisualMath" },
+  { id: "normal", label: "Нормально", description: "Стандартная ширина MathMaMath" },
   { id: "wide", label: "Широко", description: "Больше текста в строке" },
 ];
 

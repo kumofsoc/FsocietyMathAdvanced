@@ -60,7 +60,7 @@ export function HomeSiteOverview({
     <section className="future-scene future-overview" data-home-scene="about">
       <div className="future-overview-head" data-reveal>
         <div className="future-kicker">
-          <span>ЧТО ТАКОЕ VISUALMATH</span>
+          <span>ЧТО ТАКОЕ MATHMAMATH</span>
           <i>ОБЗОР ПРОДУКТА</i>
         </div>
         <h2>
@@ -69,7 +69,7 @@ export function HomeSiteOverview({
           который <em>можно понять.</em>
         </h2>
         <p>
-          VisualMath соединяет понятное объяснение, строгую математику,
+          MathMaMath соединяет понятное объяснение, строгую математику,
           визуализацию, практику и карту зависимостей. Глубина курса не прячется,
           но и не мешает сначала увидеть основную идею.
         </p>

@@ -46,7 +46,7 @@ export function HomeHeroScene({
 
       <div className="future-arrival-copy">
         <div className="future-kicker" data-reveal>
-          <span>VISUALMATH</span>
+          <span>MATHMAMATH</span>
           <i>ИНТЕРАКТИВНЫЙ КУРС</i>
         </div>
 

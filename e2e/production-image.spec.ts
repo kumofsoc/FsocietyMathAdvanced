@@ -36,7 +36,7 @@ test("production image renders under its Content-Security-Policy", async ({ page
     "media-src 'self' blob: https://visualmath.invalid",
   );
   await expect(page.locator(".app-shell")).toBeVisible();
-  await expect(page.locator("body")).toContainText("VisualMath");
+  await expect(page.locator("body")).toContainText("MathMaMath");
 
   await page.goto("/#map");
   await expect(page.locator(".knowledge-map-page")).toBeVisible();

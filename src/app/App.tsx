@@ -279,7 +279,7 @@ export default function App() {
 
   const routeContext =
     route === "home"
-      ? { section: "VisualMath", current: "Главная" }
+      ? { section: "MathMaMath", current: "Главная" }
       : route === "map"
         ? { section: "Навигация", current: "Карта курса" }
         : route === "academy"
@@ -295,7 +295,7 @@ export default function App() {
                     section: currentChapter?.title ?? "Курс",
                     current: "§ " + topic.number + " " + topic.title,
                   }
-                : { section: "VisualMath", current: "Страница" };
+                : { section: "MathMaMath", current: "Страница" };
 
   const routeSkeletonVariant =
     topic
@@ -311,7 +311,7 @@ export default function App() {
               : "home";
 
   useEffect(() => {
-    document.title = routeContext.current + " · VisualMath";
+    document.title = routeContext.current + " · MathMaMath";
     if (!routeFocusReadyRef.current) {
       routeFocusReadyRef.current = true;
       return;
@@ -370,7 +370,7 @@ export default function App() {
         <button className="brand" onClick={openHomeAtTop}>
           <span className="brand-mark">∑</span>
           <span>
-            <strong>VisualMath</strong>
+            <strong>MathMaMath</strong>
             <small>ADVANCED</small>
           </span>
         </button>
