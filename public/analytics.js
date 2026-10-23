@@ -9,10 +9,17 @@
   const source = document.currentScript;
   const measurementId = source?.getAttribute("data-measurement-id") ?? "";
   const productionHost = source?.getAttribute("data-production-host") ?? "";
-  // Prevent local/preview/test traffic from loading a production Google tag,
-  // even when Vercel skips the post-build SEO generator.
+  const currentHost = window.location.hostname.toLowerCase();
+  // The public canonical hostname is stable; a Vercel system URL can point
+  // at an individual deployment and must never disable tracking on the real
+  // site. An explicitly configured custom domain is also allowed, but random
+  // *.vercel.app preview/deployment URLs are never tracking targets.
+  const canonicalHost = currentHost === "mathmamath.vercel.app";
+  const customHost = productionHost &&
+    !productionHost.endsWith(".vercel.app") &&
+    currentHost === productionHost.toLowerCase();
   if (!/^G-[A-Z0-9]{6,16}$/.test(measurementId) ||
-      !productionHost || window.location.hostname !== productionHost) return;
+      (!canonicalHost && !customHost)) return;
 
   const consentKey = "mathmamath-analytics-consent-v1";
 

@@ -3,10 +3,11 @@ import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { runInNewContext } from "node:vm";
 import { DEFAULT_GA4_MEASUREMENT_ID, resolveGa4MeasurementId } from "./analytics-config.mjs";
+import { DEFAULT_PUBLIC_ORIGIN, resolvePublicSiteOrigin } from "./public-site-origin.mjs";
 
 const source = readFileSync(new URL("../public/analytics.js", import.meta.url), "utf8");
 
-function browser({ saved = null, hash = "#matrices", pathname = "/", hostname = "mathmamath.vercel.app", topicsReady = true } = {}) {
+function browser({ saved = null, hash = "#matrices", pathname = "/", hostname = "mathmamath.vercel.app", configuredHost = "mathmamath.vercel.app", topicsReady = true } = {}) {
   const storage = new Map(saved ? [["mathmamath-analytics-consent-v1", saved]] : []);
   const events = new Map();
   const scripts = [];
@@ -38,7 +39,7 @@ function browser({ saved = null, hash = "#matrices", pathname = "/", hostname = 
       getAttribute(key) {
         if (key === "data-measurement-id") return "G-TEST123456";
         if (key === "data-topic-ids") return topicIds;
-        if (key === "data-production-host") return "mathmamath.vercel.app";
+        if (key === "data-production-host") return configuredHost;
         return null;
       },
     },
@@ -57,8 +58,9 @@ function browser({ saved = null, hash = "#matrices", pathname = "/", hostname = 
   runInNewContext(source, { document, window, localStorage, console, encodeURIComponent });
 
   const controls = elements.find((node) => node.className === "mathmamath-analytics-controls");
-  if (hostname !== "mathmamath.vercel.app") {
-    assert.equal(controls, undefined, "No consent/tracking UI outside the production hostname");
+  if (hostname !== "mathmamath.vercel.app" &&
+      (hostname.endsWith(".vercel.app") || hostname !== configuredHost)) {
+    assert.equal(controls, undefined, "No consent/tracking UI on preview or unrelated host");
     return { scripts, events, window, location };
   }
   assert.ok(controls, "Privacy controls must exist");
@@ -183,4 +185,50 @@ test("GA4 production build tolerates missing and malformed Vercel configuration"
     assert.match(warning, /Invalid VITE_GA4_MEASUREMENT_ID/);
     assert.ok(!warning.includes("<script>"));
   }
+});
+
+test("per-deployment Vercel URL cannot replace stable SEO and GA4 site hostname", () => {
+  assert.equal(DEFAULT_PUBLIC_ORIGIN, "https://mathmamath.vercel.app");
+  assert.equal(
+    resolvePublicSiteOrigin({
+      VERCEL_PROJECT_PRODUCTION_URL: "mathmamath-cljsa0p46-iplayens3-2767.vercel.app",
+    }),
+    DEFAULT_PUBLIC_ORIGIN,
+  );
+  assert.equal(
+    resolvePublicSiteOrigin({
+      VERCEL_URL: "mathmamath-cljsa0p46-iplayens3-2767.vercel.app",
+      VITE_VERCEL_PROJECT_PRODUCTION_URL: "mathmamath-branch-other.vercel.app",
+    }),
+    DEFAULT_PUBLIC_ORIGIN,
+  );
+  assert.equal(
+    resolvePublicSiteOrigin({ VITE_PUBLIC_SITE_URL: "https://example.org" }),
+    "https://example.org",
+  );
+  assert.throws(
+    () => resolvePublicSiteOrigin({ VITE_PUBLIC_SITE_URL: "http://example.org" }),
+    /HTTPS origin/,
+  );
+});
+
+test("canonical production origin still runs consent when Vercel generated stale deployment hostname", () => {
+  const staleHost = "mathmamath-cljsa0p46-iplayens3-2767.vercel.app";
+  const app = browser({ hostname: "mathmamath.vercel.app", configuredHost: staleHost });
+  assert.equal(app.panel.hidden, false);
+  assert.equal(app.scripts.length, 0);
+  app.accept.trigger("click");
+  assert.equal(app.scripts.length, 1);
+  assert.equal(app.pageviews()[0].page_location, "https://mathmamath.vercel.app/learn/matrices/");
+
+  const preview = browser({ hostname: staleHost, configuredHost: staleHost, saved: "accepted" });
+  assert.equal(preview.scripts.length, 0);
+});
+
+test("explicit custom production hostname remains supported without tracking previews", () => {
+  const site = browser({ hostname: "math.example.org", configuredHost: "math.example.org" });
+  assert.equal(site.panel.hidden, false);
+  assert.equal(site.scripts.length, 0);
+  site.accept.trigger("click");
+  assert.equal(site.scripts.length, 1);
 });
