@@ -7,8 +7,8 @@ const IS_PREVIEW = process.env.VERCEL_ENV === "preview";
 const ROOT = process.cwd();
 const DIST = path.join(ROOT, "dist");
 const APP_NAME = "VisualMath";
-const HOME_TITLE = "VisualMath: высшая математика, теория, доказательства и задачи";
-const HOME_DESCRIPTION = "Бесплатный интерактивный курс высшей математики: линейная алгебра, аналитическая геометрия, математический анализ, интегралы и ряды. Теория, доказательства, примеры и практика.";
+const HOME_TITLE = "VisualMath (MathMaMath): высшая математика, теория и задачи";
+const HOME_DESCRIPTION = "VisualMath (MathMaMath): бесплатный интерактивный курс высшей математики: линейная алгебра, аналитическая геометрия, математический анализ, интегралы и ряды. Теория, доказательства, примеры и практика.";
 
 function siteOrigin() {
   const raw = (
@@ -291,7 +291,7 @@ async function generate() {
         '<meta property="og:url" content="' + escapeHtml(origin + "/") + '">',
       ] : []),
       '<script type="application/ld+json">' +
-        jsonLd({ "@context": "https://schema.org", "@type": "WebSite", name: "VisualMath", description: HOME_DESCRIPTION, inLanguage: "ru", ...(origin ? { url: origin + "/" } : {}) }) +
+        jsonLd({ "@context": "https://schema.org", "@type": "WebSite", name: "VisualMath", alternateName: "MathMaMath", description: HOME_DESCRIPTION, inLanguage: "ru", ...(origin ? { url: origin + "/" } : {}) }) +
         '</script>',
     ].join("\n");
     if (!index.includes("</head>")) throw new Error("dist/index.html has no </head> tag");
