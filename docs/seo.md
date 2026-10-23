@@ -48,3 +48,49 @@ Do not promise rankings or use fabricated reviews, FAQ markup, aggregate ratings
 - Google may choose different canonical URLs and is never required to index all pages.
 - `VITE_PUBLIC_SITE_URL` is a **public origin**, never a credential or secret.
 - Page-based Open Graph images and social screenshots are a separate future enhancement; no imagery is invented by the generator.
+
+## Search and traffic analytics
+
+Search-performance numbers come **from Google Search Console**, not from
+JavaScript on the website. For the verified URL-prefix property
+`https://mathmamath.vercel.app/` use:
+
+- [Search performance](https://search.google.com/search-console/performance/search-analytics?resource_id=https%3A%2F%2Fmathmamath.vercel.app%2F):
+  impressions, clicks, CTR, position, search terms, pages, device and country;
+- [Pages and indexing](https://search.google.com/search-console/index?resource_id=https%3A%2F%2Fmathmamath.vercel.app%2F):
+  excluded/crawled/indexed URLs, canonicalization problems;
+- [Sitemaps](https://search.google.com/search-console/sitemaps?resource_id=https%3A%2F%2Fmathmamath.vercel.app%2F):
+  sitemap fetch status and discovered URLs;
+- [Core Web Vitals](https://search.google.com/search-console/core-web-vitals?resource_id=https%3A%2F%2Fmathmamath.vercel.app%2F):
+  field experience once sufficient real-user data is available.
+
+### Optional Google Analytics 4
+
+For website visitor numbers and lesson navigation (distinct from search
+impressions), create a GA4 web data stream and copy its **Measurement ID**
+(`G-XXXXXXXXXX`). In **Vercel → MathMaMath → Settings → Environment Variables**,
+create `VITE_GA4_MEASUREMENT_ID` with this value for **Production only**,
+then redeploy. The code also accepts the same build variable when using Docker.
+
+When the ID is unset, **no Google Analytics tag, cookie or tracking request
+is added**. With an ID, the site shows a Russian opt-in consent panel. Only
+clicking **Разрешить аналитику** dynamically loads the Google tag. Declining
+does not load it. The persistent **Конфиденциальность** control can reopen the
+choice; withdrawing consent reloads into a non-tracking state. The choice is
+stored under `mathmamath-analytics-consent-v1`. No email, account ID, query
+string, reset/verification token or arbitrary hash fragment is sent in
+page-view URLs. The existing SPA hash routes are mapped to a safe whitelist of
+virtual `/learn/<topic>/` paths. Pre-rendered lesson and chapter pages have
+the same opt-in behavior. Preview deployments never include the analytics tag.
+
+GA4 and Search Console are distinct products. **GA4 cannot give Search
+Console search-query impressions or ranking positions.** There are no GA4
+reports until a real Measurement ID is configured and consenting traffic is
+recorded. To avoid duplicate page-view events, review GA4 Enhanced
+Measurement's browser-history pageview option because the site sends its own
+sanitized page_view events for hash navigation.
+
+Optional: enable Vercel Web Analytics and Speed Insights from the project's
+dashboard if desired. They are separate services that are **not** enabled
+automatically by this implementation. Review your legal privacy and consent
+requirements before adding other trackers.
