@@ -76,7 +76,10 @@ MathMaMath's public production GA4 ID `G-CTLM64E8WF` is bundled in the
 first-party consent loader, so the UI works even if Vercel does not inject
 the build-time environment variable or runs Vite without the SEO generator.
 The `VITE_GA4_MEASUREMENT_ID` variable is **optional** and overrides the
-public ID on builds using the normal SEO pipeline. A future production
+public ID on builds using the normal SEO pipeline. If the Vercel value is
+invalid, the build now warns and uses the public default ID instead of failing
+the entire website deployment. Correct the value in Vercel separately; it
+must contain only `G-CTLM64E8WF`, not a JavaScript snippet or `KEY=VALUE`. A future production
 hostname change must also update the source `data-production-host` value.
 
 On the production hostname, the site shows a Russian opt-in consent panel. Only

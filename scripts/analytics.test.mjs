@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { runInNewContext } from "node:vm";
+import { DEFAULT_GA4_MEASUREMENT_ID, resolveGa4MeasurementId } from "./analytics-config.mjs";
 
 const source = readFileSync(new URL("../public/analytics.js", import.meta.url), "utf8");
 
@@ -154,4 +155,32 @@ test("preview and localhost skip consent and all Google Analytics requests", () 
   const localhost = browser({ saved: "accepted", hostname: "localhost" });
   assert.equal(preview.scripts.length, 0);
   assert.equal(localhost.scripts.length, 0);
+});
+
+test("GA4 production build tolerates missing and malformed Vercel configuration", () => {
+  const warnings = [];
+  const warn = (message) => warnings.push(message);
+
+  assert.equal(DEFAULT_GA4_MEASUREMENT_ID, "G-CTLM64E8WF");
+  assert.equal(resolveGa4MeasurementId(undefined, warn), "G-CTLM64E8WF");
+  assert.equal(resolveGa4MeasurementId("", warn), "G-CTLM64E8WF");
+  assert.equal(resolveGa4MeasurementId("  G-CTLM64E8WF  ", warn), "G-CTLM64E8WF");
+  assert.equal(resolveGa4MeasurementId("G-ABCDEF9876", warn), "G-ABCDEF9876");
+  assert.equal(warnings.length, 0);
+
+  // Vercel may receive a pasted snippet or a Value containing Key=Value.
+  // Neither case should break the entire production site's SEO build.
+  assert.equal(
+    resolveGa4MeasurementId("VITE_GA4_MEASUREMENT_ID=G-CTLM64E8WF", warn),
+    "G-CTLM64E8WF",
+  );
+  assert.equal(
+    resolveGa4MeasurementId("<script>gtag('config', 'G-CTLM64E8WF')</script>", warn),
+    "G-CTLM64E8WF",
+  );
+  assert.equal(warnings.length, 2);
+  for (const warning of warnings) {
+    assert.match(warning, /Invalid VITE_GA4_MEASUREMENT_ID/);
+    assert.ok(!warning.includes("<script>"));
+  }
 });
