@@ -1,3 +1,4 @@
+.mobile-nav-close { display: none; }
 /*
  * Phone/tablet layout pass. Desktop widths are intentionally untouched.
  * Imported after the original shell styles. Keep the mathematical content
@@ -48,7 +49,23 @@
     transform: translateX(0);
     opacity: 1;
   }
-  .sidebar-reopen { display: none; }
+  .sidebar-reopen, .sidebar .sidebar-collapse-control { display: none; }
+  .mobile-nav-close {
+    position: relative;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    align-self: flex-end;
+    margin: 8px 10px 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: var(--elevated);
+    color: var(--text);
+    font-size: 26px;
+    cursor: pointer;
+  }
 
   /* Touch users cannot rely on the invisible hover-to-reveal strip. */
   .topbar.topbar-minimal {
@@ -66,6 +83,12 @@
     pointer-events: auto;
   }
   .topbar.topbar-minimal.is-hidden { transform: none; opacity: 1; pointer-events: auto; }
+  /* Graph-only mode fills the viewport and puts its controls at the top.
+     Its toolbar must not be obscured by the persistent mobile header. */
+  .app-shell:has(.knowledge-map-focus) .topbar.topbar-minimal {
+    visibility: hidden;
+    pointer-events: none;
+  }
   .topbar-reveal-zone { display: none; }
   .mobile-menu {
     flex: 0 0 44px;
@@ -110,9 +133,9 @@
     justify-content: center;
     padding: 0;
     gap: 0;
-    font-size: 0;
   }
-  .settings-shell .settings-trigger > span { font-size: 21px; }
+  .settings-shell .settings-trigger > span:not(.settings-trigger-label) { font-size: 21px; }
+  .settings-shell .settings-trigger .settings-trigger-label { display: none; }
   .settings-shell .settings-panel {
     width: min(100vw, 560px);
     max-width: 100vw;

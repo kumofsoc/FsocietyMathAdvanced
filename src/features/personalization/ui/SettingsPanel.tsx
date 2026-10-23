@@ -208,13 +208,14 @@ export function SettingsPanel() {
       <button
         ref={triggerRef}
         className="settings-trigger"
+        aria-label="Настройки"
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls="visualmath-settings-panel"
         onClick={() => setOpen((value) => !value)}
       >
-        <span>⚙</span>
-        Настройки
+        <span aria-hidden="true">⚙</span>
+        <span className="settings-trigger-label" aria-hidden="true">Настройки</span>
       </button>
 
       {open && (
