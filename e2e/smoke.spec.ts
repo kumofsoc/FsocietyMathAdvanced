@@ -53,17 +53,27 @@ test.describe("mobile and tablet layout", () => {
     test(`drawer, main routes and typography work at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 812 });
       await page.goto("/");
-      const menu = page.getByRole("button", { name: "Открыть меню курса" });
+      const menu = page.locator(".mobile-menu");
       await expect(menu).toBeVisible();
+      await expect(menu).toHaveAttribute("aria-label", "Открыть меню курса");
       await menu.click();
       await expect(page.locator("#mathmamath-course-sidebar")).toBeVisible();
       await expect(menu).toHaveAttribute("aria-expanded", "true");
+      await expect(menu).toHaveAttribute("aria-label", "Закрыть меню курса");
       await page.keyboard.press("Escape");
       await expect(page.locator("#mathmamath-course-sidebar")).toBeHidden();
+      await expect(menu).toHaveAttribute("aria-expanded", "false");
 
-      for (const route of ["/", "/#matrices", "/#map", "/#review", "/#account"]) {
-        await page.goto(route);
-        await expect(page.locator(".app-shell")).toBeVisible();
+      const routes = [
+        { url: "/", content: ".future-home" },
+        { url: "/#matrices", content: ".topic-page" },
+        { url: "/#map", content: ".knowledge-map-page" },
+        { url: "/#review", content: ".review-hub" },
+        { url: "/#account", content: ".account-page" },
+      ];
+      for (const route of routes) {
+        await page.goto(route.url);
+        await expect(page.locator(route.content)).toBeVisible();
         await expect.poll(async () => page.evaluate(() =>
           document.documentElement.scrollWidth <= window.innerWidth + 2,
         )).toBe(true);
