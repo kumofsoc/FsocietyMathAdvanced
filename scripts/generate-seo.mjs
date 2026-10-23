@@ -1,7 +1,9 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createServer } from "vite";
+import katex from "katex";
 
+const IS_PREVIEW = process.env.VERCEL_ENV === "preview";
 const ROOT = process.cwd();
 const DIST = path.join(ROOT, "dist");
 const APP_NAME = "VisualMath";
@@ -29,6 +31,23 @@ function escapeHtml(value) {
   })[char]);
 }
 
+function renderMath(formula) {
+  let rendered = "";
+  try {
+    rendered = katex.renderToString(String(formula), {
+      output: "mathml",
+      throwOnError: true,
+      trust: false,
+      strict: "ignore",
+    });
+  } catch {
+    // Some legacy formulas are intentionally informal; keep their source legible.
+  }
+  return '<div class="formula">' +
+    (rendered || '<code>' + escapeHtml(formula) + '</code>') +
+    '</div>';
+}
+
 function jsonLd(value) {
   return JSON.stringify(value).replace(/</g, "\\u003c");
 }
@@ -40,7 +59,7 @@ function richTitle(title) {
 function meta(description, title, url, type = "article") {
   return [
     '<meta name="description" content="' + escapeHtml(description) + '">',
-    '<meta name="robots" content="index,follow,max-image-preview:large">',
+    '<meta name="robots" content="' + (IS_PREVIEW ? "noindex,nofollow" : "index,follow,max-image-preview:large") + '">',
     '<meta property="og:type" content="' + type + '">',
     '<meta property="og:locale" content="ru_RU">',
     '<meta property="og:site_name" content="' + APP_NAME + '">',
@@ -93,7 +112,7 @@ function renderAnnotations(items, heading) {
   return items.map((item) =>
     '<section><h4>' + escapeHtml(item.label || item.title || heading) + '</h4>' +
     '<p>' + escapeHtml(item.body || item.claim || "") + '</p>' +
-    (item.formula ? '<div class="formula"><code>' + escapeHtml(item.formula) + '</code></div>' : "") +
+    (item.formula ? renderMath(item.formula) : "") +
     "</section>"
   ).join("");
 }
@@ -103,7 +122,7 @@ function renderBlock(block, index) {
   return '<section class="block" id="section-' + index + '">' +
     '<h2>' + escapeHtml(heading) + '</h2>' +
     '<p>' + escapeHtml(block.body) + '</p>' +
-    (block.formula ? '<div class="formula"><code>' + escapeHtml(block.formula) + '</code></div>' : "") +
+    (block.formula ? renderMath(block.formula) : "") +
     renderItems(block.items) +
     renderAnnotations(block.proofs, "Доказательство") +
     renderAnnotations(block.corollaries, "Следствие") +
@@ -266,6 +285,7 @@ async function generate() {
       '<meta property="og:title" content="' + escapeHtml(HOME_TITLE) + '">',
       '<meta property="og:description" content="' + escapeHtml(HOME_DESCRIPTION) + '">',
       '<meta name="twitter:card" content="summary">',
+      '<meta name="robots" content="' + (IS_PREVIEW ? "noindex,nofollow" : "index,follow") + '">',
       ...(origin ? [
         '<link rel="canonical" href="' + escapeHtml(origin + "/") + '">',
         '<meta property="og:url" content="' + escapeHtml(origin + "/") + '">',
@@ -281,8 +301,8 @@ async function generate() {
     // Absolute canonical URLs are mandatory for sitemap entries. Never invent
     // a hostname: GitHub CI creates pages without sitemap, Vercel uses its
     // production domain when the system variable is available.
-    let robots = "User-agent: *\nAllow: /\n";
-    if (origin) {
+    let robots = IS_PREVIEW ? "User-agent: *\nDisallow: /\n" : "User-agent: *\nAllow: /\n";
+    if (origin && !IS_PREVIEW) {
       const sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n' +
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
         urls.map((url) => "  <url><loc>" + escapeHtml(origin + url) + "</loc></url>").join("\n") +
