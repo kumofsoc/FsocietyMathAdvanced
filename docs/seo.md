@@ -86,9 +86,16 @@ the same opt-in behavior. Preview deployments never include the analytics tag.
 GA4 and Search Console are distinct products. **GA4 cannot give Search
 Console search-query impressions or ranking positions.** There are no GA4
 reports until a real Measurement ID is configured and consenting traffic is
-recorded. To avoid duplicate page-view events, review GA4 Enhanced
-Measurement's browser-history pageview option because the site sends its own
-sanitized page_view events for hash navigation.
+recorded. **Required GA4 stream configuration before enabling this variable:** open
+Google Analytics → Admin → Data streams → Web → Enhanced measurement →
+Page views (advanced options), and **disable "Page changes based on browser
+history events"**. The website already sends explicit sanitized `page_view`
+events for hash-navigation. Leaving this switch enabled causes duplicated
+events and can send unfiltered browser-history URLs independently of the
+website's consent-aware routing.
+
+See [Google's manual-pageview guide](https://developers.google.com/analytics/devguides/collection/ga4/views#disable-page-changes-based-on-browser-history-events).
+
 
 Optional: enable Vercel Web Analytics and Speed Insights from the project's
 dashboard if desired. They are separate services that are **not** enabled

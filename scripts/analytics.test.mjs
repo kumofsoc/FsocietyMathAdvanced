@@ -99,6 +99,15 @@ test("accepting enables GA4 and tracks only whitelisted lesson routes", () => {
   app.events.get("hashchange")();
   assert.deepEqual(Array.from(app.pageviews(), (event) => event.page_path),
     ["/learn/matrices/", "/learn/rank/"]);
+  assert.equal(app.pageviews()[1].page_title, "/learn/rank/ | MathMaMath");
+
+  // A route re-entry after an excluded account page is a new page view.
+  app.location.hash = "#account?reset=secret-token";
+  app.events.get("hashchange")();
+  app.location.hash = "#rank";
+  app.events.get("hashchange")();
+  assert.deepEqual(Array.from(app.pageviews(), (event) => event.page_path),
+    ["/learn/matrices/", "/learn/rank/", "/learn/rank/"]);
 });
 
 test("static search landing page is tracked with no query or fragment", () => {

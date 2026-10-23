@@ -69,12 +69,20 @@
   function trackPageView() {
     if (!initialized || consent !== "accepted") return;
     const path = safePagePath();
-    if (!path || path === lastPage) return;
+    if (!path) {
+      // Returning to a previously viewed lesson after an untracked page is
+      // a new visit; do not retain an old deduplication marker.
+      lastPage = null;
+      return;
+    }
+    if (path === lastPage) return;
     lastPage = path;
     gtag("event", "page_view", {
       page_location: window.location.origin + path,
       page_path: path,
-      page_title: document.title,
+      // React updates the SPA document.title asynchronously after hashchange.
+      // The safe canonical route gives a stable, accurate title immediately.
+      page_title: window.location.pathname === "/" ? path + " | MathMaMath" : document.title,
     });
   }
 
@@ -90,6 +98,9 @@
     });
     gtag("consent", "update", { analytics_storage: "granted" });
     gtag("js", new Date());
+    // The stream owner must also disable Enhanced Measurement's
+    // "Page changes based on browser history events" to avoid duplicate
+    // pageviews that can bypass safePagePath() on SPA navigation.
     gtag("config", measurementId, {
       send_page_view: false,
       allow_google_signals: false,
