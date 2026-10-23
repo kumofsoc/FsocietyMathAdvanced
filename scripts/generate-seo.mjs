@@ -12,20 +12,25 @@ const DEFAULT_PUBLIC_ORIGIN = "https://mathmamath.vercel.app";
 const HOME_TITLE = "MathMaMath: высшая математика, теория и задачи";
 const HOME_DESCRIPTION = "MathMaMath: бесплатный интерактивный курс высшей математики: линейная алгебра, аналитическая геометрия, математический анализ, интегралы и ряды. Теория, доказательства, примеры и практика.";
 
-// Shared opt-in analytics script. Unset by default; disabled on Preview builds.
-// A GA4 measurement ID is public and must never be confused with a secret key.
+// Consent UI must not disappear when Vercel doesn't expose a build-time env
+// variable. The GA4 Measurement ID is a public routing identifier, not a key.
+const DEFAULT_GA4_MEASUREMENT_ID = "G-CTLM64E8WF";
 let analyticsHeadMarkup = "";
 
-function analyticsMarkup(publishedIds) {
-  const id = (process.env.VITE_GA4_MEASUREMENT_ID || "").trim();
-  if (!id) return "";
+function analyticsMeasurementId() {
+  const id = (process.env.VITE_GA4_MEASUREMENT_ID || DEFAULT_GA4_MEASUREMENT_ID).trim();
   if (!/^G-[A-Z0-9]{6,16}$/.test(id)) {
     throw new Error("VITE_GA4_MEASUREMENT_ID must be a GA4 web measurement ID (G-...).");
   }
+  return id;
+}
+
+function analyticsMarkup(publishedIds, origin) {
   if (IS_PREVIEW) return "";
   const ids = publishedIds.filter((topicId) => /^[a-z0-9][a-z0-9-]{0,79}$/.test(topicId));
   return '<link rel="stylesheet" href="/analytics.css">' +
-    '<script defer src="/analytics.js" data-measurement-id="' + escapeHtml(id) +
+    '<script defer src="/analytics.js" data-measurement-id="' + escapeHtml(analyticsMeasurementId()) +
+    '" data-production-host="' + escapeHtml(new URL(origin).hostname) +
     '" data-topic-ids="' + escapeHtml(ids.join(",")) + '"></script>';
 }
 
@@ -181,7 +186,7 @@ async function generate() {
     const available = topicListMeta.filter((item) => !item.isStub);
     if (available.length === 0) throw new Error("No published course topics found.");
     const availableIds = new Set(available.map((item) => item.id));
-    analyticsHeadMarkup = analyticsMarkup([...availableIds]);
+    analyticsHeadMarkup = analyticsMarkup([...availableIds], origin);
     const urls = ["/", "/learn/"];
 
     const catalog = chapters.map((chapter) => {
@@ -314,9 +319,23 @@ async function generate() {
       '<script type="application/ld+json">' +
         jsonLd({ "@context": "https://schema.org", "@type": "WebSite", name: "MathMaMath", description: HOME_DESCRIPTION, inLanguage: "ru", ...(origin ? { url: origin + "/" } : {}) }) +
         '</script>',
-      analyticsHeadMarkup,
     ].join("\n");
     if (!index.includes("</head>")) throw new Error("dist/index.html has no </head> tag");
+    // The Vite source already carries the consent loader; do not inject a
+    // second tag. Only adapt its public ID and production host for builds
+    // using an intentional environment override/custom domain.
+    if (!index.includes('src="/analytics.js"')) {
+      throw new Error("dist/index.html is missing the GA4 consent loader");
+    }
+    const measurementId = analyticsMeasurementId();
+    index = index.replace(
+      /data-measurement-id="G-[A-Z0-9]{6,16}"/,
+      'data-measurement-id="' + escapeHtml(measurementId) + '"',
+    );
+    index = index.replace(
+      /data-production-host="[a-z0-9.-]+"/,
+      'data-production-host="' + escapeHtml(new URL(origin).hostname) + '"',
+    );
     index = index.replace("</head>", rootMeta + "\n</head>");
     await writeFile(indexPath, index, "utf8");
 
