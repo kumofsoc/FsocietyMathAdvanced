@@ -1,4 +1,7 @@
 .mobile-nav-close { display: none; }
+/* Keep the desktop settings label styled exactly as before; only its icon
+   used the accent color in the legacy stylesheet. */
+.settings-trigger .settings-trigger-label { color: inherit; font-size: inherit; }
 /*
  * Phone/tablet layout pass. Desktop widths are intentionally untouched.
  * Imported after the original shell styles. Keep the mathematical content
