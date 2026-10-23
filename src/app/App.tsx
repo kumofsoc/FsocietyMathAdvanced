@@ -191,6 +191,29 @@ export default function App() {
     setSidebarOpen,
     setReadingFocusMode,
   });
+  // Keep the mobile drawer modal-like without changing the desktop sidebar.
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const mobile = window.matchMedia("(max-width: 820px)");
+    if (!mobile.matches) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSidebarOpen(false);
+    };
+    const onViewportChange = () => {
+      if (!mobile.matches) setSidebarOpen(false);
+    };
+    window.addEventListener("keydown", onEscape);
+    mobile.addEventListener("change", onViewportChange);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", onEscape);
+      mobile.removeEventListener("change", onViewportChange);
+    };
+  }, [sidebarOpen, setSidebarOpen]);
+
   const mainContentRef = useRef<HTMLElement>(null);
   const routeFocusReadyRef = useRef(false);
 
@@ -355,7 +378,16 @@ export default function App() {
         </button>
       )}
 
-      <aside className={"sidebar " + (sidebarOpen ? "open " : "") + (sidebarCollapsed ? "collapsed" : "")}>
+      {sidebarOpen && (
+        <button
+          type="button"
+          className="mobile-nav-backdrop"
+          onClick={() => setSidebarOpen(false)}
+          aria-label="Закрыть меню курса"
+          tabIndex={-1}
+        />
+      )}
+      <aside id="mathmamath-course-sidebar" className={"sidebar " + (sidebarOpen ? "open " : "") + (sidebarCollapsed ? "collapsed" : "")}>
         <button
           className="sidebar-collapse-control"
           onClick={() => {
@@ -516,7 +548,11 @@ export default function App() {
           onMouseLeave={() => scheduleTopbarHide()}
         >
           <button
+            type="button"
             className="mobile-menu"
+            aria-label={sidebarOpen ? "Закрыть меню курса" : "Открыть меню курса"}
+            aria-expanded={sidebarOpen}
+            aria-controls="mathmamath-course-sidebar"
             onClick={() => {
               if (sidebarCollapsed) {
                 setSidebarCollapsed(false);
@@ -554,6 +590,8 @@ export default function App() {
             <strong>{courseProgress}%</strong>
           </div>
           <button
+            type="button"
+            aria-label="Открыть профиль"
             className={"topbar-account " + (route === "account" ? "active" : "")}
             onMouseEnter={preloadAccountPage}
             onFocus={preloadAccountPage}

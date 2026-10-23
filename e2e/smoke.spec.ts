@@ -47,3 +47,27 @@ test.describe("MathMaMath production smoke", () => {
     await expect(page.locator(".account-local-banner")).toContainText("Backend не настроен");
   });
 });
+
+test.describe("mobile and tablet layout", () => {
+  for (const width of [375, 768]) {
+    test(`drawer, main routes and typography work at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 812 });
+      await page.goto("/");
+      const menu = page.getByRole("button", { name: "Открыть меню курса" });
+      await expect(menu).toBeVisible();
+      await menu.click();
+      await expect(page.locator("#mathmamath-course-sidebar")).toBeVisible();
+      await expect(menu).toHaveAttribute("aria-expanded", "true");
+      await page.keyboard.press("Escape");
+      await expect(page.locator("#mathmamath-course-sidebar")).toBeHidden();
+
+      for (const route of ["/", "/#matrices", "/#map", "/#review", "/#account"]) {
+        await page.goto(route);
+        await expect(page.locator(".app-shell")).toBeVisible();
+        await expect.poll(async () => page.evaluate(() =>
+          document.documentElement.scrollWidth <= window.innerWidth + 2,
+        )).toBe(true);
+      }
+    });
+  }
+});

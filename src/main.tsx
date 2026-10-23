@@ -6,6 +6,7 @@ import "@/styles/platform.css";
 import "@/styles/typography.css";
 import "@/styles/readability.css";
 import "@/styles/theme-compat.css";
+import "@/styles/mobile-adaptive.css";
 import App from "@/app/App";
 import { topicListMeta } from "@/data/courseMeta";
 import { AppErrorBoundary } from "@/shared/ui/AppErrorBoundary";
