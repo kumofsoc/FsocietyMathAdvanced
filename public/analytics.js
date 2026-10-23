@@ -8,14 +8,22 @@
 
   const source = document.currentScript;
   const measurementId = source?.getAttribute("data-measurement-id") ?? "";
-  if (!/^G-[A-Z0-9]{6,16}$/.test(measurementId)) return;
+  const productionHost = source?.getAttribute("data-production-host") ?? "";
+  // Prevent local/preview/test traffic from loading a production Google tag,
+  // even when Vercel skips the post-build SEO generator.
+  if (!/^G-[A-Z0-9]{6,16}$/.test(measurementId) ||
+      !productionHost || window.location.hostname !== productionHost) return;
 
   const consentKey = "mathmamath-analytics-consent-v1";
-  const lessonIds = new Set(
-    (source?.getAttribute("data-topic-ids") ?? "")
-      .split(",")
-      .filter((value) => /^[a-z0-9][a-z0-9-]{0,79}$/.test(value)),
-  );
+
+  function isPublishedLesson(id) {
+    if (!/^[a-z0-9][a-z0-9-]{0,79}$/.test(id)) return false;
+    // The React entry supplies its canonical lesson IDs without exposing
+    // private/account routes. The attribute is deliberately read on demand:
+    // script execution and SPA hydration may occur in either order.
+    const ids = (source?.getAttribute("data-topic-ids") ?? "").split(",");
+    return ids.includes(id);
+  }
 
   function readConsent() {
     try {
@@ -51,7 +59,7 @@
     const match = /^#([a-z0-9][a-z0-9-]{0,79})(?:\/block\/\d+)?$/.exec(window.location.hash);
     if (!match) return null;
     const route = match[1];
-    if (lessonIds.has(route)) return "/learn/" + route + "/";
+    if (isPublishedLesson(route)) return "/learn/" + route + "/";
     if (route === "map" || route === "academy" || route === "review" || route === "marks") {
       return "/app/" + route + "/";
     }
@@ -188,6 +196,9 @@
   document.body.appendChild(controls);
 
   window.addEventListener("hashchange", trackPageView);
+  // Covers the initial lesson route if consent was previously accepted and
+  // the SPA publishes its route whitelist after this script initializes.
+  window.addEventListener("mathmamath:analytics-topics-ready", trackPageView);
   if (consent === "accepted") startAnalytics();
   if (consent === null) openChoices();
 })();

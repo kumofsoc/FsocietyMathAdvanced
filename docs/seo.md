@@ -66,14 +66,20 @@ JavaScript on the website. For the verified URL-prefix property
 
 ### Optional Google Analytics 4
 
-For website visitor numbers and lesson navigation (distinct from search
-impressions), create a GA4 web data stream and copy its **Measurement ID**
-(`G-XXXXXXXXXX`). In **Vercel → MathMaMath → Settings → Environment Variables**,
-create `VITE_GA4_MEASUREMENT_ID` with this value for **Production only**,
-then redeploy. The code also accepts the same build variable when using Docker.
+MathMaMath uses its registered GA4 web stream with Measurement ID
+`G-CTLM64E8WF`. This public ID is already installed. An environment variable
+is not required to display consent or start opt-in analytics.
+`VITE_GA4_MEASUREMENT_ID` can override the ID for another stream on deployments
+using the normal production build pipeline.
 
-When the ID is unset, **no Google Analytics tag, cookie or tracking request
-is added**. With an ID, the site shows a Russian opt-in consent panel. Only
+MathMaMath's public production GA4 ID `G-CTLM64E8WF` is bundled in the
+first-party consent loader, so the UI works even if Vercel does not inject
+the build-time environment variable or runs Vite without the SEO generator.
+The `VITE_GA4_MEASUREMENT_ID` variable is **optional** and overrides the
+public ID on builds using the normal SEO pipeline. A future production
+hostname change must also update the source `data-production-host` value.
+
+On the production hostname, the site shows a Russian opt-in consent panel. Only
 clicking **Разрешить аналитику** dynamically loads the Google tag. Declining
 does not load it. The persistent **Конфиденциальность** control can reopen the
 choice; withdrawing consent reloads into a non-tracking state. The choice is

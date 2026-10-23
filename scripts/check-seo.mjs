@@ -19,6 +19,12 @@ check(ids.length >= 80, "Expected at least 80 generated lesson pages; got " + id
 check(chapterIds.length >= 23, "Expected at least 23 chapter pages; got " + chapterIds.length);
 check(main.includes('property="og:title"'), "Home Open Graph tags missing");
 check(main.includes('application/ld+json'), "Home structured data missing");
+// The GA4 consent entry must exist irrespective of Vercel build-time env.
+// It must appear exactly once, and never load gtag.js before visitor consent.
+check((main.match(/src="\/analytics\.js"/g) ?? []).length === 1,
+  "Expected exactly one first-party consent loader on home");
+check(!main.includes('www.googletagmanager.com/gtag/js'),
+  "Google tag must not load automatically in the home HTML");
 check(catalog.includes("<h1>Курс высшей математики</h1>"), "Catalog is missing content");
 check(catalog.includes('href="/learn/matrices/"'), "Catalog is missing crawlable links");
 check(catalog.includes('href="/subjects/linear/"'), "Catalog is missing chapter links");
