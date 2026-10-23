@@ -47,3 +47,79 @@ test.describe("MathMaMath production smoke", () => {
     await expect(page.locator(".account-local-banner")).toContainText("Backend не настроен");
   });
 });
+
+test.describe("mobile and tablet layout", () => {
+  for (const width of [375, 768]) {
+    test(`drawer, main routes and typography work at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 812 });
+      await page.goto("/");
+      const menu = page.locator(".mobile-menu");
+      await expect(menu).toBeVisible();
+      await expect(menu).toHaveAttribute("aria-label", "Открыть меню курса");
+      await menu.click();
+      await expect(page.locator("#mathmamath-course-sidebar")).toBeVisible();
+      await expect(menu).toHaveAttribute("aria-expanded", "true");
+      await expect(menu).toHaveAttribute("aria-label", "Закрыть меню курса");
+      const close = page.getByRole("button", { name: "Закрыть мобильное меню" });
+      await expect(close).toBeFocused();
+      await expect(page.locator(".page-column")).toHaveAttribute("inert", "");
+      await page.keyboard.press("Shift+Tab");
+      await expect.poll(async () => page.evaluate(() =>
+        document.querySelector("#mathmamath-course-sidebar")?.contains(document.activeElement) ?? false,
+      )).toBe(true);
+      await page.keyboard.press("Tab");
+      await expect(close).toBeFocused();
+      await page.keyboard.press("Escape");
+      await expect(page.locator("#mathmamath-course-sidebar")).toBeHidden();
+      await expect(menu).toHaveAttribute("aria-expanded", "false");
+      await expect(menu).toBeFocused();
+      await expect(page.locator(".page-column")).not.toHaveAttribute("inert");
+
+      const routes = [
+        { url: "/", content: ".future-home" },
+        { url: "/#matrices", content: ".topic-page" },
+        { url: "/#map", content: ".knowledge-map-page" },
+        { url: "/#review", content: ".review-hub" },
+        { url: "/#account", content: ".account-page" },
+      ];
+      for (const route of routes) {
+        await page.goto(route.url);
+        await expect(page.locator(route.content)).toBeVisible();
+        if (route.url === "/") {
+          const settingsButton = page.getByRole("button", { name: "Настройки", exact: true });
+          await expect(settingsButton).toBeVisible();
+          await expect(settingsButton.locator(".settings-trigger-label")).toBeHidden();
+          await expect(settingsButton.locator("span").first()).toBeVisible();
+        }
+        if (route.url === "/#map") {
+          await page.locator(".map-focus-entry").click();
+          await expect(page.locator(".knowledge-map-focus")).toBeVisible();
+          await expect(page.locator(".topbar")).toHaveCSS("visibility", "hidden");
+          await expect(page.locator(".map-focus-exit")).toBeVisible();
+          await page.locator(".map-focus-exit").click();
+          await expect(page.locator(".knowledge-map-focus")).toHaveCount(0);
+        }
+        await expect.poll(async () => {
+          const result = await page.evaluate(() => {
+            const width = window.innerWidth;
+            const scrollWidth = document.documentElement.scrollWidth;
+            if (scrollWidth <= width + 2) return "ok";
+            const offenders = [...document.querySelectorAll<HTMLElement>("body *")]
+              .filter((element) => {
+                const rect = element.getBoundingClientRect();
+                const style = getComputedStyle(element);
+                return style.position !== "fixed" &&
+                  rect.width > 0 && rect.height > 0 &&
+                  (rect.right > width + 3 || rect.left < -3) &&
+                  style.visibility !== "hidden";
+              })
+              .slice(0, 7)
+              .map((el) => el.tagName.toLowerCase() + "." + el.className.toString().slice(0, 75));
+            return `route=${location.hash || "/"} scrollWidth=${scrollWidth} viewport=${width} offenders=${offenders.join("|")}`;
+          });
+          return result;
+        }).toBe("ok");
+      }
+    });
+  }
+});

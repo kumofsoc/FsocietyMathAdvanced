@@ -191,6 +191,75 @@ export default function App() {
     setSidebarOpen,
     setReadingFocusMode,
   });
+  const sidebarRef = useRef<HTMLElement>(null);
+  const mobileMenuRef = useRef<HTMLButtonElement>(null);
+
+  // Accessible mobile navigation: focus enters the drawer, stays inside
+  // until dismissed, and returns to the menu trigger after closing.
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const mobile = window.matchMedia("(max-width: 820px)");
+    const drawer = sidebarRef.current;
+    if (!mobile.matches || !drawer) return;
+
+    const originalOverflow = document.body.style.overflow;
+    const background = [
+      document.querySelector<HTMLElement>(".page-column"),
+      document.querySelector<HTMLElement>(".skip-to-content"),
+      document.querySelector<HTMLElement>(".back-to-top"),
+      document.querySelector<HTMLElement>(".sidebar-reopen"),
+    ].filter((element): element is HTMLElement => element !== null);
+    const previousInert = background.map((element) => element.inert);
+    background.forEach((element) => { element.inert = true; });
+    document.body.style.overflow = "hidden";
+
+    const focusables = () => [...drawer.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    )].filter((element) => element.getClientRects().length > 0 &&
+      getComputedStyle(element).visibility !== "hidden");
+    drawer.querySelector<HTMLButtonElement>(".mobile-nav-close")?.focus();
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setSidebarOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const items = focusables();
+      if (items.length === 0) {
+        event.preventDefault();
+        drawer.focus();
+        return;
+      }
+      const first = items[0];
+      const last = items[items.length - 1];
+      const current = document.activeElement;
+      if (!drawer.contains(current)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      } else if (event.shiftKey && current === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && current === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    const onViewportChange = () => {
+      if (!mobile.matches) setSidebarOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    mobile.addEventListener("change", onViewportChange);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      background.forEach((element, index) => { element.inert = previousInert[index]; });
+      window.removeEventListener("keydown", onKeyDown);
+      mobile.removeEventListener("change", onViewportChange);
+      if (mobileMenuRef.current?.getClientRects().length) mobileMenuRef.current.focus();
+    };
+  }, [sidebarOpen, setSidebarOpen]);
+
   const mainContentRef = useRef<HTMLElement>(null);
   const routeFocusReadyRef = useRef(false);
 
@@ -355,7 +424,32 @@ export default function App() {
         </button>
       )}
 
-      <aside className={"sidebar " + (sidebarOpen ? "open " : "") + (sidebarCollapsed ? "collapsed" : "")}>
+      {sidebarOpen && (
+        <button
+          type="button"
+          className="mobile-nav-backdrop"
+          onClick={() => setSidebarOpen(false)}
+          aria-label="Закрыть меню курса"
+          tabIndex={-1}
+        />
+      )}
+      <aside
+        ref={sidebarRef}
+        id="mathmamath-course-sidebar"
+        className={"sidebar " + (sidebarOpen ? "open " : "") + (sidebarCollapsed ? "collapsed" : "")}
+        role={sidebarOpen ? "dialog" : undefined}
+        aria-modal={sidebarOpen ? true : undefined}
+        aria-label={sidebarOpen ? "Меню курса" : undefined}
+        tabIndex={-1}
+      >
+        <button
+          type="button"
+          className="mobile-nav-close"
+          aria-label="Закрыть мобильное меню"
+          onClick={() => setSidebarOpen(false)}
+        >
+          ×
+        </button>
         <button
           className="sidebar-collapse-control"
           onClick={() => {
@@ -516,7 +610,12 @@ export default function App() {
           onMouseLeave={() => scheduleTopbarHide()}
         >
           <button
+            ref={mobileMenuRef}
+            type="button"
             className="mobile-menu"
+            aria-label={sidebarOpen ? "Закрыть меню курса" : "Открыть меню курса"}
+            aria-expanded={sidebarOpen}
+            aria-controls="mathmamath-course-sidebar"
             onClick={() => {
               if (sidebarCollapsed) {
                 setSidebarCollapsed(false);
@@ -554,6 +653,8 @@ export default function App() {
             <strong>{courseProgress}%</strong>
           </div>
           <button
+            type="button"
+            aria-label="Открыть профиль"
             className={"topbar-account " + (route === "account" ? "active" : "")}
             onMouseEnter={preloadAccountPage}
             onFocus={preloadAccountPage}

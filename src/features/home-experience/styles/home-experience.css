@@ -1254,3 +1254,59 @@
   .future-overview-card{min-height:150px}
   .future-overview-head h2{font-size:clamp(48px,14vw,78px)}
 }
+
+
+/* Responsive polish: existing futuristic sections remain, without clipping
+   actions, cards or headings on 320-820px touch devices. */
+@media (max-width: 820px) {
+  .future-home,
+  .future-scene,
+  .future-scene > *,
+  .future-arrival-copy,
+  .future-title-wrap,
+  .future-status,
+  .future-growth,
+  .future-universe,
+  .future-archive,
+  .future-overview,
+  .portal-content { min-width: 0; max-width: 100%; }
+
+  .future-scene { padding-block: clamp(44px, 8vh, 72px); }
+  .future-arrival {
+    min-height: max(620px, calc(100svh - 60px));
+    align-content: center;
+    padding-block: 34px 60px;
+  }
+  .future-arrival-copy { z-index: 4; }
+  .future-title-wrap h1 {
+    font-size: clamp(47px, 12.4vw, 94px);
+    overflow-wrap: anywhere;
+  }
+  .future-status-head h2,
+  .future-universe-copy h2,
+  .future-growth-copy h2,
+  .future-dna-head h2,
+  .motion-lab-copy h2,
+  .archive-head h2,
+  .personal-main h2 {
+    font-size: clamp(34px, 9vw, 66px);
+    overflow-wrap: anywhere;
+  }
+  .future-arrival-actions, .portal-actions { max-width: 100%; }
+  .future-arrival-actions > *, .portal-actions > * { max-width: 100%; }
+  .future-overview-grid, .future-status-grid,
+  .growth-metrics, .archive-catalog, .dna-stack { min-width: 0; }
+  .future-overview-card, .future-mastery-card,
+  .archive-sheet, .dna-card { min-width: 0; max-width: 100%; }
+  .future-constellation, .future-growth-visual, .motion-lab-stage { max-width: 100%; }
+  .portal-content h2 { font-size: clamp(52px, 14vw, 104px); overflow-wrap: anywhere; }
+}
+@media (max-width: 520px) {
+  .future-scene { padding-inline: 12px; }
+  .future-arrival { min-height: max(560px, calc(100svh - 60px)); }
+  .future-title-wrap h1 { font-size: clamp(46px, 13.7vw, 68px); }
+  .future-status-master > strong { font-size: clamp(54px, 20vw, 100px); }
+  .portal-content h2 { font-size: clamp(49px, 15vw, 75px); }
+  .future-kicker, .future-system-line { font-size: 10px; }
+  .future-primary, .future-secondary { min-height: 48px; }
+}

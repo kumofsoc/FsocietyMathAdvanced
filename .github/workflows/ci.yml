@@ -58,7 +58,11 @@ jobs:
             process.exit(1);
           }
           NODE
-      - run: pnpm exec playwright install --with-deps chromium
+      # E2E runs headless on GitHub's Ubuntu runner. Installing the full
+      # headed Chromium + OS dependencies here is redundant and may stall
+      # due to apt mirror availability. Headless shell is sufficient.
+      - name: Install Playwright Chromium headless shell
+        run: pnpm exec playwright install chromium --only-shell
       - run: pnpm test:e2e
         env:
           VITE_API_BASE_URL: ""
