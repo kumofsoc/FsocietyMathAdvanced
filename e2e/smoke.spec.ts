@@ -74,9 +74,26 @@ test.describe("mobile and tablet layout", () => {
       for (const route of routes) {
         await page.goto(route.url);
         await expect(page.locator(route.content)).toBeVisible();
-        await expect.poll(async () => page.evaluate(() =>
-          document.documentElement.scrollWidth <= window.innerWidth + 2,
-        )).toBe(true);
+        await expect.poll(async () => {
+          const result = await page.evaluate(() => {
+            const width = window.innerWidth;
+            const scrollWidth = document.documentElement.scrollWidth;
+            if (scrollWidth <= width + 2) return "ok";
+            const offenders = [...document.querySelectorAll<HTMLElement>("body *")]
+              .filter((element) => {
+                const rect = element.getBoundingClientRect();
+                const style = getComputedStyle(element);
+                return style.position !== "fixed" &&
+                  rect.width > 0 && rect.height > 0 &&
+                  (rect.right > width + 3 || rect.left < -3) &&
+                  style.visibility !== "hidden";
+              })
+              .slice(0, 7)
+              .map((el) => el.tagName.toLowerCase() + "." + el.className.toString().slice(0, 75));
+            return `route=${location.hash || "/"} scrollWidth=${scrollWidth} viewport=${width} offenders=${offenders.join("|")}`;
+          });
+          return result;
+        }).toBe("ok");
       }
     });
   }
