@@ -24,6 +24,20 @@ describe("local profile repository", () => {
     expect(localStorage.getItem(LOCAL_PROFILE_KEY)).toBeTruthy();
   });
 
+  it("migrates only the old generated profile name", () => {
+    const legacy = {
+      displayName: "VisualMath User",
+      handle: "visual-learner",
+      bio: "bio",
+      joinedAt: "2026-10-03T00:00:00.000Z",
+    };
+    localStorage.setItem(LOCAL_PROFILE_KEY, JSON.stringify(legacy));
+    expect(loadLocalProfile().displayName).toBe("MathMaMath User");
+    expect(JSON.parse(localStorage.getItem(LOCAL_PROFILE_KEY) || "{}").displayName).toBe("MathMaMath User");
+    localStorage.setItem(LOCAL_PROFILE_KEY, JSON.stringify({ ...legacy, displayName: "VisualMath User 2" }));
+    expect(loadLocalProfile().displayName).toBe("VisualMath User 2");
+  });
+
   it("normalizes persisted profile fields", () => {
     const saved = saveLocalProfile({
       displayName: "  Ada  ",

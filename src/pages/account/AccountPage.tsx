@@ -8,6 +8,7 @@ import {
 import { loadSavedTheorems } from "@/features/learning/model/learning";
 import { useAuthStore } from "@/features/auth/model/authSession";
 import { AccountSecurityControls } from "@/features/account-security/ui/AccountSecurityControls";
+import { normalizeLegacyProfileDisplayName } from "@/features/account/model/localProfile";
 import { AccountAuthGate } from "@/features/auth/ui/AccountAuthGate";
 import { api } from "@/shared/api/client";
 import { apiErrorMessage } from "@/shared/api/errorPresentation";
@@ -47,6 +48,12 @@ function loadLocalProfile(): LocalProfile {
     typeof stored.bio === "string" &&
     typeof stored.joinedAt === "string"
   ) {
+    const nextName = normalizeLegacyProfileDisplayName(stored.displayName);
+    if (nextName !== stored.displayName) {
+      const migrated = { ...stored, displayName: nextName };
+      writeLocalStorage(PROFILE_KEY, JSON.stringify(migrated));
+      return migrated;
+    }
     return stored;
   }
 
@@ -63,7 +70,7 @@ function loadLocalProfile(): LocalProfile {
 
 function initials(value: string) {
   const parts = value.trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return "VM";
+  if (!parts.length) return "MM";
   return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join("");
 }
 

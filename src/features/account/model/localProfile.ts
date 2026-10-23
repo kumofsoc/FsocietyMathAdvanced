@@ -6,6 +6,11 @@ import {
 export const LOCAL_PROFILE_KEY = "visualmath-local-profile-v1";
 export const LOCAL_PROFILE_EVENT = "visualmath:local-profile-change";
 
+/** Only the old, unedited generated profile name is migrated. */
+export function normalizeLegacyProfileDisplayName(displayName: string): string {
+  return displayName === "VisualMath User" ? "MathMaMath User" : displayName;
+}
+
 export type LocalProfile = {
   displayName: string;
   handle: string;
@@ -33,11 +38,12 @@ export function loadLocalProfile(): LocalProfile {
     return fallback;
   }
 
-  return {
-    displayName:
-      typeof stored.displayName === "string" && stored.displayName.trim()
-        ? stored.displayName
-        : fallback.displayName,
+  const displayName =
+    typeof stored.displayName === "string" && stored.displayName.trim()
+      ? normalizeLegacyProfileDisplayName(stored.displayName)
+      : fallback.displayName;
+  const profile: LocalProfile = {
+    displayName,
     handle:
       typeof stored.handle === "string" && stored.handle.trim()
         ? stored.handle.replace(/^@/, "")
@@ -48,12 +54,16 @@ export function loadLocalProfile(): LocalProfile {
         ? stored.joinedAt
         : fallback.joinedAt,
   };
+  if (stored.displayName === "VisualMath User") {
+    writeLocalStorage(LOCAL_PROFILE_KEY, JSON.stringify(profile));
+  }
+  return profile;
 }
 
 export function saveLocalProfile(profile: LocalProfile) {
   const normalized: LocalProfile = {
     ...profile,
-    displayName: profile.displayName.trim() || "MathMaMath User",
+    displayName: normalizeLegacyProfileDisplayName(profile.displayName.trim()) || "MathMaMath User",
     handle: profile.handle.trim().replace(/^@/, "") || "visual-learner",
     bio: profile.bio.trim(),
   };
