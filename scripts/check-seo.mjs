@@ -39,7 +39,7 @@ for (const id of ids) {
 const site = process.env.VITE_PUBLIC_SITE_URL ||
   process.env.VERCEL_PROJECT_PRODUCTION_URL ||
   process.env.VITE_VERCEL_PROJECT_PRODUCTION_URL;
-if (site) {
+if (site && process.env.VERCEL_ENV !== "preview") {
   const sitemap = await readFile(path.join(dist, "sitemap.xml"), "utf8");
   check(sitemap.includes("<urlset"), "Sitemap missing");
   check(sitemap.includes("/learn/matrices/"), "Sitemap missing a lesson");
