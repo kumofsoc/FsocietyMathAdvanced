@@ -197,3 +197,15 @@ kumofsoc/FsocietyMathAdvancedBackend
 - `src/features/background-music/model/backgroundAudio.ts` — IndexedDB/server media adapters.
 
 Подробности: `docs/backend-contract.md` и `docs/production-readiness.md`.
+
+## Security / Безопасность
+
+[![Security Checks](https://github.com/kumofsoc/MathMaMath/actions/workflows/security-checks.yml/badge.svg?branch=main)](https://github.com/kumofsoc/MathMaMath/actions/workflows/security-checks.yml)
+[![CI](https://github.com/kumofsoc/MathMaMath/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/kumofsoc/MathMaMath/actions/workflows/ci.yml)
+
+Проект использует защитные механизмы для сессий и браузерных данных, Content Security Policy, non-root frontend container, автоматические проверки зависимостей и исходного кода. Актуальные результаты доступны по ссылкам на GitHub Actions и в разделе [Security](https://github.com/kumofsoc/MathMaMath/security).
+
+**Важное ограничение:** прошедший CI не гарантирует отсутствия уязвимостей и не является независимым аудитом. Backend, production-инфраструктура и публичное развёртывание проверяются отдельно.
+
+- [Security Policy / приватное раскрытие уязвимостей](SECURITY.md)
+- [Scope, подтверждённые контроли и оставшиеся риски](docs/security/SECURITY-REVIEW.md)
