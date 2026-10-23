@@ -21,7 +21,7 @@ Set `VITE_PUBLIC_SITE_URL` to the **actual publicly accessible HTTPS origin**, w
 
 Vercel builds can use the system-provided `VERCEL_PROJECT_PRODUCTION_URL` as a fallback, including for previews, if system variables are exposed. This must match the origin that serves pages. For a separate Nginx/Docker deployment, pass `--build-arg VITE_PUBLIC_SITE_URL=https://math.example` to Docker build.
 
-When the origin is known on a production build, `scripts/generate-seo.mjs` generates `sitemap.xml` with absolute canonical URLs and `robots.txt` with a Sitemap directive. On Vercel Preview it uses `noindex,nofollow` plus `robots.txt` disallow and does not create a sitemap. With no known origin (e.g. local CI), it avoids publishing a fabricated sitemap. There is no invented domain.
+For this deployment the confirmed fallback origin is `https://mathmamath.vercel.app`. When the origin is known on a production build, `scripts/generate-seo.mjs` generates `sitemap.xml` with absolute canonical URLs and `robots.txt` with a Sitemap directive. On Vercel Preview it uses `noindex,nofollow` plus `robots.txt` disallow and does not create a sitemap. The fallback is the known production address, so CI now also verifies sitemap and canonical markup; a custom production domain can override it through `VITE_PUBLIC_SITE_URL`.
 
 ## Manual verification after deployment
 

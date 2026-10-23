@@ -7,6 +7,8 @@ const IS_PREVIEW = process.env.VERCEL_ENV === "preview";
 const ROOT = process.cwd();
 const DIST = path.join(ROOT, "dist");
 const APP_NAME = "MathMaMath";
+// Confirmed public Vercel production domain. Environment override supports custom domains.
+const DEFAULT_PUBLIC_ORIGIN = "https://mathmamath.vercel.app";
 const HOME_TITLE = "MathMaMath: высшая математика, теория и задачи";
 const HOME_DESCRIPTION = "MathMaMath: бесплатный интерактивный курс высшей математики: линейная алгебра, аналитическая геометрия, математический анализ, интегралы и ряды. Теория, доказательства, примеры и практика.";
 
@@ -15,7 +17,7 @@ function siteOrigin() {
     process.env.VITE_PUBLIC_SITE_URL ||
     process.env.VERCEL_PROJECT_PRODUCTION_URL ||
     process.env.VITE_VERCEL_PROJECT_PRODUCTION_URL ||
-    ""
+    DEFAULT_PUBLIC_ORIGIN
   ).trim();
   if (!raw) return "";
   const url = new URL(raw.includes("://") ? raw : "https://" + raw);
@@ -298,9 +300,8 @@ async function generate() {
     index = index.replace("</head>", rootMeta + "\n</head>");
     await writeFile(indexPath, index, "utf8");
 
-    // Absolute canonical URLs are mandatory for sitemap entries. Never invent
-    // a hostname: GitHub CI creates pages without sitemap, Vercel uses its
-    // production domain when the system variable is available.
+    // This repository's confirmed public production hostname is used by default.
+    // VITE_PUBLIC_SITE_URL overrides it when a verified custom domain is configured.
     let robots = IS_PREVIEW ? "User-agent: *\nDisallow: /\n" : "User-agent: *\nAllow: /\n";
     if (origin && !IS_PREVIEW) {
       const sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n' +

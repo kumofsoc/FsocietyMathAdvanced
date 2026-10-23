@@ -8,17 +8,29 @@ function routeFromHash() {
   return parseVisualMathHash(window.location.hash).route;
 }
 
-function readPositions(): Record<string, number> {
+/**
+ * Route names come from a URL fragment and are not trusted object-property keys.
+ * A Map safely supports any hash, including "__proto__" or "constructor".
+ * Persist the original JSON object format for backwards compatibility.
+ */
+export function readPositions(): Map<string, number> {
   try {
-    return JSON.parse(sessionStorage.getItem(ROUTE_SCROLL_KEY) || "{}");
+    const parsed: unknown = JSON.parse(sessionStorage.getItem(ROUTE_SCROLL_KEY) || "{}");
+    if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return new Map();
+    }
+    return new Map(
+      Object.entries(parsed)
+        .filter(([, value]) => typeof value === "number" && Number.isFinite(value) && value >= 0) as Array<[string, number]>,
+    );
   } catch {
-    return {};
+    return new Map();
   }
 }
 
-function writePositions(positions: Record<string, number>) {
+export function writePositions(positions: Map<string, number>) {
   try {
-    sessionStorage.setItem(ROUTE_SCROLL_KEY, JSON.stringify(positions));
+    sessionStorage.setItem(ROUTE_SCROLL_KEY, JSON.stringify(Object.fromEntries(positions)));
   } catch {
     // Scroll restoration is optional.
   }
@@ -63,7 +75,7 @@ export function useAppNavigationLifecycle({
 
   const openHomeAtTop = () => {
     const positions = readPositions();
-    positions.home = 0;
+    positions.set("home", 0);
     writePositions(positions);
 
     if (routeRef.current === "home") {
@@ -77,7 +89,7 @@ export function useAppNavigationLifecycle({
   useEffect(() => {
     const onHash = () => {
       const positions = readPositions();
-      positions[routeRef.current] = window.scrollY;
+      positions.set(routeRef.current, window.scrollY);
       writePositions(positions);
 
       const next = routeFromHash();
@@ -90,7 +102,7 @@ export function useAppNavigationLifecycle({
       }
 
       window.requestAnimationFrame(() => {
-        const y = positions[next] ?? 0;
+        const y = positions.get(next) ?? 0;
         window.scrollTo({ top: y, behavior: y > 0 ? "auto" : "smooth" });
       });
     };

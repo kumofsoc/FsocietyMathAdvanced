@@ -38,12 +38,17 @@ for (const id of ids) {
 }
 const site = process.env.VITE_PUBLIC_SITE_URL ||
   process.env.VERCEL_PROJECT_PRODUCTION_URL ||
-  process.env.VITE_VERCEL_PROJECT_PRODUCTION_URL;
-if (site && process.env.VERCEL_ENV !== "preview") {
+  process.env.VITE_VERCEL_PROJECT_PRODUCTION_URL ||
+  "https://mathmamath.vercel.app";
+if (process.env.VERCEL_ENV !== "preview") {
   const sitemap = await readFile(path.join(dist, "sitemap.xml"), "utf8");
   check(sitemap.includes("<urlset"), "Sitemap missing");
   check(sitemap.includes("/learn/matrices/"), "Sitemap missing a lesson");
   check(sitemap.includes("/subjects/linear/"), "Sitemap missing a chapter");
   check(!sitemap.includes("#"), "Sitemap must not contain hash routes");
+  const origin = new URL(site.includes("://") ? site : "https://" + site).origin;
+  check(sitemap.includes("<loc>" + origin + "/</loc>"), "Canonical home URL missing in sitemap");
+  check(robots.includes("Sitemap: " + origin + "/sitemap.xml"), "robots.txt has wrong sitemap origin");
+  check(main.includes('rel="canonical" href="' + origin + '/"'), "Home canonical missing or wrong");
 }
 console.log("[SEO] Verified " + ids.length + " crawlable lessons, " + chapterIds.length + " chapters, catalog and metadata.");
