@@ -14,12 +14,14 @@ ARG VITE_API_TIMEOUT_MS=12000
 ARG VITE_MEDIA_TRANSFER_TIMEOUT_MS=600000
 ARG VITE_ERROR_REPORTING_URL=
 ARG VITE_APP_RELEASE=container
+ARG VITE_PUBLIC_SITE_URL=
 
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 ENV VITE_API_TIMEOUT_MS=${VITE_API_TIMEOUT_MS}
 ENV VITE_MEDIA_TRANSFER_TIMEOUT_MS=${VITE_MEDIA_TRANSFER_TIMEOUT_MS}
 ENV VITE_ERROR_REPORTING_URL=${VITE_ERROR_REPORTING_URL}
 ENV VITE_APP_RELEASE=${VITE_APP_RELEASE}
+ENV VITE_PUBLIC_SITE_URL=${VITE_PUBLIC_SITE_URL}
 
 RUN node -e 'const fs=require("fs"); const api=(process.env.VITE_API_BASE_URL||"").trim(); let u; try { u=new URL(api) } catch { process.exit(1) } if (!["http:","https:"].includes(u.protocol) || u.username || u.password || u.pathname !== "/" || u.search || u.hash) process.exit(1); const sources=["\x27self\x27"]; for (const raw of [api,(process.env.VITE_ERROR_REPORTING_URL||"").trim()]) { if (!raw) continue; let parsed; try { parsed=new URL(raw) } catch { process.exit(1) } if (!["http:","https:"].includes(parsed.protocol)) process.exit(1); if (!sources.includes(parsed.origin)) sources.push(parsed.origin) } const template=fs.readFileSync("deploy/security-headers.conf","utf8"); if (!template.includes("__VISUALMATH_CONNECT_SRC__") || !template.includes("__VISUALMATH_MEDIA_SRC__")) process.exit(1); fs.writeFileSync("/tmp/security-headers.conf",template.replace("__VISUALMATH_CONNECT_SRC__",sources.join(" ")).replace("__VISUALMATH_MEDIA_SRC__",u.origin))' \
     && pnpm typecheck \

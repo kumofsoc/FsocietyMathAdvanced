@@ -220,3 +220,16 @@ kumofsoc/FsocietyMathAdvancedBackend
 
 - [Security Policy / приватное раскрытие уязвимостей](SECURITY.md)
 - [Scope, подтверждённые контроли и оставшиеся риски](docs/security/SECURITY-REVIEW.md)
+
+## Поисковая индексация / SEO
+
+Сборка дополнительно создаёт полноценные HTML-страницы по адресу `/learn/` и `/learn/<topic-id>/`: все опубликованные темы курса содержат исходную теорию, определения, доказательства и примеры без необходимости выполнять JavaScript. Интерактивное приложение продолжает работать по существующим адресам `/#<topic-id>`.
+
+```bash
+pnpm build
+pnpm seo:check
+```
+
+Для **production** задайте публичный HTTPS origin через `VITE_PUBLIC_SITE_URL=https://example.org` (без пути). На Vercel, если включены системные переменные, используется `VERCEL_PROJECT_PRODUCTION_URL`. Только при известном origin сборка создаёт абсолютные canonical URL и `sitemap.xml`; без него HTML-страницы и `robots.txt` всё равно генерируются. Не подставляйте домен Vercel Preview в canonical.
+
+Подробные ограничения, проверка индексации и инструкции: [docs/seo.md](docs/seo.md).

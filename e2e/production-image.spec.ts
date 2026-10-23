@@ -44,3 +44,22 @@ test("production image renders under its Content-Security-Policy", async ({ page
   expect(runtimeErrors).toEqual([]);
   expect(cspViolations).toEqual([]);
 });
+
+
+test("production image serves crawlable static math lessons", async ({ request }) => {
+  const catalog = await request.get("/learn/");
+  expect(catalog.status()).toBe(200);
+  const catalogHtml = await catalog.text();
+  expect(catalogHtml).toContain("<h1>Курс высшей математики</h1>");
+  expect(catalogHtml).toContain('href="/learn/matrices/"');
+
+  const topic = await request.get("/learn/matrices/");
+  expect(topic.status()).toBe(200);
+  const html = await topic.text();
+  expect(html).toContain("<h1>Матрицы</h1>");
+  expect(html).toContain('type="application/ld+json"');
+  expect(html).toContain('href="/#matrices"');
+
+  const missing = await request.get("/learn/nonexistent-seo-page/");
+  expect(missing.status()).toBe(404);
+});
