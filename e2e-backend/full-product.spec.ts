@@ -9,7 +9,7 @@ const apiBaseUrl = (
   ""
 ).replace(/\/+$/, "");
 
-const password = "MathMaMath!2026#E2E";
+const password = "VisualMath!2026#E2E";
 const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 const account = {
   email: `visualmath-e2e-${unique}@example.com`,
@@ -434,8 +434,8 @@ test("backend catalog matches bundled frontend stable contract", async ({ reques
 
     await page.getByRole("button", { name: "Сменить пароль", exact: true }).click();
     await page.getByLabel("Текущий пароль").fill(account.password);
-    await page.getByLabel("Новый пароль", { exact: true }).fill("MathMaMath!2026#Rotated");
-    await page.getByLabel("Повтори новый пароль").fill("MathMaMath!2026#Rotated");
+    await page.getByLabel("Новый пароль", { exact: true }).fill("VisualMath!2026#Rotated");
+    await page.getByLabel("Повтори новый пароль").fill("VisualMath!2026#Rotated");
 
     const changed = page.waitForResponse(
       (response) =>
@@ -451,7 +451,7 @@ test("backend catalog matches bundled frontend stable contract", async ({ reques
     await page.getByRole("button", { name: "Войти" }).click();
     await expect(page.locator(".account-auth-error")).toBeVisible();
 
-    const rotatedPassword = "MathMaMath!2026#Rotated";
+    const rotatedPassword = "VisualMath!2026#Rotated";
     await page.getByLabel("Пароль").fill(rotatedPassword);
     const bootstrap = page.waitForResponse(
       (response) =>
