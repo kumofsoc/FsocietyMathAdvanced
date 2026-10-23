@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createServer } from "vite";
 import katex from "katex";
+import { resolveGa4MeasurementId } from "./analytics-config.mjs";
 
 const IS_PREVIEW = process.env.VERCEL_ENV === "preview";
 const ROOT = process.cwd();
@@ -14,15 +15,10 @@ const HOME_DESCRIPTION = "MathMaMath: бесплатный интерактив�
 
 // Consent UI must not disappear when Vercel doesn't expose a build-time env
 // variable. The GA4 Measurement ID is a public routing identifier, not a key.
-const DEFAULT_GA4_MEASUREMENT_ID = "G-CTLM64E8WF";
 let analyticsHeadMarkup = "";
 
 function analyticsMeasurementId() {
-  const id = (process.env.VITE_GA4_MEASUREMENT_ID || DEFAULT_GA4_MEASUREMENT_ID).trim();
-  if (!/^G-[A-Z0-9]{6,16}$/.test(id)) {
-    throw new Error("VITE_GA4_MEASUREMENT_ID must be a GA4 web measurement ID (G-...).");
-  }
-  return id;
+  return resolveGa4MeasurementId(process.env.VITE_GA4_MEASUREMENT_ID);
 }
 
 function analyticsMarkup(publishedIds, origin) {
