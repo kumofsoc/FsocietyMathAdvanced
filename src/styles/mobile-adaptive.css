@@ -192,7 +192,10 @@
     min-width: 40px;
     flex-basis: 40px;
   }
-  .topic-page { padding-inline: 12px; }
+  /* Topic subpanels intentionally bleed by -16px in topic-outline.css,
+     topic-search.css and reading-width.css. Matching the parent inset
+     prevents 4px horizontal document overflow on 375px phones. */
+  .topic-page { padding-inline: 16px; }
   .topic-page .reading-width-control { flex-wrap: wrap; }
   .topic-page .reading-width-options {
     max-width: 100%;
