@@ -28,7 +28,7 @@ export function HomeGrowthScene({ data }: { data: readonly GrowthPoint[] }) {
       </div>
 
       <div className="future-growth-visual" data-reveal>
-        <svg viewBox="0 0 920 470" role="img" aria-label="Демонстрационный рост пользователей VisualMath">
+        <svg viewBox="0 0 920 470" role="img" aria-label="Демонстрационный рост пользователей MathMaMath">
           <g className="growth-grid">
             {Array.from({length:8},(_,i)=><line key={"v"+i} x1={70+i*110} y1="55" x2={70+i*110} y2="410"/>)}
             {Array.from({length:6},(_,i)=><line key={"h"+i} x1="50" y1={70+i*68} x2="880" y2={70+i*68}/>)}

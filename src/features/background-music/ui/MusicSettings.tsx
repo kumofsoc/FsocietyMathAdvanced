@@ -176,9 +176,9 @@ export function MusicSettings() {
 
   const storageCopy =
     state.storageMode === "server"
-      ? "Плейлист хранится в аккаунте VisualMath. Контент загружается авторизованным запросом, без токена в URL."
+      ? "Плейлист хранится в аккаунте MathMaMath. Контент загружается авторизованным запросом, без токена в URL."
       : state.storageMode === "local-fallback"
-        ? "Server media временно недоступен. VisualMath продолжает работать с локальным IndexedDB плейлистом."
+        ? "Server media временно недоступен. MathMaMath продолжает работать с локальным IndexedDB плейлистом."
         : "Плейлист хранится только в IndexedDB этого браузера.";
 
   return (

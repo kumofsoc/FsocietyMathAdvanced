@@ -173,7 +173,7 @@ export function BackgroundMusicPlayer() {
         })
         .catch((error) => {
           if (cancelled) return;
-          console.warn("[VisualMath] media session could not be refreshed", error);
+          console.warn("[MathMaMath] media session could not be refreshed", error);
           setPlaying(false);
           setTrackUrl(null);
         });
@@ -191,7 +191,7 @@ export function BackgroundMusicPlayer() {
       })
       .catch((error) => {
         if (cancelled) return;
-        console.warn("[VisualMath] audio content could not be loaded", error);
+        console.warn("[MathMaMath] audio content could not be loaded", error);
         setPlaying(false);
         setTrackUrl(null);
       });
@@ -231,7 +231,7 @@ export function BackgroundMusicPlayer() {
         void api.auth
           .refresh()
           .catch((error) => {
-            console.warn("[VisualMath] media session refresh failed", error);
+            console.warn("[MathMaMath] media session refresh failed", error);
           })
           .finally(() => {
             if (!cancelled) scheduleRefresh();

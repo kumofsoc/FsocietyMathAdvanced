@@ -20,7 +20,7 @@ describe("local profile repository", () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it("creates a valid local fallback", () => {
-    expect(loadLocalProfile().displayName).toBe("VisualMath User");
+    expect(loadLocalProfile().displayName).toBe("MathMaMath User");
     expect(localStorage.getItem(LOCAL_PROFILE_KEY)).toBeTruthy();
   });
 

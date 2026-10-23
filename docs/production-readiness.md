@@ -1,6 +1,6 @@
 # Production readiness
 
-This document is the frontend release gate for VisualMath.
+This document is the frontend release gate for MathMaMath.
 
 Backend contract target for the current MVP integration:
 
@@ -56,7 +56,7 @@ VITE_MEDIA_TRANSFER_TIMEOUT_MS=600000
 Production:
 
 ```env
-VITE_API_BASE_URL=https://<final-visualmath-origin>
+VITE_API_BASE_URL=https://<final-mathmamath-origin>
 VITE_API_TIMEOUT_MS=12000
 VITE_MEDIA_TRANSFER_TIMEOUT_MS=600000
 VITE_APP_RELEASE=<git-sha>
@@ -219,13 +219,13 @@ Use a CSP appropriate for the final deployment. At minimum restrict:
 - `frame-ancestors`;
 - `base-uri`.
 
-`connect-src` must allow the VisualMath API origin and optional error-ingestion origin.
+`connect-src` must allow the MathMaMath API origin and optional error-ingestion origin.
 
 ## What still remains before production
 
 Even after frontend MVP merge, production still needs:
 
-1. choose the final VisualMath HTTPS origin;
+1. choose the final MathMaMath HTTPS origin;
 2. deploy frontend + backend + PostgreSQL;
 3. configure backend `CORS_ALLOWED_ORIGINS` for the exact origin;
 4. verify Secure/HttpOnly refresh cookie behavior on the deployed topology;

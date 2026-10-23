@@ -19,7 +19,7 @@ jobs:
       - name: Require release-gate backend
         run: |
           if [ -z "$VISUALMATH_E2E_API_BASE_URL" ]; then
-            echo "::error::VISUALMATH_E2E_API_BASE_URL is required for the VisualMath release gate."
+            echo "::error::VISUALMATH_E2E_API_BASE_URL is required for the MathMaMath release gate."
             exit 1
           fi
           case "$VISUALMATH_E2E_API_BASE_URL" in

@@ -230,7 +230,7 @@ export function SettingsPanel() {
           >
             <header className="settings-head">
               <div>
-                <div className="mini-kicker">VISUALMATH / НАСТРОЙКИ И ПЕРСОНАЛИЗАЦИЯ</div>
+                <div className="mini-kicker">MATHMAMATH / НАСТРОЙКИ И ПЕРСОНАЛИЗАЦИЯ</div>
                 <h2 id="visualmath-settings-title">Настройки</h2>
               </div>
               <button onClick={() => setOpen(false)} aria-label="Закрыть настройки">×</button>

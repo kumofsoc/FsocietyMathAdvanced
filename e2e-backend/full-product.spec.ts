@@ -9,12 +9,12 @@ const apiBaseUrl = (
   ""
 ).replace(/\/+$/, "");
 
-const password = "VisualMath!2026#E2E";
+const password = "MathMaMath!2026#E2E";
 const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 const account = {
   email: `visualmath-e2e-${unique}@example.com`,
   handle: `vm-e2e-${unique.slice(-10)}`.replace(/[^a-z0-9-]/gi, "").slice(0, 28),
-  displayName: "VisualMath E2E",
+  displayName: "MathMaMath E2E",
   password,
 };
 
@@ -128,7 +128,7 @@ async function newLoggedInPage(browser: Browser) {
   return { context, page };
 }
 
-test.describe.serial("VisualMath real backend MVP", () => {
+test.describe.serial("MathMaMath real backend MVP", () => {
 test("backend catalog matches bundled frontend stable contract", async ({ request }) => {
   const summaryResponse = await request.get(apiBaseUrl + "/api/v1/course");
   expect(summaryResponse.ok()).toBeTruthy();
@@ -350,7 +350,7 @@ test("backend catalog matches bundled frontend stable contract", async ({ reques
     });
     await expect(copy).toBeVisible();
 
-    if (!(await copy.textContent())?.includes("аккаунте VisualMath")) {
+    if (!(await copy.textContent())?.includes("аккаунте MathMaMath")) {
       test.skip(true, "bootstrap.capabilities.mediaAudio=false");
     }
 
@@ -434,8 +434,8 @@ test("backend catalog matches bundled frontend stable contract", async ({ reques
 
     await page.getByRole("button", { name: "Сменить пароль", exact: true }).click();
     await page.getByLabel("Текущий пароль").fill(account.password);
-    await page.getByLabel("Новый пароль", { exact: true }).fill("VisualMath!2026#Rotated");
-    await page.getByLabel("Повтори новый пароль").fill("VisualMath!2026#Rotated");
+    await page.getByLabel("Новый пароль", { exact: true }).fill("MathMaMath!2026#Rotated");
+    await page.getByLabel("Повтори новый пароль").fill("MathMaMath!2026#Rotated");
 
     const changed = page.waitForResponse(
       (response) =>
@@ -451,7 +451,7 @@ test("backend catalog matches bundled frontend stable contract", async ({ reques
     await page.getByRole("button", { name: "Войти" }).click();
     await expect(page.locator(".account-auth-error")).toBeVisible();
 
-    const rotatedPassword = "VisualMath!2026#Rotated";
+    const rotatedPassword = "MathMaMath!2026#Rotated";
     await page.getByLabel("Пароль").fill(rotatedPassword);
     const bootstrap = page.waitForResponse(
       (response) =>

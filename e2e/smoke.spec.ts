@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("VisualMath production smoke", () => {
+test.describe("MathMaMath production smoke", () => {
   test("home shell renders without a backend", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator(".app-shell")).toBeVisible();
-    await expect(page.locator("body")).toContainText("VisualMath");
+    await expect(page.locator("body")).toContainText("MathMaMath");
   });
 
   test("command palette traps keyboard focus and restores it on close", async ({ page }) => {

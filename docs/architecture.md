@@ -1,6 +1,6 @@
 # Frontend architecture
 
-VisualMath uses a layered frontend structure. New code is placed by responsibility and runtime ownership rather than in generic `components`, `utils` or `lib` dumping grounds.
+MathMaMath uses a layered frontend structure. New code is placed by responsibility and runtime ownership rather than in generic `components`, `utils` or `lib` dumping grounds.
 
 ## Runtime layers
 

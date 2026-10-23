@@ -15,7 +15,7 @@ export type LocalProfile = {
 
 export function defaultLocalProfile(): LocalProfile {
   return {
-    displayName: "VisualMath User",
+    displayName: "MathMaMath User",
     handle: "visual-learner",
     bio: "Изучаю математику через структуру, визуализацию и практику.",
     joinedAt: new Date().toISOString(),
@@ -53,7 +53,7 @@ export function loadLocalProfile(): LocalProfile {
 export function saveLocalProfile(profile: LocalProfile) {
   const normalized: LocalProfile = {
     ...profile,
-    displayName: profile.displayName.trim() || "VisualMath User",
+    displayName: profile.displayName.trim() || "MathMaMath User",
     handle: profile.handle.trim().replace(/^@/, "") || "visual-learner",
     bio: profile.bio.trim(),
   };

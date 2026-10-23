@@ -67,7 +67,7 @@ export function saveSet(key: string, value: Set<string>) {
   try {
     localStorage.setItem(key, JSON.stringify([...value]));
   } catch (error) {
-    console.warn("[VisualMath] could not persist learning set", error);
+    console.warn("[MathMaMath] could not persist learning set", error);
   }
   emitLearning({
     source: "local",
@@ -112,7 +112,7 @@ export function saveTheorems(value: SavedTheorem[]) {
   try {
     localStorage.setItem(SAVED_THEOREMS_KEY, JSON.stringify(value));
   } catch (error) {
-    console.warn("[VisualMath] could not persist saved theorems", error);
+    console.warn("[MathMaMath] could not persist saved theorems", error);
   }
   emitLearning({
     source: "local",
@@ -145,7 +145,7 @@ function persistReadingProgress(topicId: string, ratio: number) {
   try {
     localStorage.setItem(READING_PROGRESS_KEY, JSON.stringify(next));
   } catch (error) {
-    console.warn("[VisualMath] could not persist reading progress", error);
+    console.warn("[MathMaMath] could not persist reading progress", error);
   }
   return nextRatio;
 }
@@ -186,7 +186,7 @@ export function replaceReadingBlocks(blockIds: string[]) {
   try {
     localStorage.setItem(READING_BLOCKS_KEY, JSON.stringify([...normalized]));
   } catch (error) {
-    console.warn("[VisualMath] could not hydrate reading blocks", error);
+    console.warn("[MathMaMath] could not hydrate reading blocks", error);
     return false;
   }
   emitLearning({ source: "hydrate", kind: "snapshot" });
@@ -202,7 +202,7 @@ export function markReadingBlock(topicId: string, blockIndex: number, totalBlock
     try {
       localStorage.setItem(READING_BLOCKS_KEY, JSON.stringify([...current]));
     } catch (error) {
-      console.warn("[VisualMath] could not persist reading block", error);
+      console.warn("[MathMaMath] could not persist reading block", error);
     }
   }
 
@@ -241,7 +241,7 @@ export function replaceLearningCache(snapshot: CanonicalLearningCache) {
     );
     localStorage.setItem(READING_PROGRESS_KEY, JSON.stringify(reading));
   } catch (error) {
-    console.warn("[VisualMath] could not hydrate canonical learning cache", error);
+    console.warn("[MathMaMath] could not hydrate canonical learning cache", error);
     return false;
   }
 

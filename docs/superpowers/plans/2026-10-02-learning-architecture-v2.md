@@ -1,4 +1,4 @@
-# VisualMath Learning Architecture v2 — Implementation Plan
+# MathMaMath Learning Architecture v2 — Implementation Plan
 
 ## 1. Course architecture foundation
 - Add v2 domain types for layers, units, skill categories and authored topics.
@@ -15,7 +15,7 @@
 ## 3. Home composition
 - Fix Interface DNA responsive grid.
 - Disable text selection only inside home.
-- Add “Что такое VisualMath” scene and scene rail entry.
+- Add “Что такое MathMaMath” scene and scene rail entry.
 - Link overview modules to map, academy, review and account.
 
 ## 4. Map comprehension

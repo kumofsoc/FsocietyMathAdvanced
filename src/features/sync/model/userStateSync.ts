@@ -703,14 +703,14 @@ async function performSync(
     if (notesResult.status === "fulfilled") {
       notesMigrated = notesResult.value;
     } else {
-      console.warn("[VisualMath] block-note hydration/migration failed", notesResult.reason);
+      console.warn("[MathMaMath] block-note hydration/migration failed", notesResult.reason);
     }
 
     if (importantResult.status === "fulfilled") {
       importantBlocksMigrated = importantResult.value;
     } else {
       console.warn(
-        "[VisualMath] important-block hydration/migration failed",
+        "[MathMaMath] important-block hydration/migration failed",
         importantResult.reason,
       );
     }

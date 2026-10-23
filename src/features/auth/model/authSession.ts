@@ -68,7 +68,7 @@ function startUserStateHydration(snapshot: BootstrapDto) {
       syncAuthenticatedUserState(snapshot.user.id, snapshot),
     )
     .catch((error) => {
-      console.warn("[VisualMath] authenticated state hydration failed", error);
+      console.warn("[MathMaMath] authenticated state hydration failed", error);
     });
 }
 
@@ -170,7 +170,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         bootstrapGeneratedAt: null,
         error: apiErrorMessage(error),
       });
-      console.warn("[VisualMath] login bootstrap failed; keeping local cache", error);
+      console.warn("[MathMaMath] login bootstrap failed; keeping local cache", error);
       return session.user;
     }
   },
@@ -219,7 +219,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         bootstrapGeneratedAt: null,
         error: apiErrorMessage(error),
       });
-      console.warn("[VisualMath] registration bootstrap failed; keeping local cache", error);
+      console.warn("[MathMaMath] registration bootstrap failed; keeping local cache", error);
       return { verificationRequired: false, user: result.user };
     }
   },

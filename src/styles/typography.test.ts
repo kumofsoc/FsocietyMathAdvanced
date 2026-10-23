@@ -46,7 +46,7 @@ function readStyle(relativePath: string) {
   );
 }
 
-describe("VisualMath typography tokens", () => {
+describe("MathMaMath typography tokens", () => {
   it.each(guardedStyleFiles)("%s does not introduce microscopic raw font sizes", (relativePath) => {
     const microscopic = rawPixelFontSizes(readStyle(relativePath)).filter(
       (size) => size <= 12,

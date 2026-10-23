@@ -57,7 +57,7 @@ export function reportRuntimeError(
   context: RuntimeErrorContext,
 ) {
   const payload = buildSafeRuntimeErrorPayload(error, context);
-  console.error("[VisualMath] runtime error", payload);
+  console.error("[MathMaMath] runtime error", payload);
 
   if (!runtimeConfig.errorReportingUrl || typeof window === "undefined") {
     return;

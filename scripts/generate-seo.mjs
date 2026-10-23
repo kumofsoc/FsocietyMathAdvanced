@@ -6,9 +6,9 @@ import katex from "katex";
 const IS_PREVIEW = process.env.VERCEL_ENV === "preview";
 const ROOT = process.cwd();
 const DIST = path.join(ROOT, "dist");
-const APP_NAME = "VisualMath";
-const HOME_TITLE = "VisualMath (MathMaMath): высшая математика, теория и задачи";
-const HOME_DESCRIPTION = "VisualMath (MathMaMath): бесплатный интерактивный курс высшей математики: линейная алгебра, аналитическая геометрия, математический анализ, интегралы и ряды. Теория, доказательства, примеры и практика.";
+const APP_NAME = "MathMaMath";
+const HOME_TITLE = "MathMaMath: высшая математика, теория и задачи";
+const HOME_DESCRIPTION = "MathMaMath: бесплатный интерактивный курс высшей математики: линейная алгебра, аналитическая геометрия, математический анализ, интегралы и ряды. Теория, доказательства, примеры и практика.";
 
 function siteOrigin() {
   const raw = (
@@ -178,8 +178,8 @@ async function generate() {
     const catalogUrl = origin ? origin + "/learn/" : undefined;
     const catalogHtml = basePage(
       "Курс высшей математики: все темы",
-      "Открытый курс высшей математики VisualMath. Каталог тем по линейной алгебре, геометрии, математическому анализу и другим разделам.",
-      '<main><nav><a href="/">VisualMath</a><a href="/#map">Интерактивная карта</a></nav>' +
+      "Открытый курс высшей математики MathMaMath. Каталог тем по линейной алгебре, геометрии, математическому анализу и другим разделам.",
+      '<main><nav><a href="/">MathMaMath</a><a href="/#map">Интерактивная карта</a></nav>' +
       '<h1>Курс высшей математики</h1><p class="muted">Теория, определения, доказательства, формулы и примеры. Все темы доступны для чтения без аккаунта.</p>' +
       catalog + '</main>',
       { "@context": "https://schema.org", "@type": "CollectionPage", name: "Курс высшей математики", inLanguage: "ru", ...(catalogUrl ? { url: catalogUrl } : {}) },
@@ -217,7 +217,7 @@ async function generate() {
         name: chapter.title,
         description: longDescription,
         inLanguage: "ru",
-        isPartOf: { "@type": "Course", name: "Курс высшей математики VisualMath" },
+        isPartOf: { "@type": "Course", name: "Курс высшей математики MathMaMath" },
         ...(chapterUrl ? { url: chapterUrl } : {}),
       };
       await writePage("subjects/" + chapter.id + "/index.html",
@@ -266,7 +266,7 @@ async function generate() {
         description: item.summary,
         inLanguage: "ru",
         learningResourceType: "Lesson",
-        isPartOf: { "@type": "Course", name: "Курс высшей математики VisualMath" },
+        isPartOf: { "@type": "Course", name: "Курс высшей математики MathMaMath" },
         ...(canonical ? { url: canonical } : {}),
       };
       await writePage("learn/" + item.id + "/index.html",
@@ -280,7 +280,7 @@ async function generate() {
     let index = await readFile(indexPath, "utf8");
     const rootMeta = [
       '<meta property="og:locale" content="ru_RU">',
-      '<meta property="og:site_name" content="VisualMath">',
+      '<meta property="og:site_name" content="MathMaMath">',
       '<meta property="og:type" content="website">',
       '<meta property="og:title" content="' + escapeHtml(HOME_TITLE) + '">',
       '<meta property="og:description" content="' + escapeHtml(HOME_DESCRIPTION) + '">',
@@ -291,7 +291,7 @@ async function generate() {
         '<meta property="og:url" content="' + escapeHtml(origin + "/") + '">',
       ] : []),
       '<script type="application/ld+json">' +
-        jsonLd({ "@context": "https://schema.org", "@type": "WebSite", name: "VisualMath", alternateName: "MathMaMath", description: HOME_DESCRIPTION, inLanguage: "ru", ...(origin ? { url: origin + "/" } : {}) }) +
+        jsonLd({ "@context": "https://schema.org", "@type": "WebSite", name: "MathMaMath", description: HOME_DESCRIPTION, inLanguage: "ru", ...(origin ? { url: origin + "/" } : {}) }) +
         '</script>',
     ].join("\n");
     if (!index.includes("</head>")) throw new Error("dist/index.html has no </head> tag");

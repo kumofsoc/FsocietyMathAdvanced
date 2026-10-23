@@ -1,8 +1,8 @@
-# VisualMath 30th-Century Home Implementation Plan
+# MathMaMath 30th-Century Home Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Rebuild the VisualMath home page into a cinematic post-modern “30th-century mathematics interface” while preserving the real product actions, progress data, growth data and motion-profile contracts.
+**Goal:** Rebuild the MathMaMath home page into a cinematic post-modern “30th-century mathematics interface” while preserving the real product actions, progress data, growth data and motion-profile contracts.
 
 **Architecture:** `HomePage.tsx` becomes a thin scene composer. Each major scene lives in `features/home-experience/ui`, 3D lives in `visual`, shared scene metadata/state in `model`, and all new presentation styles live in one feature-owned stylesheet rather than adding more rules to the global CSS monolith. GSAP owns scroll orchestration; CSS owns cheap ambient texture; Three.js is limited to two major scenes.
 

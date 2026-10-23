@@ -86,7 +86,7 @@ describe("API auth transition serialization", () => {
 
     const login = api.auth.login({
       email: "user-b@example.com",
-      password: "VisualMath!2026",
+      password: "MathMaMath!2026",
     });
 
     await Promise.resolve();
@@ -132,7 +132,7 @@ describe("API auth transition serialization", () => {
 
     const login = api.auth.login({
       email: "user-b@example.com",
-      password: "VisualMath!2026",
+      password: "MathMaMath!2026",
     });
     await vi.waitFor(() => expect(calls).toHaveLength(1));
 
@@ -292,7 +292,7 @@ describe("durable logout intent", () => {
     const client = await import("./client");
     const loggedIn = await client.api.auth.login({
       email: "user-b@example.com",
-      password: "VisualMath!2026",
+      password: "MathMaMath!2026",
     });
 
     expect(loggedIn.user.id).toBe("user-b");
@@ -530,13 +530,13 @@ describe("account lifecycle API", () => {
     } = await import("./client");
     setAccessToken("token-a", "2026-10-05T16:00:00Z");
 
-    await api.me.deleteAccount("VisualMath!2026");
+    await api.me.deleteAccount("MathMaMath!2026");
 
     expect(calls).toHaveLength(1);
     expect(new URL(calls[0].url).pathname).toBe("/api/v1/me/account");
     expect(calls[0].init?.method).toBe("DELETE");
     expect(calls[0].init?.body).toBe(
-      JSON.stringify({ password: "VisualMath!2026" }),
+      JSON.stringify({ password: "MathMaMath!2026" }),
     );
     expect(new Headers(calls[0].init?.headers).get("Authorization")).toBe(
       "Bearer token-a",
@@ -573,7 +573,7 @@ describe("password reset API", () => {
     await api.auth.requestPasswordReset("user@example.com");
     await api.auth.confirmPasswordReset(
       "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG",
-      "VisualMath!2026",
+      "MathMaMath!2026",
     );
 
     expect(calls.map((call) => call.path)).toEqual([
@@ -586,7 +586,7 @@ describe("password reset API", () => {
     expect(calls[1].init?.body).toBe(
       JSON.stringify({
         token: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG",
-        newPassword: "VisualMath!2026",
+        newPassword: "MathMaMath!2026",
       }),
     );
     for (const call of calls) {
@@ -627,7 +627,7 @@ describe("email verification registration contract", () => {
     const { api, getAccessTokenSnapshot } = await import("./client");
     const result = await api.auth.register({
       email: "verify@example.com",
-      password: "VisualMath!2026",
+      password: "MathMaMath!2026",
       handle: "verify_user",
       displayName: "Verify User",
     });

@@ -1,4 +1,4 @@
-# VisualMath Profile + Map 30th-Century Implementation Plan
+# MathMaMath Profile + Map 30th-Century Implementation Plan
 
 **Goal:** Redesign Account and Course Map to match the 30th-century home experience without changing their data semantics or graph engine.
 

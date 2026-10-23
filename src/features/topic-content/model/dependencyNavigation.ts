@@ -1,5 +1,5 @@
 import type { CourseSearchEntry } from "@/data/courseSearchIndex";
-import { parseVisualMathHash } from "@/shared/lib/blockDeepLink";
+import { parseMathMaMathHash } from "@/shared/lib/blockDeepLink";
 
 export const BLOCK_TARGET_KEY = "fsociety-block-target-v1";
 
@@ -39,7 +39,7 @@ function dependencyTarget(
 
 function openBlock(topicId: string, index: number) {
   const id = "block-" + topicId + "-" + index;
-  if (parseVisualMathHash(window.location.hash).route === topicId) {
+  if (parseMathMaMathHash(window.location.hash).route === topicId) {
     document
       .getElementById(id)
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -55,11 +55,11 @@ export async function openDependency(dependency: string) {
     const { courseSearchIndex } = await import("@/data/courseSearchIndex");
     const target = dependencyTarget(dependency, courseSearchIndex);
     if (!target) {
-      console.warn("[VisualMath] dependency target not found", dependency);
+      console.warn("[MathMaMath] dependency target not found", dependency);
       return;
     }
     openBlock(target.topicId, target.index);
   } catch (error) {
-    console.warn("[VisualMath] dependency index failed to load", error);
+    console.warn("[MathMaMath] dependency index failed to load", error);
   }
 }

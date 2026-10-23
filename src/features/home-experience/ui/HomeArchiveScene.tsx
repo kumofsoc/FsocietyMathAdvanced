@@ -27,7 +27,7 @@ export function HomeArchiveScene() {
       <div className="archive-tape" data-ambient="ticker" aria-hidden="true">
         <span>ЭКСПЕРИМЕНТАЛЬНЫЙ АРХИВ МАТЕМАТИЧЕСКИХ ИДЕЙ</span>
         <span>НЕ УЧЕБНАЯ СТАТИСТИКА</span>
-        <span>VISUALMATH / ARCHIVE</span>
+        <span>MATHMAMATH / ARCHIVE</span>
         <span>ЭКСПЕРИМЕНТАЛЬНЫЙ АРХИВ МАТЕМАТИЧЕСКИХ ИДЕЙ</span>
       </div>
     </section>

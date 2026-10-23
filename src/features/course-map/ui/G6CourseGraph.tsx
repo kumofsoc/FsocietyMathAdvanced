@@ -354,7 +354,7 @@ export function G6CourseGraph({
         { duration: 260, easing: "ease-out" },
       );
     }).catch((error: unknown) => {
-      if (!destroyed) console.error("[VisualMath] graph render failed", error);
+      if (!destroyed) console.error("[MathMaMath] graph render failed", error);
     });
 
     // G6 already observes its container with autoResize: true. Adding another

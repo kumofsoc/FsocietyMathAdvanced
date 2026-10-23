@@ -51,7 +51,7 @@ function loadLocalProfile(): LocalProfile {
   }
 
   const profile: LocalProfile = {
-    displayName: "VisualMath User",
+    displayName: "MathMaMath User",
     handle: "visual-learner",
     bio: "Изучаю математику через структуру, визуализацию и практику.",
     joinedAt: new Date().toISOString(),
@@ -158,7 +158,7 @@ function LocalAccount({
   const save = () => {
     const next: LocalProfile = {
       ...profile,
-      displayName: draft.displayName.trim() || "VisualMath User",
+      displayName: draft.displayName.trim() || "MathMaMath User",
       handle: draft.handle.trim().replace(/^@/, "") || "visual-learner",
       bio: draft.bio.trim(),
     };
@@ -336,7 +336,7 @@ function BackendAccount({
           <div className="eyebrow">SYNCED PROFILE</div>
           <h1>{serverProfile.displayName}</h1>
           <span>@{serverProfile.handle}</span>
-          <p>{serverProfile.bio || "Профиль VisualMath"}</p>
+          <p>{serverProfile.bio || "Профиль MathMaMath"}</p>
           <small>{user.email}</small>
         </div>
         <div className="account-hero-actions">
