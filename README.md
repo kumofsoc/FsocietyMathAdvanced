@@ -2,6 +2,17 @@
 
 Интерактивная среда для изучения высшей математики на React + TypeScript.
 
+## Open-source collaboration / Участие в проекте
+
+Исходный код доступен публично. Предложения, ошибки и изменения оформляются через Issues и Pull Requests; изменения основного приложения проходят автоматические проверки, а уязвимости сообщаются приватно.
+
+- [CONTRIBUTING](CONTRIBUTING.md): настройка, тесты и правила PR
+- [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md): нормы технического взаимодействия
+- [SUPPORT](SUPPORT.md): вопросы и сообщения о проблемах
+- [SECURITY](SECURITY.md): приватные отчёты об уязвимостях и проверяемые меры защиты
+- [Repository hardening](docs/security/REPOSITORY-HARDENING.md): защита main, CI/CD и релизов
+- [Лицензирование](docs/OPEN-SOURCE-LICENSING.md): лицензия ещё не выбрана; публичность кода не равна разрешению на его свободное использование
+
 ## Стек
 
 - React 19 + TypeScript + Vite

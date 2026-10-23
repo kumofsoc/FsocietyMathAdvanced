@@ -1,31 +1,29 @@
 # Security Policy / Политика безопасности
 
-Безопасность MathMaMath (в исходном коде приложение называется VisualMath) проверяется публичными, воспроизводимыми процедурами. **Ни один статус CI, badge или этот документ не является сертификатом отсутствия уязвимостей.**
+MathMaMath (продукт VisualMath) использует автоматические проверки и документированные меры защиты. Успешные проверки не являются гарантией отсутствия уязвимостей.
 
-## Сообщение об уязвимости / Reporting
+## Сообщения об уязвимостях / Vulnerability disclosure
 
-Пожалуйста, **не раскрывайте** уязвимость, токены, персональные данные или PoC в публичном Issue.
+**Приватный канал:** [GitHub Security Advisory](https://github.com/kumofsoc/MathMaMath/security/advisories/new).
 
-1. Откройте [Private vulnerability reporting](https://github.com/kumofsoc/MathMaMath/security/advisories/new), если эта функция включена владельцем репозитория.
-2. Если приватная отправка недоступна, создайте публичный Issue **без технических деталей уязвимости** с просьбой открыть закрытый канал связи. Не публикуйте эксплойт.
-3. Сообщите затронутые версии/commit, воспроизведение, последствия и предполагаемое исправление **только приватно**.
+Если приватная форма недоступна, в [Issues](https://github.com/kumofsoc/MathMaMath/issues/new) допускается только запрос закрытого канала связи. Не размещайте в публичных обсуждениях секреты, персональные данные, рабочие эксплойты или детали неизвестной уязвимости.
 
-Не тестируйте доступ к чужим аккаунтам, не извлекайте чужие данные и не нарушайте доступность сервиса. Для исследования используйте собственные тестовые данные.
+Приватное сообщение должно содержать затронутую версию/commit, последовательность воспроизведения, последствия и рекомендации по исправлению. Проверки проводятся только с тестовыми данными без нарушения доступности сервиса или доступа к чужим аккаунтам.
 
-**English:** Please disclose vulnerabilities privately through GitHub's private vulnerability reporting if enabled. If unavailable, request a private channel in a public Issue without publishing exploit details, secrets or user data. Avoid disruptive testing or accessing third-party accounts.
+**English:** Report vulnerabilities privately via [GitHub Security Advisories](https://github.com/kumofsoc/MathMaMath/security/advisories/new). If that form is unavailable, use a public issue only to request a private disclosure channel. Do not disclose exploit details, tokens, or personal data publicly.
 
-## Scope / Область действия
+## Область проверки / Scope
 
-- Этот репозиторий содержит frontend и конфигурацию frontend-контейнера.
-- Аутентификация, хранение пользовательских данных, cookie, токены и API-авторизация **требуют отдельной проверки backend**: [FsocietyMathAdvancedBackend](https://github.com/kumofsoc/FsocietyMathAdvancedBackend).
-- Реальное развёртывание, DNS/TLS, облачные настройки, backup/restore и инфраструктура не подтверждаются одним исходным кодом.
-- Результаты проверки и оставшиеся ограничения: [docs/security/SECURITY-REVIEW.md](docs/security/SECURITY-REVIEW.md).
+- Этот репозиторий содержит frontend и его конфигурацию развёртывания.
+- Backend, API-авторизация, управление сессиями и защита серверных данных требуют отдельного анализа: [FsocietyMathAdvancedBackend](https://github.com/kumofsoc/FsocietyMathAdvancedBackend).
+- Защита продакшн-инфраструктуры, DNS/TLS, backup/restore и cloud configuration проверяется отдельно.
+- Ограничения и результаты предыдущего обзора: [Security Review](docs/security/SECURITY-REVIEW.md).
 
-## Public verification / Проверка
+## Проверяемые механизмы / Verification
 
-- [Security Checks](https://github.com/kumofsoc/MathMaMath/actions/workflows/security-checks.yml): CodeQL на push/PR/по расписанию и Dependency Review на PR.
-- [CI](https://github.com/kumofsoc/MathMaMath/actions/workflows/ci.yml): unit, typecheck, build, локальные Playwright-тесты, dependency audit, smoke контейнера.
-- [Release Gate](https://github.com/kumofsoc/MathMaMath/actions/workflows/release-gate.yml): real-backend Playwright; требуется доступный staging backend по HTTPS.
-- [Security alerts](https://github.com/kumofsoc/MathMaMath/security): предупреждения GitHub при доступности и соответствующих настройках.
+- [Security Checks](https://github.com/kumofsoc/MathMaMath/actions/workflows/security-checks.yml): CodeQL и Dependency Review.
+- [CI](https://github.com/kumofsoc/MathMaMath/actions/workflows/ci.yml): типизация, тесты, проверка зависимостей и frontend-контейнера.
+- [Release Gate](https://github.com/kumofsoc/MathMaMath/actions/workflows/release-gate.yml): интеграционные тесты с реальным backend при доступном HTTPS staging.
+- [GitHub Security](https://github.com/kumofsoc/MathMaMath/security): сведения и предупреждения GitHub.
 
-Перед релизом проверьте **актуальный SHA, статус прогонов, результаты CodeQL/Dependabot и ручные findings**, а не только цвет badge.
+Результаты действительны только для соответствующих commit SHA и среды запуска; CI не является независимой сертификацией безопасности.

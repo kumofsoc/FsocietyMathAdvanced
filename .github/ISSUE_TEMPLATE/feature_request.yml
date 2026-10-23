@@ -1,0 +1,21 @@
+name: Feature request
+description: Предложение для VisualMath
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какую задачу решает предложение
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Предлагаемое решение
+    validations:
+      required: true
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Влияние на local-first, backend и пользовательские данные
