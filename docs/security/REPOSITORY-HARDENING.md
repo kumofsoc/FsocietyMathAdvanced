@@ -16,8 +16,6 @@
 
 Проверьте результат повторным запросом `Branches` и реальным тестовым PR.
 
-Подготовленные JSON-шаблоны и последовательность активации: [GitHub Rulesets и PR](../github-rulesets-and-prs.md).
-
 ## Другие настройки
 
 - [Settings → Actions → General](https://github.com/kumofsoc/MathMaMath/settings/actions): минимальные workflow permissions (read-only по умолчанию), запрет опасных ненужных workflows и контроль approvals для PR из форков.
