@@ -80,6 +80,10 @@ export function HomePage({
         onPrimary={openPrimary}
         onMap={openMap}
       />
+
+      <nav aria-label="Открытый каталог тем" className="course-index-link">
+        <a href="/learn/">Полный курс высшей математики: теория, доказательства и примеры</a>
+      </nav>
     </div>
   );
 }

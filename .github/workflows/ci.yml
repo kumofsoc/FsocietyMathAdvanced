@@ -35,6 +35,8 @@ jobs:
           grep -Fq "account export downloads canonical server snapshot without secrets" /tmp/backend-e2e-list.txt
           grep -Fq "self deletion invalidates the account and all credentials" /tmp/backend-e2e-list.txt
       - run: pnpm build
+      - name: Verify crawlable course HTML and SEO metadata
+        run: pnpm seo:check
       - name: Enforce JavaScript chunk budget
         run: |
           node --input-type=module <<'NODE'

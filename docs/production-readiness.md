@@ -235,3 +235,11 @@ Even after frontend MVP merge, production still needs:
 8. verify the shipped CSP against the final public origin and any configured error-ingestion endpoint;
 9. run the backend-integrated Playwright suite against staging/production topology;
 10. set `VITE_APP_RELEASE` to the deployed git SHA and verify release-tagged error reporting.
+
+## SEO release checks
+
+- `pnpm build && pnpm seo:check` генерирует `/learn/` и HTML-страницы опубликованных тем.
+- В продакшне задайте `VITE_PUBLIC_SITE_URL=https://<canonical-public-origin>` для canonical, Open Graph URL и абсолютного `sitemap.xml`. Vercel может предоставить `VERCEL_PROJECT_PRODUCTION_URL` автоматически при включённых системных переменных.
+- Проверьте `/robots.txt`, `/sitemap.xml`, `/learn/` и `/learn/matrices/` на реальном origin, включая `Content-Type: text/html`, статус 200 и корректные canonical URL.
+- Запросы к несуществующим `/learn/<id>/` должны отвечать 404, а не fallback HTML главной. См. `deploy/nginx.conf`.
+- Перед запуском рекламы/индексации подтвердите домен в Google Search Console и отправьте sitemap. Сама сборка не гарантирует индексацию.
