@@ -45,10 +45,13 @@
       }
       return null;
     }
+    // An arbitrary or malformed fragment is not the homepage. It may contain
+    // a one-time auth token or private value, so never infer a pageview from it.
+    if (window.location.hash === "" || window.location.hash === "#home") return "/";
     const match = /^#([a-z0-9][a-z0-9-]{0,79})(?:\/block\/\d+)?$/.exec(window.location.hash);
-    const route = match?.[1] ?? "";
+    if (!match) return null;
+    const route = match[1];
     if (lessonIds.has(route)) return "/learn/" + route + "/";
-    if (route === "" || route === "home") return "/";
     if (route === "map" || route === "academy" || route === "review" || route === "marks") {
       return "/app/" + route + "/";
     }
