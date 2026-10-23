@@ -45,7 +45,7 @@ def main() -> int:
     open_heads = {
         pr["head"]["ref"]
         for pr in prs
-        if pr["state"] == "open" and pr.get("head", {}).get("repo", {}).get("full_name") == REPO
+        if pr["state"] == "open" and ((pr.get("head") or {}).get("repo") or {}).get("full_name") == REPO
     }
     merged_by_name = {}
     for pr in prs:
