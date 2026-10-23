@@ -21,7 +21,7 @@ Set `VITE_PUBLIC_SITE_URL` to the **actual publicly accessible HTTPS origin**, w
 
 Vercel builds can use the system-provided `VERCEL_PROJECT_PRODUCTION_URL` as a fallback, including for previews, if system variables are exposed. This must match the origin that serves pages. For a separate Nginx/Docker deployment, pass `--build-arg VITE_PUBLIC_SITE_URL=https://math.example` to Docker build.
 
-When the origin is known, `scripts/generate-seo.mjs` generates `sitemap.xml` with absolute canonical URLs and `robots.txt` with a Sitemap directive. When no origin is known (e.g. local CI), it avoids publishing a fabricated sitemap. There is no invented domain.
+When the origin is known on a production build, `scripts/generate-seo.mjs` generates `sitemap.xml` with absolute canonical URLs and `robots.txt` with a Sitemap directive. On Vercel Preview it uses `noindex,nofollow` plus `robots.txt` disallow and does not create a sitemap. With no known origin (e.g. local CI), it avoids publishing a fabricated sitemap. There is no invented domain.
 
 ## Manual verification after deployment
 
@@ -37,7 +37,7 @@ Do not promise rankings or use fabricated reviews, FAQ markup, aggregate ratings
 ## Implementation details
 
 - `index.html`: descriptive home title/description, visible no-JS catalog link.
-- `scripts/generate-seo.mjs`: builds full HTML pages using Vite SSR module loading; emits canonical/OG/Twitter metadata, schema.org LearningResource, robots and sitemap.
+- `scripts/generate-seo.mjs`: builds full HTML pages using Vite SSR module loading; emits chapter pages, metadata, schema.org LearningResource, semantic MathML formulas (fallback to original text), robots and sitemap.
 - `scripts/check-seo.mjs`: validates built pages and relevant markup.
 - `deploy/nginx.conf`: prevents SPA fallback for nonexistent `/learn/` URLs.
 - `e2e/production-image.spec.ts`: validates static HTML and 404 routing in the actual Nginx image.
