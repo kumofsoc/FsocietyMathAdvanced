@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   buildBlockDeepLink,
   buildBlockHash,
-  parseMathMaMathHash,
+  parseVisualMathHash,
   visualMathHashParam,
 } from "./blockDeepLink";
 
 describe("block deep links", () => {
   it("keeps ordinary routes unchanged", () => {
-    expect(parseMathMaMathHash("#matrices")).toEqual({
+    expect(parseVisualMathHash("#matrices")).toEqual({
       route: "matrices",
       topicId: null,
       blockIndex: null,
@@ -16,7 +16,7 @@ describe("block deep links", () => {
   });
 
   it("keeps fragment query parameters out of route matching", () => {
-    expect(parseMathMaMathHash("#account?reset=opaque-token")).toEqual({
+    expect(parseVisualMathHash("#account?reset=opaque-token")).toEqual({
       route: "account",
       topicId: null,
       blockIndex: null,
@@ -27,7 +27,7 @@ describe("block deep links", () => {
   });
 
   it("extracts topic route and block target from deep links", () => {
-    expect(parseMathMaMathHash("#matrices/block/7")).toEqual({
+    expect(parseVisualMathHash("#matrices/block/7")).toEqual({
       route: "matrices",
       topicId: "matrices",
       blockIndex: 7,

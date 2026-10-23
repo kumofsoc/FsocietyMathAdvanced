@@ -163,7 +163,7 @@ function enqueue(
       await work();
     })
     .catch((error) => {
-      console.warn("[MathMaMath] " + label + " sync failed; local cache kept", error);
+      console.warn("[VisualMath] " + label + " sync failed; local cache kept", error);
     });
   return mutationChain;
 }
@@ -311,7 +311,7 @@ export async function flushPendingGeneralMutations(userId: string) {
       clearPendingGeneralMutation(storageKey, mutation.updatedAt);
     } catch (error) {
       console.warn(
-        "[MathMaMath] pending " + mutation.kind + " retry failed; keeping mutation",
+        "[VisualMath] pending " + mutation.kind + " retry failed; keeping mutation",
         error,
       );
     }
@@ -339,7 +339,7 @@ function queueMutation(
 
   if (!persisted) {
     console.warn(
-      "[MathMaMath] could not durably queue " + semanticKey + "; attempting immediate sync",
+      "[VisualMath] could not durably queue " + semanticKey + "; attempting immediate sync",
     );
   }
 }

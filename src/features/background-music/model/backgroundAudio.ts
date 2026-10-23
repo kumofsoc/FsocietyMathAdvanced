@@ -226,7 +226,7 @@ export async function loadBackgroundPlaylist(): Promise<{
     };
   } catch (error) {
     console.warn(
-      "[MathMaMath] server audio unavailable; falling back to local playlist",
+      "[VisualMath] server audio unavailable; falling back to local playlist",
       error,
     );
     return {
@@ -284,7 +284,7 @@ export async function saveBackgroundTracks(files: File[]): Promise<StoredBackgro
   for (const file of files) {
     if (currentServerMediaUserId() !== serverUserId) {
       console.warn(
-        "[MathMaMath] audio upload batch stopped because the active account changed",
+        "[VisualMath] audio upload batch stopped because the active account changed",
       );
       break;
     }
@@ -293,7 +293,7 @@ export async function saveBackgroundTracks(files: File[]): Promise<StoredBackgro
       created.push(fromRemoteTrack(await api.media.uploadAudio(file)));
     } catch (error) {
       console.warn(
-        "[MathMaMath] audio upload failed; keeping file in local IndexedDB",
+        "[VisualMath] audio upload failed; keeping file in local IndexedDB",
         error,
       );
       localFallback.push(file);

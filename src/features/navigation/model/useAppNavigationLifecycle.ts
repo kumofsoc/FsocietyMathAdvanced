@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { getHistoryHotkeyDirection } from "@/features/navigation/model/historyHotkeys";
-import { parseMathMaMathHash } from "@/shared/lib/blockDeepLink";
+import { parseVisualMathHash } from "@/shared/lib/blockDeepLink";
 
 const ROUTE_SCROLL_KEY = "fsociety-route-scroll-v1";
 
 function routeFromHash() {
-  return parseMathMaMathHash(window.location.hash).route;
+  return parseVisualMathHash(window.location.hash).route;
 }
 
 function readPositions(): Record<string, number> {

@@ -19,7 +19,7 @@ import {
   saveTopicResume,
 } from "@/features/learning/model/topicResume";
 import { BLOCK_TARGET_KEY } from "@/features/topic-content/model/dependencyNavigation";
-import { parseMathMaMathHash } from "@/shared/lib/blockDeepLink";
+import { parseVisualMathHash } from "@/shared/lib/blockDeepLink";
 
 type Params = {
   topic: Topic;
@@ -76,7 +76,7 @@ export function useTopicReadingLifecycle({
     };
 
     const applyHashTarget = () => {
-      const parsed = parseMathMaMathHash(window.location.hash);
+      const parsed = parseVisualMathHash(window.location.hash);
       if (parsed.topicId !== topic.id || parsed.blockIndex === null) {
         return false;
       }

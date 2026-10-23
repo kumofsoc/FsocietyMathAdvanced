@@ -14,7 +14,7 @@ const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 const account = {
   email: `visualmath-e2e-${unique}@example.com`,
   handle: `vm-e2e-${unique.slice(-10)}`.replace(/[^a-z0-9-]/gi, "").slice(0, 28),
-  displayName: "MathMaMath E2E",
+  displayName: "VisualMath E2E",
   password,
 };
 
@@ -128,7 +128,7 @@ async function newLoggedInPage(browser: Browser) {
   return { context, page };
 }
 
-test.describe.serial("MathMaMath real backend MVP", () => {
+test.describe.serial("VisualMath real backend MVP", () => {
 test("backend catalog matches bundled frontend stable contract", async ({ request }) => {
   const summaryResponse = await request.get(apiBaseUrl + "/api/v1/course");
   expect(summaryResponse.ok()).toBeTruthy();
@@ -350,7 +350,7 @@ test("backend catalog matches bundled frontend stable contract", async ({ reques
     });
     await expect(copy).toBeVisible();
 
-    if (!(await copy.textContent())?.includes("аккаунте MathMaMath")) {
+    if (!(await copy.textContent())?.includes("аккаунте VisualMath")) {
       test.skip(true, "bootstrap.capabilities.mediaAudio=false");
     }
 

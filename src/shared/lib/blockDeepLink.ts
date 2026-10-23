@@ -4,7 +4,7 @@ export type BlockDeepLink = {
   blockIndex: number | null;
 };
 
-export function parseMathMaMathHash(hash: string): BlockDeepLink {
+export function parseVisualMathHash(hash: string): BlockDeepLink {
   const raw = hash.replace(/^#/, "").trim();
   if (!raw) {
     return { route: "home", topicId: null, blockIndex: null };
