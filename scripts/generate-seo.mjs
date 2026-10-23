@@ -138,6 +138,7 @@ async function generate() {
   try {
     const { chapters, topicMeta, topicListMeta } = await vite.ssrLoadModule("/src/data/courseMeta.ts");
     const { loadCourseTopic } = await vite.ssrLoadModule("/src/data/course/topicLoaders.ts");
+    const { loadPracticeForTopic } = await vite.ssrLoadModule("/src/data/practice/loaders.ts");
     const available = topicListMeta.filter((item) => !item.isStub);
     if (available.length === 0) throw new Error("No published course topics found.");
     const availableIds = new Set(available.map((item) => item.id));
@@ -146,7 +147,7 @@ async function generate() {
     const catalog = chapters.map((chapter) => {
       const entries = chapter.topicIds.filter((id) => availableIds.has(id));
       if (!entries.length) return "";
-      return '<section><h2>' + escapeHtml(chapter.title) + '</h2><div class="topic-list">' +
+      return '<section><h2><a href="/subjects/' + encodeURIComponent(chapter.id) + '/">' + escapeHtml(chapter.title) + '</a></h2><div class="topic-list">' +
         entries.map((id) => {
           const item = topicMeta[id];
           return '<a href="/learn/' + encodeURIComponent(id) + '/"><strong>§ ' +
@@ -167,8 +168,47 @@ async function generate() {
     );
     await writePage("learn/index.html", catalogHtml);
 
+    // Every discipline/chapter also has a crawlable landing page. These are
+    // not thin doorway pages: their descriptions come from real course metadata
+    // and lead directly to the canonical lessons.
+    let publishedChapters = 0;
+    for (const chapter of chapters) {
+      const entries = chapter.topicIds.filter((id) => availableIds.has(id));
+      if (!entries.length) continue;
+      const pathname = "/subjects/" + encodeURIComponent(chapter.id) + "/";
+      const chapterUrl = origin ? origin + pathname : undefined;
+      const longDescription = "Раздел «" + chapter.title +
+        "»: основные понятия, определения, теоремы, формулы и задачи. " +
+        entries.slice(0, 3).map((id) => topicMeta[id].summary).join(" ");
+      const lessonList = entries.map((id) => {
+        const topic = topicMeta[id];
+        return '<li><h2><a href="/learn/' + encodeURIComponent(topic.id) +
+          '/">§ ' + escapeHtml(topic.number) + '. ' + escapeHtml(topic.title) +
+          '</a></h2><p>' + escapeHtml(topic.summary) + '</p></li>';
+      }).join("");
+      const content = '<main><nav aria-label="Навигация"><a href="/">Главная</a>' +
+        '<a href="/learn/">Курс</a><a href="/#map">Интерактивная карта</a></nav>' +
+        '<h1>' + escapeHtml(chapter.title) + '</h1>' +
+        '<p>' + escapeHtml(longDescription) + '</p>' +
+        '<ol>' + lessonList + '</ol>' +
+        '<p><a href="/learn/">Смотреть все разделы курса</a></p></main>';
+      const schema = {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: chapter.title,
+        description: longDescription,
+        inLanguage: "ru",
+        isPartOf: { "@type": "Course", name: "Курс высшей математики VisualMath" },
+        ...(chapterUrl ? { url: chapterUrl } : {}),
+      };
+      await writePage("subjects/" + chapter.id + "/index.html",
+        basePage(chapter.title, longDescription.slice(0, 240), content, schema, chapterUrl, "website"));
+      urls.push(pathname);
+      publishedChapters += 1;
+    }
+
     for (const item of available) {
-      const topic = await loadCourseTopic(item.id);
+      const [topic, practice] = await Promise.all([loadCourseTopic(item.id), loadPracticeForTopic(item.id)]);
       if (!topic || topic.id !== item.id || !Array.isArray(topic.blocks) || topic.blocks.length === 0) {
         throw new Error("Incomplete topic: " + item.id);
       }
@@ -184,12 +224,16 @@ async function generate() {
       const content =
         '<main><nav aria-label="Навигация"><a href="/">Главная</a><a href="/learn/">Все темы</a>' +
         '<a href="/#' + encodeURIComponent(item.id) + '">Интерактивная версия</a></nav>' +
-        '<article><header><p class="muted">' + escapeHtml(chapter?.title || "Высшая математика") +
+        '<article><header><p class="muted"><a href="/subjects/' + encodeURIComponent(item.chapterId) + '/">' + escapeHtml(chapter?.title || "Высшая математика") + '</a>' +
         ' · § ' + escapeHtml(item.number) + '</p><h1>' + escapeHtml(item.title) + '</h1>' +
         '<p>' + escapeHtml(item.summary) + '</p></header>' +
         (prereq.length ? '<aside><h2>Предварительные темы</h2><ul>' +
           prereq.map((id) => '<li><a href="/learn/' + encodeURIComponent(id) + '/">' + escapeHtml(topicMeta[id].title) + '</a></li>').join("") + '</ul></aside>' : "") +
-        topic.blocks.map(renderBlock).join("") + '</article>' +
+        topic.blocks.map(renderBlock).join("") +
+        (practice.length ? '<section class="block"><h2>Задачи для самостоятельной практики</h2><p>Задания курса доступны в интерактивной версии. Ниже приведены формулировки части заданий без ответов.</p><ol>' +
+          practice.slice(0, 12).map((task) => '<li><h3>' + escapeHtml(task.title) + '</h3><p>' + escapeHtml(task.prompt) + '</p></li>').join("") +
+          '</ol><p><a href="/#' + encodeURIComponent(item.id) + '">Открыть все задачи в тренажёре</a></p></section>' : "") +
+        '</article>' +
         '<nav aria-label="Другие темы">' +
         (previous ? '<a href="/learn/' + encodeURIComponent(previous) + '/">← ' + escapeHtml(topicMeta[previous].title) + '</a>' : "") +
         (next ? '<a href="/learn/' + encodeURIComponent(next) + '/">' + escapeHtml(topicMeta[next].title) + ' →</a>' : "") +
@@ -247,7 +291,7 @@ async function generate() {
       robots += "Sitemap: " + origin + "/sitemap.xml\n";
     }
     await writePage("robots.txt", robots);
-    console.log("[SEO] Generated " + available.length + " topic pages, index, robots.txt" +
+    console.log("[SEO] Generated " + available.length + " topic pages, " + publishedChapters + " chapter pages, index, robots.txt" +
       (origin ? ", sitemap.xml (" + origin + ")" : "; no sitemap: public site origin unavailable"));
   } finally {
     await vite.close();

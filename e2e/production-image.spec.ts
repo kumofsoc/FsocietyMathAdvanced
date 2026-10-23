@@ -53,6 +53,10 @@ test("production image serves crawlable static math lessons", async ({ request }
   expect(catalogHtml).toContain("<h1>Курс высшей математики</h1>");
   expect(catalogHtml).toContain('href="/learn/matrices/"');
 
+  const chapter = await request.get("/subjects/linear/");
+  expect(chapter.status()).toBe(200);
+  expect(await chapter.text()).toContain("<h1>Линейная алгебра</h1>");
+
   const topic = await request.get("/learn/matrices/");
   expect(topic.status()).toBe(200);
   const html = await topic.text();
@@ -60,6 +64,8 @@ test("production image serves crawlable static math lessons", async ({ request }
   expect(html).toContain('type="application/ld+json"');
   expect(html).toContain('href="/#matrices"');
 
+  const missingChapter = await request.get("/subjects/nonexistent-seo-page/");
+  expect(missingChapter.status()).toBe(404);
   const missing = await request.get("/learn/nonexistent-seo-page/");
   expect(missing.status()).toBe(404);
 });

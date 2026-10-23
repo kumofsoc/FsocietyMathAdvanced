@@ -9,7 +9,8 @@ The interactive client retains existing hash navigation (`/#matrices`, `/#map`) 
 The build creates independent, server-readable HTML resources:
 
 - `/learn/`: chapter navigation and links to every published course topic.
-- `/learn/<topic-id>/`: full semantic lesson HTML, including headings, course text, formulas as accessible text, examples and proofs where available.
+- `/learn/<topic-id>/`: full semantic lesson HTML, including headings, course text, formulas as accessible text, examples, proofs and selected practice prompts where available.
+- `/subjects/<chapter-id>/`: 23 chapter landing pages with real topic summaries, an organized learning sequence and contextual links.
 - Each lesson provides links to prerequisites, neighboring topics, and its interactive counterpart.
 
 Generated HTML comes from canonical TypeScript course loaders, not manually copied or invented SEO summaries. `pnpm seo:check` confirms the catalog and pages exist.
@@ -26,7 +27,7 @@ When the origin is known, `scripts/generate-seo.mjs` generates `sitemap.xml` wit
 
 1. Check `/learn/`, `/learn/matrices/`, `/robots.txt` and `/sitemap.xml` at the live production address.
 2. Verify HTTP 200, semantic text in **view source** without JavaScript, and canonical URLs pointing at the real deployment.
-3. Verify `/learn/not-a-real-topic/` returns **HTTP 404**; check Vercel and Nginx routing separately.
+3. Verify `/learn/not-a-real-topic/` and `/subjects/not-a-real-chapter/` return **HTTP 404**; check Vercel and Nginx routing separately.
 4. Check `/learn/` and lessons are reachable from the home page, not only the XML sitemap.
 5. Add the domain to Google Search Console / Bing Webmaster Tools, submit the sitemap, and inspect selected URLs.
 6. Review real crawl/index coverage, Core Web Vitals, structured-data diagnostics and robots/canonical conflicts after launch.
