@@ -1,0 +1,36 @@
+name: Bug report
+description: Воспроизводимая ошибка в приложении
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "Не размещайте реальные токены, пароли и детали неизвестных уязвимостей. Для них используйте SECURITY.md."
+  - type: textarea
+    id: summary
+    attributes:
+      label: Что произошло
+      description: Краткое описание проблемы
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Шаги воспроизведения
+      description: Только с тестовыми или обезличенными данными
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемое поведение
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Версия или commit SHA
+  - type: textarea
+    id: environment
+    attributes:
+      label: Браузер, система, режим local/account

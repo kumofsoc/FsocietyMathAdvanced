@@ -25,8 +25,8 @@
 | Non-root frontend container | `Dockerfile` плюс CI smoke `id -u` | Не доказывает защиту runtime host |
 | `pnpm audit --prod --audit-level high`, тесты, CI smoke | `.github/workflows/ci.yml` | Успех конкретного запуска проверяется в GitHub Actions |
 | Dependabot | `.github/dependabot.yml` | Alerts/PR и их устранение должны контролироваться |
-| CodeQL и dependency review | `.github/workflows/security-checks.yml` | Результаты появятся после запуска; CodeQL alerts нужно разбирать отдельно |
-| Сведения об уязвимостях | `SECURITY.md` | GitHub private vulnerability reporting нужно включить в настройках, если доступно |
+| CodeQL и dependency review | `.github/workflows/security-checks.yml` | Статусы каждого запуска и CodeQL alerts проверяются отдельно |
+| Сведения об уязвимостях | `SECURITY.md` | Проверка доступности приватной формы проводится по ссылке из SECURITY.md |
 
 ## Конкретное улучшение этого изменения
 

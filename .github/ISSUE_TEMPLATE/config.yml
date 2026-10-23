@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Сообщить об уязвимости приватно
+    url: https://github.com/kumofsoc/MathMaMath/security/advisories/new
+    about: Не публикуйте сведения об уязвимостях в открытых Issues
